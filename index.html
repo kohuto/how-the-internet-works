@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f2">
+  <meta name="description" content="Prozkoumej, jak funguje internet. Česká interaktivní síťová laboratoř: web, místní tisk, pakety a náhradní cesta.">
+  <title>Jak funguje internet · Síť pod lupou</title>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/style.css?v=32">
+  <link rel="stylesheet" href="./assets/computer.css?v=32">
+  <script src="./js/network.js?v=32" defer></script>
+  <script src="./js/cloud.js?v=32" defer></script>
+  <script src="./js/media.js?v=32" defer></script>
+  <script src="./js/web.js?v=32" defer></script>
+  <script src="./js/vpn.js?v=32" defer></script>
+  <script src="./js/phishing.js?v=32" defer></script>
+  <script src="./js/mitm.js?v=32" defer></script>
+  <script src="./js/simulation.js?v=32" defer></script>
+  <script src="./js/map.js?v=32" defer></script>
+  <script src="./js/computer.js?v=32" defer></script>
+  <script src="./js/phishing-ui.js?v=32" defer></script>
+  <script src="./js/mitm-ui.js?v=32" defer></script>
+  <script src="./js/app.js?v=32" defer></script>
+</head>
+<body>
+  <main class="workspace">
+    <section class="map-area" aria-label="Interaktivní mapa sítě">
+      <div class="stage" id="stage">
+        <nav class="scene-nav" aria-label="Měřítko mapy"><button data-scene="home" class="active" aria-pressed="true">Byt</button><button data-scene="city" aria-pressed="false">Město</button><button data-scene="dc" aria-pressed="false">Centra</button><button data-scene="friend" aria-pressed="false">Kamarád</button><button data-scene="mobile" aria-pressed="false">Mobilní síť</button><button data-scene="satellite" aria-pressed="false">Satelit</button><button data-scene="cafe" aria-pressed="false">Kavárna</button><button data-scene="hacker" aria-pressed="false">Doupě</button><button data-scene="vpn" aria-pressed="false">VPN</button><button data-scene="all" aria-pressed="false">Celá síť</button></nav>
+        <svg id="network-map" role="group" aria-label="Síťová mapa. Zařízení a spoje lze otevřít klepnutím. Přiblížení gestem dvěma prsty nebo Ctrl a kolečkem myši." viewBox="35 270 465 440"></svg>
+        <div class="map-tools"><button id="zoom-in" class="icon-button" aria-label="Přiblížit mapu" title="Přiblížit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">+</button><button id="zoom-out" class="icon-button" aria-label="Oddálit mapu" title="Oddálit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">−</button></div>
+        <label class="labels-control"><input id="labels" type="checkbox" checked> Popisky</label>
+        <div id="message-map-status" class="message-map-status" hidden aria-label="Počítadla datových paketů"></div>
+        <div class="monitor-overlay" id="monitor-overlay" hidden>
+          <section class="monitor-window" id="monitor-content" role="dialog" aria-modal="false" aria-labelledby="computer-title" tabindex="-1"></section>
+        </div>
+        <div class="device-overlay" id="device-overlay" hidden>
+          <section class="device-window" id="device-content" role="dialog" aria-modal="false" aria-labelledby="device-title" tabindex="-1">
+            <div class="device-window-bar">
+              <button id="device-back" class="icon-button" data-action="back-device" aria-label="Zpět na předchozí detail" hidden>←</button>
+              <span id="device-eyebrow">UVNITŘ SÍTĚ</span>
+              <button class="device-close" data-action="close-device" aria-label="Zavřít informace o zařízení a vrátit se k mapě"><span>Zpět k mapě</span> ×</button>
+            </div>
+            <div class="device-body" id="device-body"></div>
+          </section>
+        </div>
+      </div>
+      <footer class="transport" aria-label="Ovládání přenosu">
+        <div class="transport-status"><span class="status-dot" id="run-dot"></span><div><strong id="event-title">Síť čeká na tvůj první přenos</strong><span id="event-description">Klikni na notebook v mapě a otevři jeho plochu.</span></div></div>
+        <div class="transport-buttons"><button id="packet-detail" class="secondary-button" disabled>Prozkoumat paket</button><button id="repeat" class="icon-button" aria-label="Opakovat stejnou akci" disabled>↻</button><button id="play" class="primary-button play" disabled aria-label="Přehrát přenos">▶ <span>Přehrát</span></button><button id="step" class="secondary-button" disabled>Krok <span aria-hidden="true">→</span></button></div>
+      </footer>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <noscript>Pro interaktivní model povol JavaScript. Aplikace neposílá žádná data mimo prohlížeč.</noscript>
+</body>
+</html>

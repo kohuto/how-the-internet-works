@@ -1,0 +1,11 @@
+.DS_Store
+.codex/
+.agents/
+.aws/
+.env
+.env.*
+node_modules/
+__pycache__/
+*.pyc
+/jak-funguje-internet.zip
+*.zip.tmp
