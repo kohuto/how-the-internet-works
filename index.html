@@ -7,27 +7,40 @@
   <meta name="description" content="Prozkoumej, jak funguje internet. Česká interaktivní síťová laboratoř: web, místní tisk, pakety a náhradní cesta.">
   <title>Jak funguje internet · Síť pod lupou</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./assets/style.css?v=32">
-  <link rel="stylesheet" href="./assets/computer.css?v=32">
-  <script src="./js/network.js?v=32" defer></script>
-  <script src="./js/cloud.js?v=32" defer></script>
-  <script src="./js/media.js?v=32" defer></script>
-  <script src="./js/web.js?v=32" defer></script>
-  <script src="./js/vpn.js?v=32" defer></script>
-  <script src="./js/phishing.js?v=32" defer></script>
-  <script src="./js/mitm.js?v=32" defer></script>
-  <script src="./js/simulation.js?v=32" defer></script>
-  <script src="./js/map.js?v=32" defer></script>
-  <script src="./js/computer.js?v=32" defer></script>
-  <script src="./js/phishing-ui.js?v=32" defer></script>
-  <script src="./js/mitm-ui.js?v=32" defer></script>
-  <script src="./js/app.js?v=32" defer></script>
+  <link rel="stylesheet" href="./assets/style.css?v=74">
+  <link rel="stylesheet" href="./assets/computer.css?v=74">
+  <link rel="stylesheet" href="./assets/browser.css?v=74">
+  <link rel="stylesheet" href="./assets/instagram.css?v=74">
+  <script src="./js/network.js?v=74" defer></script>
+  <script src="./js/cloud.js?v=74" defer></script>
+  <script src="./js/media.js?v=74" defer></script>
+  <script src="./js/web.js?v=74" defer></script>
+  <script src="./js/privacy.js?v=74" defer></script>
+  <script src="./js/auth.js?v=74" defer></script>
+  <script src="./js/vpn.js?v=74" defer></script>
+  <script src="./js/phishing.js?v=74" defer></script>
+  <script src="./js/mitm.js?v=74" defer></script>
+  <script src="./js/mail.js?v=74" defer></script>
+  <script src="./js/ads.js?v=74" defer></script>
+  <script src="./js/simulation.js?v=74" defer></script>
+  <script src="./js/map.js?v=74" defer></script>
+  <script src="./js/browser-navigation.js?v=74" defer></script>
+  <script src="./js/instagram-ui.js?v=74" defer></script>
+  <script src="./js/computer.js?v=74" defer></script>
+  <script src="./js/browser-ui.js?v=74" defer></script>
+  <script src="./js/phishing-ui.js?v=74" defer></script>
+  <script src="./js/mitm-ui.js?v=74" defer></script>
+  <script src="./js/mail-ui.js?v=74" defer></script>
+  <script src="./js/privacy-ui.js?v=74" defer></script>
+  <script src="./js/auth-ui.js?v=74" defer></script>
+  <script src="./js/ads-ui.js?v=74" defer></script>
+  <script src="./js/app.js?v=74" defer></script>
 </head>
 <body>
   <main class="workspace">
     <section class="map-area" aria-label="Interaktivní mapa sítě">
       <div class="stage" id="stage">
-        <nav class="scene-nav" aria-label="Měřítko mapy"><button data-scene="home" class="active" aria-pressed="true">Byt</button><button data-scene="city" aria-pressed="false">Město</button><button data-scene="dc" aria-pressed="false">Centra</button><button data-scene="friend" aria-pressed="false">Kamarád</button><button data-scene="mobile" aria-pressed="false">Mobilní síť</button><button data-scene="satellite" aria-pressed="false">Satelit</button><button data-scene="cafe" aria-pressed="false">Kavárna</button><button data-scene="hacker" aria-pressed="false">Doupě</button><button data-scene="vpn" aria-pressed="false">VPN</button><button data-scene="all" aria-pressed="false">Celá síť</button></nav>
+        <nav class="scene-nav" aria-label="Měřítko mapy"><button data-scene="home" class="active" aria-pressed="true">Byt</button><button data-scene="city" aria-pressed="false">Město</button><button data-scene="all" aria-pressed="false">Celá síť</button></nav>
         <svg id="network-map" role="group" aria-label="Síťová mapa. Zařízení a spoje lze otevřít klepnutím. Přiblížení gestem dvěma prsty nebo Ctrl a kolečkem myši." viewBox="35 270 465 440"></svg>
         <div class="map-tools"><button id="zoom-in" class="icon-button" aria-label="Přiblížit mapu" title="Přiblížit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">+</button><button id="zoom-out" class="icon-button" aria-label="Oddálit mapu" title="Oddálit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">−</button></div>
         <label class="labels-control"><input id="labels" type="checkbox" checked> Popisky</label>
@@ -39,8 +52,8 @@
           <section class="device-window" id="device-content" role="dialog" aria-modal="false" aria-labelledby="device-title" tabindex="-1">
             <div class="device-window-bar">
               <button id="device-back" class="icon-button" data-action="back-device" aria-label="Zpět na předchozí detail" hidden>←</button>
-              <span id="device-eyebrow">UVNITŘ SÍTĚ</span>
-              <button class="device-close" data-action="close-device" aria-label="Zavřít informace o zařízení a vrátit se k mapě"><span>Zpět k mapě</span> ×</button>
+              <span id="device-eyebrow" hidden></span>
+              <button class="device-close" data-action="close-device" aria-label="Zavřít informace o zařízení a vrátit se k mapě"><span aria-hidden="true">×</span></button>
             </div>
             <div class="device-body" id="device-body"></div>
           </section>

@@ -4,12 +4,13 @@ import '../js/media.js';
 import '../js/web.js';
 import '../js/vpn.js';
 import '../js/phishing.js';
-import '../js/mitm.js';import '../js/simulation.js';
+import '../js/mitm.js';import '../js/mail.js';import '../js/privacy.js';import '../js/auth.js';import '../js/ads.js';import '../js/simulation.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const {Network,Simulation,DEFAULT_MESSAGE,MSS,DELIVERY_MSS,MAC}=globalThis.InternetLab;
-const LONG_MESSAGE=DEFAULT_MESSAGE.repeat(12);
+// Keep segmentation coverage independent of the editable example message.
+const LONG_MESSAGE='Čau Matěji! Delší zkušební zpráva s diakritikou pro přenos více paketů. '.repeat(60);
 function finish(sim) {
   const events=[];
   for(let n=0;sim.status==='running'&&n<2500;n++) {

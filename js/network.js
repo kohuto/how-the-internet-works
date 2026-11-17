@@ -2,7 +2,8 @@
 (() => {
   'use strict';
   const HOME = '192.168.10.0/24', DC = '203.0.113.0/26', IG = '203.0.113.64/26', CLOUD = '203.0.113.128/26', REPLICA = '203.0.113.192/26', FRIEND = '172.16.20.0/24', MOBILE = '198.51.100.0/24';
-  const VPN='192.0.2.128/27', CABIN='192.168.30.0/24', SAT_WAN='192.0.2.52/30', HACKER='192.168.40.0/24', PHISH='192.0.2.160/27', CAFE='192.168.50.0/24';
+  const VPN='192.0.2.128/27', CABIN='192.168.30.0/24', SAT_WAN='192.0.2.52/30', HACKER='192.168.40.0/24', PHISH='192.0.2.160/27', CAFE='192.168.50.0/24', MAIL_B='192.0.2.192/27';
+  const PARTNERS='192.0.2.224/27';
   const browserState=()=>({content:null,revision:null,state:'idle',error:'',dnsCache:{},address:'knihovna.test',secure:false,loadedSecure:false,tlsPhase:'idle',certificateVerified:false,receipt:'',visitor:null,greeting:'',cookies:{allowed:true,items:[],lastSent:'',lastReceived:'',sendNote:'Zatím žádný webový požadavek.',receiveNote:'Zatím žádná odpověď s cookie.'}});
   const CHATBOT_REPLY='Ahoj! Tvůj dotaz dorazil na server. Tady jsem připravil tuto odpověď a poslal ji přes síť zpět do tvého zařízení.';
   const MAC = {laptop:'02:00:00:00:10:10', printer:'02:00:00:00:10:20', home:'02:00:00:00:10:01', dc:'02:00:00:00:20:01', dns:'02:00:00:00:20:53', web:'02:00:00:00:20:10',instagram:'02:00:00:00:20:80',friend:'02:00:00:00:30:10','friend-home':'02:00:00:00:30:01'};
@@ -54,11 +55,19 @@
     ['phish-router','Router cizího hostingu','router',1880,-50,'192.0.2.161','02:00:00:00:b0:01','phish'],
     ['phish-switch','Switch cizího hostingu','switch',2040,-50,null,null,'phish'],
     ['phish-web','Podvodný web','host',2170,-50,'192.0.2.170','02:00:00:00:b0:10','phish'],
-    ['mail','Poštovní server','host',1100,450,'203.0.113.40','02:00:00:00:20:40','dc'],
+    ['mail','Pošta Lipov','host',1100,450,'203.0.113.40','02:00:00:00:20:40','dc'],
+    ['mail-router','Router pošty Dopis','router',890,1380,'192.0.2.193','02:00:00:00:d0:01','mail-b'],
+    ['mail-switch','Switch pošty Dopis','switch',1100,1380,null,null,'mail-b'],
+    ['mail-dopis','Pošta Dopis','host',1230,1380,'192.0.2.194','02:00:00:00:d0:10','mail-b'],
     ['cafe','Notebook hosta','host',180,1300,'192.168.50.10','02:00:00:00:c0:10','cafe'],
     ['cafe-attacker','Útočník v kavárně','ap',440,1440,null,null,'cafe'],
     ['cafe-ap','Wi-Fi kavárny','ap',440,1190,null,null,'cafe'],
     ['cafe-router','Router kavárny','router',750,1300,'192.168.50.1','02:00:00:00:c0:01','cafe'],
+    ['partners-router','Router partnerů','router',1440,-325,'192.0.2.225','02:00:00:00:e0:01','partners'],
+    ['partners-switch','Switch partnerů','switch',1590,-325,null,null,'partners'],
+    ['shop','E-shop · obchod.test','host',1740,-440,'192.0.2.226','02:00:00:00:e0:10','partners'],
+    ['news','Zprávy · zpravy.test','host',1950,-440,'192.0.2.227','02:00:00:00:e0:11','partners'],
+    ['ads','Společný reklamní server','host',2160,-325,'192.0.2.228','02:00:00:00:e0:12','partners'],
     ['cloud-backup','Cloud B · kopie','host',1710,870,'203.0.113.204','02:00:00:00:70:20','replica']
   ];
   const linkDefinitions = [
@@ -115,11 +124,19 @@
     ['phish-uplink','peer','phish-router','eth6','wan0','Přípojka cizího hostingu',['192.0.2.65','192.0.2.66','192.0.2.64/30']],
     ['phish-lan','phish-router','phish-switch','lan0','p1','Cizí hosting — switch',null,{prefix:PHISH}],
     ['phish-server','phish-switch','phish-web','p2','eth0','Cizí hosting — podvodný web',null,{prefix:PHISH}],
+    ['mail-uplink','dc','mail-router','eth4','wan0','Přípojka pošty Dopis',['192.0.2.73','192.0.2.74','192.0.2.72/30']],
+    ['mail-lan','mail-router','mail-switch','lan0','p1','Pošta Dopis — switch',null,{prefix:MAIL_B}],
+    ['mail-server','mail-switch','mail-dopis','p2','eth0','Pošta Dopis — server',null,{prefix:MAIL_B}],
     ['cafe-wifi','cafe','cafe-ap','wlan0','wifi1','Host — Wi-Fi kavárny',null,{prefix:CAFE,medium:'wifi',device:'cafe',mode:'wifi',hotspot:'trusted'}],
     ['cafe-twin','cafe','cafe-attacker','wlan1','wifi1','Host — napodobená Wi-Fi',null,{prefix:CAFE,medium:'wifi',device:'cafe',mode:'wifi',hotspot:'rogue',attackOnly:true}],
     ['cafe-relay','cafe-attacker','cafe-ap','upstream','wifi2','Útočník — Wi-Fi kavárny',null,{prefix:CAFE,medium:'wifi',attackOnly:true}],
     ['cafe-lan','cafe-ap','cafe-router','eth0','lan0','Wi-Fi — router kavárny',null,{prefix:CAFE}],
     ['cafe-uplink','cafe-router','south','wan0','eth3','Přípojka kavárny',['192.0.2.69','192.0.2.70','192.0.2.68/30']],
+    ['partners-uplink','peer','partners-router','eth7','wan0','Přípojka partnerů',['192.0.2.77','192.0.2.78','192.0.2.76/30']],
+    ['partners-lan','partners-router','partners-switch','lan0','p1','Partneři — switch',null,{prefix:PARTNERS}],
+    ['shop-server','partners-switch','shop','p2','eth0','Partneři — e-shop',null,{prefix:PARTNERS}],
+    ['news-server','partners-switch','news','p3','eth0','Partneři — zprávy',null,{prefix:PARTNERS}],
+    ['ads-server','partners-switch','ads','p4','eth0','Partneři — reklamní server',null,{prefix:PARTNERS}],
     ['mail-switch','dc-switch','mail','p5','eth0','Hosting — poštovní server',null,{prefix:DC}]
   ];
   const ipv4 = ip => ip.split('.').reduce((n,b)=>(n*256 + Number(b))>>>0,0);
@@ -145,7 +162,7 @@
       this.version=1;
       this.server={title:'Dnes otevřeno do 16 hodin',revision:1,certificate:{name:'knihovna.test',issuer:'Výuková certifikační autorita',trusted:true,valid:true},lastRequest:null};
       this.sender={text:'',content:null,sentBytes:0,sentPackets:0,state:'idle'};
-      this.instagram={id:0,text:'',content:null,receivedPackets:0,sentBytes:0,sentPackets:0,state:'idle',totalBytes:0,receivedBytes:0,streamBytes:0,readRequested:false,readKnown:false,readNotified:false,error:'',senderDevice:'laptop'};
+      this.instagram={id:0,text:'',content:null,receivedPackets:0,sentBytes:0,sentPackets:0,state:'idle',totalBytes:0,receivedBytes:0,streamBytes:0,readRequested:false,readKnown:false,readNotified:false,error:'',senderDevice:'laptop',recipientDevice:'friend',replyDevice:'laptop',openDevice:null,selfReceipts:true,history:[]};
       this.friend={text:'',content:null,receivedPackets:0,state:'idle',receivedBytes:0,streamBytes:0,read:false,receipts:true,chatOpen:false};
       this.cookieTime=0;this.browser=browserState();this.phoneBrowser=browserState();this.cabinBrowser=browserState();this.friendBrowser=browserState();this.cafeBrowser=browserState();
       this.server.cookies={secureOnly:false,serial:0,visitors:new Map(),last:null};
@@ -155,7 +172,8 @@
       this.nat={'cafe-router':{lan:CAFE,lanLink:'cafe-lan',wanLink:'cafe-uplink',rows:[],nextPort:40000},'hacker-router':{lan:HACKER,lanLink:'hacker-lan',wanLink:'hacker-uplink',rows:[],nextPort:40000},'cabin-router':{lan:CABIN,lanLink:'cabin-lan',wanLink:'cabin-wan',rows:[],nextPort:40000},home:{lan:HOME,lanLink:'switch-home',wanLink:'uplink',rows:[],nextPort:40000},'friend-home':{lan:FRIEND,lanLink:'friend-switch-home',wanLink:'friend-uplink',rows:[],nextPort:40000}};
       this.instagramChannels={};
       this.vpn={clients:Object.fromEntries(['laptop','friend','phone','cabin','hacker','cafe'].map((id,i)=>[id,{enabled:false,ip:`10.8.0.${10+i}`,port:54010+i,epoch:0,peer:null,path:[],sent:0,received:0}])),rows:[],nextPort:55000,sent:0,received:0,last:null};
-      this.dnsRecords={'knihovna.test':'203.0.113.10','knihovna-podpora.test':'192.0.2.170'};
+      this.mailMXRecords={'posta.test':{exchange:'mx.posta.test',address:'203.0.113.40',server:'mail'},'dopis.test':{exchange:'mx.dopis.test',address:'192.0.2.194',server:'mail-dopis'}};
+      this.dnsRecords={'obchod.test':'192.0.2.226','zpravy.test':'192.0.2.227','reklamy.test':'192.0.2.228','mx.posta.test':'203.0.113.40','mx.dopis.test':'192.0.2.194','knihovna.test':'203.0.113.10','knihovna-podpora.test':'192.0.2.170'};
       this.applyAccess('cafe');this.applyAccess('hacker');this.applyAccess('cabin');this.applyAccess('laptop');this.applyAccess('friend');this.applyAccess('phone');
       this.recomputeRoutes();
     }
@@ -164,7 +182,7 @@
     selectedAccess(link) {return (!link.attackOnly||this.mitm.active)&&(!link.device||(this.access[link.device].mode===link.mode&&(!link.tower||this.access[link.device].tower===link.tower)&&(!link.hotspot||this.access[link.device].hotspot===link.hotspot)));}
     isActive(link) {return !!link && link.on && this.selectedAccess(link) && (!link.requiresView||this.satellite.clearView) && this.nodes[link.a].on && this.nodes[link.b].on;}
     browserFor(id='laptop') {return id==='cafe'?this.cafeBrowser:id==='friend'?this.friendBrowser:id==='cabin'?this.cabinBrowser:id==='phone'?this.phoneBrowser:this.browser;}
-    advanceCookieTime(seconds=3600) {if(!Number.isFinite(seconds)||seconds<0)return false;this.cookieTime+=seconds;for(const id of ['laptop','friend','phone','cabin','cafe'])globalThis.InternetLab.WebCookies.expire(this.browserFor(id).cookies,this.cookieTime);return true;}
+    advanceCookieTime(seconds=3600) {if(!Number.isFinite(seconds)||seconds<0)return false;this.cookieTime+=seconds;for(const id of ['laptop','friend','phone','cabin','cafe'])globalThis.InternetLab.WebCookies.expire(this.browserFor(id).cookies,this.cookieTime);for(const c of Object.values(this.ads?.clients||{}))if(c.cookie?.expiresAt<=this.cookieTime)c.cookie=null;return true;}
     accessLink(id) {return this.adjacent(id).find(l=>l.device===id&&this.selectedAccess(l))||null;}
     accessReady(id) {return this.isActive(this.accessLink(id));}
     applyAccess(id) {
@@ -201,7 +219,7 @@
       return null;
     }
     recomputeRoutes() {
-      const domains=[{prefix:CAFE,router:'cafe-router',link:'cafe-lan',private:true},{prefix:'192.0.2.68/30',router:'south',link:'cafe-uplink'},{prefix:PHISH,router:'phish-router',link:'phish-lan'},{prefix:HACKER,router:'hacker-router',link:'hacker-lan',private:true},{prefix:'192.0.2.60/30',router:'peer',link:'hacker-uplink'},{prefix:CABIN,router:'cabin-router',link:'cabin-lan',private:true},{prefix:SAT_WAN,router:'sat-gateway',link:'sat-downlink'},{prefix:HOME,router:'home',link:'switch-home',private:true},{prefix:DC,router:'hosting-router',link:'hosting-lan'},{prefix:IG,router:'ig-router',link:'ig-lan'},{prefix:CLOUD,router:'cloud-router',link:'cloud-lan'},{prefix:REPLICA,router:'replica-router',link:'replica-lan'},{prefix:FRIEND,router:'friend-home',link:'friend-switch-home',private:true},{prefix:VPN,router:'vpn-router',link:'vpn-lan'},
+      const domains=[{prefix:PARTNERS,router:'partners-router',link:'partners-lan'},{prefix:MAIL_B,router:'mail-router',link:'mail-lan'},{prefix:CAFE,router:'cafe-router',link:'cafe-lan',private:true},{prefix:'192.0.2.68/30',router:'south',link:'cafe-uplink'},{prefix:PHISH,router:'phish-router',link:'phish-lan'},{prefix:HACKER,router:'hacker-router',link:'hacker-lan',private:true},{prefix:'192.0.2.60/30',router:'peer',link:'hacker-uplink'},{prefix:CABIN,router:'cabin-router',link:'cabin-lan',private:true},{prefix:SAT_WAN,router:'sat-gateway',link:'sat-downlink'},{prefix:HOME,router:'home',link:'switch-home',private:true},{prefix:DC,router:'hosting-router',link:'hosting-lan'},{prefix:IG,router:'ig-router',link:'ig-lan'},{prefix:CLOUD,router:'cloud-router',link:'cloud-lan'},{prefix:REPLICA,router:'replica-router',link:'replica-lan'},{prefix:FRIEND,router:'friend-home',link:'friend-switch-home',private:true},{prefix:VPN,router:'vpn-router',link:'vpn-lan'},
         {prefix:'192.0.2.0/30',router:'edge',link:'uplink'},{prefix:'192.0.2.24/30',router:'peer',link:'friend-uplink'}];
       if(this.access.phone.mode==='cellular')domains.push({prefix:MOBILE,router:'mobile-core',link:`${this.access.phone.tower}-core`});
       for(const n of Object.values(this.nodes).filter(n=>n.type==='router')) {
@@ -333,8 +351,8 @@
         const l=this.access[id]?this.accessLink(id):this.adjacent(id)[0];
         if(!l||!this.isActive(l))return null;
         if(id==='phone'&&this.access.phone.mode==='cellular')return {link:l,frame:{cellular:true,target:ip}};
-        const local=contains({cafe:CAFE,hacker:HACKER,phish:PHISH,cabin:CABIN,home:HOME,dc:DC,friend:FRIEND,instagram:IG,cloud:CLOUD,replica:REPLICA,vpn:VPN}[n.region],ip);
-        const target=local?this.nodes[this.hostId(ip)]:this.nodes[{cafe:'cafe-router',hacker:'hacker-router',phish:'phish-router',cabin:'cabin-router',home:'home',dc:'hosting-router',friend:'friend-home',instagram:'ig-router',cloud:'cloud-router',replica:'replica-router',vpn:'vpn-router'}[n.region]];
+        const local=contains({partners:PARTNERS,'mail-b':MAIL_B,cafe:CAFE,hacker:HACKER,phish:PHISH,cabin:CABIN,home:HOME,dc:DC,friend:FRIEND,instagram:IG,cloud:CLOUD,replica:REPLICA,vpn:VPN}[n.region],ip);
+        const target=local?this.nodes[this.hostId(ip)]:this.nodes[{partners:'partners-router','mail-b':'mail-router',cafe:'cafe-router',hacker:'hacker-router',phish:'phish-router',cabin:'cabin-router',home:'home',dc:'hosting-router',friend:'friend-home',instagram:'ig-router',cloud:'cloud-router',replica:'replica-router',vpn:'vpn-router'}[n.region]];
         if(!target)return null;
         return {link:l,frame:{src:n.mac,dst:target.mac}};
       }
@@ -347,5 +365,5 @@
       return {link:l,frame:{src:iface.mac,dst:target.mac},row};
     }
   }
-  globalThis.InternetLab={Network,HOME,DC,IG,CLOUD,REPLICA,FRIEND,MOBILE,MAC,contains,CHATBOT_REPLY,VPN,CABIN,SAT_WAN,HACKER,PHISH,CAFE};
+  globalThis.InternetLab={Network,HOME,DC,IG,CLOUD,REPLICA,FRIEND,MOBILE,MAC,contains,CHATBOT_REPLY,VPN,CABIN,SAT_WAN,HACKER,PHISH,CAFE,MAIL_B,PARTNERS};
 })();

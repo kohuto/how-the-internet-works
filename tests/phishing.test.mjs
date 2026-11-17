@@ -1,4 +1,4 @@
-import '../js/network.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/simulation.js';
+import '../js/network.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/privacy.js';import '../js/auth.js';import '../js/ads.js';import '../js/simulation.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 const {Simulation,PHISH_HOST,DEMO_LOGIN,webAddress,requestText}=globalThis.InternetLab;
 function finish(s){const events=[];for(let i=0;i<5000&&s.status==='running';i++){s.advanceFrame();events.push(...structuredClone(s.frame));}assert.notEqual(s.status,'running');return events;}
@@ -18,9 +18,9 @@ test('The lair has an independent private LAN/NAT and the fake hosting and mail 
 });
 
 test('Mail is stored only when the request arrives; the recipient sees it only after its own fetch response',()=>{
- const s=new Simulation();assert(s.start('phish-send',{device:'hacker',target:'laptop'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='phish-request'));assert.equal(s.net.phishing.messages.size,0);
+ const s=new Simulation();assert(s.start('phish-send',{device:'hacker',target:'laptop'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='smtp-request'));assert.equal(s.net.phishing.messages.size,0);
  until(s,()=>s.net.phishing.messages.size===1);assert.equal(s.net.phishing.clients.laptop.inbox,null);assert.equal(s.net.phishing.hacker.state,'sending');finish(s);assert.equal(s.net.phishing.hacker.state,'ready');
- assert(s.start('mail-check',{device:'laptop'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='phish-response'));assert.equal(s.net.phishing.clients.laptop.inbox,null);finish(s);
+ assert(s.start('mail-check',{device:'laptop'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='imap-response'));assert.equal(s.net.phishing.clients.laptop.inbox,null);finish(s);
  assert.equal(s.net.phishing.clients.laptop.inbox.id,1);assert.equal(s.net.phishing.clients.phone.inbox,null);
 });
 
@@ -79,14 +79,14 @@ test('A lost login response preserves the server capture and retry is idempotent
 });
 
 test('TLS corruption, an invalid fake-site certificate or interrupted access prevents acceptance and preserves prior state',()=>{
- const s=new Simulation();assert(s.start('phish-send',{device:'hacker',target:'laptop'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='phish-request'));[...s.packets.values()][0].payload.record.data[0]^=1;finish(s);assert.equal(s.status,'failed');assert.equal(s.net.phishing.messages.size,0);
+ const s=new Simulation();assert(s.start('phish-send',{device:'hacker',target:'laptop'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='smtp-request'));[...s.packets.values()][0].payload.record.data[0]^=1;finish(s);assert.equal(s.status,'failed');assert.equal(s.net.phishing.messages.size,0);
  send(s);fetch(s);s.net.phishing.certificate.valid=false;visit(s);assert.equal(s.status,'failed');assert(!s.net.browser.certificateVerified);assert.equal(s.net.phishing.captures.size,0);s.net.phishing.certificate.valid=true;
  assert(s.start('mail-check',{device:'laptop'}));s.net.setAccess('laptop','wifi');s.connectionChanged('laptop');assert.equal(s.status,'failed');assert.equal(s.net.phishing.clients.laptop.state,'error');fetch(s);assert.equal(s.status,'success');
  assert(s.start('web',{device:'laptop',address:link(s).replace('https:','http:'),method:'POST',phishLogin:true}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='http-request'));[...s.packets.values()].find(p=>p.kind==='http-request').payload.message='{invalid';finish(s);assert.equal(s.status,'failed');assert.equal(s.net.phishing.captures.size,0);
 });
 
 test('Mail/admin payloads and HTTPS credential payloads are opaque in transit, while HTTP credentials are visible',()=>{
- const s=new Simulation();const mail=send(s);assert(mail.filter(e=>e.kind==='hop'&&e.packet.connection==='phishing-api').every(e=>e.packet.payload.record&&!JSON.stringify(e.packet).includes('Ověření čtenářského účtu')));fetch(s);const secure=capture(s);
+ const s=new Simulation();const mail=send(s);assert(mail.some(e=>e.kind==='hop'&&e.packet.connection==='smtp'));assert(mail.filter(e=>e.kind==='hop'&&e.packet.connection==='smtp').every(e=>e.packet.payload.record&&!JSON.stringify(e.packet).includes('Ověření čtenářského účtu')));fetch(s);const secure=capture(s);
  assert(secure.filter(e=>e.kind==='hop'&&e.packet.kind==='https-request').every(e=>!JSON.stringify(e.packet).includes(DEMO_LOGIN.password)));
  run(s,'web',{address:link(s).replace('https:','http:'),method:'POST',phishLogin:true});assert.equal(s.status,'success');assert([...s.packets.values()].some(p=>p.kind==='http-request'&&requestText(p.payload).includes(DEMO_LOGIN.password)));assert(s.current.description.includes('HTTP'));assert(!s.current.description.includes('dešifrovala'));
 });

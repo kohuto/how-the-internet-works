@@ -1,5 +1,5 @@
 import '../js/network.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/vpn.js';import '../js/phishing.js';
-import '../js/mitm.js';import '../js/simulation.js';
+import '../js/mitm.js';import '../js/mail.js';import '../js/privacy.js';import '../js/auth.js';import '../js/ads.js';import '../js/simulation.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 const {Simulation,CABIN,SAT_WAN,contains,CHATBOT_REPLY}=globalThis.InternetLab;
 function finish(s){const events=[];for(let i=0;i<6000&&s.status==='running';i++){s.advanceFrame();events.push(...structuredClone(s.frame));}assert.notEqual(s.status,'running');return events;}

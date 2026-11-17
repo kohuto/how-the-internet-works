@@ -4,21 +4,24 @@
   'use strict';
   const encoder=new TextEncoder();
   function webAddress(value='knihovna.test') {
+    const partner=/^(?:(https?):\/\/)?(obchod|zpravy)\.test\/?(?:\?tema=(cyklistika|hudba|cestovani))?$/i.exec(value.trim());
+    if(partner){const secure=partner[1]?.toLowerCase()!=='http',server=partner[2].toLowerCase()==='obchod'?'shop':'news',host=partner[2].toLowerCase()+'.test',path=server==='shop'&&partner[3]?'/?tema='+partner[3].toLowerCase():'/';return {secure,server,host,path,url:`${secure?'https':'http'}://${host}${path}`};}
     const fake=/^(?:(https?):\/\/)?knihovna-podpora\.test(?:\/(?:overeni)?)?(?:\?zprava=([1-9][0-9]*))?$/i.exec(value.trim());
     if(fake){const secure=fake[1]?.toLowerCase()==='https',messageId=Number(fake[2])||0;return {host:'knihovna-podpora.test',secure,server:'phish-web',path:'/overeni',messageId,url:`${secure?'https':'http'}://knihovna-podpora.test/overeni${messageId?'?zprava='+messageId:''}`};}
     const match=/^(https?):\/\/knihovna\.test\/?$/i.exec(value.trim())||/^(knihovna\.test)\/?$/i.exec(value.trim());
     return match?{host:'knihovna.test',server:'web',path:'/',secure:match[1].toLowerCase()==='https',url:`${match[1].toLowerCase()==='https'?'https':'http'}://knihovna.test/`}:null;
   }
-  // Only the first-party visitor cookie of the model library is supported.
+  // First-party visitor cookies and the separate secure library session cookie.
   // All state stays in memory, independently of the browser's real cookies.
   const WebCookies={
     expire(jar,now) {
+      if(jar.session?.expiresAt<=now)jar.session=null;
       const count=jar.items.length;jar.items=jar.items.filter(c=>c.expiresAt>now);
       if(count!==jar.items.length)jar.receiveNote='Platnost cookie vypršela. Další požadavek ji už neodešle.';
     },
     header(jar,address,path,now) {
       this.expire(jar,now);
-      const eligible=jar.items.filter(c=>c.domain===address.host&&(path===c.path||path.startsWith(c.path.endsWith('/')?c.path:c.path+'/')));
+      const eligible=[...jar.items,...(jar.session&&jar.session.expiresAt>now?[jar.session]:[])].filter(c=>c.domain===address.host&&(path===c.path||path.startsWith(c.path.endsWith('/')?c.path:c.path+'/')));
       const sent=jar.allowed?eligible.filter(c=>!c.secure||address.secure):[];
       jar.lastSent=sent.map(c=>`${c.name}=${c.value}`).join('; ');
       jar.sendNote=!jar.allowed?'Cookies jsou pro tento web zakázané.':jar.lastSent?'Prohlížeč připojil cookie k požadavku.':eligible.some(c=>c.secure&&!address.secure)?'Cookie má Secure. Přes HTTP ji prohlížeč neodešle.':'Pro tento požadavek není uložená platná cookie.';
@@ -38,7 +41,7 @@
       jar.items.push({name:'navstevnik',value:match[1],domain:address.host,path:'/',secure,httpOnly:attrs.httponly===true,sameSite:attrs.samesite||'Lax',expiresAt:now+lifetime});
       jar.receiveNote='Cookie je uložená v tomto prohlížeči. Platnost se obnovila na jednu modelovou hodinu.';return true;
     },
-    clear(jar) {jar.items=[];jar.receiveNote='Cookies byly smazány pouze v tomto prohlížeči. Záznamy na serveru zůstaly.';},
+    clear(jar) {jar.items=[];jar.session=null;jar.receiveNote='Cookies byly smazány pouze v tomto prohlížeči. Záznamy na serveru zůstaly.';},
     respond(state,request,meta,now) {
       const value=(request.cookie||'').split(';').map(x=>x.trim()).find(x=>/^navstevnik=v[1-9][0-9]*$/.test(x))?.split('=')[1];
       let row=state.visitors.get(value);const returning=!!row;
@@ -51,13 +54,17 @@
     }
   };
   function requestText(p) {
-    return `${p.method} ${p.path} HTTP/1.1\nHost: ${p.host||'knihovna.test'}${p.cookie?`\nCookie: ${p.cookie}`:''}${p.method==='POST'?`\nContent-Type: text/plain; charset=utf-8\nContent-Length: ${encoder.encode(p.message).length}\n\n${p.message}`:'\n'}`;
+    return `${p.method} ${p.path} HTTP/1.1\nHost: ${p.host||'knihovna.test'}${p.cookie?`\nCookie: ${p.cookie}`:''}${p.authorization?`\nAuthorization: ${p.authorization}`:''}${p.method==='POST'?`\nContent-Type: ${p.contentType||'text/plain; charset=utf-8'}\nContent-Length: ${encoder.encode(p.message).length}\n\n${p.message}`:'\n'}`;
   }
   function responseBody(p) {
-    return `${p.title}${p.greeting?`\n\n${p.greeting}\nIdentifikátor: ${p.visitor.id} · načtení stránky: ${p.visitor.loads}`:''}${p.receipt?`\n\nPřijatý vzkaz: ${p.receipt}`:''}`;
+    if(p.advertising)return JSON.stringify(p.advertising);
+    if(p.partnerPage)return JSON.stringify({title:p.title,...p.partnerPage});
+    if(p.auth)return JSON.stringify(p.auth);
+    if(p.privacy)return JSON.stringify(p.privacy);
+    return `${p.title}${p.greeting?`\n\n${p.greeting}${p.visitor?`\nIdentifikátor: ${p.visitor.id} · načtení stránky: ${p.visitor.loads}`:''}`:''}${p.receipt?`\n\nPřijatý vzkaz: ${p.receipt}`:''}`;
   }
   function responseText(p) {
-    return `HTTP/1.1 ${p.status} OK\nCache-Control: no-store\nContent-Type: text/plain; charset=utf-8${p.setCookie?`\nSet-Cookie: ${p.setCookie}`:''}\n\n${responseBody(p)}`;
+    return `HTTP/1.1 ${p.status} ${{200:'OK',201:'Created',400:'Bad Request',401:'Unauthorized',403:'Forbidden',409:'Conflict',503:'Service Unavailable'}[p.status]||'Response'}\nCache-Control: no-store\nContent-Type: text/plain; charset=utf-8${p.setCookie?`\nSet-Cookie: ${p.setCookie}`:''}\n\n${responseBody(p)}`;
   }
   class ModelTLS {
     #records=new Map();

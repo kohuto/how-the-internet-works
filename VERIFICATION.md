@@ -1,6 +1,252 @@
 # Záznam ověření
 
-Poslední ověření 11. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
+Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
+
+## Odebrání odkazu na připojení telefonu — 17. listopadu 2026, v74
+
+Z oken BTS odstraněno tlačítko Připojení telefonu ↗. V prohlížeči ověřena jeho nepřítomnost u BTS Lipová i BTS Park a zachování obou portů, napájení a sbalené nápovědy. Konzole bez chyb a varování. Syntaxe skriptu ověřena, aktualizována verze prostředků.
+
+## Odebrání šipek u portů BTS — 17. listopadu 2026, v73
+
+Ze seznamu portů obou BTS odstraněna tlačítka otevření připojených spojů. V prohlížeči ověřeny BTS Lipová i BTS Park: oba porty, názvy protějších zařízení a kontrolky zůstávají, šipky chybějí. Sbalená nápověda a odkaz na připojení telefonu jsou zachovány a dříve odstraněný stavový panel se nevrací. Konzole bez chyb a varování. Syntaxe skriptu ověřena, aktualizována verze prostředků.
+
+## Odebrání poznámky mobilního spoje — 17. listopadu 2026, v72
+
+Z detailů obou mobilních spojů odstraněn celý vysvětlující panel Mobilní data · rádio. V prohlížeči ověřena nepřítomnost panelu u spojů telefonu s BTS Lipová i BTS Park, zachování nadpisu, obou konců, sítě a ovládání odpojení/obnovení. Ověřeno odpojení a opětovné připojení spoje i zavření okna. Při 731 × 858 px bez vodorovného přetékání, konzole bez chyb a varování. Syntaxe skriptu ověřena, aktualizována verze prostředků.
+
+## Odebrání panelu vybrané BTS — 17. listopadu 2026, v71
+
+Z oken obou BTS odstraněn stavový panel Telefon má vybranou tuto BTS / Telefon tuto BTS právě nepoužívá s opakovaným názvem stanice. V prohlížeči ověřeno odstranění panelu u BTS Lipová i BTS Park, zachování názvu, napájení, obou portů, odkazu na připojení telefonu a sbalené nápovědy. Ověřeno vypnutí a zapnutí BTS a zavření křížkem. Při 731 × 858 px bez vodorovného přetékání, konzole bez chyb a varování. Syntaxe skriptu ověřena, aktualizována verze prostředků.
+
+## Vysvětlení zařízení v rozbalovací nápovědě — 16. listopadu 2026, v70
+
+Obecné popisy a výukové poznámky v informačních oknech zařízení jsou přesunuty do jedné výchozí sbalené položky Nápověda dole v okně, s texty seskupenými podle tématu. Zahrnuty switche, routery a NAT, Wi-Fi, mobilní a satelitní síť, DNS, web, cookies, přihlášení a soukromí, pošta, Instagram, cloud, chatbot, reklama a podvodný web. Přesouvají se pouze výslovně označená vysvětlení. Smíšené bloky byly rozděleny, aby aktuální WAN adresa, stav satelitní cesty, platnost certifikátu a počet reklamních požadavků zůstaly viditelné. Rozhodnutí, tabulky, prázdné stavy, data a ovládání zůstávají v hlavním náhledu. Při aktualizaci stejného okna se zachovává rozbalení nápovědy i dalších podrobností.
+
+V rozhraní znovu otevřeno všech 61 zařízení. Z 54 informačních oken má 53 sbalenou nápovědu; tiskárna nemá obecný vysvětlující text. Všechny označené poznámky jsou uvnitř nápovědy, žádné tlačítko ani formulář do ní nebyly přesunuty. Ověřeno otevření Enterem, zavření, zachování rozbalení při vypnutí a zapnutí a současně s podrobnostmi rozhraní routeru. Místní tisk uspěl, rozhodnutí a naučená MAC zůstaly viditelné a otevřená nápověda přežila všechna krokování. Na webovém serveru ověřeno uložení nového nadpisu i dostupnost certifikátu, Secure cookie, přepínačů soukromí a účtů; u reklamy viditelný počet požadavků a u cloudu synchronizace, stav a soubory. Rozbalování a rozložení ověřeno při 814 × 858 a 320 × 844 px bez vodorovného přetékání, včetně dlouhé nápovědy webového serveru. Konzole bez chyb a varování. Ověřena syntaxe šesti upravených skriptů a místní prostředky, aktualizována dokumentace a verze prostředků.
+
+## Jednotné čisté záhlaví všech zařízení — 16. listopadu 2026, v69
+
+Ze společné šablony oken zařízení odstraněny ikona u názvu, menší podnadpis a stav Zapnuto/Vypnuto s barevnou tečkou. V oknech všech zařízení se již nezobrazuje šipka zpět ani popisek záhlaví. Tlačítko napájení je jednotně vpravo. Odstraněny nepoužívané styly a podmínky podle typu zařízení; ikony přímo v mapě zůstávají.
+
+V rozhraní otevřeno všech 61 zařízení: 54 informačních oken a 7 monitorů počítačů či telefonu. V žádném nezůstaly požadované prvky; názvy, napájení a zavření jsou dostupné. U devíti zástupců různých typů ověřeno vypnutí a opětovné zapnutí bez návratu odstraněných prvků. Při 814 × 858 a 320 × 844 px bez vodorovného přetékání; na úzké obrazovce ověřeny Wi-Fi, webový server, BTS a domácí router. Úspěšně proveden místní tisk, otevření detailu paketu a následné okno tiskárny. Detail paketu si zachovává vlastní záhlaví i návrat. Konzole bez chyb a varování. Ověřena syntaxe skriptu a existence 29 místních prostředků, aktualizována verze prostředků.
+
+## Zjednodušení okna satelitní antény — 16. listopadu 2026, v68
+
+Z okna satelitní antény odstraněny ikona, podtitulek, stav Zapnuto/Vypnuto s barevnou tečkou, šipka zpět, text Uvnitř sítě, oba odkazy na připojené spoje a odkaz na notebook na chatě. Název, napájení, nastavení výhledu, výukové informace, rozhodnutí a oba porty s kontrolkami zůstávají. V rozhraní ověřena nepřítomnost všech označených prvků, vypnutí a zapnutí antény, zakrytí a obnovení výhledu s odpovídající změnou dostupnosti satelitní cesty a zavření křížkem. Změna je omezena na uživatelský terminál; satelit LEO si zachovává své ovládací prvky a router svůj stav napájení. Při 814 × 858 px bez vodorovného přetékání, konzole bez chyb a varování. Ověřena syntaxe skriptu, aktualizována verze prostředků.
+
+## Zjednodušení okna routeru — 16. listopadu 2026, v67
+
+Z oken routerů odstraněna ikona u názvu, podtitulek, šipka zpět, text Uvnitř sítě a tlačítka otevření připojených spojů. Stav napájení, ovládání, seznam portů, směrovací tabulka a NAT zůstávají. V rozhraní ověřeno všech 20 routerů, vypnutí a zapnutí domácího routeru i zavření okna. Předchozí zjednodušení switchů zůstává; přístupové body si zachovávají své ikony, podtitulky i odkazy. Při 814 × 858 px bez vodorovného přetékání, konzole bez chyb a varování. Ověřena syntaxe skriptu a existence všech 29 místních prostředků, aktualizována verze prostředků.
+
+## Zjednodušení okna switche — 16. listopadu 2026, v65–66
+
+Z oken switchů odstraněna šipka zpět, text Uvnitř sítě, ikona u názvu, podtitulek Ethernet · přepínání rámců, stav Zapnuto/Vypnuto s tečkou a tlačítka otevření spojů v seznamu portů. Názvy portů, protější zařízení a jejich stavové kontrolky zůstávají. V rozhraní ověřeno všech 12 switchů, vypnutí a opětovné zapnutí domácího switche, zachování MAC tabulky a výukového obsahu a předchozí úpravy tiskárny. Při 814 × 858 px bez vodorovného přetékání. Konzole bez chyb a varování, syntaxe skriptu ověřena. Aktualizována verze prostředků.
+
+## Obousměrná konverzace s Matějem — 16. listopadu 2026, v64
+
+Matějův chat má stejné psaní a volby Text, Obrázek a Video. Každé zařízení uchovává vlastní rozepsaný text a volbu přílohy. Oba směry používají skutečný modelový přenos: klient → Instagram → příjemce, s novými pakety, samostatnými klientskými porty, NAT a případně VPN. Matěj odpovídá do zařízení poslední doručené zprávy, výchozí je notebook na Lipové. Ve všech směrech funguje čekání na serveru při odpojení příjemce a samostatné potvrzení přečtení. Zprávy zůstávají v historii zařízení, která je odeslala nebo plně přijala; obsah ani náhled přílohy se příjemci neukáže před dokončením přenosu. Historie ukládá metadata příloh, nikoli další kopie jejich modelových bajtů. Popisky serveru, paketů a mapy sledují aktuální směr.
+
+Prošlo všech **231 automatických testů**, včetně devíti nových scénářů obousměrného chatu: porty a překlady NAT, střídání zpráv a potvrzení, obě přílohy a přesné složení bajtů, viditelnost obsahu a escapování, odpověď na telefon, výpadek a nové doručení, VPN obou domácností, zpožděné potvrzení a odmítnutí neplatného cíle. Původní scénáře webu, pošty, cloudu, reklamy, bezpečnosti a přístupových sítí zůstávají úspěšné.
+
+V rozhraní ověřena výměna textových zpráv v obou směrech, vlastní rozepsané texty a typy příloh, historie čtyř zpráv včetně Matějova obrázku a přehratelného videa a potvrzení přečtení zpět. Odpověď se po zprávě z telefonu skutečně vrátila do telefonu. Ověřen přehled Matěj → Instagram → Ty a odpovídající počty paketů. Při 320 × 844 px má telefon obsah 252/252 px bez vodorovného přetékání a dostupné psaní i všechny tři volby; vzhled ověřen také při 814 × 858 px. Dvě doručená videa zachovala po aktualizaci rozhraní samostatné pozice 0,5 s a 1,5 s i pozastavení. Odstraněné akce záhlaví a údaj o bajtech se nevracejí. Konzole bez chyb a varování. Ověřena syntaxe všech 24 skriptů a 29 místních prostředků, aktualizována dokumentace a verze prostředků.
+
+## Kratší výchozí zpráva Instagramu — 16. listopadu 2026, v63
+
+Výchozí text změněn na „Čau Matěji! Nechceš zítra po škole vyrazit ven?“. Společná konstanta předvyplňuje notebook, telefon i notebook na chatě. Nový text má 52 B v UTF-8; údaj aktualizován v dokumentaci. Dlouhý text pro testy segmentace oddělen od uživatelské ukázky, aby nadále pokrýval více paketů. Prošlo všech 28 testů modelu a kontrola syntaxe skriptu. Aktualizována verze prostředků.
+
+## Odebrání velikosti zprávy u psaní — 16. listopadu 2026, v62
+
+Z řádku voleb Text / Obrázek / Video odstraněn údaj o velikosti připravované zprávy v bajtech a obě jeho pravidla vzhledu. Ověřena nepřítomnost prvku ve zdroji a syntaxe skriptu. Aktualizována verze prostředků.
+
+## Zjednodušení záhlaví Instagramu — 16. listopadu 2026, v61
+
+Ze záhlaví chatu odstraněno tlačítko Mapa i celá nabídka informací o konverzaci včetně ikony. Odstraněny jejich nepoužívané ikony, styly a obsluha zavírání nabídky. V prohlížeči ověřena nepřítomnost obou prvků na notebooku, telefonu i u Matěje, zachování kontaktu a návratu na plochu, odesílání a přehledu Přenos v síti. Zavření monitoru funguje, konzole bez chyb a varování. Ověřena syntaxe upravených skriptů, aktualizována dokumentace a verze prostředků.
+
+## Instagram ve vzhledu chatu — 16. listopadu 2026, v60
+
+Přepracován Instagram na přímé zprávy: seznam konverzací vlevo na větší obrazovce, profil v záhlaví, odchozí a příchozí bubliny, přílohy a psaní dole. Podrobnosti o obou spojích, porovnání velikostí a výběr paketů jsou v rozbalovacím Přenosu v síti. Nabídka informací otevře druhou stranu chatu a u Matěje nastavení potvrzení přečtení. Enter odesílá, Shift + Enter zůstává novým řádkem; nabídku zavře Escape i kliknutí mimo ni. Původní síťový model a jedna poslední zpráva zůstávají zdrojem stavu. Nové rozhraní a styly jsou v samostatných souborech. Při aktualizaci zůstávají zachované posunutí chatu, kurzor i otevřené podrobnosti; klíč pohledu vychází z aktuálně vybrané aplikace.
+
+V prohlížeči úspěšně odeslán text s diakritikou, emoji a značkami, ověřeno bezpečné vykreslení, příjem u Matěje a návrat potvrzení Zobrazeno. Přenesen obrázek i video; u příjemce je video přehratelné s ovládáním. Detail paketu z přehledu pozastaví krokování. Ověřeny počty 72 paketů pro obrázek a 3 572 pro video, zachování přehledu při změně přílohy a původního rozepsaného textu. Odeslání z telefonu při vypnutém Matějově notebooku zprávu uchovalo na serveru; po zapnutí se doručila. Vypnutá potvrzení ponechala odesílateli Doručeno, jejich zapnutí připravilo a úspěšně přeneslo potvrzení přečtení. Enter při blokovaném odesílání nespustil nový přenos.
+
+Vzhled ověřen při 814 × 858, 390 × 844 a 320 × 844 px včetně monitoru telefonu. Při 320 px má obsah 252/252 px bez vodorovného přetékání, psaní a odeslání zůstávají dostupné i s rozbalenými podrobnostmi; nabídka informací se vejde do obrazovky. Ověřeno přepínání s prohlížečem, Poštou a Připojením, zachování posunutí a fokusu při aktualizaci. Konzole bez chyb a varování. Prošlo sedm testů médií a osm testů navigace prohlížeče; ověřena syntaxe všech 24 skriptů a existence 29 místních prostředků. Aktualizována dokumentace a verze prostředků.
+
+## Odebrání názvů místností v bytě — 16. listopadu 2026, v59
+
+Ze SVG bytu na Lipové odstraněny textové prvky Pracovna a Tiskový kout. Ověřena nepřítomnost obou popisků ve zdroji mapy a syntaxe skriptu. Aktualizována verze prostředků.
+
+## Odebrání obrázku listu v tiskárně — 16. listopadu 2026, v58
+
+Z okna tiskárny odstraněn dekorativní list Připraveno k tisku a jeho nepoužívaná pravidla vzhledu. Zůstává samotná zpráva Tiskárna čeká na dokument; její panel již nezabírá prostor po obrázku. V prohlížeči ověřeno odstranění listu i jeho textu, kompaktní panel, zachování údajů IP/MAC/služba, tlačítka napájení a zavření okna. Konzole bez chyb a varování, syntaxe skriptu ověřena. Aktualizována verze prostředků.
+
+## Odebrání štítku nad monitorem — 16. listopadu 2026, v57
+
+Nad monitorem odstraněn viditelný štítek se jménem zařízení a stavovou tečkou. Zavírací tlačítko zůstává vpravo. Název zařízení je zachován jako skrytý nadpis pro přístupné pojmenování dialogu. V prohlížeči ověřena nepřítomnost štítku a tečky, zarovnání zavření, otevření Dokumentu s tlačítkem Tisk a zavření monitoru. Strom přístupnosti nadále uvádí dialog Notebook. Konzole bez chyb a varování, syntaxe skriptu ověřena. Aktualizována verze prostředků.
+
+## Popisek tlačítka Tisk — 16. listopadu 2026, v56
+
+Tlačítko v aplikaci Dokument přejmenováno z Odeslat do tiskárny na Tisk. Změněn pouze jeho text; odeslání formuláře a obsluha tisku zůstávají stejné. Ověřen nový text ve zdroji a syntaxe skriptu. Aktualizována verze prostředků.
+
+## Odebrání úpravy názvu dokumentu — 16. listopadu 2026, v55
+
+Z aplikace Dokument odstraněn popisek Název dokumentu i pole pro přejmenování. Tlačítko Odeslat do tiskárny zůstává vpravo nad náhledem dokumentu. Odstraněna také nepoužívaná pravidla vzhledu pole. V prohlížeči ověřena nepřítomnost pole a popisku i úspěšné odeslání a vytištění dokumentu se stávajícím názvem Poznámky k projektu.pdf. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků.
+
+## Zjednodušení záhlaví tiskárny — 16. listopadu 2026, v54
+
+Z okna tiskárny odstraněna ikona u nadpisu, podtitulek Místní síť · byt na Lipové a stav Zapnuto/Vypnuto včetně barevné tečky. Tlačítko napájení zůstává vpravo. V prohlížeči ověřeno odstranění všech tří prvků při zapnuté i vypnuté tiskárně, funkční přepnutí napájení a zavření okna, zachování náhledu dokumentu i údajů IP/MAC/služba. U switche ověřeno zachování jeho ikony, podtitulu a stavu. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků; ZIP se podle přání uživatele dále nevytváří.
+
+## Zjednodušení okna tiskárny — 16. listopadu 2026, v53
+
+Z okna tiskárny odstraněna šipka zpět, označení Koncové zařízení, vysvětlující text o místním tisku, odkaz na dokument v notebooku a celá sekce připojení včetně portu a odkazu na spoj. V prohlížeči ověřena nepřítomnost všech označených prvků, zachování náhledu dokumentu a údajů IP/MAC/služba, vypnutí i zapnutí tiskárny a zavření křížkem. Ostatní zařízení si zachovávají své záhlaví, navigaci i porty. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Čistý prohlížeč — 16. listopadu 2026, v52
+
+Zapracována schválená čistá varianta: karty, historie, obnovení, adresní řádek, záložky a nabídka. Ikona u adresy ukazuje informace o skutečném spojení a zámek až po ověření TLS. Cookies a výukový přehled přenosu jsou dostupné na vyžádání. Účet, registrace, vzkaz a soukromí patří do webu knihovny; další vysvětlení jsou rozbalovací.
+
+Přidán model karet s nezávislými dokumenty a rozepsanými adresami, společnými cookies a DNS v rámci zařízení. Přepnutí obnoví místní snímek, historie a obnovení posílají nové požadavky přes síť. Během probíhajícího pokusu nelze měnit cílovou kartu. Původní síťový model, směrování, NAT a bezpečnostní scénáře zůstávají zachované.
+
+Prošlo všech **222 automatických testů**, včetně osmi nových testů navigace a izolace karet. V prohlížeči ověřeno HTTPS načtení knihovny, nový požadavek a reklama v druhé kartě, obnovení původní stránky, přihlášení s výpočtem na serveru, odeslání vzkazu a jeho doručené potvrzení, načtení osobních údajů, obě varianty HTTP/HTTPS, ověření šifrování a načtení podvodného formuláře. Upraven vzor uživatelského jména pro HTML regulární výrazy v režimu v; jméno s pomlčkou projde a mezera se odmítne. Ověřena také chybná adresa: důvod chyby je viditelný a dříve doručená stránka zůstává označená jako starší obsah.
+
+Vizuálně ověřeno při 658 × 858 px a na telefonu při 390 × 844 a 320 × 844 px. Cookies, přihlášení, registrace i hlavní stránka při 320 px nepřetékají vodorovně (šířka obsahu 252/252 px). Osm otevřených karet se při 390 px zalomí bez překrytí ovládacích prvků. Nabídka respektuje dostupnou výšku monitoru. Kliknutí na aktuální paket z přehledu přenosu zastaví simulaci a zavření dovolí pokračovat; po dokončení zůstává stránka načtená. Konzole bez chyb a varování. Upravena dokumentace, verze prostředků a přenosný ZIP.
+
+## Nadpisy podle typu spojení — 16. listopadu 2026, v51
+
+Nadpisy oken spojů nově rozlišují Kabelové spojení a Bezdrátové spojení – Wi-Fi / mobilní síť / satelit. Konkrétní zařízení a porty zůstávají v údajích První konec a Druhý konec. Kabel k satelitní anténě a přípojky BTS jsou v tomto modelu označené jako kabelové úseky. V prohlížeči ověřeno všech šest druhů média na reprezentativních spojích, přístupný název okna, zavření a zachování nadpisu při odpojení i obnovení. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Upravena dokumentace, verze prostředků a přenosný ZIP.
+
+## Jednolité pozadí mapy a budov — 16. listopadu 2026, v50
+
+Odstraněn tečkovaný vzor na celé ploše mapy a čtvercová mřížka podlah v pěti budovách: byt na Lipové, chata, Matějova domácnost, kavárna a doupě. Smazány obě definice SVG vzorů a všech šest překryvných obdélníků; pod nimi zůstávají jednolité barevné výplně. V prohlížeči ověřeny pohledy Byt, Město a Celá síť bez vzorů, všech 61 zařízení a 67 spojů a zachování barev jednotlivých ploch. Vzhled bytu a pozadí vizuálně ověřen. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Zavírání samotným křížkem — 16. listopadu 2026, v49
+
+Zavírací tlačítko informačních oken má pouze křížek bez textu a rámečku; přístupný název pro čtečky zůstává zachován. U okna spoje je křížek přímo v pravém horním rohu a prázdné záhlaví nezabírá místo. Nadpis má rezervované místo, aby do křížku nezasahoval. Vzhled vizuálně ověřen při šířce 658 px, u delšího názvu také rozměry při skutečné šířce výřezu 500 px: bez překryvu nadpisu a vodorovného přetékání. Ověřeno zavření kliknutím, návrat fokusu na spoj, Escape a zavírací křížek v okně zařízení. Konzole bez chyb a varování. Upravena dokumentace, verze prostředků a přenosný ZIP.
+
+## Odebrání popisku Detail spoje — 16. listopadu 2026, v48
+
+Ze záhlaví okna spoje odstraněn popisek Detail spoje. V prohlížeči ověřeno jeho odstranění i po změně stavu spoje a funkční zavření k mapě. Popisky ostatních typů oken zůstávají dostupné. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Odebrání odkazu na připojení zařízení — 16. listopadu 2026, v47
+
+Z detailů spojů odstraněn odkaz Vybrat připojení zařízení. V prohlížeči ověřeno jeho odstranění u kabelového i Wi-Fi připojení, zachování tří údajů o spoji, funkční odpojení a obnovení i zavření k mapě. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Další zjednodušení okna spoje — 16. listopadu 2026, v46
+
+Z detailů spojů odstraněn horní ukazatel dostupnosti a obě spodní tlačítka koncových zařízení; šipka zpět se v těchto oknech nezobrazuje. V prohlížeči ověřeny kabelový i Wi-Fi spoj se třemi zbývajícími údaji, funkční odpojení a obnovení, zavření k mapě a zachování navigace zpět v oknech zařízení. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Odebrání ikon obousměrných spojů — 16. listopadu 2026, v45
+
+Z mapy odstraněny značky ↔ v obdélníkových štítcích spojnic. Zachovány popisky rádiových spojů a označení odpojených spojů. V prohlížeči ověřeno všech 67 spojů bez ikon ↔, otevření detailu kliknutím přímo na spojnici a odpojení i obnovení vybrané větve. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Odebrání řádku Způsob přenosu — 16. listopadu 2026, v44
+
+Z údajů detailu spoje odstraněn řádek Způsob přenosu včetně hodnoty. V prohlížeči ověřeny kabelový i Wi-Fi spoj: zůstávají údaje První konec, Druhý konec a Připojená síť, tlačítko odpojení i odkazy na obě zařízení. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Odebrání podnadpisu spoje — 16. listopadu 2026, v43
+
+Z detailu spoje odstraněn řádek s názvy propojených zařízení a obousměrnou šipkou pod hlavním nadpisem. V prohlížeči ověřeno, že po nadpisu přímo následuje dostupnost spoje a zůstávají čtyři údaje, ovládání a odkazy na koncová zařízení. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Odebrání řádku Stav spoje — 16. listopadu 2026, v42
+
+Z údajů detailu spoje odstraněn řádek Stav spoje včetně jeho rádiové varianty a hodnoty. V prohlížeči ověřeny čtyři zbývající údaje, odkazy na koncová zařízení a funkční odpojení i obnovení spoje. Horní indikátor dostupnosti funguje dál. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Zjednodušení detailu spoje — 16. listopadu 2026, v41
+
+Odstraněna spodní vysvětlující karta spoje a navazující poznámka o aktualizaci směrovacích tabulek. V prohlížeči ověřen detail Notebook — switch: oba bloky chybí, pět údajů o spoji a odkazy na koncová zařízení zůstávají dostupné. Odpojení i obnovení spoje funguje. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Detail spoje bez ilustrace — 16. listopadu 2026, v40
+
+Odstraněna dekorativní ilustrace dvou koleček a spojnice z okna detailu spoje i její nepoužívané styly. V prohlížeči ověřeno otevření detailu Notebook — switch, zachování stavu a ovládání, odpojení a opětovné připojení spoje. Ilustrace se neobjevuje ani při změně stavu. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Hlavní popisky zařízení — 16. listopadu 2026, v39
+
+Odstraněny drobné vedlejší popisky pod zařízeními ve všech měřítkách. Zachovány hlavní názvy a informace v oknech zařízení. V prohlížeči ověřeno 61 hlavních názvů a žádný vedlejší popisek v pohledech Byt, Město a Celá síť; detail DNS serveru se otevírá správně. Konzole bez chyb a varování, syntaxe upraveného skriptu ověřena. Aktualizována verze prostředků a přenosný ZIP.
+
+## Zjednodušení navigace — 16. listopadu 2026
+
+Horní navigace mapy obsahuje pouze **Byt**, **Město** a **Celá síť**. V prohlížeči ověřeno přepínání všech tří výřezů; model nadále obsahuje 61 zařízení. Ostatní oblasti a jejich funkce zůstávají dostupné přiblížením a posunutím mapy. Upravena související dokumentace a přenosný ZIP.
+
+## Obnovení původní mapy — 16. listopadu 2026, v38
+
+Vrácena poslední úprava mapy se sítěmi provozovatelů. Obnovena předchozí topologie **61 zařízení a 67 spojů**, původní souřadnice, pohled Byt a výřez Celá síť `20 -565 2320 2180`, původní přepočet směrovacích tabulek i mobilní prefix /24. Předchozí služby, bezpečnostní scénáře a ovládání paketů zůstávají zachované. Dokumentace i přenosný ZIP odpovídají obnovené mapě.
+
+Ověřeno všech **214 původních automatických testů**, syntaxe **21 JS souborů** a existence všech 24 relativních prostředků indexu. V prohlížeči ověřen výchozí výřez `35 270 465 440`, počet zařízení/spojů, původní navigace a úspěšné načtení knihovny přes DNS/HTTP po krokování. Konzole bez chyb a varování. Verze prostředků zvýšena na `v=38`, aby se načetly obnovené skripty a styly.
+
+## Společný reklamní server 12. listopadu 2026
+
+Nový e-shop `obchod.test` (192.0.2.226), zprávy `zpravy.test` (192.0.2.227) a společný partner `reklamy.test` (192.0.2.228) jsou tři skutečné hostitelské uzly v modelu. Mají vlastní partnerskou LAN 192.0.2.224/27, router, switch a přípojku přes E. Celkem je nyní **61 zařízení a 67 spojů**. Oblast **Reklama** ukazuje jednotlivé služby v mapě. Všechny běžné prohlížeče mají rychlou volbu Knihovna / E-shop / Zprávy.
+
+Ověřeno ovládáním místního náhledu:
+
+- Notebook → Prohlížeč → E-shop spustil DNS a HTTPS k e-shopu. Hlavní stránka s kategorií Cyklistika se zobrazila před dokončením reklamy. V ní zůstávalo čekání na jiný server, dokud neproběhl další DNS/TLS/HTTPS přenos. Teprve přijatá odpověď zobrazila banner a vlastní cookie `reklama_id=r1` s příznaky Secure, HttpOnly a SameSite=None.
+- Přechod přes tlačítko Zprávy zahájil nový přenos ke druhému webu a další žádost k témuž reklamnímu serveru. Přijatý banner nabídl kola a uvedl důvod „Podle uloženého zájmu Cyklistika z prohlížení obchod.test“. Adresa prohlížeče zůstala zpravy.test; vložená reklama hlavní web nenahrazuje.
+- Odkaz na reklamní server otevřel informace nad mapou. Profil r1 měl jeden bod Cyklistika, dva požadavky a oddělené návštěvy obchod.test / zpravy.test. Serverový přehled výslovně odlišuje skutečný stav serveru od dříve přijaté reklamy v zařízení.
+- Vypnutí propojení a nové načtení Zpráv doručilo obecnou nabídku „Objev něco nového“ a důvod bez uloženého zájmu. Uložená cookie zůstala v zařízení, ale neodesílala se. Profil se tímto požadavkem nezměnil (ověřeno také automaticky).
+- Rozhraní ověřeno při 1280 × 720 a 1280 × 900 px. Při 390 × 844 px měla stránka 308/308 px, banner 306/306 px (clientWidth/scrollWidth). Při 320 × 568 px měla stránka 238/238 px, banner 236/236 px, serverový oddíl 252/252 px. Dokument měl vždy 390/390, respektive 320/320 px. Nová oblast mapy byla vizuálně upravena tak, aby nezasahovala do sousedního cizího hostingu. Konzole bez chyb a varování. Dočasná karta, rozměry a server po kontrole uklizeny.
+
+**214 automatických testů úspěšných:** předchozích 198 a 16 nových v `tests/ads.test.mjs`. Pokrývají adresy a skutečné vratné cesty tří služeb; nezávislé načtení stránky/partnera; uložení zájmu až serverovým krokem a cookie/banner až po odpovědi; doporučení na druhém webu; změny skóre a shody; kontext bez profilování; smazání a expiraci bez smazání serverových profilů; dvě zařízení za stejným NAT; oddělení knihovních cookies a přihlášení; výpadky hlavního webu a partnera, ztracené potvrzení a zachování stránky; certifikáty a integritu obou směrů; HTTP hlavní web s HTTPS reklamou a doručeným zásahem MITM do hlavního nadpisu; neprůhlednost v kavárně; Wi-Fi, mobilní data, satelit, VPN a MTU. Příkaz: `node --test --test-concurrency=1 tests/*.test.mjs`.
+
+Syntaxe **21 skriptů**, dvě CSS a relativní prostředky ověřeny. Cache **v=36**. Přenosný ZIP aktualizován a bajtově porovnán se zdroji.
+
+Pokus používá přímo sbíraná data reklamního partnera a samostatnou cookie třetí strany, nikoli přeprodej databáze. Přepínač je výukové povolení propojení, nikoli změna reálného nastavení prohlížeče nebo plnohodnotný proces souhlasu. Reálné prohlížeče mají rozdílné politiky blokování/dělení cookies. CORS, preflight, iframe, skutečné skripty dalších webů, aukce a statistické doporučovací modely nejsou implementované. Vyhrává nejčastěji navštívená kategorie; při shodě dříve zaznamenaná. Data jsou v paměti simulace a neposílají se žádné skutečné reklamní síti. Dřívější oddíly níže popisují předchozí verze.
+
+Snímky: [doporučená reklama na zprávách](docs/ads-news.jpg), [profil serveru](docs/ads-server.jpg), [kontext bez propojení](docs/ads-context.jpg), [mapa](docs/ads-map.jpg), [390 px](docs/ads-mobile.jpg), [320 px](docs/ads-mobile-small.jpg).
+
+## Registrace, hesla a přihlášení 12. listopadu 2026
+
+Na knihovně ve všech pěti běžných zařízeních je nová část **Jak se ověřuje heslo?** s registrací, přihlášením, ověřením aktuální relace a odhlášením. Výchozí tři účty začínají přihlášené. Nové účty se vytvářejí a ověřují na modelovém serveru po skutečném průchodu DNS/TLS/HTTPS. Síť zůstává na 56 zařízeních a 62 spojích.
+
+Ověřeno ovládáním místního náhledu, bez přímého volání interního modelu:
+
+- Notebook načetl knihovnu přes HTTPS. Registrace fiktivního účtu `ukazka` prošla sítí a v zařízení se potvrdila až po doručení odpovědi. Následující přihlášení s chybným heslem bylo odmítnuto, správné heslo potvrdilo nový účet a relaci. Rozepsané hodnoty zůstaly zachované během překreslování a krokování.
+- **Ověřit přihlášení** dokončilo nový přenos s hlášením „Server ověřil cookie relace. Heslo nebylo odesláno.“ Soukromí poté načetlo profil `ctenar-4` se jménem a e-mailem nového účtu.
+- Odkaz na otisky otevřel okno webového serveru přímo u nového oddílu. Po přihlášení ukázal použitou sůl, nový a uložený otisk se stejnými 64 hexadecimálními znaky a výsledek SHODA. Níže byly tři oddělené záznamy účtů se stejným ukázkovým heslem, různými solemi a otisky, parametry PBKDF2 a tabulka relací.
+- Rozhraní kontrolováno při 1280 × 720 a 1280 × 900 px. Při 390 × 844 px měl formulář 274/274 px a panel 306/306 px; serverový oddíl 322/322 px. Při 320 × 568 px měl formulář 204/204 px, panel 236/236 px a server 252/252 px. Dokument měl vždy shodnou clientWidth/scrollWidth (390/390 a 320/320), dlouhé otisky se zalamovaly. Obsah se posouvá uvnitř monitoru, ovládání přenosu zůstává mimo něj. Konzole bez chyb a varování.
+
+**198 automatických testů úspěšných:** předchozích 182, upravených pro přihlašovací relace místo připraveného Bearer tokenu, a 16 nových v `tests/auth.test.mjs`. Nové testy ověřují shodu skutečného PBKDF2 s nezávislou implementací Node crypto, UTF-8, náhodné soli a různé otisky stejného hesla, ukládání až samostatným serverovým krokem po výpočtu, doručení potvrzení zvlášť, žádné heslo v databázi nebo běžných síťových záznamech, chybná/neexistující přihlášení, rotaci a zneplatnění relací, expiraci/zákaz/smazání cookies, doménu a HTTPS, certifikát a integritu, výpadek serveru během výpočtu, ochranu proti pozdnímu dokončení zrušené akce, ztracená potvrzení, registraci bez duplicit, dynamickou identitu GDPR a odstranění e-mailu, Wi-Fi/data/satelit/VPN, neprůhlednost pro MITM a mez MTU. Příkaz: `node --test --test-concurrency=1 tests/*.test.mjs`.
+
+Syntaxe všech **19 skriptů**, obě CSS a relativní prostředky ověřeny. Cache `v=35`. Přenosný ZIP aktualizován a porovnán se zdroji. Dočasná kontrolní karta, rozměry a server po práci uklizeny.
+
+KDF je skutečné PBKDF2-HMAC-SHA-256 (600 000 iterací, náhodná 16B sůl, 32B otisk); používá se vestavěné Web Crypto bez závislostí. Síť/TLS a obě logické role serveru a klienta zůstávají v jednom místním výukovém modelu. Není to produkční zabezpečení ani trvalá registrace. Heslo je v klientském rozepsaném formuláři a poslední akci; po dešifrování jej server přechodně zná, ale databáze ukládá pouze sůl, otisk a parametry. Výmaz dobrovolného profilu odstraňuje i kopii e-mailu u přihlašovacího účtu, ponechává však přihlašovací jméno/otisk/relace pro přístup k výsledku a případnému dokladu; nejde o zrušení účtu. Starší oddíly níže popisují tehdejší verze.
+
+Snímky: [monitor](docs/auth-desktop.jpg), [porovnání otisků](docs/auth-server.jpg), [390 px](docs/auth-mobile.jpg), [server na telefonu](docs/auth-server-mobile.jpg), [320 px](docs/auth-mobile-small.jpg).
+
+## GDPR · přístup a výmaz 12. listopadu 2026
+
+Na stránce knihovny přibyla nabídka **Soukromí a moje údaje**. Model má tři připravené fiktivní účty: notebook, telefon a chata sdílejí `ctenar-1`, Matěj a host kavárny mají samostatné účty. Síť zůstává na 56 zařízeních a 62 spojích. Přibyla pouze aplikační logika nad stávajícím DNS/TLS/HTTPS, NAT a VPN. Přihlášení je oddělené od cookie. Údaje se přijímají přes `GET /soukromi/udaje`, žádost o výmaz přes `POST /soukromi/vymaz`; na síti jsou to běžné chráněné HTTPS pakety.
+
+Ověřeno skutečným ovládáním místního náhledu:
+
+- Notebook načetl knihovnu přes HTTPS. Rozbalení nabídky a Zobrazit moje údaje zahájilo nový přenos; až jeho dokončení ukázalo jméno Alex Lipovský, e-mail, žánry, návštěvu se zdrojem po NAT `192.0.2.1` a jeden přidružený záznam prohlížeče.
+- Požádat o výmaz a dokončení dalšího přenosu doručilo potvrzení samostatně. Nové zobrazení údajů ukázalo prázdný profil a historii, nulový počet záznamů a vypnutý dobrovolný sběr účtu. Ukázkový účetní doklad se jménem zůstal označen důvodem uchování. Odkaz na server otevřel přímo příslušný správcovský oddíl nad mapou a ukázal stejný skutečný stav; ostatní dva profily zůstaly beze změny.
+- Matějův notebook samostatně načetl svůj profil a návštěvu s NAT `192.0.2.26`. Jeho výmaz potvrdil odstranění také samostatného dokladu; nové načtení přehledu neobsahovalo žádný další doklad. Otevření detailu TLS paketu pozastavilo krokování i přehrávání; po zavření šel dokončit původní přenos a znovu otevřít zachovanou aplikaci.
+- Soukromí mělo při 390 × 844 px obsah 330/330 px a při 320 × 568 px 260/260 px (clientWidth/scrollWidth); dokument zůstal široký přesně 390, respektive 320 px. Tlačítka se na úzkém displeji skládají pod sebe, texty se zalamují a obsah se posouvá uvnitř monitoru. Dočasná změna rozměrů byla vrácena. Konzole neobsahovala chyby ani varování. Kontrolní karta zavřena a dočasný server ukončen.
+
+**182 automatických testů úspěšných:** dosavadních 167 a 15 nových v `tests/privacy.test.mjs`. Nové testy ověřují načtení až po doručení a serverový snímek, odmítnutí chybějícího přihlášení bez úniku dat, okamžik výmazu a návrat potvrzení, obě varianty uchování, samostatné lokální mazání cookies, sdílený účet a izolaci ostatních uživatelů, zastavení dalšího přihlášeného sběru, přiřazení dosavadního prohlížeče bez autentizace cookie, přijetí pouze správného HTTPS požadavku, výpadek před zpracováním a po něm, opakování se stejnou identitou žádosti, certifikát a integritu obou směrů, neprůhlednost při MITM a VPN, skutečné pozorované IP, tři návštěvy a MTU. Příkaz: `node --test --test-concurrency=1 tests/*.test.mjs`.
+
+Syntaxe všech **17 skriptů**, dva CSS soubory a relativní prostředky ověřeny. Cache `v=34`. Přenosný ZIP byl aktualizován a jeho soubory bajtově porovnány se zdroji.
+
+Jde o uzavřený fiktivní scénář, nikoli produkční GDPR proces. Podmínky výmazu jsou pro dobrovolný profil předpokládané, právní důvod dokladu je ukázková varianta a přihlášení připravené. Čas je zkrácený. Nepřiřazené záznamy se neidentifikují podle IP; model nevyhledává všechny osobní údaje napříč skutečnou organizací. Výuková síťová historie, ostatní služby a dřívější místní kopie nejsou globálně mazány. Další meze a právní zdroje jsou v README.
+
+Snímky: [přehled údajů](docs/privacy-profile.jpg), [stav serveru po výmazu](docs/privacy-server.jpg), [úplný výmaz druhého účtu](docs/privacy-erasure.jpg), [pozastavený TLS paket](docs/privacy-packet.jpg), [390 px](docs/privacy-mobile.jpg), [320 px](docs/privacy-mobile-small.jpg).
+
+## SMTP a IMAP 12. listopadu 2026
+
+Pošta Lipov (`posta.test`, 203.0.113.40) a nová Pošta Dopis (`dopis.test`, 192.0.2.194) mají oddělené serverové schránky. Dopis má vlastní router, switch, LAN /27 a přípojku do D. Model nyní obsahuje **56 zařízení a 62 spojů**. Všech pět běžných klientů může psát i číst e-maily; Matějův účet je `matej@dopis.test`. Dřívější oddíly níže popisují tehdejší verze; jejich původní Poštu přes HTTPS API nyní nahrazuje tento model SMTP/IMAP.
+
+Ověřeno ovládáním skutečných prvků místního náhledu:
+
+- Notebook → Pošta → Napsat e-mail: změna příjemce aktualizovala trasu, vlastní předmět a text se zachovaly. SMTP předalo zprávu vlastnímu serveru, ten provedl DNS MX a samostatné předání druhému poskytovateli. Pošta Dopis zobrazila schránku, UID a nepřečtený e-mail i při vypnutém Matějově notebooku. Rozhovor obsahoval MAIL FROM, RCPT TO, DATA, 354 a konečné 250.
+- Po zapnutí příjemce byla jeho místní Pošta prázdná. Teprve IMAP · Zkontrolovat poštu provedlo SELECT a FETCH a zpřístupnilo doručenou zprávu. Otevření zprávy vyvolalo samostatné SELECT/UID STORE a příznak přečtení se potvrdil po návratu odpovědi. Rozbalený rozhovor zůstal otevřený během krokování i překreslování. Odesílateli se potvrzení přečtení neposílalo.
+- Vypnutí Pošty Lipov před odesláním z Matějovy Pošty ponechalo e-mail ve frontě Pošty Dopis. Okno serveru ukázalo čekání a počet pokusů. Po zapnutí Lipova tlačítko Zkusit předat z fronty dokončilo samostatný SMTP přenos. Fronta změnila stav na doručeno, počet pokusů na dva.
+- Detail SMTP paketu nad mapou zobrazil TCP/465 a návrat přes NAT, chráněné modelové TLS bajty a vysvětlení odeslání. Po dobu prohlížení byly krokování a přehrávání deaktivované. Zavření umožnilo dokončit tentýž přenos. SMTP značky jsou oranžové, IMAP modré; směr rozlišují šipky a popisky. Příprava dalších částí má vlastní popis kroku.
+- Pošta měla při 390 × 844 px obsah 330/330 px a při 320 × 568 px 260/260 px (clientWidth/scrollWidth). Dokument byl široký přesně 390, respektive 320 px. Na 320 px fungoval výběr příjemce a aktualizace trasy; formulář a rozhovory se posouvají uvnitř monitoru. Dočasné rozměry byly vráceny. Při této kontrole byla opravena výjimka při obnovení fokusu výběru příjemce; kontrola po novém načtení už neobsahovala chyby ani varování. Kontrolní karta byla zavřena.
+
+**167 automatických testů úspěšných:** předchozích 153 a 14 nových v `tests/mail.test.mjs`. Kontroly pokrývají role a směrování dvou poskytovatelů, příkazy a oddělené porty/TLS relace, čas převzetí a potvrzení, offline příjemce a odpojení odesílatele, místní i opačné předání, MX a nedostupný cílový server, uloženou frontu a retry, ztrátu potvrzení a modelovou deduplikaci, IMAP snapshot až po doručení, více zpráv/UID/Seen a nulové potvrzení odesílateli, zachování staré kopie při chybě, vícebajtové UTF-8 přes souběžné části, MTU a SEQ, Wi-Fi/data/satelit/VPN, neprůhlednost při kavárenském odposlechu, změnu připojení a odmítnutí poškozeného TLS. Dosavadní phishingové kontroly nově procházejí skutečnými modelovými SMTP/IMAP přenosy. Příkaz: `node --test --test-concurrency=1 tests/*.test.mjs`.
+
+Syntaxe všech **15 skriptů**, dva CSS soubory a relativní odkazy ověřeny; cache `v=33`. Přenosný ZIP byl aktualizován a jeho soubory bajtově porovnány se zdroji. Zůstává bez sestavení a externích závislostí.
+
+Meze: krátký připravený protokolový rozhovor, připravené účty a TLS bez animace handshake, interní JSON po částech 192 B před obalením, ruční retry a pouze paměťové schránky. Výpis FETCH zkracuje těla, celá data však putují v odpovědi. Modelová deduplikace stejné identity není záruka reálného SMTP. TLS chrání samostatné úseky, nikoli obsah před poštovními poskytovateli. Úplné příkazy, autentizace, TCP retransmise, přílohy, bounce a antispam se nesimulují. Podrobnosti a primární RFC jsou v README.
+
+Snímky: [server a odlišení protokolů](docs/mail-server.jpg), [IMAP rozhovor](docs/mail-imap.jpg), [SMTP paket](docs/mail-packet.jpg), [odchozí fronta](docs/mail-queue.jpg), [Pošta na 390 px](docs/mail-mobile.jpg), [formulář na 320 px](docs/mail-compose-mobile.jpg).
 
 ## Kavárna a MITM 11. listopadu 2026
 

@@ -1,0 +1,137 @@
+/* Instagram Direct-inspired shell. The network model remains the source of truth. */
+.instagram-application{container-type:inline-size;background:#fff;border-color:#e2e2e6}
+.instagram-application>.computer-app-title{display:none}
+.instagram-application>.computer-app-body{display:flex;min-height:0;overflow:hidden;background:#fff}
+.instagram-app{--ig-ink:#262626;--ig-muted:#737373;--ig-line:#efefef;display:grid;grid-template-columns:184px minmax(0,1fr);width:100%;height:100%;min-height:0;background:#fff;color:var(--ig-ink);font-family:Arial,Helvetica,sans-serif}
+.instagram-app button,.instagram-app summary,.instagram-app textarea{font-family:inherit}
+.instagram-app button:focus-visible,.instagram-app summary:focus-visible,.instagram-app textarea:focus-visible,.ig-conversation:focus-visible{outline:2px solid #8b5cf6;outline-offset:2px}
+.instagram-app svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ig-sidebar{display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--ig-line);padding:24px 0 14px;background:#fff}
+.ig-sidebar-brand{padding:0 18px;font-family:Georgia,serif;font-size:26px;font-style:italic;font-weight:700;letter-spacing:-1.3px;color:#171717}
+.ig-account{display:flex;align-items:center;gap:9px;margin:27px 16px 22px}
+.ig-account>span:last-child{display:flex;flex-direction:column;min-width:0;gap:4px}
+.ig-account strong{font-size:12px}
+.ig-account small{font-size:9px;color:var(--ig-muted);overflow-wrap:anywhere}
+.ig-sidebar-label{display:flex;align-items:center;justify-content:space-between;padding:0 17px 11px;font-size:12px;font-weight:700}
+.ig-sidebar-label>span{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#f1edff;color:#7950d8;font-size:9px}
+.ig-thread{display:flex;align-items:center;gap:10px;padding:13px 15px;background:#f5f5f5}
+.ig-thread>div{min-width:0}
+.ig-thread strong{font-size:11px;font-weight:600}
+.ig-thread p{margin:4px 0 0;color:var(--ig-muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:104px}
+.ig-sidebar-note{margin-top:auto;padding:20px 18px 0;font-size:9px;color:#999}
+.ig-avatar{display:grid;place-items:center;flex-shrink:0;width:35px;height:35px;border-radius:50%;border:2px solid #fff;outline:1px solid #e6d9dd;background:linear-gradient(145deg,#f4d6ad,#e8a9ab 65%,#c7b8e8);color:#733b55;font-size:13px;font-weight:600}
+.ig-avatar.self{background:linear-gradient(145deg,#c0dcf6,#d4c5f5 75%);color:#4f5285}
+.ig-avatar.large{width:64px;height:64px;font-size:25px;outline-color:#eee}
+.ig-main{display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;overflow:hidden}
+.ig-contact{display:flex;align-items:center;gap:9px;position:relative;flex-shrink:0;min-height:62px;padding:10px 16px;border-bottom:1px solid var(--ig-line);background:#fff;z-index:3}
+.ig-contact-name{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ig-contact-name strong{font-size:12px;font-weight:600}
+.ig-contact-name small{font-size:10px;color:var(--ig-muted)}
+.instagram-app .ig-icon-button{display:grid;place-items:center;flex-shrink:0;width:30px;height:30px;min-height:30px;padding:5px;border:0;border-radius:50%;background:transparent;color:#262626;cursor:pointer;list-style:none}
+.instagram-app .ig-icon-button:hover{background:#f5f5f5}
+
+.ig-conversation{display:flex;flex:1 1 0;flex-direction:column;align-items:stretch;min-height:0;overflow:auto;overscroll-behavior:contain;padding:18px 21px 14px;scrollbar-width:thin;scrollbar-color:#dedde3 transparent;background:#fff}
+.ig-chat-intro{display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding:10px 0 22px;gap:6px;text-align:center}
+.ig-chat-intro>.ig-avatar.large{width:64px;height:64px;font-size:25px;margin-bottom:4px}
+.ig-chat-intro strong{font-size:16px;margin:0;font-weight:600}
+.ig-chat-intro small{font-size:10px;color:var(--ig-muted)}
+.ig-chat-intro p{margin:4px 0 0;font-size:10px;color:#969696}
+.ig-message-group{display:flex;flex-direction:column;flex-shrink:0;max-width:88%;margin:0 0 7px;gap:6px;min-width:0}
+.ig-message-group.outgoing{align-self:flex-end;align-items:flex-end}
+.ig-message-group.incoming{align-self:flex-start;align-items:flex-start}
+.ig-bubble{max-width:100%;padding:11px 15px;border-radius:18px;font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.ig-bubble.outgoing{background:linear-gradient(120deg,#6556ee,#a033ed);color:#fff;border-bottom-right-radius:5px}
+.ig-bubble.incoming{background:#efefef;color:#262626;border-bottom-left-radius:5px}
+.ig-message-status{font-size:9px;line-height:1.5;color:var(--ig-muted);margin:0 3px}
+.ig-message-status.error{color:#c44842}
+.ig-media-message{width:250px;max-width:100%;border-radius:15px;overflow:hidden;background:#f5f5f5}
+.ig-media-message .message-preview{margin:0;border:0;border-radius:15px 15px 0 0}
+.ig-media-message .message-preview img,.ig-media-message .message-preview video{max-height:190px;object-fit:cover}
+.ig-media-message .message-preview figcaption{display:none}
+.ig-media-message>small{display:block;padding:7px 10px;font-size:9px;color:var(--ig-muted);overflow-wrap:anywhere}
+.ig-notice{flex-shrink:0;margin:10px 0 2px;padding:10px 12px;border:1px solid #eeebf5;border-radius:9px;background:#f8f7fb;color:#6f687a;font-size:10px;line-height:1.5}
+.ig-notice.error{border-color:#f0d9d6;background:#fff7f5;color:#a45148}
+.ig-receiving{display:flex;flex-shrink:0;align-items:center;gap:4px;margin:10px 0;font-size:10px;color:var(--ig-muted)}
+.ig-receiving i{width:5px;height:5px;border-radius:50%;background:#c1b2dc}
+.ig-receiving span{margin-left:5px}
+.ig-compose{flex-shrink:0;padding:8px 15px 12px;background:#fff;border:0}
+.ig-compose-types{display:flex;align-items:center;gap:6px;padding:0 1px 8px}
+.ig-compose-types button{display:flex;align-items:center;gap:5px;border:0;background:transparent;border-radius:6px;padding:5px 6px;font-size:10px;color:#737373;min-height:28px}
+.ig-compose-types button[aria-pressed="true"]{background:#f2ecff;color:#8151ce}
+.ig-compose-types button:hover{background:#f6f3fa}
+.ig-compose-types svg{width:16px;height:16px}
+.ig-compose-box{display:flex;align-items:center;gap:6px;min-width:0;min-height:48px;padding:4px 6px 4px 13px;border:1px solid #dbdbdb;border-radius:24px;background:#fff}
+.ig-compose-box:focus-within{border-color:#baa6d9}
+.instagram-app .ig-compose textarea{display:block;flex:1;width:100%;min-width:0;height:40px;min-height:40px;max-height:90px;padding:0;border:0;border-radius:0;background:transparent;color:#262626;font-size:12px;line-height:20px;resize:none;box-shadow:none;scrollbar-width:thin}
+.instagram-app .ig-compose textarea:focus{outline:none}
+.ig-compose textarea::placeholder{color:#999}
+.instagram-app .ig-send{display:flex;align-items:center;justify-content:center;flex-shrink:0;gap:6px;min-height:34px;padding:7px 9px;border:0;border-radius:18px;background:transparent;color:#7554d4;font-size:11px;font-weight:600;white-space:nowrap;width:auto}
+.instagram-app .ig-send:hover{background:#f3effb;color:#5c3cb5}
+.ig-send svg{width:18px;height:18px}
+.ig-send:disabled{opacity:.4}
+.ig-attachment{display:flex;align-items:center;gap:10px;margin:0 0 9px;padding:7px;border-radius:10px;background:#f7f6fa;min-width:0}
+.ig-attachment .message-preview{width:67px;min-width:67px;margin:0;border:0;border-radius:6px}
+.ig-attachment .message-preview img{height:45px;min-height:45px;max-height:45px;object-fit:cover}
+.ig-attachment .message-preview figcaption{display:none}
+.ig-attachment .preview-play{width:23px;height:23px;font-size:10px;top:50%}
+.ig-attachment>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ig-attachment strong{font-size:10px;font-weight:500;overflow-wrap:anywhere}
+.ig-attachment small{font-size:9px;color:var(--ig-muted)}
+.ig-attachment>.ig-icon-button{margin-left:auto}
+.ig-attachment-ready{flex:1;min-width:0;font-size:10px;color:var(--ig-muted);line-height:1.5;padding:8px 0}
+.ig-text-button{border:0;padding:2px 0;background:none;font-size:10px;line-height:1.6;color:#7950ce;font-weight:600;text-align:left}
+.ig-text-button:hover{text-decoration:underline;text-underline-offset:3px}
+.ig-retry{padding:0 17px 10px}
+.ig-receipt-setting{display:flex;align-items:center;gap:7px;font-size:10px;line-height:1.5;color:#61566e}
+.ig-receipt-setting input{accent-color:#8966bd;width:13px;height:13px;margin:0}
+.ig-network{flex-shrink:0;min-width:0;border-top:1px solid var(--ig-line);background:#fcfbfd;font-size:10px}
+.ig-network>summary{display:flex;align-items:center;gap:7px;list-style:none;padding:9px 16px;min-height:35px;cursor:pointer;color:#69616f}
+.ig-network>summary::-webkit-details-marker{display:none}
+.ig-network>summary svg{width:15px;height:15px;color:#9a87b0}
+.ig-network>summary small{margin-left:auto;font-size:9px;color:#9a8ba8}
+.ig-network>summary::after{content:'⌄';font-size:13px;margin-left:5px;color:#9a8ba8}
+.ig-network[open]>summary::after{transform:rotate(180deg)}
+.ig-network-body{max-height:165px;overflow:auto;overscroll-behavior:contain;padding:4px 16px 14px;border-top:1px solid #f1eef4;scrollbar-width:thin}
+.ig-transfer-explanation{padding:10px 0 6px}
+.ig-transfer-explanation>strong{font-size:11px;color:#62516d}
+.ig-transfer-explanation p,.ig-model-note{font-size:10px;color:#8b8093;line-height:1.65;margin:6px 0 12px}
+.ig-network .message-progress{padding:0;gap:7px;margin:4px 0 12px;grid-template-columns:1fr 1fr}
+.ig-network .message-progress>div{padding:9px}
+.ig-network .message-progress strong{font-size:10px}
+.ig-network .message-progress span,.ig-network .message-progress small{font-size:9px}
+.ig-size-comparison{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:6px 0 10px}
+.ig-size-comparison>div{display:flex;flex-direction:column;gap:5px;min-width:0;padding:9px 6px;background:#f2eef6;border-radius:7px;font-size:10px;color:#7d688f}
+.ig-size-comparison strong{font-size:10px;color:#675075}
+.ig-size-comparison small{font-size:9px;line-height:1.5}
+.ig-packet-group{margin:10px 0 12px}
+.ig-packet-group>strong{font-size:10px;font-weight:600;color:#79658b}
+.ig-packet-group .parts{margin:7px 0;max-width:100%}
+.ig-packet-group .part-chip{font-size:9px;padding:5px 7px}
+@container (max-width:500px){
+  .instagram-app{grid-template-columns:minmax(0,1fr)}
+  .ig-sidebar{display:none}
+  .ig-contact{padding:9px 11px;min-height:58px;gap:8px}
+  .ig-chat-intro{padding-top:6px;padding-bottom:20px}
+  .ig-conversation{padding:12px 15px}
+}
+@container (max-width:300px){
+  .ig-contact{padding:8px;gap:6px;min-height:54px}
+  .ig-contact .ig-avatar{width:29px;height:29px;font-size:11px}
+  .ig-contact-name strong{font-size:11px}
+  .ig-contact-name small{font-size:9px}
+  .instagram-app .ig-home{width:22px;padding:2px}
+  .ig-conversation{padding:10px 11px}
+  .ig-chat-intro>.ig-avatar.large{width:48px;height:48px;font-size:20px}
+  .ig-chat-intro strong{font-size:14px}
+  .ig-compose{padding:6px 8px 9px}
+  .ig-compose-types{gap:2px}
+  .ig-compose-types button{font-size:9px;padding:4px;gap:3px}
+  .ig-compose-box{padding-left:10px;gap:2px}
+  .instagram-app .ig-compose textarea{font-size:16px}
+  .ig-send>span{display:none}
+  .ig-message-group{max-width:95%}
+  .ig-bubble{font-size:11px;padding:10px 12px}
+  .ig-network>summary{padding:8px 11px;font-size:9px}
+  .ig-network-body{padding:4px 11px 12px;max-height:145px}
+  .ig-network .message-progress{grid-template-columns:1fr}
+}

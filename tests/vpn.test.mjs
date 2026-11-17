@@ -1,5 +1,5 @@
 import '../js/network.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/vpn.js';import '../js/phishing.js';
-import '../js/mitm.js';import '../js/simulation.js';
+import '../js/mitm.js';import '../js/mail.js';import '../js/privacy.js';import '../js/auth.js';import '../js/ads.js';import '../js/simulation.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 const {Simulation,CHATBOT_REPLY}=globalThis.InternetLab;
 function finish(s){const events=[];for(let i=0;i<30000&&s.status==='running';i++){s.advanceFrame();events.push(...structuredClone(s.frame));}assert.notEqual(s.status,'running');return events;}
@@ -12,7 +12,7 @@ test('VPN is an independent layer above cable, Wi-Fi and data with separate tunn
   const access=structuredClone(s.net.access[id]),ip=s.net.nodes[id].ip;assert(s.net.setVPN(id,true));
   assert.deepEqual(s.net.access[id],access);assert.equal(s.net.nodes[id].ip,ip);assert.equal(s.net.vpn.clients[id].ip,`10.8.0.${10+i}`);
  }
- assert.equal(Object.keys(s.net.nodes).length,53);assert.equal(Object.keys(s.net.links).length,59);
+ assert.equal(Object.keys(s.net.nodes).length,61);assert.equal(Object.keys(s.net.links).length,67);
 });
 
 test('The VPN envelope hides the entire DNS and HTTP packet on the access path and exposes HTTP only at the exit',()=>{

@@ -1,0 +1,155 @@
+/* Browser chrome, page content and optional teaching tools are separate. */
+.browser-application>.computer-app-title{display:none}
+.real-browser{background:#fffef9;color:#263f36;min-width:0}
+.real-browser svg{width:16px;height:16px;flex-shrink:0}
+.real-browser button{color:inherit}
+.real-browser .primary-button{color:#fffef9}
+.browser-chrome{position:sticky;top:0;z-index:4;flex-shrink:0;background:#f2f5ee}
+.browser-tabs{display:flex;flex-wrap:wrap;align-items:end;gap:3px;min-height:38px;padding:6px 7px 0;background:#e4ebe1}
+.browser-tab{display:flex;align-items:center;min-width:72px;max-width:170px;flex:1 1 72px;padding:2px 1px 2px 7px;border-radius:8px 8px 0 0;color:#68796c}
+.browser-tab.active{background:#f2f5ee;color:#263f36}
+.browser-tab-select{display:flex;align-items:center;gap:7px;flex:1;min-width:0;text-align:left;border:0;background:none;padding:5px 0;font-size:11px}
+.browser-tab-select span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.browser-tab-close{display:grid;place-items:center;width:24px;height:26px;padding:4px;border:0;border-radius:5px;background:none;flex-shrink:0}
+.browser-tab-close svg{width:13px;height:13px}
+.browser-tab-close:hover,.browser-icon:hover,.browser-minimize:hover{background:#dce6d8}
+.browser-icon{display:inline-grid;place-items:center;width:30px;height:30px;padding:5px;flex-shrink:0;border:0;border-radius:6px;background:none}
+.browser-minimize{margin-left:auto;align-self:start;width:29px;height:28px;border:0;border-radius:5px;background:none;font-size:19px;flex-shrink:0}
+.browser-toolbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:5px;padding:6px 7px}
+.browser-history{display:flex;gap:1px}
+.browser-address{display:flex;align-items:center;gap:3px;min-width:0;border:1px solid #d3ded0;border-radius:22px;background:#fffef9;padding:2px 5px;margin:0}
+.browser-address input{min-width:0;flex:1;width:100%;border:0;background:none;color:#2d4539;padding:5px 3px;font-size:12px;line-height:1.5;outline-offset:1px}
+.browser-address:focus-within{outline:2px solid #528b70;outline-offset:0}
+.browser-address input:focus-visible{outline:none}
+.browser-security,.browser-go{display:grid;place-items:center;width:26px;height:26px;padding:5px;border:0;border-radius:50%;background:none;flex-shrink:0}
+.browser-security{background:#edf2e8}
+.browser-security.http{color:#8c6546}
+.browser-security:hover,.browser-go:hover{background:#e3eddd}
+.browser-bookmarks{display:flex;align-items:center;flex-wrap:wrap;gap:2px;padding:0 8px 5px;border-bottom:1px solid #dae3d6}
+.browser-bookmarks button{display:flex;align-items:center;gap:6px;border:0;border-radius:5px;background:none;padding:5px 7px;font-size:11px}
+.browser-bookmarks button:hover{background:#e4ecdf}
+.browser-bookmarks svg{width:14px;height:14px}
+.browser-content{flex:1;min-width:0;display:flex;flex-direction:column}
+.real-browser .computer-webpage{padding:0;min-height:210px;background:#fffef9;display:flex;flex-direction:column;flex:1;min-width:0}
+.browser-new-tab,.browser-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:210px;padding:20px 18px;text-align:center}
+.browser-new-tab h3{font-size:23px;font-weight:500;letter-spacing:-.5px;margin:0 0 18px;color:#2c4a3a}
+.browser-shortcuts{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.browser-shortcuts button{display:flex;flex-direction:column;align-items:center;gap:10px;min-width:83px;padding:16px 12px;border:1px solid #dce5d4;border-radius:9px;background:#f3f6ed;font-size:12px}
+.browser-shortcuts button:hover{background:#e9f0e1}
+.browser-shortcuts svg{width:25px;height:25px;color:#55764e}
+.browser-empty h3{font-size:20px;margin:12px 0}
+.browser-empty p{font-size:12px;line-height:1.7;max-width:370px;overflow-wrap:anywhere;color:#74846e}
+.browser-empty-icon svg{width:30px;height:30px;color:#819879}
+.browser-library{display:flex;flex-direction:column;flex:1;min-width:0}
+.browser-site-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 23px;padding:20px 0 16px;border-bottom:1px solid #dde4d5}
+.browser-site-brand{display:flex;align-items:center;gap:10px;min-width:0;border:0;background:none;padding:0;text-align:left;font-size:15px;font-weight:650}
+.browser-site-brand svg{width:22px;height:22px}
+.browser-text-button{border:0;background:none;border-radius:5px;padding:5px 3px;font-size:11px;text-decoration:underline;text-underline-offset:3px;line-height:1.5}
+.browser-text-button:hover{color:#477c56;background:#edf3e7}
+.browser-library-home{padding:29px 25px 36px;flex:1;min-height:225px}
+.browser-library-home .library-kicker{margin:0 0 14px;font-size:10px;letter-spacing:1.2px;color:#829173}
+.browser-library-home .library-title{margin:0 0 18px;font-size:clamp(25px,3vw,34px);line-height:1.13;letter-spacing:-.7px;font-weight:400;max-width:460px;font-family:Georgia,"Times New Roman",serif;color:#294437;overflow-wrap:anywhere}
+.browser-library-home>p:not(.library-kicker){font-size:12px;line-height:1.7;color:#72806a;max-width:390px;margin:0 0 20px}
+.browser-site-cta{display:inline-flex;align-items:center;gap:10px;font-size:12px;padding:10px 14px;border-radius:6px}
+.browser-site-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0;margin:0 23px;border-top:1px solid #dde4d5;font-size:11px;color:#859078}
+.browser-site-section{padding:24px 25px 28px;flex:1}
+.browser-site-section h3,.browser-account h3{font-family:Georgia,"Times New Roman",serif;font-size:25px;font-weight:400;line-height:1.2;color:#294437;margin:0 0 22px}
+.browser-site-section .web-message-form{margin:0;padding:0;border:0;background:none}
+.browser-site-section .web-message-form textarea{font-size:13px;min-height:96px;padding:12px;background:#fffef9}
+.browser-site-section .web-message-form label{font-size:12px}
+.browser-site-section .web-message-form>div{gap:10px;flex-wrap:wrap}
+.browser-site-section .web-message-form>div>span{font-size:11px}
+.browser-site-section .web-message-form button{font-size:12px}
+.browser-lesson{margin:18px 0 0;font-size:11px;line-height:1.7;color:#70816c}
+.browser-lesson>summary{font-size:11px;cursor:pointer;line-height:1.7;color:#51724c}
+.browser-lesson[open]>summary{margin-bottom:12px}
+.browser-lesson p{line-height:1.7;overflow-wrap:anywhere}
+.browser-popover{position:absolute;z-index:5;top:calc(100% - 1px);right:8px;width:min(315px,calc(100% - 16px));max-height:min(410px,var(--browser-panel-height,65vh));overflow:auto;overscroll-behavior:contain;background:#fffef9;border:1px solid #cbdac6;border-radius:10px;padding:14px;box-shadow:0 10px 30px #203b3326;font-size:12px}
+.browser-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.browser-panel-heading strong{font-size:12px;line-height:1.5}
+.browser-panel-heading h3,.browser-panel-heading h4{margin:0;font-size:15px;line-height:1.4;display:flex;align-items:center;gap:8px}
+.browser-menu>button,.browser-menu-link{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:9px 7px;border:0;border-radius:5px;background:none;font-size:12px;line-height:1.5}
+.browser-menu>button:hover,.browser-menu-link:hover{background:#edf3e7}
+.browser-menu hr{border:0;border-top:1px solid #e0e7d9;margin:7px 0}
+.browser-connection p{font-size:12px;line-height:1.7;margin:10px 0;overflow-wrap:anywhere;color:#72806a}
+.browser-error{color:#a47046!important}
+.browser-drawer{flex:1;padding:20px;background:#fffef9;min-width:0}
+.browser-drawer>.browser-panel-heading{margin-bottom:18px}
+.browser-cookie-content.cookie-panel{padding:0;border:0;border-radius:0;background:none;color:#4e6b53}
+.browser-cookie-content>h4{font-size:13px;margin:20px 0 12px}
+.browser-cookie-content>h4:first-child{margin-top:0}
+.browser-cookie-content .cookie-entry{background:#f4f7ed;padding:12px;border-radius:8px;margin:12px 0}
+.browser-cookie-content .cookie-entry>div{flex-wrap:wrap}
+.browser-cookie-content .cookie-entry code{max-width:100%;overflow-wrap:anywhere;font-size:11px}
+.browser-cookie-content .cookie-entry p{font-size:11px;line-height:1.7}
+.browser-cookie-content .cookie-toggle{font-size:12px;line-height:1.7}
+.browser-cookie-content .cookie-entry dl{font-size:11px}
+.browser-cookie-content .cookie-wire{margin-top:12px}
+.browser-cookie-content .cookie-wire code{font-size:11px;overflow-wrap:anywhere;white-space:normal}
+.browser-muted{font-size:11px;line-height:1.7;color:#7d8c74}
+.browser-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.browser-actions button{font-size:11px}
+.browser-network{padding:15px 18px;border-top:1px solid #dce4d5;background:#f1f5eb;flex-shrink:0;font-size:11px;line-height:1.7}
+.browser-network>.browser-panel-heading{margin-bottom:8px}
+.browser-transfer-state p{margin:5px 0 12px;color:#73846c;overflow-wrap:anywhere}
+.browser-network .browser-lesson{margin:12px 0}
+.browser-loading-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#f1f5eb;border-top:1px solid #dce4d5;flex-shrink:0;font-size:10px;color:#6f8069}
+.browser-loading-status>span{margin-right:auto}
+.browser-document-notice{font-size:11px;line-height:1.6;padding:9px 17px;background:#f7f0de;color:#9a7a42;border-bottom:1px solid #e9ddc2}
+.browser-loading .browser-history [data-browser-nav=reload] svg{animation:browser-loading-spin 1.2s linear infinite}
+@keyframes browser-loading-spin{to{transform:rotate(360deg)}}
+.browser-account.auth-panel{padding:24px 25px;background:none;border:0;flex:1}
+.browser-account .auth-current{padding:12px;background:#f3f6ed;margin:18px 0}
+.browser-account .auth-current strong{font-size:12px}
+.browser-account .auth-current span,.browser-account .auth-current button{font-size:11px}
+.browser-account .auth-form{grid-template-columns:1fr;max-width:400px}
+.browser-account .auth-form label{font-size:12px}
+.browser-account .auth-form input{font-size:13px;background:#fffef9}
+.browser-account .auth-submit{align-items:start;flex-direction:column;gap:12px}
+.browser-account .auth-submit small{font-size:11px;line-height:1.7}
+.browser-account .auth-submit button{font-size:12px;min-height:36px}
+.browser-account .auth-notice{font-size:11px}
+.browser-account .auth-explain{display:block}
+.browser-account .auth-explain p{margin:12px 0}
+.browser-account .auth-journey{margin-top:12px;flex-wrap:wrap}
+.browser-library .privacy-toolbar{display:none}
+.browser-library .privacy-panel{padding:24px 25px;background:none;border:0;flex:1}
+.browser-library .privacy-panel header h3{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:24px}
+.real-browser .partner-page{min-width:0}
+.real-browser .ads-settings .ads-controls{margin-top:14px}
+.real-browser .ads-model-note{font-size:11px;line-height:1.7}
+@media(max-width:700px){
+  .browser-application{inset:8px 8px 51px}
+  .browser-toolbar{gap:3px;padding:5px}
+  .browser-icon{width:28px;height:29px}
+  .browser-history{gap:0}
+  .browser-site-header{margin:0 17px;padding:17px 0 14px}
+  .browser-library-home{padding:25px 18px 30px}
+  .browser-site-footer{margin:0 17px}
+  .browser-site-section,.browser-account.auth-panel,.browser-library .privacy-panel{padding:21px 18px}
+  .browser-popover{max-height:min(290px,var(--browser-panel-height,65vh))}
+  .browser-drawer{padding:17px}
+}
+@media(max-width:440px){
+  .browser-toolbar{grid-template-columns:1fr auto}
+  .browser-address{grid-column:1/-1;grid-row:2}
+  .browser-history{width:max-content}
+  .browser-tabs{padding-top:5px}
+  .browser-tab{flex:1 1 72px;max-width:170px;padding-left:5px}
+  .browser-tab-select{gap:4px;font-size:11px}
+  .browser-tab-select svg{width:13px;height:13px}
+  .browser-tab-close{width:20px;padding:2px}
+  .browser-tab-close svg{width:11px;height:11px}
+  .browser-tabs{flex-wrap:wrap}
+  .browser-bookmarks{padding-left:5px}
+  .browser-bookmarks button{font-size:11px;padding:4px 5px}
+  .browser-shortcuts{gap:7px}
+  .browser-shortcuts button{min-width:67px;padding:13px 9px;font-size:11px}
+  .browser-site-brand{font-size:13px;gap:7px}
+  .browser-site-brand svg{width:19px;height:19px}
+  .browser-site-header{gap:8px}
+  .browser-library-home .library-title{font-size:26px}
+  .browser-popover{max-height:min(245px,var(--browser-panel-height,65vh))}
+}
+@media(pointer:coarse){.browser-address input,.browser-account input,.browser-site-section textarea{font-size:16px}.browser-icon,.browser-tab-close{min-height:36px}.browser-bookmarks button{min-height:36px}}
+@media(prefers-reduced-motion:reduce){.browser-loading .browser-history [data-browser-nav=reload] svg{animation:none}}

@@ -1,5 +1,5 @@
 import '../js/network.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/vpn.js';import '../js/phishing.js';
-import '../js/mitm.js';import '../js/simulation.js';
+import '../js/mitm.js';import '../js/mail.js';import '../js/privacy.js';import '../js/auth.js';import '../js/ads.js';import '../js/simulation.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 const {Simulation,WebCookies,requestText,responseText}=globalThis.InternetLab;
 function finish(s){const events=[];for(let i=0;i<4000&&s.status==='running';i++){s.advanceFrame();events.push(...structuredClone(s.frame));}assert.notEqual(s.status,'running');return events;}
@@ -91,7 +91,7 @@ test('Cookies travel in readable HTTP headers and remain opaque inside TLS and t
 });
 
 test('The cookie is selected for the destination host/path and never sent in DNS or TLS negotiation',()=>{
- const s=new Simulation();run(s);const j=jar(s);assert.equal(WebCookies.header(j,{host:'cizi.test',secure:true},'/',0),'');assert.equal(WebCookies.header(j,{host:'knihovna.test',secure:true},'/vzkaz',0),'navstevnik=v1');
+ const s=new Simulation();run(s);const j=jar(s);assert.equal(WebCookies.header(j,{host:'cizi.test',secure:true},'/',0),'');assert.equal(WebCookies.header(j,{host:'knihovna.test',secure:true},'/vzkaz',0),'navstevnik=v1; library_session='+j.session.value);
  assert(!WebCookies.receive(j,'navstevnik=v9; Domain=cizi.test; Path=/; Max-Age=3600',{host:'knihovna.test',secure:true},0));assert.equal(j.items[0].value,'v1');
  const e=run(s,{secure:true});assert(e.filter(e=>e.packet&&(e.packet.kind.startsWith('dns-')||e.packet.kind.startsWith('tls-'))).every(e=>!JSON.stringify(e.packet).includes('navstevnik')));
 });
