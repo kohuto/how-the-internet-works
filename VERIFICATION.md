@@ -2,6 +2,10 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Odebrání poznámky o velikosti paketů — 17. listopadu 2026, v87
+
+Z detailu datových paketů odstraněn odstavec začínající V tomto porovnání nese datový paket nejvýše 1400 B aplikačních dat. V náhledu ověřen paket Instagram → Matěj · 1/1: odstavec chybí, údaje IPv4, TCP, pořadové číslo a velikost dat segmentu zůstávají dostupné. Konzole bez chyb a varování. Ověřena syntaxe skriptu a existence všech 32 místních prostředků, verze prostředků v87.
+
 ## Cookies jako volitelné rozšíření — 17. listopadu 2026, v86
 
 Přidán samostatný přepínač Cookies, ve výchozí sestavě vypnutý. Bez něj model neposílá Cookie/Set-Cookie, nevytváří návštěvnická ID, záznamy návštěv ani přihlašovací cookie/relace. Vynechá rozpoznávání i doprovodné texty událostí. Přehledy cookies, jejich ovládání a odkazy jsou skryté v prohlížeči i na webovém serveru. Uložený soubor knihovny, načtení i formulář zůstávají funkční. DNS, TLS a Cookies jsou nezávislé volby. Můj účet a Soukromí vyžadují Cookies i TLS; samotné TLS může pracovat bez cookies. Reklamní partner automaticky vyžaduje také Cookies a panel uvádí návaznost. Použití této volby vytváří nový model stejně jako ostatní rozšíření.

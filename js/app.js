@@ -281,7 +281,6 @@
     else if(p.frame)html+=`<details><summary class="hint">${p.frame.medium==='wifi'?'Wi-Fi':'Ethernet'} posledního pozorovaného rámce</summary><dl class="dl">${definition('Zdrojová MAC',p.frame.src)}${definition('Cílová MAC',p.frame.dst)}</dl><p class="hint">Router na dalším spoji vytvoří nový rámec. Domácí NAT navíc překládá IP adresu a port; změnu ukazuje historie překladu výše.</p></details>`;
     if(segmented&&['cloud','replica'].includes(p.connection))html+=`<p class="hint">${p.connection==='replica'?'Kopie mezi centry':'Cloudový požadavek i odpověď'} má části do ${CLOUD_MSS} B. Aplikace zpracuje až všechny složené bajty. Přihlášení je připravené; TLS, TCP ACK a opakování ztracených segmentů se nesimulují.</p>`;
     else if(segmented&&p.connection==='chatbot')html+=`<p class="hint">Dotaz i odpověď se přenášejí jako UTF-8, nejvýše ${MSS} B dat na paket. IP serveru a připojení jsou připravené. TCP handshake, ACK, TLS a opakování ztracených segmentů se nesimulují.</p>`;
-    else if(segmented)html+=`<p class="hint">V tomto porovnání nese datový paket nejvýše ${MSS} B aplikačních dat. Počet se počítá z velikosti, ne z typu souboru. Skupiny časově zhušťují průchod paketů; TCP ACK, TLS a opakování nejsou započítané. Router segmenty nevytváří.</p>`;
     return html;
   }
   function pruneUnavailable(root) {
