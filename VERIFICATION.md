@@ -2,6 +2,12 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Připojení bez úvodní instrukce — 17. listopadu 2026, v101
+
+Z okna Připojení odstraněna věta „Vyber, kudy bude notebook posílat data.“ včetně společné varianty pro telefon a počítač. Nadpis a ikona jsou nyní v jednom svisle vycentrovaném řádku; odstraněny nepoužívané styly podnadpisu.
+
+Ověřena syntaxe computer.js. V prohlížeči při 1053 × 858 px potvrzena nepřítomnost odstavce, zarovnání nadpisu s ikonou, odpojení a obnovení kabelového připojení. Při 320 × 844 px nadpis s ikonou vycentrovaný a bez vodorovného přetékání. Konzole bez chyb a varování. Verze prostředků v101.
+
 ## Výběr zařízení a spojnic bez ohraničení — 17. listopadu 2026, v100
 
 Odstraněn obrys zaměřených zařízení a spojnic v mapě, barevné zvýraznění vybraného zařízení i zesílení vybrané spojnice. Zrušeno také zvýraznění zařízení při ovládání klávesnicí v úzkém zobrazení. Výběr a otevírání detailů zůstávají funkční; ostatní ovládací prvky si zachovávají indikátor zaměření.
