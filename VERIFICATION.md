@@ -2,6 +2,12 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Přenos bez hnědého zvýraznění — 17. listopadu 2026, v90
+
+Z mapy odstraněny třídy a styly, které při pohybu paketu měnily spoj na hnědý a při zpracování zvýrazňovaly obrys zařízení. Odebrána i samostatná hnědá varianta satelitních spojů. Pohyb a výběr paketů, ruční výběr zařízení a spojů, značení výpadků a zvláštní styly VPN zůstávají zachované.
+
+V prohlížeči krokován celý HTTP přenos z notebooku (38 kroků) a chaty přes satelit (58 kroků). V každém kroku porovnány skutečné vykreslené barvy, výplně a tloušťky spojů i obrysů zařízení s počátečním stavem: žádná změna vlivem přenosu, žádné zbývající třídy carrying/current. Oba přenosy doručily knihovnu. Potvrzena pokračující animace paketů, modrá satelitní spojnice a zachovaný ruční výběr notebooku. Konzole bez chyb a varování. Prošlo všech 15 cílených testů geometrie a ovládání mapy. Ověřena syntaxe mapy, existence 32 místních prostředků a verze prostředků v90.
+
 ## Více routerů a spojnice bez křížení — 17. listopadu 2026, v89
 
 Přidáno 17 skutečných směrujících routerů F–V a 17 krátkých propojů. Úplná síť má 78 zařízení a 84 spojů; základ má 12 zařízení a 12 spojů. Napojení poskytovatelů vede z D přes G do E. Odtud pokračují společné severní a jižní větve a kratší odbočky k jednotlivým oblastem. Hosting je dostupný přes V, dolní náhradní větev vede přes F, cloud a pošta mají rozdělenou větev přes R a kavárna přes U. Routery volitelných větví se zobrazují pouze při zapnutí služeb, které je potřebují. Nové úseky mají nezávislé sítě /30 a samostatná rozhraní. Opraveny návratové směry k WAN sítím Matěje, kavárny a doupěte po přesunu jejich přípojek. Pro odstranění místních křížení změněna také poloha domácího AP/tiskárny, BTS Park a mobilního jádra; připojení i jejich funkce zůstávají zachované. Popisek odpojeného propoje D–G leží uprostřed nového krátkého úseku.
