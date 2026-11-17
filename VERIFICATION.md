@@ -2,6 +2,12 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Odebrání odkazů z webového serveru — 17. listopadu 2026, v84
+
+Z detailu webového serveru odstraněn odkaz Otevřít prohlížeč na notebooku, skupina odkazů na prohlížeče pod cookies a šipka pro otevření spoje Hosting — web. Odstraněny nepoužívané styly skupiny odkazů. Port eth0, název switche, napájení, úprava obsahu a nápověda zůstávají dostupné.
+
+V prohlížeči ověřeno odstranění všech tří prvků v základní i úplné sestavě s TLS, zachování nastavení certifikátu při zapnutém TLS a funkční uložení změněného nadpisu včetně jeho skutečného načtení přes HTTP do notebooku. Při 853 × 858 a 320 × 844 px bez vodorovného přetékání, konzole bez chyb a varování. Ověřena syntaxe skriptu, vyvážení CSS bloků a existence všech 32 místních prostředků. Verze prostředků v84.
+
 ## TLS jako volitelné rozšíření — 17. listopadu 2026, v83
 
 Přidána samostatná volba TLS / HTTPS, výchozí stav je vypnuto. Základní web i formulář knihovny nyní používají HTTP na TCP/80, bez TLS handshake a certifikátu. Zapnutí přidá výchozí HTTPS odkazy, handshake, ověření certifikátu a chráněné záznamy na TCP/443. DNS zůstává nezávislé. Adresní řádek, historie, opakování i partnerské a podvodné weby používají skutečný protokol pokusu. Webový server a prohlížeč bez TLS nenabízejí certifikát, Secure cookie ani zabezpečené přihlášení/Soukromí; bezpečné operace se neposílají čitelně. Kavárna bez TLS nabízí pozorování a změnu HTTP, s TLS i oba HTTPS pokusy. Reklamní partner automaticky vyžaduje TLS pro Secure cookie a návaznost je uvedena v nastavení. Připravená ochrana pošty a správcovských spojení a samostatný VPN scénář nejsou touto webovou volbou změněny.
