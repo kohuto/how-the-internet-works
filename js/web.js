@@ -61,10 +61,15 @@
     if(p.partnerPage)return JSON.stringify({title:p.title,...p.partnerPage});
     if(p.auth)return JSON.stringify(p.auth);
     if(p.privacy)return JSON.stringify(p.privacy);
+    if(p.document)return libraryHTML({...p.document,title:p.title},p);
     return `${p.title}${p.greeting?`\n\n${p.greeting}${p.visitor?`\nIdentifikátor: ${p.visitor.id} · načtení stránky: ${p.visitor.loads}`:''}`:''}${p.receipt?`\n\nPřijatý vzkaz: ${p.receipt}`:''}`;
   }
+  function libraryHTML(page,response={}) {
+    const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return `<!doctype html>\n<html lang="cs">\n<head><meta charset="utf-8"><title>${esc(page.brand)}</title></head>\n<body>\n<header>${esc(page.brand)}</header>\n<main>\n<p>${esc(page.kicker)}</p>\n<h1>${esc(page.title)}</h1>\n<p>${esc(page.description)}</p>\n</main>${response.greeting?`\n<p>${esc(response.greeting)}</p>`:''}${response.visitor?`\n<p>Identifikátor: ${esc(response.visitor.id)} · načtení stránky: ${esc(response.visitor.loads)}</p>`:''}${response.receipt?`\n<p>Přijatý vzkaz: ${esc(response.receipt)}</p>`:''}\n</body>\n</html>`;
+  }
   function responseText(p) {
-    return `HTTP/1.1 ${p.status} ${{200:'OK',201:'Created',400:'Bad Request',401:'Unauthorized',403:'Forbidden',409:'Conflict',503:'Service Unavailable'}[p.status]||'Response'}\nCache-Control: no-store\nContent-Type: text/plain; charset=utf-8${p.setCookie?`\nSet-Cookie: ${p.setCookie}`:''}\n\n${responseBody(p)}`;
+    return `HTTP/1.1 ${p.status} ${{200:'OK',201:'Created',400:'Bad Request',401:'Unauthorized',403:'Forbidden',409:'Conflict',503:'Service Unavailable'}[p.status]||'Response'}\nCache-Control: no-store\nContent-Type: ${p.document?'text/html':'text/plain'}; charset=utf-8${p.setCookie?`\nSet-Cookie: ${p.setCookie}`:''}\n\n${responseBody(p)}`;
   }
   class ModelTLS {
     #records=new Map();
@@ -85,5 +90,5 @@
       return JSON.parse(saved.text);
     }
   }
-  Object.assign(globalThis.InternetLab,{webAddress,requestText,responseText,responseBody,WebCookies,ModelTLS});
+  Object.assign(globalThis.InternetLab,{webAddress,requestText,responseText,responseBody,libraryHTML,WebCookies,ModelTLS});
 })();

@@ -7,7 +7,7 @@ import '../js/phishing.js';
 import '../js/mitm.js';import '../js/mail.js';import '../js/privacy.js';import '../js/auth.js';import '../js/ads.js';import '../js/simulation.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-const {Simulation,webAddress,requestText,responseText}=globalThis.InternetLab;
+const {Simulation,webAddress,requestText,responseText,responseBody}=globalThis.InternetLab;
 function finish(sim) {
   const events=[];for(let i=0;i<1000&&sim.status==='running';i++){sim.advance();events.push(structuredClone(sim.current));}
   assert.notEqual(sim.status,'running');return events;
@@ -127,4 +127,60 @@ test('Web addresses are bounded to the model, both schemes share DNS, and UTF-8 
   assert.equal(webAddress(' HTTPS://KNIHOVNA.TEST/ ').secure,true);assert.equal(webAddress('knihovna.test/').secure,false);
   const sim=new Simulation(),message='漢'.repeat(160);run(sim,true,{method:'POST',message});assert.equal(sim.status,'success');assert.equal(sim.net.browser.receipt,message);
   const events=run(sim,false);assert(!events.some(e=>e.kind==='origin'&&e.packet.kind==='dns-query'));
+});
+
+test('The library file exists before browsing and survives a server power outage',()=>{
+  const sim=new Simulation(),file=sim.net.server.files['index.html'];
+  assert.equal(file.name,'index.html');assert.equal(file.mediaType,'text/html; charset=utf-8');
+  assert.equal(file.content.title,'Dnes otevřeno do 16 hodin');
+  assert.equal(sim.net.browser.pageDocument,null);assert.equal(sim.net.browser.content,null);
+  sim.net.toggleNode('web');run(sim,false);assert.equal(sim.status,'failed');
+  assert.equal(sim.net.server.files['index.html'],file);assert.equal(sim.net.browser.pageDocument,null);
+  sim.net.toggleNode('web');run(sim,false);assert.equal(sim.status,'success');
+  assert.deepEqual(sim.net.browser.pageDocument,file.content);
+});
+
+test('HTTP and HTTPS deliver a separate copy of the stored library document',()=>{
+  for(const secure of [false,true]){
+    const sim=new Simulation(),file=sim.net.server.files['index.html'];
+    file.content.description='Text uložený pouze na serveru 🙂';
+    sim.start('web',{address:`${secure?'https':'http'}://knihovna.test/`});
+    until(sim,()=>[...sim.packets.values()].some(p=>p.kind===(secure?'https-response':'http-response')));
+    assert.equal(sim.net.browser.pageDocument,null,'The document is not displayed before the response is processed');
+    finish(sim);assert.equal(sim.status,'success');
+    const reply=secure?sim.webReply:[...sim.packets.values()].find(p=>p.kind==='http-response').payload;
+    assert.equal(reply.fileName,file.name);assert.deepEqual(sim.net.browser.pageDocument,file.content);
+    assert.notEqual(sim.net.browser.pageDocument,file.content);
+    assert.equal(reply.bodyBytes,new TextEncoder().encode(responseBody(reply)).length);
+    assert(responseText(reply).includes('Content-Type: text/html; charset=utf-8'));
+    assert(responseBody(reply).includes('<h1>Dnes otevřeno do 16 hodin</h1>'));
+    assert(responseBody(reply).includes(file.content.description));
+    assert(responseBody(reply).includes(`Identifikátor: ${reply.visitor.id} · načtení stránky: ${reply.visitor.loads}`));
+    if(secure)assert(!JSON.stringify([...sim.packets.values()]).includes(file.content.description));
+    else assert([...sim.packets.values()].some(p=>p.kind==='http-response'&&responseText(p.payload).includes(file.content.description)));
+  }
+});
+
+test('A document response snapshots the server file and later server changes cannot alter the received copy',()=>{
+  for(const secure of [false,true]){
+    const sim=new Simulation(),file=sim.net.server.files['index.html'];
+    sim.start('web',{address:`${secure?'https':'http'}://knihovna.test/`});
+    until(sim,()=>[...sim.packets.values()].some(p=>p.kind===(secure?'https-response':'http-response')));
+    const reply=secure?sim.webReply:[...sim.packets.values()].find(p=>p.kind==='http-response').payload;
+    const sent=structuredClone(reply.document);
+    file.content.title='Pozdější nadpis';file.content.description='Pozdější text';
+    finish(sim);assert.deepEqual(sim.net.browser.pageDocument,sent);
+    run(sim,secure);assert.deepEqual(sim.net.browser.pageDocument,file.content);
+  }
+});
+
+test('Library HTML escapes stored text and submitted messages without changing their delivered values',()=>{
+  const sim=new Simulation(),file=sim.net.server.files['index.html'];
+  file.content.title='<img src=x onerror=alert(1)>';file.content.description='Knihovna & čtenáři';
+  run(sim,false,{method:'POST',message:'<script>ukázka</script>'});assert.equal(sim.status,'success');
+  const html=responseBody([...sim.packets.values()].find(p=>p.kind==='http-response').payload);
+  assert(!html.includes('<img'));assert(!html.includes('<script>'));
+  assert(html.includes('&lt;img'));assert(html.includes('Knihovna &amp; čtenáři'));
+  assert.equal(sim.net.browser.content,file.content.title);
+  assert.equal(sim.net.browser.receipt,'<script>ukázka</script>');
 });

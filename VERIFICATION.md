@@ -2,6 +2,16 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Stránka uložená na webovém serveru — 17. listopadu 2026, v85
+
+Zrušen editor nadpisu i jeho ukládací akce. Místo něj detail webového serveru ukazuje Uložené soubory, složku knihovna.test a rozbalovací soubor index.html. Otevření zobrazí náhled značky knihovny, nadpisu a úvodního textu bez možnosti úpravy. Vysvětlení cesty server → odpověď → kopie v prohlížeči je ve sbalené Nápovědě.
+
+Obsah souboru je zdroj v modelovém úložišti serveru. Při zpracování požadavku se kopíruje do odpovědi, která nyní obsahuje modelové HTML s Content-Type text/html. Prohlížeč používá přijatou kopii také pro značku a úvodní text, ne živá serverová data. Pozdější změna serverového modelu nepřepíše již připravenou odpověď ani přijatý dokument. Soubor je přítomný před prvním načtením a přežije vypnutí serveru; úložiště je stejně jako celá síť součástí lokální simulace v paměti.
+
+Prošlo všech 254 testů modelu. Čtyři nové testy ověřují přítomnost souboru a zachování po vypnutí, HTTP/HTTPS doručení nezávislé kopie včetně HTML a jeho délky/ochrany, snímek obsahu při přípravě odpovědi a escapování uloženého textu i vzkazu. Stávající testy ověřily také karty/historii, formuláře, cookies, TLS, MITM a ostatní služby.
+
+V prohlížeči ověřeno otevření souboru a shodný obsah v náhledu i notebooku, neexistence editoru, zachování souboru i rozbalení při vypnutí zařízení, selhání nového požadavku při vypnutém serveru a úspěšné načtení po zapnutí. Ověřeno HTTP i HTTPS a doručení vzkazu knihovně, dostupnost nastavení certifikátu se zapnutým TLS. Při 853 × 858 a 320 × 844 px čitelný náhled bez vodorovného přetékání, konzole bez chyb a varování. Ověřena syntaxe všech 26 skriptů, vyvážení CSS bloků a existence 32 místních prostředků. Verze prostředků v85.
+
 ## Odebrání odkazů z webového serveru — 17. listopadu 2026, v84
 
 Z detailu webového serveru odstraněn odkaz Otevřít prohlížeč na notebooku, skupina odkazů na prohlížeče pod cookies a šipka pro otevření spoje Hosting — web. Odstraněny nepoužívané styly skupiny odkazů. Port eth0, název switche, napájení, úprava obsahu a nápověda zůstávají dostupné.

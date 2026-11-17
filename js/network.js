@@ -4,7 +4,7 @@
   const HOME = '192.168.10.0/24', DC = '203.0.113.0/26', IG = '203.0.113.64/26', CLOUD = '203.0.113.128/26', REPLICA = '203.0.113.192/26', FRIEND = '172.16.20.0/24', MOBILE = '198.51.100.0/24';
   const VPN='192.0.2.128/27', CABIN='192.168.30.0/24', SAT_WAN='192.0.2.52/30', HACKER='192.168.40.0/24', PHISH='192.0.2.160/27', CAFE='192.168.50.0/24', MAIL_B='192.0.2.192/27';
   const PARTNERS='192.0.2.224/27';
-  const browserState=()=>({content:null,revision:null,state:'idle',error:'',dnsCache:{},address:'knihovna.test',secure:false,loadedSecure:false,tlsPhase:'idle',certificateVerified:false,receipt:'',visitor:null,greeting:'',cookies:{allowed:true,items:[],lastSent:'',lastReceived:'',sendNote:'Zatím žádný webový požadavek.',receiveNote:'Zatím žádná odpověď s cookie.'}});
+  const browserState=()=>({content:null,pageDocument:null,revision:null,state:'idle',error:'',dnsCache:{},address:'knihovna.test',secure:false,loadedSecure:false,tlsPhase:'idle',certificateVerified:false,receipt:'',visitor:null,greeting:'',cookies:{allowed:true,items:[],lastSent:'',lastReceived:'',sendNote:'Zatím žádný webový požadavek.',receiveNote:'Zatím žádná odpověď s cookie.'}});
   const CHATBOT_REPLY='Ahoj! Tvůj dotaz dorazil na server. Tady jsem připravil tuto odpověď a poslal ji přes síť zpět do tvého zařízení.';
   const MAC = {laptop:'02:00:00:00:10:10', printer:'02:00:00:00:10:20', home:'02:00:00:00:10:01', dc:'02:00:00:00:20:01', dns:'02:00:00:00:20:53', web:'02:00:00:00:20:10',instagram:'02:00:00:00:20:80',friend:'02:00:00:00:30:10','friend-home':'02:00:00:00:30:01'};
   const nodeDefinitions = [
@@ -163,7 +163,12 @@
         return [id,link];
       }));
       this.version=1;
-      this.server={title:'Dnes otevřeno do 16 hodin',revision:1,certificate:{name:'knihovna.test',issuer:'Výuková certifikační autorita',trusted:true,valid:true},lastRequest:null};
+      this.server={
+        files:{'index.html':{name:'index.html',mediaType:'text/html; charset=utf-8',content:{brand:'knihovna na rohu',kicker:'MĚSTSKÁ KNIHOVNA LIPOV',title:'Dnes otevřeno do 16 hodin',description:'Vítejte v knihovně na rohu. Spravujte své výpůjčky nebo nám napište.'}}},
+        get title(){return this.files['index.html'].content.title;},
+        set title(value){this.files['index.html'].content.title=value;},
+        revision:1,certificate:{name:'knihovna.test',issuer:'Výuková certifikační autorita',trusted:true,valid:true},lastRequest:null
+      };
       this.sender={text:'',content:null,sentBytes:0,sentPackets:0,state:'idle'};
       this.instagram={id:0,text:'',content:null,receivedPackets:0,sentBytes:0,sentPackets:0,state:'idle',totalBytes:0,receivedBytes:0,streamBytes:0,readRequested:false,readKnown:false,readNotified:false,error:'',senderDevice:'laptop',recipientDevice:'friend',replyDevice:'laptop',openDevice:null,selfReceipts:true,history:[]};
       this.friend={text:'',content:null,receivedPackets:0,state:'idle',receivedBytes:0,streamBytes:0,read:false,receipts:true,chatOpen:false};

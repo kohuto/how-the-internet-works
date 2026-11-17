@@ -281,7 +281,8 @@
       }
       server.lastRequest=this.privacy.shouldRecord(request)?{...request,secure,client:this.clientId(),sourceIp:packet.src,sourcePort:packet.sport}:null;
       const meta={secure,sourceIp:packet.src,packetId:packet.id};
-      const response={status:200,cacheControl:'no-store',title:server.title,revision:server.revision,receipt:request.method==='POST'?request.message:'',...(this.privacy.shouldRecord(request)?WebCookies.respond(server.cookies,request,meta,this.net.cookieTime):{greeting:'Dobrovolný profil a historie tohoto účtu byly vymazány. Sběr zůstává vypnutý.'})};
+      const file=server.files['index.html'];
+      const response={status:200,cacheControl:'no-store',fileName:file.name,document:structuredClone(file.content),title:file.content.title,revision:server.revision,receipt:request.method==='POST'?request.message:'',...(this.privacy.shouldRecord(request)?WebCookies.respond(server.cookies,request,meta,this.net.cookieTime):{greeting:'Dobrovolný profil a historie tohoto účtu byly vymazány. Sběr zůstává vypnutý.'})};
       this.privacy.observe(request,response,meta);
       response.bodyBytes=encoder.encode(responseBody(response)).length;return response;
     }
@@ -297,7 +298,7 @@
         this.finish(response.privacy.ok?(response.privacy.op==='erase'?'Potvrzení výmazu dorazilo do zařízení':'Přehled osobních údajů dorazil do zařízení'):'Server žádost odmítl',response.privacy.ok?'Uživatel vidí až přijatou odpověď. Skutečný stav je v okně webového serveru.':response.privacy.message,this.clientId());return;
       }
       const b=this.browser();WebCookies.receive(b.cookies,response.setCookie,webAddress(b.address),this.net.cookieTime);
-      Object.assign(b,{pageType:response.pageType||'library',loadedHost:this.webHost(),loadedMessageId:response.messageId||0,submitted:!!response.submitted,visitor:response.visitor,greeting:response.greeting,content:response.title,revision:response.revision,receipt:response.receipt||'',state:'ready',loadedSecure:secure,tlsPhase:'done'});
+      Object.assign(b,{pageType:response.pageType||'library',loadedHost:this.webHost(),loadedMessageId:response.messageId||0,submitted:!!response.submitted,visitor:response.visitor,greeting:response.greeting,content:response.title,pageDocument:response.document?{...structuredClone(response.document),title:response.title}:null,revision:response.revision,receipt:response.receipt||'',state:'ready',loadedSecure:secure,tlsPhase:'done'});
       if(response.pageType==='phishing'){this.finish(response.submitted?'Ukázkové údaje dorazily na podvodný server':'Podvodná stránka dorazila do prohlížeče',response.submitted?`${secure?'Data se dešifrovala na podvodném serveru.':'Data dorazila čitelným HTTP přenosem na podvodný server.'} Útočník si je může načíst ze svého počítače.`:'Otevření stránky v tomto pokusu neodeslalo přihlašovací údaje. Prohlédni skutečnou doménu.',this.clientId());return;}
       this.finish(this.clientId()==='phone'?'Web se zobrazil na telefonu':'Web se zobrazil na notebooku',`${secure?'Prohlížeč dešifroval odpověď. ':''}Doručený obsah verze ${response.revision}${response.receipt?' včetně potvrzení přijatého vzkazu':''}. ${b.cookies.receiveNote}`,this.clientId());
     }

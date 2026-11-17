@@ -90,3 +90,31 @@
 .map-node.node-cafe .node-halo,.map-node.node-cafe-ap .node-halo,.map-node.node-cafe-router .node-halo{fill:#f4eddd;stroke:#c9b38c}.map-node.node-cafe .device-icon,.map-node.node-cafe-ap .device-icon,.map-node.node-cafe-router .device-icon{stroke:#9a7d51}.map-node.node-cafe-attacker .node-halo{fill:#efe2eb;stroke:#c7a6bb}.map-node.node-cafe-attacker .device-icon{stroke:#9b6d89}.map-link.mitm-route .link-line{stroke:#b98ba3;stroke-dasharray:7 6}.mitm-packet-note{padding:14px;border:1px solid #dac3cf;background:#f8eff4;border-radius:10px;font-size:11px;line-height:1.7;color:#987388;margin:15px 0}.mitm-packet-note>strong{display:block}.mitm-packet-note p{margin:7px 0}
 
 .packet.mail-smtp>rect{fill:#f9ead3;stroke:#c09a60}.packet.mail-smtp>text,.packet.mail-smtp .packet-label text{fill:#9a7137}.packet.mail-imap>rect{fill:#e0edf7;stroke:#77a4c2}.packet.mail-imap>text,.packet.mail-imap .packet-label text{fill:#4b7f9f}
+
+/* Files stored on the library web server. */
+.server-storage{margin:24px 0 28px}
+.server-storage .section-label{margin-top:0}
+.server-folder{display:flex;align-items:center;gap:9px;padding:0 0 12px;color:var(--muted);font-size:12px}
+.server-folder svg,.server-file-icon{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round;flex-shrink:0}
+.server-file{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff}
+.server-file>summary{display:flex;align-items:center;gap:12px;padding:17px 16px;cursor:pointer;list-style:none}
+.server-file>summary::-webkit-details-marker{display:none}
+.server-file>summary:hover{background:#f5f7f1}
+.server-file>summary:focus-visible{outline:2px solid #579a7f;outline-offset:-3px;border-radius:10px}
+.server-file-icon{width:30px;height:34px;color:#64816e}
+.server-file-name{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.server-file-name strong{font-size:14px;font-weight:650;overflow-wrap:anywhere}
+.server-file-name small{font-size:11px;color:var(--muted)}
+.server-file-open{font-size:11px;color:#517760}
+.server-file-chevron{font-size:20px;color:#64816e;transition:transform .15s}
+.server-file[open]>summary{border-bottom:1px solid var(--line);background:#f5f7f1}
+.server-file[open] .server-file-open{display:none}
+.server-file[open] .server-file-chevron{transform:rotate(180deg)}
+.server-file-content{padding:16px;background:#f5f7f1}
+.server-file-caption{font-size:9px;letter-spacing:.8px;font-weight:650;color:var(--muted);margin:0 0 12px;overflow-wrap:anywhere}
+.server-library-preview{background:#fffef9;border:1px solid #dce4d6;border-radius:8px;overflow:hidden}
+.server-library-brand{font-size:14px;font-weight:650;margin:0 20px;padding:17px 0;border-bottom:1px solid #dde4d5;color:#294437}
+.server-library-preview .browser-library-home{padding:23px 20px 24px;min-height:0}
+.server-library-preview .library-title{font-size:27px}
+.server-library-preview .browser-library-home>p:last-child{margin-bottom:0}
+@media(max-width:480px){.server-file>summary{padding:14px 12px;gap:9px}.server-file-content{padding:10px}.server-library-brand{margin:0 13px;font-size:12px}.server-library-preview .browser-library-home{padding:20px 13px}.server-library-preview .library-title{font-size:24px}}
