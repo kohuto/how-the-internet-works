@@ -2,6 +2,16 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Zjednodušený náhled paketů, volitelné TTL a TCP — 17. listopadu 2026, v94
+
+Základní náhled nyní obsahuje IP adresy, protokol, dostupnou délku modelového paketu, vlastní přenášená data a rozbalovací MAC adresy rámce. TTL a celá TCP hlavička (porty a SEQ) mají dva samostatné přepínače, výchozí stav je vypnuto. UDP hlavička zůstává dostupná. Obsah je viditelný vždy; původní přepínač Obsah paketů odstraněn také s navazujícím skrýváním v přehledu VPN serveru a MITM. Veřejné části TLS, chráněné záznamy TLS/pošty a vnější VPN obaly zůstávají oddělené od čitelného obsahu. Model a časování přenosu se nemění.
+
+Náhled paketu používá obecný nadpis IP paket. Odstraněny směrové názvy a čísla částí, ID pokusu/paketu, stav/poloha, pořadí a rozsahy bajtů fotky, historie NATu, satelitu, VPN i MITM, vysvětlující karty a navigace do zařízení. Historie a tabulky v samostatných oknech zařízení zůstávají dostupné. Vykreslování odděleno do js/packet-ui.js, odstraněna původní speciální VPN a poštovní nápověda i nepoužívané styly.
+
+Prošlo všech 277 testů ve 23 souborech. Devět nových testů pokrývá všechny čtyři kombinace TTL/TCP bez změny dat/hlaviček, výchozí HTTP požadavek a HTML odpověď, data fotky, chybějící popisky/historie i se všemi podrobnostmi, DNS/UDP, MAC podle média, escapování textu a zachování ochrany TLS/VPN/pošty.
+
+V prohlížeči při 939 × 858 px ověřeny všechny kombinace TTL/TCP, čekání na Použít změny, zahození změny zavřením nastavení a zachování stejného otevřeného paketu. Viditelný GET i přijaté HTML jako text, základní DNS datagram a šifrovaná data TLS. U šestého paketu fotky ověřeny vlastní bajty, délka 1440 B, po zapnutí TCP porty a SEQ 8001, bez původních popisků a historie. Fotka dorazila i po prohlížení a změnách podrobností. Při 320 × 844 px náhled s TTL/TCP a rozbalenými MAC i nastavení bez vodorovného přetékání; zavření detailu obnovilo krokování. Z chaty přes satelit a VPN ověřen vnější UDP obal s chráněnými bajty, následný vnitřní HTTP paket bez historie a úspěšné načtení webu za 129 kroků. Konzole bez chyb a varování. Ověřena syntaxe všech 27 skriptů, vyvážení CSS a existence všech 33 místních prostředků. Verze prostředků v94.
+
 ## Odebrání přehledu Instagramových paketů z mapy — 17. listopadu 2026, v93
 
 Z levého dolního rohu mapy odstraněn fialový přehled typu zprávy, velikosti, počtu odeslaných a přijatých paketů. Odebrán jeho HTML prvek, vykreslování, nepoužívané importy a styly včetně mobilní varianty.
