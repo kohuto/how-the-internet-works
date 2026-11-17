@@ -12,7 +12,7 @@
       ].map(([id,a])=>[id,{...a,id,visits:[],visitorIds:new Set(),collecting:true,erased:false,revision:0,document:{holder:a.profile.name,label:'Ukázkový účetní doklad o čtenářském poplatku',reason:'Modelová zákonná povinnost uchovat účetní doklad po stanovenou dobu.'}}]))};
     }
     owner(device){return owners[device];}
-    validate(p){return !!owners[p.device||'laptop']&&['read','erase'].includes(p.privacyOp)&&globalThis.InternetLab.webAddress(p.address)?.secure&&globalThis.InternetLab.webAddress(p.address)?.server==='web';}
+    validate(p){if(!this.net.featureEnabled('cookies')||!this.net.featureEnabled('tls'))return false;return !!owners[p.device||'laptop']&&['read','erase'].includes(p.privacyOp)&&globalThis.InternetLab.webAddress(p.address)?.secure&&globalThis.InternetLab.webAddress(p.address)?.server==='web';}
     begin(p){
       const c=this.state.clients[p.device||'laptop'];
       if(p.privacyOp==='erase')p.privacyRequestId??=`vymaz-${++this.state.serial}`;

@@ -10,6 +10,7 @@
     {id:'printer',group:'services',label:'Tiskárna',description:'Místní tisk z dokumentu na notebooku.',nodes:['printer']},
     {id:'dns',group:'services',label:'DNS server',description:'Překlad názvů webů a hledání poštovních serverů. Bez rozšíření se tento krok vynechá.',nodes:['dns']},
     {id:'tls',group:'services',label:'TLS / HTTPS',description:'Zabezpečení webu, ověření certifikátu a šifrovaný přenos. Bez rozšíření se používá HTTP.'},
+    {id:'cookies',group:'services',label:'Cookies',description:'Rozpoznání prohlížeče, záznamy návštěv a cookies přihlašovacích relací.'},
     {id:'wifi',group:'services',label:'Wi-Fi v bytě na Lipové',description:'Bezdrátové připojení notebooku a telefonu.',nodes:['ap']},
     {id:'phone',group:'services',label:'Telefon',description:'Telefon s prohlížečem a dalšími zapnutými aplikacemi.',requires:['wifi'],nodes:['phone']},
     {id:'mail',group:'services',label:'Pošta Lipov',description:'Poštovní aplikace a server pro doménu posta.test.',nodes:['mail']},
@@ -23,7 +24,7 @@
     {id:'mitm',group:'services',label:'Útočník v kavárně',description:'Napodobený hotspot a porovnání HTTP a HTTPS.',requires:['cafe'],nodes:['cafe-attacker']},
     {id:'shop',group:'services',label:'E-shop',description:'Ukázkový web obchod.test.',nodes:['shop']},
     {id:'news',group:'services',label:'Zprávy',description:'Ukázkový web zpravy.test.',nodes:['news']},
-    {id:'ads',group:'services',label:'Reklamní partner',description:'Společná reklama dvou webů. Tento pokus používá HTTPS a zabezpečenou cookie.',requires:['shop','news','tls'],nodes:['ads']}
+    {id:'ads',group:'services',label:'Reklamní partner',description:'Společná reklama dvou webů. Tento pokus používá HTTPS a zabezpečenou cookie.',requires:['shop','news','tls','cookies'],nodes:['ads']}
   ];
   const DETAILS=[
     {id:'mac',label:'MAC tabulky',description:'Naučené adresy a porty switchů a přístupových bodů.'},

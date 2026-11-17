@@ -257,9 +257,11 @@
     webHost() {return this.ads.address()?.host||'knihovna.test';}
     webSecure() {return !!this.ads.address()?.secure;}
     prepareWebCookies() {
+      delete this.webRequest.cookie;
+      if(!this.net.featureEnabled('cookies'))return;
       if(this.ads.embedded){this.ads.cookieHeader();return;}
       const b=this.browser(),address=webAddress(b.address),cookie=WebCookies.header(b.cookies,address,this.webRequest.path,this.net.cookieTime);
-      delete this.webRequest.cookie;if(cookie)this.webRequest.cookie=cookie;
+      if(cookie)this.webRequest.cookie=cookie;
     }
     webConnect() {
       const client=this.clientId(),b=this.browser(),target=this.webTarget();
@@ -282,8 +284,9 @@
       server.lastRequest=this.privacy.shouldRecord(request)?{...request,secure,client:this.clientId(),sourceIp:packet.src,sourcePort:packet.sport}:null;
       const meta={secure,sourceIp:packet.src,packetId:packet.id};
       const file=server.files['index.html'];
-      const response={status:200,cacheControl:'no-store',fileName:file.name,document:structuredClone(file.content),title:file.content.title,revision:server.revision,receipt:request.method==='POST'?request.message:'',...(this.privacy.shouldRecord(request)?WebCookies.respond(server.cookies,request,meta,this.net.cookieTime):{greeting:'Dobrovolný profil a historie tohoto účtu byly vymazány. Sběr zůstává vypnutý.'})};
-      this.privacy.observe(request,response,meta);
+      const cookies=this.net.featureEnabled('cookies')?(this.privacy.shouldRecord(request)?WebCookies.respond(server.cookies,request,meta,this.net.cookieTime):{greeting:'Dobrovolný profil a historie tohoto účtu byly vymazány. Sběr zůstává vypnutý.'}):{};
+      const response={status:200,cacheControl:'no-store',fileName:file.name,document:structuredClone(file.content),title:file.content.title,revision:server.revision,receipt:request.method==='POST'?request.message:'',...cookies};
+      if(this.net.featureEnabled('cookies'))this.privacy.observe(request,response,meta);
       response.bodyBytes=encoder.encode(responseBody(response)).length;return response;
     }
     showWeb(response,secure) {
@@ -297,10 +300,10 @@
         this.privacy.receive(this.clientId(),response);Object.assign(this.browser(),{state:'ready',tlsPhase:'done',loadedSecure:secure});
         this.finish(response.privacy.ok?(response.privacy.op==='erase'?'Potvrzení výmazu dorazilo do zařízení':'Přehled osobních údajů dorazil do zařízení'):'Server žádost odmítl',response.privacy.ok?'Uživatel vidí až přijatou odpověď. Skutečný stav je v okně webového serveru.':response.privacy.message,this.clientId());return;
       }
-      const b=this.browser();WebCookies.receive(b.cookies,response.setCookie,webAddress(b.address),this.net.cookieTime);
-      Object.assign(b,{pageType:response.pageType||'library',loadedHost:this.webHost(),loadedMessageId:response.messageId||0,submitted:!!response.submitted,visitor:response.visitor,greeting:response.greeting,content:response.title,pageDocument:response.document?{...structuredClone(response.document),title:response.title}:null,revision:response.revision,receipt:response.receipt||'',state:'ready',loadedSecure:secure,tlsPhase:'done'});
+      const b=this.browser();if(this.net.featureEnabled('cookies'))WebCookies.receive(b.cookies,response.setCookie,webAddress(b.address),this.net.cookieTime);
+      Object.assign(b,{pageType:response.pageType||'library',loadedHost:this.webHost(),loadedMessageId:response.messageId||0,submitted:!!response.submitted,visitor:response.visitor||null,greeting:response.greeting||'',content:response.title,pageDocument:response.document?{...structuredClone(response.document),title:response.title}:null,revision:response.revision,receipt:response.receipt||'',state:'ready',loadedSecure:secure,tlsPhase:'done'});
       if(response.pageType==='phishing'){this.finish(response.submitted?'Ukázkové údaje dorazily na podvodný server':'Podvodná stránka dorazila do prohlížeče',response.submitted?`${secure?'Data se dešifrovala na podvodném serveru.':'Data dorazila čitelným HTTP přenosem na podvodný server.'} Útočník si je může načíst ze svého počítače.`:'Otevření stránky v tomto pokusu neodeslalo přihlašovací údaje. Prohlédni skutečnou doménu.',this.clientId());return;}
-      this.finish(this.clientId()==='phone'?'Web se zobrazil na telefonu':'Web se zobrazil na notebooku',`${secure?'Prohlížeč dešifroval odpověď. ':''}Doručený obsah verze ${response.revision}${response.receipt?' včetně potvrzení přijatého vzkazu':''}. ${b.cookies.receiveNote}`,this.clientId());
+      this.finish(this.clientId()==='phone'?'Web se zobrazil na telefonu':'Web se zobrazil na notebooku',`${secure?'Prohlížeč dešifroval odpověď. ':''}Doručený obsah verze ${response.revision}${response.receipt?' včetně potvrzení přijatého vzkazu':''}.${this.net.featureEnabled('cookies')?' '+b.cookies.receiveNote:''}`,this.clientId());
     }
     webEvent(e) {
       const p=e.packet,client=this.clientId(),b=this.browser(),target=this.webTarget();
@@ -315,7 +318,7 @@
         } else if(e.kind==='web-encrypt-request') {
           b.tlsPhase='request';this.prepareWebCookies();
           this.next([this.originate(this.createPacket('https-request',client,target,{record:this.tls.seal('request',this.webRequest,target)}))]);
-          e.description='Metoda HTTP, cesta, cookies i text formuláře jsou chráněné TLS. IP adresy a TCP porty zůstávají viditelné.';
+          e.description=`Metoda HTTP, cesta${this.net.featureEnabled('cookies')?', cookies':''} i text formuláře jsou chráněné TLS. IP adresy a TCP porty zůstávají viditelné.`;
         } else if(e.kind==='web-decrypt-request') {
           const request=this.tls.open(p.payload.record,target,'request');
           b.tlsPhase='processing';
@@ -605,6 +608,7 @@
           catch(error){return this.failure(error.message,p,p.destination);}
           if(['shop','news'].includes(p.destination))e.description='Hlavní web připravil stránku s reklamním kódem. Následně prohlížeč kontaktuje reklamy.test samostatně.';
           else if(p.destination==='phish-web')e.description='Podvodný server připravil odpověď. Při přijetí formuláře se ukázkové údaje uloží právě zde.';
+          else if(!this.net.featureEnabled('cookies'))e.description='Server načetl uloženou stránku index.html a připravil odpověď. Její kopie nyní putuje do prohlížeče.';
           else e.description=`Server ${server.cookies.last.returning?'rozpoznal prohlížeč podle cookie':'vytvořil nové ID prohlížeče'} ${server.cookies.last.id}. Do odpovědi přidal Set-Cookie a obsah verze ${server.revision}. Změna obsahu po tomto okamžiku už tuto odpověď nezmění.`;
         } else if(p.kind==='http-response') {
           this.showWeb(p.payload,false);

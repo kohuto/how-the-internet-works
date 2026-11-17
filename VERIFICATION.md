@@ -2,6 +2,14 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Cookies jako volitelné rozšíření — 17. listopadu 2026, v86
+
+Přidán samostatný přepínač Cookies, ve výchozí sestavě vypnutý. Bez něj model neposílá Cookie/Set-Cookie, nevytváří návštěvnická ID, záznamy návštěv ani přihlašovací cookie/relace. Vynechá rozpoznávání i doprovodné texty událostí. Přehledy cookies, jejich ovládání a odkazy jsou skryté v prohlížeči i na webovém serveru. Uložený soubor knihovny, načtení i formulář zůstávají funkční. DNS, TLS a Cookies jsou nezávislé volby. Můj účet a Soukromí vyžadují Cookies i TLS; samotné TLS může pracovat bez cookies. Reklamní partner automaticky vyžaduje také Cookies a panel uvádí návaznost. Použití této volby vytváří nový model stejně jako ostatní rozšíření.
+
+Prošlo všech 259 testů modelu. Pět nových testů pokrývá osm kombinací DNS/TLS/Cookies včetně opakovaného GET a POST, chybějících hlaviček/ID a prázdných relací, ignorování případných starších hodnot cookies při vypnutém rozšíření také přes VPN, rozdíl mezi vypnutým rozšířením a zákazem v prohlížeči, dostupnost účtu a Soukromí jen s Cookies+TLS a automatické zapnutí cookies s rozpoznáním reklamního profilu na dvou webech. Stávající testy cookies, autentizace, soukromí i ostatních služeb prošly.
+
+V prohlížeči ověřena výchozí vypnutá volba a nepřítomnost cookies v detailu serveru, menu prohlížeče i výsledných událostech. Knihovna i vzkaz bez cookies dorazily přes HTTP za 34 kroků. Po použití Cookies se objevily přehledy a cookie navstevnik=v1; opakované načtení použilo stejné ID se dvěma návštěvami. Se současným TLS se objevily přihlašovací cookie, Můj účet a Soukromí. Po vypnutí Cookies samotné HTTPS dál načetlo knihovnu za 90 kroků bez přehledů, účtu a Soukromí. Ověřeno čekání na Použít změny a automatická závislost reklamního partnera. Při 853 × 858 a 320 × 844 px dialog nepřetéká vodorovně a volba i použití změn jsou dostupné, konzole bez chyb a varování. Syntaxe všech 26 skriptů a existence 32 místních prostředků ověřeny. Verze prostředků v86.
+
 ## Stránka uložená na webovém serveru — 17. listopadu 2026, v85
 
 Zrušen editor nadpisu i jeho ukládací akce. Místo něj detail webového serveru ukazuje Uložené soubory, složku knihovna.test a rozbalovací soubor index.html. Otevření zobrazí náhled značky knihovny, nadpisu a úvodního textu bez možnosti úpravy. Vysvětlení cesty server → odpověď → kopie v prohlížeči je ve sbalené Nápovědě.

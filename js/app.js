@@ -200,8 +200,8 @@
     } else if(n.id==='web') {
       html+=serverStorage();
       html+=`<dl class="dl">${definition('IP adresa',n.ip)}${definition('Služby',net.featureEnabled('tls')?'HTTP · TCP/80 a HTTPS · TLS nad TCP/443':'HTTP · TCP/80')}${definition('Pravidlo HTTP cache','Cache-Control: no-store')}${definition('MAC adresa',n.mac)}</dl>${portList(n)}`;
-      if(net.featureEnabled('tls')){html+=globalThis.InternetLab.authServer(net,sim);html+=globalThis.InternetLab.privacyServer(net,sim);}
-      html+=cookieServer();
+      if(net.featureEnabled('tls')&&net.featureEnabled('cookies')){html+=globalThis.InternetLab.authServer(net,sim);html+=globalThis.InternetLab.privacyServer(net,sim);}
+      if(net.featureEnabled('cookies'))html+=cookieServer();
       const cert=net.server.certificate,last=net.server.lastRequest;
       if(net.featureEnabled('tls'))html+=`<div class="section-label">HTTPS · CERTIFIKÁT SERVERU</div><div class="note-card"><strong>${esc(cert.name)}</strong>Vydavatel: ${esc(cert.issuer)}<br>${cert.valid&&cert.trusted&&cert.name==='knihovna.test'?'Platný a důvěryhodný pro knihovna.test':'Certifikát neprojde ověřením pro knihovna.test'}</div><label class="field-label" for="web-certificate">MODELOVÝ STAV CERTIFIKÁTU</label><select class="text-input" id="web-certificate" data-web-certificate><option value="valid" ${cert.valid&&cert.trusted&&cert.name==='knihovna.test'?'selected':''}>Platný certifikát</option><option value="expired" ${!cert.valid?'selected':''}>Platnost vypršela</option><option value="wrong-name" ${cert.name!=='knihovna.test'?'selected':''}>Patří jiné doméně</option><option value="untrusted" ${!cert.trusted?'selected':''}>Nedůvěryhodný vydavatel</option></select><p class="hint" data-device-help="Jak zařízení funguje">Prohlížeč certifikát ověří při novém HTTPS spojení. Neplatný certifikát zabrání odeslání formuláře. HTTP certifikát nepoužívá.</p>`;
       html+=`${last?`<div class="section-label">POSLEDNÍ ZPRACOVANÝ POŽADAVEK</div><div class="note-card"><strong>${last.secure?'HTTPS · dešifrováno na serveru':'HTTP · přijato jako čitelný text'}</strong>${esc(net.nodes[last.client].name)} · ${esc(last.method)} ${esc(last.path)}<br>Zdroj viděný webem: ${esc(last.sourceIp)}:${last.sourcePort}</div><div class="payload-preview">${esc(requestText(last))}</div>`:''}`;
@@ -448,7 +448,7 @@
         }
         if(action==='new'){if(!browserNavigation.add(device,busy))return;}
         else if(action==='menu'||action==='security')state.panel=state.panel===action?null:action;
-        else if(action==='cookies')state.panel='cookies';
+        else if(action==='cookies'&&net.featureEnabled('cookies'))state.panel='cookies';
         else if(action==='close-panel')state.panel=null;
         else if(action==='network'){state.networkOpen=!state.networkOpen;state.panel=null;}
       }
@@ -481,7 +481,7 @@
     if(b.dataset.action==='privacy-panel'){ui.privacyOpen[ui.monitorDevice]=!ui.privacyOpen[ui.monitorDevice];render();$('[data-action=privacy-panel]')?.focus({preventScroll:true});return;}
     if(b.dataset.privacyOp){const address='https://knihovna.test';ui[addressKey(ui.monitorDevice)]=address;startAction('web',{address,privacyOp:b.dataset.privacyOp});return;}
     if(b.dataset.action==='cookie-panel'){ui.cookieOpen[ui.monitorDevice]=!ui.cookieOpen[ui.monitorDevice];render();$('[data-action="cookie-panel"]')?.focus({preventScroll:true});return;}
-    if(['cookie-clear','cookie-time'].includes(b.dataset.action)){if(sim.status==='running')return;if(b.dataset.action==='cookie-clear'){globalThis.InternetLab.WebCookies.clear(net.browserFor(ui.monitorDevice).cookies);notify('Cookies byly smazány z tohoto prohlížeče. Záznamy na serveru zůstaly.');}else{net.advanceCookieTime();notify('Modelový čas se posunul o hodinu. Cookies s prošlou platností byly odstraněny.');}render();return;}
+    if(['cookie-clear','cookie-time'].includes(b.dataset.action)){if(!net.featureEnabled('cookies')||sim.status==='running')return;if(b.dataset.action==='cookie-clear'){globalThis.InternetLab.WebCookies.clear(net.browserFor(ui.monitorDevice).cookies);notify('Cookies byly smazány z tohoto prohlížeče. Záznamy na serveru zůstaly.');}else{net.advanceCookieTime();notify('Modelový čas se posunul o hodinu. Cookies s prošlou platností byly odstraněny.');}render();return;}
     if(b.dataset.webProtocol){const address=globalThis.InternetLab.webAddress(browserNavigation.active(ui.monitorDevice).url||ui[addressKey(ui.monitorDevice)]);ui[addressKey(ui.monitorDevice)]=address?.server==='phish-web'?`${b.dataset.webProtocol}://knihovna-podpora.test/overeni${address.messageId?'?zprava='+address.messageId:''}`:`${b.dataset.webProtocol}://${address?.host||'knihovna.test'}${address?.path==='/'?'':address?.path||''}`;startAction('web');return;}
     if(b.dataset.messageType){const key=messageKey(ui.monitorDevice,'messageType');ui[key]=b.dataset.messageType;render();$(`[data-message-type="${ui[key]}"]`).focus({preventScroll:true});return;}
     if(b.hasAttribute('data-group-member')){ui.packetMember=Number(b.dataset.groupMember);$('#device-body').scrollTop=0;render();$('#device-content').focus({preventScroll:true});return;}
@@ -525,8 +525,8 @@
       if(e.target.hasAttribute('data-attack-target')){ui.attackTarget=e.target.value;render();return;}
       if(e.target.hasAttribute('data-ads-allowed')){if(sim.ads.setAllowed(ui.monitorDevice,e.target.checked)){render();$('[data-ads-allowed]')?.focus({preventScroll:true});}return;}
       if(e.target.dataset.privacyHold){if(sim.status==='running')return;sim.privacy.setHold(e.target.dataset.privacyHold,e.target.checked);render();$(`[data-privacy-hold="${e.target.dataset.privacyHold}"]`)?.focus({preventScroll:true});return;}
-      if(e.target.hasAttribute('data-cookie-allowed')){if(sim.status==='running')return;net.browserFor(ui.monitorDevice).cookies.allowed=e.target.checked;render();$('[data-cookie-allowed]')?.focus({preventScroll:true});return;}
-      if(e.target.hasAttribute('data-cookie-secure')){if(sim.status==='running')return;net.server.cookies.secureOnly=e.target.checked;render();$('[data-cookie-secure]')?.focus({preventScroll:true});return;}
+      if(e.target.hasAttribute('data-cookie-allowed')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.browserFor(ui.monitorDevice).cookies.allowed=e.target.checked;render();$('[data-cookie-allowed]')?.focus({preventScroll:true});return;}
+      if(e.target.hasAttribute('data-cookie-secure')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.server.cookies.secureOnly=e.target.checked;render();$('[data-cookie-secure]')?.focus({preventScroll:true});return;}
       if(e.target.dataset.vpn){const id=e.target.dataset.vpn;if(net.setVPN(id,e.target.checked)){sim.connectionChanged(id);if(sim.status!=='running')stop();syncReader();notify(`VPN ${net.vpn.clients[id].enabled?'zapnutá':'vypnutá'} pro ${net.nodes[id].name}.`);if(!resumeMessage())render();$(`#monitor-content [data-vpn="${id}"]`)?.focus({preventScroll:true});}return;}
       if(e.target.hasAttribute('data-web-certificate')){const value=e.target.value;Object.assign(net.server.certificate,{name:value==='wrong-name'?'jiny-web.test':'knihovna.test',valid:value!=='expired',trusted:value!=='untrusted'});render();$('#web-certificate').focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-cloud-center')){const device=ui.monitorDevice,draft=ui.cloud[device];draft.server=e.target.value;draft.permissions={};Object.assign(net.cloud.clients[device],{state:'idle',catalog:[],listed:false});render();$('#monitor-content [data-cloud-center]').focus({preventScroll:true});return;}

@@ -15,7 +15,7 @@ import '../js/browser-navigation.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-const {Network,Simulation,LabSettings,LAB_FEATURES,BrowserNavigation,requestText}=globalThis.InternetLab;
+const {Network,Simulation,LabSettings,LAB_FEATURES,BrowserNavigation,requestText,responseText}=globalThis.InternetLab;
 const network=features=>new Network(new LabSettings({features}));
 function finish(sim,expected='success') {
   const events=[];
@@ -46,7 +46,7 @@ test('The base is a usable web network without optional hosts or DNS transfers',
 });
 test('Dependencies are added transitively and stay enabled until their dependents are removed',()=>{
   let settings=new LabSettings({features:['mobile','instagram','hacker','replica','ads']});
-  for(const id of ['phone','friend','mail','phishing','cloud','shop','news','tls'])assert(settings.has(id),id);
+  for(const id of ['phone','friend','mail','phishing','cloud','shop','news','tls','cookies'])assert(settings.has(id),id);
   assert(!settings.has('wifi'),'Mobile-only phone does not require home Wi-Fi');
   assert.deepEqual(new LabSettings({features:['phone']}).requiredBy('wifi').map(f=>f.id),['phone']);
   settings=settings.toggle('mobile',false);
@@ -218,4 +218,72 @@ test('Secure account and privacy operations cannot be silently sent in plaintext
     assert.equal(sim.start('web',{address:'https://knihovna.test/',...operation}),false);
     assert.equal(sim.packets.size,0);assert.equal(sim.net.server.lastRequest,null);
   }
+});
+
+test('Cookies, DNS and TLS are independent; GET and POST work in all eight combinations',()=>{
+  for(const cookies of [false,true])for(const dns of [false,true])for(const tls of [false,true]){
+    const net=network([...(cookies?['cookies']:[]),...(dns?['dns']:[]),...(tls?['tls']:[])]),sim=new Simulation(net);
+    for(const extra of [{},{},{method:'POST',message:'Vzkaz funguje i bez cookies'}]){
+      assert(sim.start('web',{address:'https://knihovna.test/',...extra}));finish(sim);
+      const reply=tls?sim.webReply:[...sim.packets.values()].find(p=>p.kind==='http-response').payload;
+      assert.equal(net.browser.loadedSecure,tls);assert.equal(net.browser.content,net.server.files['index.html'].content.title);
+      assert.equal(!!reply.setCookie,cookies);assert.equal(!!reply.visitor,cookies);
+      assert.equal(responseText(reply).includes('Set-Cookie:'),cookies);
+      assert.equal([...sim.packets.values()].some(p=>p.kind.startsWith('tls-')),tls);
+      if(!cookies){
+        assert(!requestText(sim.webRequest).includes('Cookie:'));
+        assert(!responseText(reply).includes('Identifikátor:'));
+        assert.equal(net.browser.visitor,null);assert.equal(net.browser.greeting,'');
+        assert(!/cookie|identifikátor/i.test(sim.current.description));
+      }
+    }
+    assert.equal(net.browser.receipt,'Vzkaz funguje i bez cookies');
+    assert.equal(net.browser.cookies.items.length,cookies?1:0);
+    assert.equal(net.server.cookies.visitors.size,cookies?1:0);
+    if(cookies){assert.equal(net.server.cookies.last.returning,true);assert.equal(net.server.cookies.visitors.get('v1').loads,2);assert.equal(net.server.cookies.visitors.get('v1').requests,3);}
+    else{assert.equal(net.server.cookies.serial,0);assert.equal(net.server.cookies.last,null);}
+    assert.equal(net.server.auth.sessions.size,cookies&&tls?5:0);
+    assert.equal(net.visibleNodes().length,dns?11:10,'Cookies add no network nodes');
+  }
+});
+
+test('Disabling the cookie extension omits cookies even if a browser has residual stored values',()=>{
+  const net=network(['tls','vpn']),sim=new Simulation(net);net.setVPN('laptop',true);
+  net.browser.cookies.items.push({name:'navstevnik',value:'v99',domain:'knihovna.test',path:'/',secure:false,expiresAt:3600});
+  net.browser.cookies.session={name:'library_session',value:'a'.repeat(64),domain:'knihovna.test',path:'/',secure:true,expiresAt:3600};
+  sim.start('web',{address:'https://knihovna.test/'});finish(sim);
+  assert(!sim.webRequest.cookie);assert(!sim.webReply.setCookie);
+  assert.equal(net.server.cookies.visitors.size,0);assert.equal(net.server.auth.sessions.size,0);
+  assert.equal(net.browser.visitor,null);assert(!net.browser.cookies.lastSent);assert(!net.browser.cookies.lastReceived);
+});
+
+test('The browser cookie permission remains different from removing the cookie lesson',()=>{
+  const net=network(['cookies']),sim=new Simulation(net);net.browser.cookies.allowed=false;
+  for(let i=0;i<2;i++){sim.start('web',{address:'http://knihovna.test/'});finish(sim);}
+  assert.equal(net.browser.cookies.items.length,0);assert.equal(net.server.cookies.visitors.size,2);
+  assert.equal(net.server.cookies.last.returning,false,'The server still tries to assign an ID when only browser permission is denied');
+});
+
+test('Account and privacy operations require cookies and TLS together',()=>{
+  for(const cookies of [false,true])for(const tls of [false,true]){
+    const net=network([...(cookies?['cookies']:[]),...(tls?['tls']:[])]),sim=new Simulation(net);
+    const available=cookies&&tls;
+    for(const device of ['laptop','phone','friend','cabin','cafe'])assert.equal(!!net.browserFor(device).cookies.session,available);
+    for(const op of [{authOp:'status'},{privacyOp:'read'}]){
+      assert.equal(sim.start('web',{address:'https://knihovna.test/',...op}),available);
+      if(available){finish(sim);assert.equal(sim.webReply.status,200);}
+      else assert.equal(sim.packets.size,0);
+    }
+  }
+});
+
+test('The advertising scenario automatically adds cookies and recognizes its profile across websites',()=>{
+  for(const feature of LAB_FEATURES)assert.equal(new LabSettings({features:[feature.id]}).has('cookies'),['cookies','ads'].includes(feature.id),feature.id);
+  const settings=new LabSettings({features:['ads']});
+  assert.deepEqual(settings.requiredBy('cookies').map(f=>f.id),['ads']);
+  assert(!settings.toggle('ads',false).has('cookies'));
+  const net=new Network(settings),sim=new Simulation(net);
+  for(const address of ['https://obchod.test/','https://zpravy.test/']){sim.start('web',{address});finish(sim);}
+  assert.equal(net.ads.requests,2);assert.equal(net.ads.profiles.size,1);
+  assert.equal(net.ads.profiles.get(net.ads.clients.laptop.cookie.value).events.length,2);
 });

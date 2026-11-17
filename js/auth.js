@@ -21,10 +21,11 @@
       this.sim=sim;this.net=sim.net;this.pending=null;
       this.state=this.net.server.auth={serial:3,accounts:new Map(),sessions:new Map(),clients:{},last:null};
       for(const [username,id,salt,hash] of seeds)this.state.accounts.set(username,{username,id,email:sim.privacy.state.accounts.get(id).profile.email,salt,hash,algorithm:'PBKDF2-HMAC-SHA-256',iterations:ITERATIONS});
+      const signedIn=this.net.featureEnabled('cookies')&&this.net.featureEnabled('tls');
       for(const [device,id] of Object.entries(PRIVACY_OWNERS)){
         const account=[...this.state.accounts.values()].find(a=>a.id===id);
-        this.net.browserFor(device).cookies.session=this.cookie(this.issue(account));
-        this.state.clients[device]={user:this.publicUser(account),state:'ready',error:'',notice:'Ukázkový účet je na začátku přihlášený. Odhlas se a vyzkoušej přihlášení nebo registraci.'};
+        if(signedIn)this.net.browserFor(device).cookies.session=this.cookie(this.issue(account));
+        this.state.clients[device]={user:signedIn?this.publicUser(account):null,state:'ready',error:'',notice:signedIn?'Ukázkový účet je na začátku přihlášený. Odhlas se a vyzkoušej přihlášení nebo registraci.':''};
       }
       sim.privacy.auth=this;
     }
@@ -33,7 +34,7 @@
     cookie(value){return {name:'library_session',value,domain:'knihovna.test',path:'/',secure:true,httpOnly:true,sameSite:'Lax',expiresAt:this.net.cookieTime+3600};}
     token(request){return /(?:^|;\s*)library_session=([a-f0-9]{64})(?:;|$)/.exec(request.cookie||'')?.[1];}
     account(request){const s=this.state.sessions.get(this.token(request));return s&&s.expiresAt>this.net.cookieTime?[...this.state.accounts.values()].find(a=>a.id===s.account):null;}
-    validate(p){const a=webAddress(p.address);return !!this.state.clients[p.device||'laptop']&&a?.secure&&a.server==='web'&&['register','login','status','logout'].includes(p.authOp)&&(!['register','login'].includes(p.authOp)||(typeof p.username==='string'&&/^[a-z0-9_-]{3,24}$/.test(p.username)&&typeof p.password==='string'&&p.password.length>=4&&p.password.length<=80&&(p.authOp!=='register'||/^[^\s@]{1,40}@[^\s@]{1,40}\.test$/.test(p.email||''))));}
+    validate(p){if(!this.net.featureEnabled('cookies')||!this.net.featureEnabled('tls'))return false;const a=webAddress(p.address);return !!this.state.clients[p.device||'laptop']&&a?.secure&&a.server==='web'&&['register','login','status','logout'].includes(p.authOp)&&(!['register','login'].includes(p.authOp)||(typeof p.username==='string'&&/^[a-z0-9_-]{3,24}$/.test(p.username)&&typeof p.password==='string'&&p.password.length>=4&&p.password.length<=80&&(p.authOp!=='register'||/^[^\s@]{1,40}@[^\s@]{1,40}\.test$/.test(p.email||''))));}
     begin(device){Object.assign(this.state.clients[device],{state:'loading',error:'',notice:'Požadavek čeká na doručení přes HTTPS. Heslo zpracuje až server.'});}
     response(status,op,message,account,setCookie){return {status,title:message,auth:{ok:status<400,op,message,user:this.publicUser(account)},...(setCookie?{setCookie}:{}),revision:0};}
     sessionLine(token){return `library_session=${token}; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Lax`;}
