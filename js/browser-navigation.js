@@ -15,7 +15,7 @@
         this.add(device);
       }
     }
-    normalize(value) {return globalThis.InternetLab.webAddress(value)?.url||value.trim();}
+    normalize(value) {return this.net.webAddress(value)?.url||value.trim();}
     state(device) {return this.devices[device];}
     active(device) {const s=this.state(device);return s.tabs.find(t=>t.id===s.active);}
     capture(device) {

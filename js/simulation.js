@@ -57,6 +57,10 @@
     }
     start(type,payload={}) {
       if(this.status==='running')return false;
+      if(type==='web'&&!this.net.featureEnabled('tls')){
+        const address=this.net.webAddress(payload.address||'knihovna.test');
+        if(address)payload={...payload,address:address.url};
+      }
       const feature={print:'printer',message:'instagram',cloud:'cloud',replicate:'replica',chatbot:'chatbot','phish-send':'hacker','phish-results':'hacker'}[type];
       if(!this.net.nodeAvailable(payload.device||'laptop')||feature&&!this.net.featureEnabled(feature))return false;
       if(this.mail.accepts(type)&&!this.net.featureEnabled('mail'))return false;

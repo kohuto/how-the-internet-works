@@ -184,6 +184,10 @@
       this.recomputeRoutes();
     }
     featureEnabled(id) {return this.settings?.has(id)??true;}
+    webAddress(value) {
+      const address=globalThis.InternetLab.webAddress(value);
+      return address&&!this.featureEnabled('tls')?{...address,secure:false,url:address.url.replace(/^https:/,'http:')}:address;
+    }
     detailEnabled(id) {return this.settings?.details[id]??true;}
     appAvailable(app,device) {
       const feature={mail:'mail',print:'printer',message:'instagram',cloud:'cloud',chatbot:'chatbot',attack:'hacker',mitm:'mitm'}[app];

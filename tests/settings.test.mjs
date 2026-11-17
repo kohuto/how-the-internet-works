@@ -11,10 +11,11 @@ import '../js/mitm.js';
 import '../js/mail.js';
 import '../js/ads.js';
 import '../js/simulation.js';
+import '../js/browser-navigation.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-const {Network,Simulation,LabSettings,LAB_FEATURES}=globalThis.InternetLab;
+const {Network,Simulation,LabSettings,LAB_FEATURES,BrowserNavigation,requestText}=globalThis.InternetLab;
 const network=features=>new Network(new LabSettings({features}));
 function finish(sim,expected='success') {
   const events=[];
@@ -32,6 +33,9 @@ test('The base is a usable web network without optional hosts or DNS transfers',
   for(const app of ['print','mail','message','cloud','chatbot'])assert.equal(net.appAvailable(app,'laptop'),false);
   sim.start('web',{address:'https://knihovna.test/'});const events=finish(sim);
   assert.equal(net.browser.content,net.server.title);
+  assert.equal(net.browser.address,'http://knihovna.test/');
+  assert.equal(net.browser.loadedSecure,false);
+  assert.deepEqual([...sim.packets.values()].map(p=>p.kind),['http-request','http-response']);
   assert(!events.some(e=>e.packet?.kind.startsWith('dns-')));
   assert.deepEqual(net.browser.dnsCache,{},'Prepared addresses are not fabricated DNS replies');
   assert.deepEqual(events.find(e=>e.kind==='switch').decision.ports,['p3']);
@@ -42,7 +46,7 @@ test('The base is a usable web network without optional hosts or DNS transfers',
 });
 test('Dependencies are added transitively and stay enabled until their dependents are removed',()=>{
   let settings=new LabSettings({features:['mobile','instagram','hacker','replica','ads']});
-  for(const id of ['phone','friend','mail','phishing','cloud','shop','news'])assert(settings.has(id),id);
+  for(const id of ['phone','friend','mail','phishing','cloud','shop','news','tls'])assert(settings.has(id),id);
   assert(!settings.has('wifi'),'Mobile-only phone does not require home Wi-Fi');
   assert.deepEqual(new LabSettings({features:['phone']}).requiredBy('wifi').map(f=>f.id),['phone']);
   settings=settings.toggle('mobile',false);
@@ -107,7 +111,7 @@ test('Showing details changes no forwarding, data delivery or address translatio
 });
 test('Without DNS, normal domain URLs still deliver HTTP, HTTPS and forms, also through VPN',()=>{
   for(const features of [[],['vpn']])for(const protocol of ['http','https']){
-    const net=network(features),sim=new Simulation(net);
+    const net=network([...features,...(protocol==='https'?['tls']:[])]),sim=new Simulation(net);
     if(features.includes('vpn'))assert(net.setVPN('laptop',true));
     assert(sim.start('web',{address:`${protocol}://knihovna.test/`,method:'POST',message:'Pozdrav knihovně'}));
     assert.notEqual(net.browser.tlsPhase,'dns');
@@ -121,7 +125,7 @@ test('Without DNS, normal domain URLs still deliver HTTP, HTTPS and forms, also 
   }
 });
 test('Enabling DNS restores cold lookups and learned cache; a powered-off DNS server is not bypassed',()=>{
-  const net=network(['dns']),sim=new Simulation(net);
+  const net=network(['dns','tls']),sim=new Simulation(net);
   assert(net.nodeAvailable('dns'));assert.equal(net.visibleLinks().length,11);
   sim.start('web',{address:'https://knihovna.test/'});finish(sim);
   assert([...sim.packets.values()].some(p=>p.kind==='dns-query'&&p.payload.name==='knihovna.test'));
@@ -150,5 +154,68 @@ test('Mail between providers preserves delivery and SMTP relay with or without D
     assert([...sim.packets.values()].some(p=>p.mailMeta?.phase==='relay'));
     assert.equal([...sim.packets.values()].some(p=>p.connection==='mail-dns'),enabled);
     if(!enabled){assert(!events.some(e=>e.kind==='mail-mx'));assert.deepEqual(sim.net.mail.mxCache,{});}
+  }
+});
+test('DNS and TLS are independent steps; the same form is delivered in all four combinations',()=>{
+  const message='Vzkaz knihovně 🙂';
+  for(const dns of [false,true])for(const tls of [false,true]){
+    const net=network([...(dns?['dns']:[]),...(tls?['tls']:[])]),sim=new Simulation(net);
+    assert(sim.start('web',{address:'https://knihovna.test/',method:'POST',message}));finish(sim);
+    const packets=[...sim.packets.values()],kinds=packets.map(p=>p.kind);
+    assert.deepEqual(kinds,[...(dns?['dns-query','dns-response']:[]),...(tls?['tls-client-hello','tls-server-response','tls-finished','https-request','https-response']:['http-request','http-response'])]);
+    assert.equal(net.browser.certificateVerified,tls);assert.equal(net.browser.loadedSecure,tls);
+    assert.equal(net.browser.address,`${tls?'https':'http'}://knihovna.test/`);
+    assert.equal(sim.lastAction.payload.address,net.browser.address);
+    assert.equal(net.browser.receipt,message);assert.equal(net.server.lastRequest.message,message);
+    const request=packets.find(p=>p.kind===(tls?'https-request':'http-request'));
+    assert.equal(request.initialHeader.dport,tls?443:80);
+    if(tls){assert(request.payload.record);assert(!JSON.stringify(request).includes(message));}
+    else assert(requestText(request.payload).includes(message));
+    assert.equal(net.visibleNodes().length,dns?11:10,'TLS adds no map devices');
+  }
+});
+test('Certificate rejection is restored by TLS, while disabled TLS delivers readable HTTP',()=>{
+  for(const change of [{valid:false},{trusted:false},{name:'jiny-web.test'}])for(const tls of [false,true]){
+    const net=network(tls?['tls']:[]),sim=new Simulation(net);Object.assign(net.server.certificate,change);
+    assert(sim.start('web',{address:'https://knihovna.test/',method:'POST',message:'Pokus s certifikátem'}));finish(sim,tls?'failed':'success');
+    assert.equal(net.browser.certificateVerified,false);
+    if(tls){assert.equal(net.server.lastRequest,null);assert(![...sim.packets.values()].some(p=>p.kind==='https-request'));}
+    else assert.equal(net.browser.receipt,'Pokus s certifikátem');
+  }
+});
+test('Browser history and repeat use the effective protocol for all optional websites',()=>{
+  for(const tls of [false,true]){
+    const net=network(['shop','news','phishing',...(tls?['tls']:[])]),sim=new Simulation(net),nav=new BrowserNavigation(net);
+    for(const url of ['https://knihovna.test/','https://obchod.test/?tema=hudba','https://zpravy.test/','https://knihovna-podpora.test/overeni?zprava=1']){
+      assert(sim.start('web',{address:url}));nav.sync(sim);finish(sim);nav.sync(sim);
+      const effective=tls?url:url.replace('https:','http:');
+      assert.equal(nav.active('laptop').url,effective);assert.equal(nav.active('laptop').loadedUrl,effective);
+      assert.equal(net.browser.loadedSecure,tls);
+      assert(sim.repeat());nav.sync(sim);finish(sim);nav.sync(sim);
+      assert.equal(nav.active('laptop').history.at(-1),effective);
+    }
+    assert.equal(nav.active('laptop').history.length,4);
+  }
+});
+test('Only the secure advertising lesson automatically requires web TLS',()=>{
+  for(const feature of LAB_FEATURES)assert.equal(new LabSettings({features:[feature.id]}).has('tls'),['tls','ads'].includes(feature.id),feature.id);
+  assert.deepEqual(new LabSettings({features:['ads']}).requiredBy('tls').map(f=>f.id),['ads']);
+  assert.equal(new LabSettings({features:['ads']}).toggle('ads',false).has('tls'),false);
+});
+test('The cafe HTTP attack works without TLS and gains encrypted web protection when enabled',()=>{
+  for(const tls of [false,true]){
+    const net=network(['mitm',...(tls?['tls']:[])]),sim=new Simulation(net);
+    sim.mitm.configure(true,'http');net.setCafeHotspot('rogue');
+    assert(sim.start('web',{device:'cafe',address:'https://knihovna.test/',method:'POST',message:'Vzkaz od hosta'}));finish(sim);
+    assert.equal(net.browserFor('cafe').receipt,'Vzkaz od hosta');
+    assert.equal(net.browserFor('cafe').content===net.server.title,tls);
+    assert.equal(net.mitm.logs.some(row=>row.before.includes('Vzkaz od hosta')),!tls);
+  }
+});
+test('Secure account and privacy operations cannot be silently sent in plaintext',()=>{
+  for(const operation of [{authOp:'status'},{privacyOp:'read'}]){
+    const sim=new Simulation(network([]));
+    assert.equal(sim.start('web',{address:'https://knihovna.test/',...operation}),false);
+    assert.equal(sim.packets.size,0);assert.equal(sim.net.server.lastRequest,null);
   }
 });

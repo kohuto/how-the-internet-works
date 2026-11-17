@@ -2,6 +2,14 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## TLS jako volitelné rozšíření — 17. listopadu 2026, v83
+
+Přidána samostatná volba TLS / HTTPS, výchozí stav je vypnuto. Základní web i formulář knihovny nyní používají HTTP na TCP/80, bez TLS handshake a certifikátu. Zapnutí přidá výchozí HTTPS odkazy, handshake, ověření certifikátu a chráněné záznamy na TCP/443. DNS zůstává nezávislé. Adresní řádek, historie, opakování i partnerské a podvodné weby používají skutečný protokol pokusu. Webový server a prohlížeč bez TLS nenabízejí certifikát, Secure cookie ani zabezpečené přihlášení/Soukromí; bezpečné operace se neposílají čitelně. Kavárna bez TLS nabízí pozorování a změnu HTTP, s TLS i oba HTTPS pokusy. Reklamní partner automaticky vyžaduje TLS pro Secure cookie a návaznost je uvedena v nastavení. Připravená ochrana pošty a správcovských spojení a samostatný VPN scénář nejsou touto webovou volbou změněny.
+
+Prošlo všech 250 testů modelu. Šest nových testů ověřuje všechny čtyři kombinace DNS/TLS včetně formuláře, portů, druhů paketů a čitelnosti dat; platné/neplatné certifikáty; historii a opakování všech webů; závislost reklamy; MITM s TLS i bez něj; odmítnutí zabezpečených operací přes HTTP. Upraveny starší testy HTTPS pro explicitně zapnuté rozšíření. Bez DNS vznikají dva HTTP pakety, se zapnutým TLS pět paketů handshake a HTTPS; zapnuté DNS přidá dotaz a odpověď. Počet zařízení zapnutí TLS nemění.
+
+V prohlížeči ověřeno načtení knihovny se všemi čtyřmi kombinacemi DNS a TLS. Základní HTTP načtení i odeslání vzkazu bez DNS mají 34 kroků; HTTPS bez DNS má 90 kroků, s DNS 124. Bez TLS chybějí přepínače protokolu a zabezpečené části knihovny; po zapnutí jsou dostupné a spojení je označeno jako šifrované. Změna certifikátu na prošlý způsobila selhání nového HTTPS načtení se zachováním starší stránky. Změny se projeví až po Použít změny, reload obnovuje vypnuté TLS. Ověřeny omezené volby MITM bez TLS a automatická závislost reklamního partnera. Konzole bez chyb a varování, syntaxe všech 26 skriptů a existence 32 místních prostředků ověřeny. Při šířce 320 px má dialog dostupnou volbu TLS i tlačítko Použít změny a nepřetéká vodorovně. Verze prostředků v83.
+
 ## DNS jako volitelné rozšíření — 17. listopadu 2026, v82
 
 DNS server je samostatná volba mezi zařízeními a službami, výchozí sestava jej nemá. Obsahuje nyní 10 zařízení a 10 spojů. Názvy webů a nabízené odkazy zůstávají funkční díky připraveným adresám, bez DNS událostí, paketů a naplňování cache. Po zapnutí DNS se objeví jeho uzel/spoj v hostingu a běžné dotazy i odpovědi A/MX s cache. Výpadek napájení či spoje zapnutého DNS tuto zkratku neaktivuje. Vynechání funguje i pro vložený reklamní požadavek a poštovní MX při předání i opakovaném předání mezi poskytovateli. Změna volby nadále podléhá společnému tlačítku Použít změny.
