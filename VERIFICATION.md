@@ -2,6 +2,14 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Více routerů a spojnice bez křížení — 17. listopadu 2026, v89
+
+Přidáno 17 skutečných směrujících routerů F–V a 17 krátkých propojů. Úplná síť má 78 zařízení a 84 spojů; základ má 12 zařízení a 12 spojů. Napojení poskytovatelů vede z D přes G do E. Odtud pokračují společné severní a jižní větve a kratší odbočky k jednotlivým oblastem. Hosting je dostupný přes V, dolní náhradní větev vede přes F, cloud a pošta mají rozdělenou větev přes R a kavárna přes U. Routery volitelných větví se zobrazují pouze při zapnutí služeb, které je potřebují. Nové úseky mají nezávislé sítě /30 a samostatná rozhraní. Opraveny návratové směry k WAN sítím Matěje, kavárny a doupěte po přesunu jejich přípojek. Pro odstranění místních křížení změněna také poloha domácího AP/tiskárny, BTS Park a mobilního jádra; připojení i jejich funkce zůstávají zachované. Popisek odpojeného propoje D–G leží uprostřed nového krátkého úseku.
+
+Prošlo všech 268 testů ve 22 souborech. Geometrie kontroluje všech 84 spojů současně včetně nevybraných přístupových spojů: žádné křížení, překrývající se úseky ani průchod přes obrys cizího zařízení nebo cizí oblast. Nejdelší úsek má 570 jednotek mapy; každý je kratší než 600. Výřezy obsahují všechna zařízení v základu, úplné síti i každém samostatném rozšíření. Nové modelové testy ověřují nepřekrývající se podsítě a neporušená rozhraní, skutečné předání přes nové routery včetně TTL, dolní náhradní cestu, výpadek V a nezávislý výpadek Instagramové větve. Stávající testy služeb, NAT, VPN, DNS/TLS/Cookies, přenosů souborů, pošty a výpadků prošly. Po konečné úpravě popisku opět prošlo 18 cílených testů topologie, geometrie a ovládání mapy.
+
+V prohlížeči ověřena základní sestava 12/12 a HTTP načtení knihovny za 38 kroků přes V. Samostatný Instagram má 24/25 a doručil text za 65 kroků. V úplné síti otevřeno všech 17 nových routerů s platným názvem a nejméně dvěma dostupnými rozhraními; vypnutí a zapnutí V funguje. Z přímo vykreslených SVG koncových bodů zkontrolováno všech 84 spojů bez křížení a dlouhých úseků. Vizuálně ověřeno při 1400 × 1050 a 853 × 858 px, při 320 × 844 px dostupné přiblížení a detail routeru bez vodorovného přetékání; konzole bez chyb a varování. Syntaxe všech 26 skriptů a existence všech 32 místních prostředků ověřeny. Verze prostředků v89.
+
 ## Rozšířené rozložení městské sítě — 17. listopadu 2026, v88
 
 Routery A–D rozestoupeny ve větší oblasti města Lipov, router E posunut vpravo. Hosting a ostatní volitelné oblasti mají samostatná místa kolem městské sítě. Polohy zařízení, dekorací a hranice výřezů vycházejí ze společného popisu rozložení. Propojení, adresy, směrování ani časování modelu se nemění; animace paketů používají nové koncové body spojů. Celá síť přizpůsobuje výřez právě zapnutým oblastem.

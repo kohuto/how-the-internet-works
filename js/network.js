@@ -7,7 +7,7 @@
   // Shared placement keeps devices, scenery and camera bounds together.
   const MAP_LAYOUT={
     offsets:{dc:[500,-400],instagram:[1170,100],friend:[770,200],mobile:[0,120],cloud:[500,600],replica:[670,480],vpn:[520,700],hacker:[1070,110],phish:[420,-50],'mail-b':[210,620],cafe:[150,250],partners:[510,-230],peer:[630,30]},
-    routers:{edge:[680,550],north:[1030,280],south:[1240,1000],dc:[1450,550]},
+    positions:{edge:[680,550],north:[1030,280],south:[1240,1000],dc:[1450,550],ap:[150,590],printer:[305,355],'bts-park':[550,900],'mobile-core':[780,1100]},
     bounds:{
       home:[40,270,460,430],city:[520,120,1110,1090],peer:[1820,390,320,330],
       cabin:[10,-280,470,565],satellite:[10,-565,1215,700],
@@ -83,6 +83,28 @@
     ['ads','Společný reklamní server','host',2160,-325,'192.0.2.228','02:00:00:00:e0:12','partners'],
     ['cloud-backup','Cloud B · kopie','host',1710,870,'203.0.113.204','02:00:00:00:70:20','replica']
   ];
+  // Real forwarding nodes; their coordinates are absolute and optional branches
+  // appear only while at least one of their downstream lessons is enabled.
+  const backboneRouters=[
+    ['f',960,775,'city',[]],
+    ['g',1700,550,'peer',['friend','instagram','replica','vpn','hacker','phishing','shop','news','ads']],
+    ['h',1950,150,'peer',['instagram','phishing','shop','news','ads']],
+    ['i',1950,-150,'peer',['phishing','shop','news','ads']],
+    ['j',1950,-350,'peer',['shop','news','ads']],
+    ['k',1950,950,'peer',['replica','vpn','hacker']],
+    ['l',1950,1350,'peer',['replica','vpn']],
+    ['m',1950,1690,'peer',['vpn']],
+    ['n',2300,700,'peer',['friend']],
+    ['o',2300,200,'peer',['instagram']],
+    ['p',2300,1000,'peer',['hacker']],
+    ['q',2700,1200,'peer',['hacker']],
+    ['r',1450,1000,'city',['cloud','mail-b']],
+    ['s',1240,1350,'city',['mail-b']],
+    ['t',1100,1680,'city',['mail-b']],
+    ['u',1070,1275,'city',['cafe']],
+    ['v',1450,210,'city',[]]
+  ];
+  for(const [letter,x,y,region,enabledBy] of backboneRouters)nodeDefinitions.push([`transit-${letter}`,`Router ${letter.toUpperCase()}`,'router',x,y,null,null,region,enabledBy]);
   const linkDefinitions = [
     ['cabin-cable','cabin','cabin-switch','eth0','p1','Notebook — switch na chatě',null,{prefix:CABIN,device:'cabin',mode:'cable'}],
     ['cabin-wifi','cabin','cabin-ap','wlan0','wifi1','Notebook — Wi-Fi Chata',null,{prefix:CABIN,medium:'wifi',device:'cabin',mode:'wifi'}],
@@ -98,15 +120,15 @@
     ['uplink','home','edge','wan0','eth0','Přípojka bytu', ['192.0.2.1','192.0.2.2','192.0.2.0/30']],
     ['edge-north','edge','north','eth1','eth0','A — B · horní větev', ['192.0.2.5','192.0.2.6','192.0.2.4/30']],
     ['north-dc','north','dc','eth1','eth0','B — D · horní větev', ['192.0.2.9','192.0.2.10','192.0.2.8/30']],
-    ['edge-south','edge','south','eth2','eth0','A — C · dolní větev', ['192.0.2.13','192.0.2.14','192.0.2.12/30']],
+    ['edge-south','edge','transit-f','eth2','eth0','A — F · dolní větev', ['192.0.2.13','192.0.2.14','192.0.2.12/30']],
     ['south-dc','south','dc','eth1','eth1','C — D · dolní větev', ['192.0.2.17','192.0.2.18','192.0.2.16/30']],
-    ['dc-access','dc','hosting-router','eth2','wan0','Přípojka hostingu',['192.0.2.33','192.0.2.34','192.0.2.32/30']],
+    ['dc-access','transit-v','hosting-router','eth1','wan0','Přípojka hostingu',['192.0.2.33','192.0.2.34','192.0.2.32/30']],
     ['dns-switch','dc-switch','dns','p2','eth0','Hosting — DNS'],
     ['web-switch','dc-switch','web','p3','eth0','Hosting — web'],
     ['chatbot-switch','dc-switch','chatbot','p4','eth0','Hosting — chatbot'],
     ['instagram-switch','ig-switch','instagram','p2','eth0','Instagram — server',null,{prefix:IG}],
-    ['north-peer','north','peer','eth2','eth0','Propojení poskytovatelů', ['192.0.2.21','192.0.2.22','192.0.2.20/30']],
-    ['friend-uplink','peer','friend-home','eth1','wan0','Matějova přípojka', ['192.0.2.25','192.0.2.26','192.0.2.24/30']],
+    ['north-peer','dc','transit-g','eth5','eth0','Propojení poskytovatelů', ['192.0.2.21','192.0.2.22','192.0.2.20/30']],
+    ['friend-uplink','transit-n','friend-home','eth1','wan0','Matějova přípojka', ['192.0.2.25','192.0.2.26','192.0.2.24/30']],
     ['friend-switch-home','friend-home','friend-switch','lan0','p1','Matějův router — switch'],
     ['friend-laptop-switch','friend-switch','friend','p2','eth0','Matějův notebook — switch',null,{device:'friend',mode:'cable'}],
     ['ap-switch','ap','switch','eth0','p4','Wi-Fi Lipová — switch',null,{prefix:HOME}],
@@ -121,37 +143,62 @@
     ['mobile-uplink','mobile-core','south','wan0','eth2','Operátor — internet',['192.0.2.30','192.0.2.29','192.0.2.28/30']],
     ['cloud-switch','cloud-switch','cloud','p2','eth0','Cloud A — server',null,{prefix:CLOUD}],
     ['hosting-lan','hosting-router','dc-switch','lan0','p1','Hosting — switch',null,{prefix:DC}],
-    ['ig-uplink','peer','ig-router','eth2','wan0','Přípojka Instagramu',['192.0.2.37','192.0.2.38','192.0.2.36/30']],
+    ['ig-uplink','transit-o','ig-router','eth1','wan0','Přípojka Instagramu',['192.0.2.37','192.0.2.38','192.0.2.36/30']],
     ['ig-lan','ig-router','ig-switch','lan0','p1','Instagram — switch',null,{prefix:IG}],
-    ['cloud-uplink','dc','cloud-router','eth3','wan0','Přípojka cloudu A',['192.0.2.41','192.0.2.42','192.0.2.40/30']],
+    ['cloud-uplink','transit-r','cloud-router','eth1','wan0','Přípojka cloudu A',['192.0.2.41','192.0.2.42','192.0.2.40/30']],
     ['cloud-lan','cloud-router','cloud-switch','lan0','p1','Cloud A — switch',null,{prefix:CLOUD}],
-    ['replica-uplink','peer','replica-router','eth3','wan0','Přípojka cloudu B',['192.0.2.45','192.0.2.46','192.0.2.44/30']],
+    ['replica-uplink','transit-l','replica-router','eth2','wan0','Přípojka cloudu B',['192.0.2.45','192.0.2.46','192.0.2.44/30']],
     ['replica-lan','replica-router','replica-switch','lan0','p1','Cloud B — switch',null,{prefix:REPLICA}],
     ['replica-server','replica-switch','cloud-backup','p2','eth0','Cloud B — server',null,{prefix:REPLICA}],
-    ['vpn-uplink','peer','vpn-router','eth4','wan0','Přípojka VPN centra',['192.0.2.49','192.0.2.50','192.0.2.48/30']],
+    ['vpn-uplink','transit-m','vpn-router','eth1','wan0','Přípojka VPN centra',['192.0.2.49','192.0.2.50','192.0.2.48/30']],
     ['vpn-lan','vpn-router','vpn-switch','lan0','p1','VPN centrum — switch',null,{prefix:VPN}],
     ['vpn-server','vpn-switch','vpn','p2','eth0','VPN centrum — server',null,{prefix:VPN}],
     ['hacker-cable','hacker','hacker-switch','eth0','p1','Počítač útočníka — switch',null,{prefix:HACKER,device:'hacker',mode:'cable'}],
     ['hacker-lan','hacker-switch','hacker-router','p2','lan0','Switch — router doupěte',null,{prefix:HACKER}],
-    ['hacker-uplink','peer','hacker-router','eth5','wan0','Přípojka hackerského doupěte',['192.0.2.61','192.0.2.62','192.0.2.60/30']],
-    ['phish-uplink','peer','phish-router','eth6','wan0','Přípojka cizího hostingu',['192.0.2.65','192.0.2.66','192.0.2.64/30']],
+    ['hacker-uplink','transit-q','hacker-router','eth1','wan0','Přípojka hackerského doupěte',['192.0.2.61','192.0.2.62','192.0.2.60/30']],
+    ['phish-uplink','transit-i','phish-router','eth2','wan0','Přípojka cizího hostingu',['192.0.2.65','192.0.2.66','192.0.2.64/30']],
     ['phish-lan','phish-router','phish-switch','lan0','p1','Cizí hosting — switch',null,{prefix:PHISH}],
     ['phish-server','phish-switch','phish-web','p2','eth0','Cizí hosting — podvodný web',null,{prefix:PHISH}],
-    ['mail-uplink','dc','mail-router','eth4','wan0','Přípojka pošty Dopis',['192.0.2.73','192.0.2.74','192.0.2.72/30']],
+    ['mail-uplink','transit-t','mail-router','eth1','wan0','Přípojka pošty Dopis',['192.0.2.73','192.0.2.74','192.0.2.72/30']],
     ['mail-lan','mail-router','mail-switch','lan0','p1','Pošta Dopis — switch',null,{prefix:MAIL_B}],
     ['mail-server','mail-switch','mail-dopis','p2','eth0','Pošta Dopis — server',null,{prefix:MAIL_B}],
     ['cafe-wifi','cafe','cafe-ap','wlan0','wifi1','Host — Wi-Fi kavárny',null,{prefix:CAFE,medium:'wifi',device:'cafe',mode:'wifi',hotspot:'trusted'}],
     ['cafe-twin','cafe','cafe-attacker','wlan1','wifi1','Host — napodobená Wi-Fi',null,{prefix:CAFE,medium:'wifi',device:'cafe',mode:'wifi',hotspot:'rogue',attackOnly:true}],
     ['cafe-relay','cafe-attacker','cafe-ap','upstream','wifi2','Útočník — Wi-Fi kavárny',null,{prefix:CAFE,medium:'wifi',attackOnly:true}],
     ['cafe-lan','cafe-ap','cafe-router','eth0','lan0','Wi-Fi — router kavárny',null,{prefix:CAFE}],
-    ['cafe-uplink','cafe-router','south','wan0','eth3','Přípojka kavárny',['192.0.2.69','192.0.2.70','192.0.2.68/30']],
-    ['partners-uplink','peer','partners-router','eth7','wan0','Přípojka partnerů',['192.0.2.77','192.0.2.78','192.0.2.76/30']],
+    ['cafe-uplink','cafe-router','transit-u','wan0','eth1','Přípojka kavárny',['192.0.2.69','192.0.2.70','192.0.2.68/30']],
+    ['partners-uplink','transit-j','partners-router','eth1','wan0','Přípojka partnerů',['192.0.2.77','192.0.2.78','192.0.2.76/30']],
     ['partners-lan','partners-router','partners-switch','lan0','p1','Partneři — switch',null,{prefix:PARTNERS}],
     ['shop-server','partners-switch','shop','p2','eth0','Partneři — e-shop',null,{prefix:PARTNERS}],
     ['news-server','partners-switch','news','p3','eth0','Partneři — zprávy',null,{prefix:PARTNERS}],
     ['ads-server','partners-switch','ads','p4','eth0','Partneři — reklamní server',null,{prefix:PARTNERS}],
     ['mail-switch','dc-switch','mail','p5','eth0','Hosting — poštovní server',null,{prefix:DC}]
   ];
+  // Each short backbone segment has its own prepared /30 network, separate
+  // from the existing service LANs and access WANs.
+  const backboneLinks=[
+    ['f-c','transit-f','south','eth1','eth0'],
+    ['g-e','transit-g','peer','eth1','eth0'],
+    ['e-h','peer','transit-h','eth1','eth0'],
+    ['h-i','transit-h','transit-i','eth1','eth0'],
+    ['i-j','transit-i','transit-j','eth1','eth0'],
+    ['e-k','peer','transit-k','eth2','eth0'],
+    ['k-l','transit-k','transit-l','eth1','eth0'],
+    ['l-m','transit-l','transit-m','eth1','eth0'],
+    ['e-n','peer','transit-n','eth3','eth0'],
+    ['h-o','transit-h','transit-o','eth2','eth0'],
+    ['k-p','transit-k','transit-p','eth2','eth0'],
+    ['p-q','transit-p','transit-q','eth1','eth0'],
+    ['d-r','dc','transit-r','eth3','eth0'],
+    ['r-s','transit-r','transit-s','eth2','eth0'],
+    ['s-t','transit-s','transit-t','eth1','eth0'],
+    ['c-u','south','transit-u','eth3','eth0'],
+    ['d-v','dc','transit-v','eth2','eth0']
+  ];
+  const backboneLetter=id=>({peer:'E',dc:'D',south:'C'}[id]||id.slice(-1).toUpperCase());
+  for(const [index,[id,a,b,pa,pb]] of backboneLinks.entries()){
+    linkDefinitions.push([`backbone-${id}`,a,b,pa,pb,`${backboneLetter(a)} — ${backboneLetter(b)}`,[`198.18.0.${index*4+1}`,`198.18.0.${index*4+2}`,`198.18.0.${index*4}/30`]]);
+  }
   const ipv4 = ip => ip.split('.').reduce((n,b)=>(n*256 + Number(b))>>>0,0);
   const contains = (prefix,ip) => {
     const [net,bits] = prefix.split('/'); const shift = 32-Number(bits);
@@ -162,10 +209,10 @@
       // A bare model retains the complete topology for standalone experiments.
       // The application supplies its explicit, session-only starting selection.
       this.settings=settings;
-      this.nodes = Object.fromEntries(nodeDefinitions.map(([id,name,type,x,y,ip,mac,region])=>[id,{id,name,type,x,y,ip,mac,region,on:true,interfaces:{},macTable:{},lastDecision:null}]));
+      this.nodes = Object.fromEntries(nodeDefinitions.map(([id,name,type,x,y,ip,mac,region,enabledBy])=>[id,{id,name,type,x,y,ip,mac,region,enabledBy,on:true,interfaces:{},macTable:{},lastDecision:null}]));
       for(const n of Object.values(this.nodes)){
-        const offset=MAP_LAYOUT.offsets[n.region]||[0,0];n.x+=offset[0];n.y+=offset[1];
-        if(MAP_LAYOUT.routers[n.id])[n.x,n.y]=MAP_LAYOUT.routers[n.id];
+        const offset=n.enabledBy?[0,0]:MAP_LAYOUT.offsets[n.region]||[0,0];n.x+=offset[0];n.y+=offset[1];
+        if(MAP_LAYOUT.positions[n.id])[n.x,n.y]=MAP_LAYOUT.positions[n.id];
       }
       this.satellite={clearView:true};this.mitm={active:false,mode:'observe',logs:[],serial:0};
       this.access={cafe:{mode:'wifi',hotspot:'trusted'},hacker:{mode:'cable'},cabin:{mode:'wifi'},laptop:{mode:'cable'},friend:{mode:'cable'},phone:{mode:'cellular',tower:'bts-lipova'}};
@@ -267,8 +314,8 @@
       return null;
     }
     recomputeRoutes() {
-      const domains=[{prefix:PARTNERS,router:'partners-router',link:'partners-lan'},{prefix:MAIL_B,router:'mail-router',link:'mail-lan'},{prefix:CAFE,router:'cafe-router',link:'cafe-lan',private:true},{prefix:'192.0.2.68/30',router:'south',link:'cafe-uplink'},{prefix:PHISH,router:'phish-router',link:'phish-lan'},{prefix:HACKER,router:'hacker-router',link:'hacker-lan',private:true},{prefix:'192.0.2.60/30',router:'peer',link:'hacker-uplink'},{prefix:CABIN,router:'cabin-router',link:'cabin-lan',private:true},{prefix:SAT_WAN,router:'sat-gateway',link:'sat-downlink'},{prefix:HOME,router:'home',link:'switch-home',private:true},{prefix:DC,router:'hosting-router',link:'hosting-lan'},{prefix:IG,router:'ig-router',link:'ig-lan'},{prefix:CLOUD,router:'cloud-router',link:'cloud-lan'},{prefix:REPLICA,router:'replica-router',link:'replica-lan'},{prefix:FRIEND,router:'friend-home',link:'friend-switch-home',private:true},{prefix:VPN,router:'vpn-router',link:'vpn-lan'},
-        {prefix:'192.0.2.0/30',router:'edge',link:'uplink'},{prefix:'192.0.2.24/30',router:'peer',link:'friend-uplink'}];
+      const domains=[{prefix:PARTNERS,router:'partners-router',link:'partners-lan'},{prefix:MAIL_B,router:'mail-router',link:'mail-lan'},{prefix:CAFE,router:'cafe-router',link:'cafe-lan',private:true},{prefix:'192.0.2.68/30',router:this.links['cafe-uplink'].b,link:'cafe-uplink'},{prefix:PHISH,router:'phish-router',link:'phish-lan'},{prefix:HACKER,router:'hacker-router',link:'hacker-lan',private:true},{prefix:'192.0.2.60/30',router:this.links['hacker-uplink'].a,link:'hacker-uplink'},{prefix:CABIN,router:'cabin-router',link:'cabin-lan',private:true},{prefix:SAT_WAN,router:'sat-gateway',link:'sat-downlink'},{prefix:HOME,router:'home',link:'switch-home',private:true},{prefix:DC,router:'hosting-router',link:'hosting-lan'},{prefix:IG,router:'ig-router',link:'ig-lan'},{prefix:CLOUD,router:'cloud-router',link:'cloud-lan'},{prefix:REPLICA,router:'replica-router',link:'replica-lan'},{prefix:FRIEND,router:'friend-home',link:'friend-switch-home',private:true},{prefix:VPN,router:'vpn-router',link:'vpn-lan'},
+        {prefix:'192.0.2.0/30',router:'edge',link:'uplink'},{prefix:'192.0.2.24/30',router:this.links['friend-uplink'].a,link:'friend-uplink'}];
       if(this.access.phone.mode==='cellular')domains.push({prefix:MOBILE,router:'mobile-core',link:`${this.access.phone.tower}-core`});
       for(const n of Object.values(this.nodes).filter(n=>n.type==='router')) {
         n.routes=[]; if(!n.on)continue;

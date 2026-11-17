@@ -52,6 +52,7 @@
     }
     sameNetwork(other) {return FEATURES.every(f=>this.has(f.id)===other.has(f.id));}
     nodeEnabled(node) {
+      if(node.enabledBy)return !node.enabledBy.length||node.enabledBy.some(id=>this.has(id));
       if(node.id==='peer')return ['friend','instagram','replica','vpn','hacker','phishing','shop','news','ads'].some(id=>this.has(id));
       if(['partners-router','partners-switch'].includes(node.id))return ['shop','news','ads'].some(id=>this.has(id));
       const feature=FEATURES.find(f=>f.nodes?.includes(node.id)||f.regions?.includes(node.region));
