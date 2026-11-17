@@ -73,7 +73,7 @@ test('Read access downloads exact UTF-8 bytes over the second household and cann
   const events=finish(sim),copy=sim.net.cloud.local.friend.at(-1);
   assert.equal(copy.content,file.content);assert.equal(copy.cloudId,file.id);assert.equal(copy.cloudVersion,1);
   assert(events.some(e=>e.kind==='hop'&&e.link==='friend-uplink'));
-  assert(events.some(e=>e.kind==='hop'&&e.link==='north-peer'));
+  assert(events.some(e=>e.kind==='hop'&&e.link==='backbone-r-k'));
   const content=file.content;
   run(sim,'friend',{op:'upload',fileId:file.id,version:1,name:'Změna.txt',content:'Pokus o přepis'},copy.id);
   assert.match(sim.net.cloud.clients.friend.message,/403/);assert.equal(file.content,content);

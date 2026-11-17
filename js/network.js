@@ -91,24 +91,32 @@
   ];
   // Real forwarding nodes; their coordinates are absolute and optional branches
   // appear only while at least one of their downstream lessons is enabled.
+  const peerFeatures=['friend','instagram','replica','vpn','hacker','phishing','shop','news','ads'];
   const backboneRouters=[
     ['f',960,775,'city',[]],
-    ['g',1700,550,'peer',['friend','instagram','replica','vpn','hacker','phishing','shop','news','ads']],
-    ['h',1950,150,'peer',['instagram','phishing','shop','news','ads']],
-    ['i',1950,-150,'peer',['phishing','shop','news','ads']],
-    ['j',1950,-350,'peer',['shop','news','ads']],
-    ['k',1950,950,'peer',['replica','vpn','hacker']],
-    ['l',1950,1350,'peer',['replica','vpn']],
-    ['m',1950,1690,'peer',['vpn']],
-    ['n',2300,700,'peer',['friend']],
-    ['o',2300,200,'peer',['instagram']],
-    ['p',2300,1000,'peer',['hacker']],
+    ['g',1700,550,'peer',peerFeatures],
+    ['h',2040,150,'peer',peerFeatures],
+    ['i',2040,-150,'peer',['phishing','shop','news','ads']],
+    ['j',2040,-350,'peer',['phishing','shop','news','ads']],
+    ['k',2000,950,'peer',peerFeatures],
+    ['l',2000,1350,'peer',['replica','vpn']],
+    ['m',2000,1690,'peer',['replica','vpn']],
+    ['n',2300,700,'peer',peerFeatures],
+    ['o',2300,200,'peer',peerFeatures],
+    ['p',2300,1000,'peer',peerFeatures],
     ['q',2700,1200,'peer',['hacker']],
-    ['r',1450,1000,'city',['cloud','mail-b']],
-    ['s',1240,1350,'city',['mail-b']],
+    ['r',1450,1000,'city',['cloud','mail-b','cafe','replica','vpn']],
+    ['s',1240,1350,'city',['mail-b','cafe']],
     ['t',1100,1680,'city',['mail-b']],
-    ['u',1070,1275,'city',['cafe']],
-    ['v',1450,210,'city',[]]
+    ['u',1070,1275,'city',['cafe','mail-b']],
+    ['v',1450,210,'city',[]],
+    ['w',2300,450,'peer',peerFeatures],
+    ['x',1740,260,'peer',peerFeatures],
+    ['y',1910,200,'peer',peerFeatures],
+    ['z',1910,-250,'peer',['phishing','shop','news','ads']],
+    ['aa',2500,1010,'peer',['hacker']],
+    ['ab',1910,1150,'peer',['replica','vpn']],
+    ['ac',1910,1500,'peer',['replica','vpn']]
   ];
   for(const [letter,x,y,region,enabledBy] of backboneRouters)nodeDefinitions.push([`transit-${letter}`,`Router ${letter.toUpperCase()}`,'router',x,y,null,null,region,enabledBy]);
   const linkDefinitions = [
@@ -199,9 +207,27 @@
     ['r-s','transit-r','transit-s','eth2','eth0'],
     ['s-t','transit-s','transit-t','eth1','eth0'],
     ['c-u','south','transit-u','eth3','eth0'],
-    ['d-v','dc','transit-v','eth2','eth0']
+    ['d-v','dc','transit-v','eth2','eth0'],
+    ['b-v','north','transit-v','eth2','eth2'],
+    ['v-x','transit-v','transit-x','eth3','eth0'],
+    ['x-y','transit-x','transit-y','eth1','eth0'],
+    ['y-h','transit-y','transit-h','eth1','eth3'],
+    ['o-w','transit-o','transit-w','eth2','eth0'],
+    ['w-n','transit-w','transit-n','eth1','eth2'],
+    ['n-p','transit-n','transit-p','eth3','eth2'],
+    ['n-aa','transit-n','transit-aa','eth4','eth0'],
+    ['aa-q','transit-aa','transit-q','eth1','eth2'],
+    ['y-z','transit-y','transit-z','eth2','eth0'],
+    ['z-j','transit-z','transit-j','eth1','eth2'],
+    ['c-r','south','transit-r','eth4','eth3'],
+    ['u-s','transit-u','transit-s','eth2','eth2'],
+    ['u-t','transit-u','transit-t','eth3','eth2'],
+    ['r-k','transit-r','transit-k','eth4','eth3'],
+    ['r-ab','transit-r','transit-ab','eth5','eth0'],
+    ['ab-ac','transit-ab','transit-ac','eth1','eth0'],
+    ['ac-m','transit-ac','transit-m','eth1','eth2']
   ];
-  const backboneLetter=id=>({peer:'E',dc:'D',south:'C'}[id]||id.slice(-1).toUpperCase());
+  const backboneLetter=id=>({edge:'A',north:'B',south:'C',dc:'D',peer:'E'}[id]||id.replace(/^transit-/,'').toUpperCase());
   for(const [index,[id,a,b,pa,pb]] of backboneLinks.entries()){
     linkDefinitions.push([`backbone-${id}`,a,b,pa,pb,`${backboneLetter(a)} — ${backboneLetter(b)}`,[`198.18.0.${index*4+1}`,`198.18.0.${index*4+2}`,`198.18.0.${index*4}/30`]]);
   }

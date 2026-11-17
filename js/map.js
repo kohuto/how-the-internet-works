@@ -19,8 +19,8 @@
   icons.satellite='<rect x="-12" y="-18" width="24" height="36" rx="4"/><path d="M-15-13h-25v26h25m30-26h25v26H15M-31-13v26m62-26v26M0-18v-10m-5-3h10M0 18v13m-8-3q8 9 16 0"/>';
   icons.friend=icons.laptop;icons.instagram=icons.server;
   const {MAP_LAYOUT}=globalThis.InternetLab;
-  const bounds=regions=>{
-    const boxes=regions.map(id=>MAP_LAYOUT.bounds[id]),x=Math.min(...boxes.map(b=>b[0])),y=Math.min(...boxes.map(b=>b[1]));
+  const bounds=(regions,nodes=[])=>{
+    const boxes=[...regions.map(id=>MAP_LAYOUT.bounds[id]),...nodes.map(n=>[n.x-65,n.y-55,130,125])],x=Math.min(...boxes.map(b=>b[0])),y=Math.min(...boxes.map(b=>b[1]));
     return [x,y,Math.max(...boxes.map(b=>b[0]+b[2]))-x,Math.max(...boxes.map(b=>b[1]+b[3]))-y];
   };
   const presets={home:[35,270,465,440],city:[480,100,1720,1140],all:bounds(Object.keys(MAP_LAYOUT.bounds)),ads:bounds(['partners']),mail:bounds(['dc','mail-b']),dc:bounds(['dc']),friend:bounds(['friend']),mobile:bounds(['home','mobile']),cafe:bounds(['cafe']),vpn:bounds(['vpn']),hacker:bounds(['hacker']),satellite:bounds(['cabin','satellite'])};
@@ -163,7 +163,7 @@
     setScene(scene) {this.scene=scene;this.svg.dataset.scene=scene;this.box=scene==='all'?this.networkBounds():[...presets[scene]];this.setBox();}
     networkBounds() {
       if(!this.net.settings)return [...presets.all];
-      return bounds([...new Set(this.net.visibleNodes().map(n=>n.region))]);
+      const nodes=this.net.visibleNodes();return bounds([...new Set(nodes.map(n=>n.region))],nodes);
     }
     zoom(factor,origin,destination=origin) {
       if(!Number.isFinite(factor)||factor<=0)return;

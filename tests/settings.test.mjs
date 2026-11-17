@@ -26,7 +26,7 @@ function finish(sim,expected='success') {
 test('The base is a usable web network without optional hosts or DNS transfers',()=>{
   const net=network([]),sim=new Simulation(net);
   assert.deepEqual(net.visibleNodes().map(n=>n.id).sort(),['laptop','switch','home','edge','north','south','dc','dc-switch','web','hosting-web-2','hosting-web-3','hosting-router','transit-f','transit-v'].sort());
-  assert.equal(net.visibleLinks().length,14);
+  assert.equal(net.visibleLinks().length,15);
   assert.deepEqual(net.dnsRecords,{'knihovna.test':'203.0.113.10'});
   assert.deepEqual(net.mailMXRecords,{});
   assert.equal(net.appAvailable('web','laptop'),true);
@@ -71,7 +71,7 @@ test('Every optional area can stand alone with its dependencies; all restores th
     }
   }
   const net=new Network(LabSettings.full());
-  assert.equal(net.visibleNodes().length,80);assert.equal(net.visibleLinks().length,86);
+  assert.equal(net.visibleNodes().length,87);assert.equal(net.visibleLinks().length,104);
 });
 test('Phone Wi-Fi and mobile access only offer enabled connections',()=>{
   const wifi=network(['phone']);
@@ -126,7 +126,7 @@ test('Without DNS, normal domain URLs still deliver HTTP, HTTPS and forms, also 
 });
 test('Enabling DNS restores cold lookups and learned cache; a powered-off DNS server is not bypassed',()=>{
   const net=network(['dns','tls']),sim=new Simulation(net);
-  assert(net.nodeAvailable('dns'));assert.equal(net.visibleLinks().length,15);
+  assert(net.nodeAvailable('dns'));assert.equal(net.visibleLinks().length,16);
   sim.start('web',{address:'https://knihovna.test/'});finish(sim);
   assert([...sim.packets.values()].some(p=>p.kind==='dns-query'&&p.payload.name==='knihovna.test'));
   assert.equal(net.browser.dnsCache['knihovna.test'],net.nodes.web.ip);

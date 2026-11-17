@@ -14,7 +14,7 @@ Při každém novém otevření se vytvoří výchozí model. Obsah ani zásahy 
 
 ## Nastavení sestavy a podrobností
 
-Ozubené kolo nad mapou je dostupné vždy, také při otevřeném monitoru nebo detailu zařízení. Po každém otevření či obnovení stránky se začne základní sestavou: notebook, domácí switch a router v bytě na Lipové, město Lipov a datové centrum hostingu se třemi servery zákazníků. Základ obsahuje 14 zařízení a 14 spojů; web se otevře přes HTTP bez kroků DNS a TLS a bez cookies. Ostatní oblasti, zařízení a služby se přidávají jednotlivě v nastavení; nejde o učitelský či žákovský režim.
+Ozubené kolo nad mapou je dostupné vždy, také při otevřeném monitoru nebo detailu zařízení. Po každém otevření či obnovení stránky se začne základní sestavou: notebook, domácí switch a router v bytě na Lipové, město Lipov a datové centrum hostingu se třemi servery zákazníků. Základ obsahuje 14 zařízení a 15 spojů; web se otevře přes HTTP bez kroků DNS a TLS a bez cookies. Ostatní oblasti, zařízení a služby se přidávají jednotlivě v nastavení; nejde o učitelský či žákovský režim.
 
 - **Části sítě:** Matějův byt, chata se satelitem, mobilní síť s BTS, kavárna a hackerské doupě.
 - **Zařízení a služby:** tiskárna, DNS server, TLS / HTTPS, cookies, domácí Wi-Fi, telefon, Pošta Lipov, Pošta Dopis, Instagram, cloud, záložní cloud, VPN, chatbot, podvodný web, útočník v kavárně, e-shop, zprávy a reklamní partner.
@@ -97,7 +97,7 @@ Horní navigace nabízí pouze **Byt**, **Město** a **Celá síť**. Další ob
 - **Text, obrázek a video:** v Instagramu vyberte typ obsahu. Text se počítá podle skutečných UTF-8 bajtů rozepsané zprávy (výchozí 52 B = 1 datový paket). Ukázkový obrázek má modelově 12 kB = 9 paketů, video 48 kB = 35 paketů. Všechny tři varianty používají nejvýše 1 400 B dat na paket. Počet určuje velikost, nikoli přípona souboru. Menší modelové soubory udržují délku pokusu zvládnutelnou; náhledy slouží k ilustraci obsahu. Každý paket má vlastní značku a číslo, pohybuje se samostatně a lze jej otevřít přímo v mapě. Více paketů současně postupuje různými částmi sítě. U příjemce se obsah zobrazí až po úplném složení; doručené ukázkové video má přehrávač.
 - **Instagram:** na notebooku nebo telefonu odešlete zprávu Matějovi. První spojení doručí data serveru; teprve po přijetí celé zprávy vzniknou nové pakety pro příjemce. Po dokončení otevřete Matějův notebook a Instagram. Stejnými volbami Text, Obrázek a Video odešlete odpověď. Ta skutečně projde z Matějovy domácnosti přes server do původního zařízení; v obou chatech zůstává historie. Vypněte zařízení příjemce: obsah počká na Instagramu a po připojení se připraví doručení. Přečtení se potvrzuje samostatnými pakety opačným směrem; Matějovo potvrzování lze vypnout na jeho ploše. Během probíhajícího přenosu a při čekajícím doručení nelze odeslat další zprávu.
 - **NAT a sdílená veřejná adresa:** načtěte web nebo odešlete zprávu a krokujte až k domácímu routeru. Jeho okno ukazuje tabulku NAT/PAT: soukromou IP a port zařízení, veřejnou IP a přeložený port, protějšek a počty paketů v obou směrech. Detail paketu ukáže hlavičku před a po překladu. Notebook a telefon na stejné Wi-Fi sdílejí veřejnou adresu, ale dostanou odlišné překlady. Prohlédnout NAT routeru lze také z aplikace Připojení. Zkuste tabulku vymazat po odeslání webového požadavku: vracející se odpověď už nelze přiřadit. Nový pokus vytvoří nový záznam. Místní tisk NAT nepoužívá.
-- **Náhradní cesta:** v celkové mapě načtěte web, odpojte používaný spoj horní větve A–B–D a zopakujte načtení. Přenos projde dolní větví A–F–C–D. Odpojte i tu: přenos selže. Přípojka hostingu odpojí jen web a DNS; další centra mají vlastní přípojky.
+- **Náhradní cesty v páteři:** síť obsahuje propojené okruhy a sedm nových routerů W–AC. Přerušte E–N: zpráva Matějovi najde cestu přes O–W–N. Vypněte Router E: přenos může použít horní cestu přes V–X–Y–H. V základním webovém pokusu odpojte A–B a přenos opakujte; použije dolní větev přes F a C. Odpojení také A–F izoluje byt a přenos selže. Při jednotlivém výpadku kteréhokoli páteřního spoje nebo routeru zůstávají ostatní páteřní routery propojené; přípojky domácností, datových center a samotné koncové služby se zálohují samostatně a v modelu mají nadále jediný přístup. Přerušený pokus je potřeba opakovat; automatické TCP opakování ztracených dat model nepřidává.
 
 Akce začne **pozastavená**. Přehrát zapne animaci, Pauza zastaví všechny pohybující se pakety. Krok posune společný časový krok sítě: na různých spojích může současně proběhnout více událostí. Části zprávy odcházejí s odstupem a další vyrazí ještě před doručením předchozí. Čísla na paketech pomáhají sledovat jednotlivé části. Pakety projíždějí přes středy zařízení; při rozhodování zůstávají na uzlu a další úsek začíná na stejném místě. Trasa se nezkracuje před kolečkem a paket neodskočí nad zařízení. Přehrávání používá stálé tempo; interval animace není měřením rychlosti sítě. Opakovat stejnou akci lze i v průběhu pokusu: ukončí aktuální přenos, připraví znovu stejný obsah a zachová zapojení, napájení, naučené MAC adresy, DNS cache, tabulky NAT i uložený obsah serveru. Pokud už zprávu převzal Instagram a čeká její doručení, opakování obnoví druhou fázi z uchovaného textu. Úplný výchozí stav vrátíte novým načtením aplikace v prohlížeči.
 
@@ -194,12 +194,30 @@ Také všechny spoje (kabely, Wi-Fi, mobilní rádio, přípojky BTS a propojen�
 | Router S eth1 — Router T eth0 | 198.18.0.56/30 | 198.18.0.57 | 198.18.0.58 |
 | Router C eth3 — Router U eth0 | 198.18.0.60/30 | 198.18.0.61 | 198.18.0.62 |
 | Router D eth2 — Router V eth0 | 198.18.0.64/30 | 198.18.0.65 | 198.18.0.66 |
+| Router B eth2 — Router V eth2 | 198.18.0.68/30 | 198.18.0.69 | 198.18.0.70 |
+| Router V eth3 — Router X eth0 | 198.18.0.72/30 | 198.18.0.73 | 198.18.0.74 |
+| Router X eth1 — Router Y eth0 | 198.18.0.76/30 | 198.18.0.77 | 198.18.0.78 |
+| Router Y eth1 — Router H eth3 | 198.18.0.80/30 | 198.18.0.81 | 198.18.0.82 |
+| Router O eth2 — Router W eth0 | 198.18.0.84/30 | 198.18.0.85 | 198.18.0.86 |
+| Router W eth1 — Router N eth2 | 198.18.0.88/30 | 198.18.0.89 | 198.18.0.90 |
+| Router N eth3 — Router P eth2 | 198.18.0.92/30 | 198.18.0.93 | 198.18.0.94 |
+| Router N eth4 — Router AA eth0 | 198.18.0.96/30 | 198.18.0.97 | 198.18.0.98 |
+| Router AA eth1 — Router Q eth2 | 198.18.0.100/30 | 198.18.0.101 | 198.18.0.102 |
+| Router Y eth2 — Router Z eth0 | 198.18.0.104/30 | 198.18.0.105 | 198.18.0.106 |
+| Router Z eth1 — Router J eth2 | 198.18.0.108/30 | 198.18.0.109 | 198.18.0.110 |
+| Router C eth4 — Router R eth3 | 198.18.0.112/30 | 198.18.0.113 | 198.18.0.114 |
+| Router U eth2 — Router S eth2 | 198.18.0.116/30 | 198.18.0.117 | 198.18.0.118 |
+| Router U eth3 — Router T eth2 | 198.18.0.120/30 | 198.18.0.121 | 198.18.0.122 |
+| Router R eth4 — Router K eth3 | 198.18.0.124/30 | 198.18.0.125 | 198.18.0.126 |
+| Router R eth5 — Router AB eth0 | 198.18.0.128/30 | 198.18.0.129 | 198.18.0.130 |
+| Router AB eth1 — Router AC eth0 | 198.18.0.132/30 | 198.18.0.133 | 198.18.0.134 |
+| Router AC eth1 — Router M eth2 | 198.18.0.136/30 | 198.18.0.137 | 198.18.0.138 |
 
 Veřejnou adresu domácnosti v modelu tvoří WAN rozhraní domácího routeru: `192.0.2.1` na Lipové, `192.0.2.26` u Matěje, `192.0.2.53` na chatě, `192.0.2.62` v doupěti a `192.0.2.69` v kavárně. Tyto adresy, adresy serverů a mobilní adresy jsou vyhrazené dokumentační rozsahy; označení veřejná zde popisuje roli v izolované simulaci.
 
-Nové krátké propojovací úseky mají samostatné modelové sítě /30 z rozsahu `198.18.0.0/24`.
+Celkem 35 krátkých páteřních úseků má samostatné modelové sítě /30 z rozsahu `198.18.0.0/24`. Nových 18 spojů tvoří okruhy mezi existujícími uzly a routery W–AC. Žádný spoj se nekříží s jiným mimo společný router ani neprochází cizím zařízením či oblastí. Výřez celé sítě zahrnuje skutečně zapnuté uzly; společné tranzitní routery nezapínají sousední služby.
 
-MAC každého rozhraní propojů mezi routery je odlišná a zobrazuje se v detailu rozhraní. Switche nemají připravenou řídicí IP adresu, protože ji pro přepínání rámců nepotřebují. Dvanáct switchů obsluhuje tři domácí LAN, doupě, čtyři základní sítě služeb, VPN centrum, cizí hosting a samostatného poskytovatele pošty Dopis a partnerské weby s reklamním serverem. Celkem má úplný model 80 zařízení a 86 spojů. Partneři mají samostatnou síť 192.0.2.224/27 a přípojku 192.0.2.76/30 do routeru J. Pošta Dopis má vlastní síť 192.0.2.192/27 a přípojku 192.0.2.72/30 do routeru T. Kavárna přidává dva notebooky (útočníkův zároveň plní roli AP/mostu), přístupový bod a router; další switch nepotřebuje. Domácnosti a centra propojuje směrovaná síť. Hosting používá 203.0.113.0/26, Instagram 203.0.113.64/26, cloud A 203.0.113.128/26 a cloud B 203.0.113.192/26. Router D je nyní tranzitním uzlem poskytovatele; centra mají vlastní brány.
+MAC každého rozhraní propojů mezi routery je odlišná a zobrazuje se v detailu rozhraní. Switche nemají připravenou řídicí IP adresu, protože ji pro přepínání rámců nepotřebují. Dvanáct switchů obsluhuje tři domácí LAN, doupě, čtyři základní sítě služeb, VPN centrum, cizí hosting a samostatného poskytovatele pošty Dopis a partnerské weby s reklamním serverem. Celkem má úplný model 87 zařízení a 104 spojů. Partneři mají samostatnou síť 192.0.2.224/27 a přípojku 192.0.2.76/30 do routeru J. Pošta Dopis má vlastní síť 192.0.2.192/27 a přípojku 192.0.2.72/30 do routeru T. Kavárna přidává dva notebooky (útočníkův zároveň plní roli AP/mostu), přístupový bod a router; další switch nepotřebuje. Domácnosti a centra propojuje směrovaná síť. Hosting používá 203.0.113.0/26, Instagram 203.0.113.64/26, cloud A 203.0.113.128/26 a cloud B 203.0.113.192/26. Router D je nyní tranzitním uzlem poskytovatele; centra mají vlastní brány.
 
 ### Co se skutečně modeluje
 
@@ -271,7 +289,7 @@ Ověřované principy: [MDN — cookies třetích stran a omezení prohlížeč�
 1. Vytvořte repozitář na GitHubu. Nahrajte `index.html`, složky `assets` a `js` do jeho kořene; README a ostatní soubory můžete přidat také. `index.html` nesmí zůstat v další nadbytečné podsložce.
 2. V repozitáři otevřete **Settings → Pages**. V části Build and deployment zvolte **Deploy from a branch**, publikační větev (typicky `main`) a složku **/ (root)**. Uložte.
 3. Počkejte na dokončení publikování. Projekt otevřete na adrese `https://UZIVATEL.github.io/REPOZITAR/` uvedené v nastavení Pages.
-4. Další verze zveřejníte běžným nahráním změněných souborů nebo commitem do stejné větve. Vlastní workflow, balíčky a build nejsou potřeba. Při změně JS/CSS současně zvyšte `v=97` v odpovídajících cestách v `index.html`, aby prohlížeče rychleji načetly novou verzi prostředků.
+4. Další verze zveřejníte běžným nahráním změněných souborů nebo commitem do stejné větve. Vlastní workflow, balíčky a build nejsou potřeba. Při změně JS/CSS současně zvyšte `v=98` v odpovídajících cestách v `index.html`, aby prohlížeče rychleji načetly novou verzi prostředků.
 
 Všechny cesty jsou relativní (`./assets/…`, `./js/…`), proto aplikace funguje i v podcestě projektových GitHub Pages. Soubor `.nojekyll` ponechá statické soubory bez zpracování Jekyllem.
 
@@ -304,7 +322,7 @@ Postup odpovídá [dokumentaci GitHub Pages](https://docs.github.com/en/pages/ge
 - `js/privacy-ui.js`: nabídka Soukromí a moje údaje v knihovně a správcovský pohled na webovém serveru.
 - `js/web.js`: výukový model cookies prvé strany, výběr hlaviček, příjem, platnost, záznamy serveru a model TLS, neprůhledné chráněné záznamy oddělené od koncových dat, kontrola integrity, adresy, HTML uložené stránky knihovny a čitelná reprezentace HTTP.
 - `js/simulation.js`: časová fronta diskrétních událostí, souběžné přenosy paketů, předání zprávy přes Instagram, čekání a potvrzení přečtení, segmentace cloudových požadavků, odpovědí a kopie mezi centry.
-- `tests/backbone.test.mjs`: skutečné předávání a TTL nových routerů, náhradní cesta a výpadky větví, samostatné podsítě a rozhraní.
+- `tests/backbone.test.mjs`: 35 samostatných páteřních podsítí, zachování rozhraní, přepočítání tras a TTL; výpadek každého jednoho páteřního spoje i routeru v základní, úplné a každé samostatně zapnuté sestavě; doručení zpráv při sedmi různých výpadcích a fotky přes W po odpojení E–N.
 - `tests/map-layout.test.mjs`: křížení, překryvy spojů, odstupy od zařízení a oblastí, délky úseků a výřezy všech sestav.
 - `js/map.js`: SVG scéna, pohyb paketů, měřítka a výběr.
 - `js/computer.js`: monitory notebooků, obrazovka telefonu, nastavení připojení a aplikace odvozené ze společného modelu.

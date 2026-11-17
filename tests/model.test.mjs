@@ -107,10 +107,10 @@ test('Stable routes, alternate route, total failure, restore and repeat preserve
   assert(first.includes('edge-north'));assert(!first.includes('edge-south'));
   sim.repeat();const warm=branch(finish(sim));sim.repeat();assert.deepEqual(branch(finish(sim)),warm);
   sim.net.server.title='Změna přetrvá';sim.net.server.revision=2;
-  sim.net.toggleLink('north-dc');sim.repeat();
-  const alternate=branch(finish(sim));assert.equal(sim.status,'success');assert(alternate.includes('edge-south'));assert(!alternate.includes('north-dc'));
-  sim.net.toggleLink('south-dc');sim.repeat();finish(sim);assert.equal(sim.status,'failed');assert.equal(sim.net.browser.content,'Změna přetrvá');
-  sim.net.toggleLink('north-dc');sim.repeat();finish(sim);assert.equal(sim.status,'success');assert.equal(sim.net.browser.content,'Změna přetrvá');
+  sim.net.toggleLink('edge-north');sim.repeat();
+  const alternate=branch(finish(sim));assert.equal(sim.status,'success');assert(alternate.includes('edge-south'));assert(!alternate.includes('edge-north'));
+  sim.net.toggleLink('edge-south');sim.repeat();finish(sim);assert.equal(sim.status,'failed');assert.equal(sim.net.browser.content,'Změna přetrvá');
+  sim.net.toggleLink('edge-north');sim.repeat();finish(sim);assert.equal(sim.status,'success');assert.equal(sim.net.browser.content,'Změna přetrvá');
   sim.net.toggleLink('dc-access');sim.repeat();finish(sim);assert.equal(sim.status,'failed');
   sim.net.toggleLink('dc-access');sim.repeat();finish(sim);assert.equal(sim.status,'success');
   const clean=new Network();assert.equal(clean.server.revision,1);assert.equal(clean.server.title,'Dnes otevřeno do 16 hodin');assert(Object.values(clean.links).every(l=>l.on));assert.deepEqual(clean.nodes.switch.macTable,{});
