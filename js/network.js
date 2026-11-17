@@ -145,7 +145,10 @@
     return (ipv4(net)>>>shift) === (ipv4(ip)>>>shift);
   };
   class Network {
-    constructor() {
+    constructor(settings=null) {
+      // A bare model retains the complete topology for standalone experiments.
+      // The application supplies its explicit, session-only starting selection.
+      this.settings=settings;
       this.nodes = Object.fromEntries(nodeDefinitions.map(([id,name,type,x,y,ip,mac,region])=>[id,{id,name,type,x,y,ip,mac,region,on:true,interfaces:{},macTable:{},lastDecision:null}]));
       this.satellite={clearView:true};this.mitm={active:false,mode:'observe',logs:[],serial:0};
       this.access={cafe:{mode:'wifi',hotspot:'trusted'},hacker:{mode:'cable'},cabin:{mode:'wifi'},laptop:{mode:'cable'},friend:{mode:'cable'},phone:{mode:'cellular',tower:'bts-lipova'}};
@@ -174,13 +177,32 @@
       this.vpn={clients:Object.fromEntries(['laptop','friend','phone','cabin','hacker','cafe'].map((id,i)=>[id,{enabled:false,ip:`10.8.0.${10+i}`,port:54010+i,epoch:0,peer:null,path:[],sent:0,received:0}])),rows:[],nextPort:55000,sent:0,received:0,last:null};
       this.mailMXRecords={'posta.test':{exchange:'mx.posta.test',address:'203.0.113.40',server:'mail'},'dopis.test':{exchange:'mx.dopis.test',address:'192.0.2.194',server:'mail-dopis'}};
       this.dnsRecords={'obchod.test':'192.0.2.226','zpravy.test':'192.0.2.227','reklamy.test':'192.0.2.228','mx.posta.test':'203.0.113.40','mx.dopis.test':'192.0.2.194','knihovna.test':'203.0.113.10','knihovna-podpora.test':'192.0.2.170'};
+      if(!this.featureEnabled('mobile'))this.access.phone.mode='wifi';
+      this.dnsRecords=Object.fromEntries(Object.entries(this.dnsRecords).filter(([,ip])=>this.hostId(ip)));
+      this.mailMXRecords=Object.fromEntries(Object.entries(this.mailMXRecords).filter(([,mx])=>this.nodeAvailable(mx.server)));
       this.applyAccess('cafe');this.applyAccess('hacker');this.applyAccess('cabin');this.applyAccess('laptop');this.applyAccess('friend');this.applyAccess('phone');
       this.recomputeRoutes();
+    }
+    featureEnabled(id) {return this.settings?.has(id)??true;}
+    detailEnabled(id) {return this.settings?.details[id]??true;}
+    appAvailable(app,device) {
+      const feature={mail:'mail',print:'printer',message:'instagram',cloud:'cloud',chatbot:'chatbot',attack:'hacker',mitm:'mitm'}[app];
+      return this.nodeAvailable(device)&&(!feature||this.featureEnabled(feature))&&(app!=='mail'||this.nodeAvailable(globalThis.InternetLab.mailServerFor(device)));
+    }
+    nodeAvailable(id) {return !!this.nodes[id]&&(!this.settings||this.settings.nodeEnabled(this.nodes[id]));}
+    linkAvailable(link) {return !!link&&this.nodeAvailable(link.a)&&this.nodeAvailable(link.b);}
+    visibleNodes() {return Object.values(this.nodes).filter(n=>this.nodeAvailable(n.id));}
+    visibleLinks() {return Object.values(this.links).filter(l=>this.linkAvailable(l));}
+    accessModeAvailable(id,mode) {
+      if(mode==='offline')return true;
+      if(mode==='cellular')return this.featureEnabled('mobile');
+      if(mode==='wifi')return this.nodeAvailable(id==='cafe'?'cafe-ap':id==='friend'?'friend-ap':id==='cabin'?'cabin-ap':'ap');
+      return true;
     }
     peer(link,node) {return link.a===node?link.b:link.a;}
     port(link,node) {return link.a===node?link.pa:link.pb;}
     selectedAccess(link) {return (!link.attackOnly||this.mitm.active)&&(!link.device||(this.access[link.device].mode===link.mode&&(!link.tower||this.access[link.device].tower===link.tower)&&(!link.hotspot||this.access[link.device].hotspot===link.hotspot)));}
-    isActive(link) {return !!link && link.on && this.selectedAccess(link) && (!link.requiresView||this.satellite.clearView) && this.nodes[link.a].on && this.nodes[link.b].on;}
+    isActive(link) {return this.linkAvailable(link) && link.on && this.selectedAccess(link) && (!link.requiresView||this.satellite.clearView) && this.nodes[link.a].on && this.nodes[link.b].on;}
     browserFor(id='laptop') {return id==='cafe'?this.cafeBrowser:id==='friend'?this.friendBrowser:id==='cabin'?this.cabinBrowser:id==='phone'?this.phoneBrowser:this.browser;}
     advanceCookieTime(seconds=3600) {if(!Number.isFinite(seconds)||seconds<0)return false;this.cookieTime+=seconds;for(const id of ['laptop','friend','phone','cabin','cafe'])globalThis.InternetLab.WebCookies.expire(this.browserFor(id).cookies,this.cookieTime);for(const c of Object.values(this.ads?.clients||{}))if(c.cookie?.expiresAt<=this.cookieTime)c.cookie=null;return true;}
     accessLink(id) {return this.adjacent(id).find(l=>l.device===id&&this.selectedAccess(l))||null;}
@@ -196,15 +218,15 @@
     }
     setAccess(id,mode,tower=this.access[id]?.tower) {
       const allowed=id==='cafe'?['wifi','offline']:id==='hacker'?['cable','offline']:id==='phone'?['wifi','cellular','offline']:['cable','wifi','offline'];
-      if(!this.access[id]||!allowed.includes(mode)||(id==='phone'&&!['bts-lipova','bts-park'].includes(tower)))return false;
+      if(!this.nodeAvailable(id)||!this.access[id]||!allowed.includes(mode)||!this.accessModeAvailable(id,mode)||(id==='phone'&&!['bts-lipova','bts-park'].includes(tower)))return false;
       if(this.access[id].mode===mode&&this.access[id].tower===tower)return false;
       this.access[id]={mode,...(id==='phone'?{tower}:id==='cafe'?{hotspot:this.access.cafe.hotspot}:{})};this.applyAccess(id);this.changed();return true;
     }
     setCafeHotspot(hotspot) {
-      if(!['trusted','rogue'].includes(hotspot)||this.access.cafe.mode==='wifi'&&this.access.cafe.hotspot===hotspot)return false;
+      if(!this.nodeAvailable('cafe')||hotspot==='rogue'&&!this.featureEnabled('mitm')||!['trusted','rogue'].includes(hotspot)||this.access.cafe.mode==='wifi'&&this.access.cafe.hotspot===hotspot)return false;
       this.access.cafe={mode:'wifi',hotspot};this.applyAccess('cafe');this.changed();return true;
     }
-    adjacent(id) {return Object.values(this.links).filter(l=>l.a===id||l.b===id);}
+    adjacent(id) {return this.visibleLinks().filter(l=>l.a===id||l.b===id);}
     iface(node,link) {return this.nodes[node].interfaces[this.port(link,node)];}
     shortest(from,to) {
       if (!this.nodes[from].on || !this.nodes[to].on) return null;
@@ -252,8 +274,8 @@
     }
     setSatelliteView(clear) {if(this.satellite.clearView===clear)return false;this.satellite.clearView=clear;this.changed();return true;}
     natRouterFor(id) {return id==='cafe'?'cafe-router':id==='hacker'?'hacker-router':id==='cabin'?'cabin-router':id==='friend'?'friend-home':id==='phone'&&this.access.phone.mode==='cellular'?null:'home';}
-    toggleLink(id) {this.links[id].on=!this.links[id].on;this.changed();return this.links[id].on;}
-    toggleNode(id) {this.nodes[id].on=!this.nodes[id].on;this.changed();return this.nodes[id].on;}
+    toggleLink(id) {if(!this.linkAvailable(this.links[id]))return false;this.links[id].on=!this.links[id].on;this.changed();return this.links[id].on;}
+    toggleNode(id) {if(!this.nodeAvailable(id))return false;this.nodes[id].on=!this.nodes[id].on;this.changed();return this.nodes[id].on;}
     packetHeader(p) {return {protocol:p.protocol,src:p.src,sport:p.sport,dst:p.dst,dport:p.dport};}
     natAddress(id) {return this.iface(id,this.links[this.nat[id].wanLink]).ip;}
     clearNat(id) {if(this.nat[id]){this.nat[id].rows=[];this.version++;}}
@@ -297,6 +319,7 @@
       return c;
     }
     setVPN(id,enabled) {
+      if(!this.featureEnabled('vpn')||!this.nodeAvailable(id))return false;
       const c=this.vpn.clients[id];if(!c||c.enabled===enabled)return false;
       Object.assign(c,{enabled,epoch:c.epoch+1,peer:null,path:[],sent:0,received:0});
       this.vpn.rows=this.vpn.rows.filter(r=>r.client!==id);delete this.instagramChannels[id];
@@ -334,7 +357,7 @@
       const decision={kind:'switch',packetId,input,src:frame.src,dst:frame.dst,learned:input,known:known||null,ports,action:known?'known':'flood',version:this.version,table:{...n.macTable}};
       n.lastDecision=decision; return decision;
     }
-    hostId(ip) {return Object.values(this.nodes).find(n=>n.type==='host'&&n.ip===ip)?.id;}
+    hostId(ip) {return this.visibleNodes().find(n=>n.type==='host'&&n.ip===ip)?.id;}
     linkLeadsTo(link,from,mac) {
       const seen=new Set([from]),queue=[[this.peer(link,from),link]];
       while(queue.length) {

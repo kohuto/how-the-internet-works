@@ -57,6 +57,11 @@
     }
     start(type,payload={}) {
       if(this.status==='running')return false;
+      const feature={print:'printer',message:'instagram',cloud:'cloud',replicate:'replica',chatbot:'chatbot','phish-send':'hacker','phish-results':'hacker'}[type];
+      if(!this.net.nodeAvailable(payload.device||'laptop')||feature&&!this.net.featureEnabled(feature))return false;
+      if(this.mail.accepts(type)&&!this.net.featureEnabled('mail'))return false;
+      if(type==='cloud'&&payload.server==='cloud-backup'&&!this.net.featureEnabled('replica'))return false;
+      if(type==='mail-send'&&(!this.net.nodeAvailable(payload.target)||!this.net.nodeAvailable(globalThis.InternetLab.mailServerFor(payload.target))))return false;
       if(!['web','print','message','cloud','replicate','chatbot'].includes(type)&&!this.phishing.accepts(type)&&!this.mail.accepts(type))return false;
       if(this.mail.accepts(type)&&!this.mail.validate(type,payload))return false;
       if(this.phishing.accepts(type)&&!this.phishing.validate(type,payload))return false;
@@ -92,8 +97,9 @@
       } else if(type==='web') {
         if(payload.authOp)this.auth.begin(this.clientId());
         if(payload.privacyOp){this.privacy.begin(this.action.payload);this.lastAction.payload={...this.action.payload};}
-        Object.assign(this.browser(),{state:'loading',error:'',address:payload.address||'knihovna.test',secure:!!webAddress(payload.address||'knihovna.test')?.secure,tlsPhase:'dns',certificateVerified:false});
-        this.next([{kind:'prepare',title:`${this.clientName()} připravuje otevření webu`,description:'Nejprve potřebuje IP adresu serveru.',node:this.clientId()}]);
+        const secure=!!webAddress(payload.address||'knihovna.test')?.secure;
+        Object.assign(this.browser(),{state:'loading',error:'',address:payload.address||'knihovna.test',secure,tlsPhase:this.net.featureEnabled('dns')?'dns':secure?'handshake':'request',certificateVerified:false});
+        this.next([{kind:'prepare',title:`${this.clientName()} připravuje otevření webu`,description:this.net.featureEnabled('dns')?'Nejprve potřebuje IP adresu serveru.':secure?'Naváže zabezpečené spojení a požádá server o stránku.':'Požádá server o stránku.',node:this.clientId()}]);
       } else if(type==='print') {
         this.net.printer.state='sending';
         this.next([{kind:'prepare',title:'Dokument je připravený k odeslání',description:'Tiskárna má adresu ve stejné podsíti jako notebook.',node:this.clientId()}]);
@@ -253,6 +259,7 @@
     }
     webConnect() {
       const client=this.clientId(),b=this.browser(),target=this.webTarget();
+      if(!this.net.nodeAvailable(target)){this.failure('Tato webová služba není v současné sestavě zapnutá.',null,client);return;}
       if(this.webSecure()) {
         this.tls=new ModelTLS(this.run*2+(this.ads.embedded?1:0),client);b.tlsPhase='handshake';
         this.next([this.originate(this.createPacket('tls-client-hello',client,target,{publicText:`ClientHello · TLS 1.3\nServer Name (SNI): ${this.webHost()}\nNabídka parametrů a veřejný příspěvek k dohodě klíčů.`}))]);
@@ -436,7 +443,12 @@
           if(this.action.payload.privacyOp){const erase=this.action.payload.privacyOp==='erase';this.webRequest={method:erase?'POST':'GET',path:erase?'/soukromi/vymaz':'/soukromi/udaje',host:address.host,...(erase?{message:JSON.stringify({requestId:this.action.payload.privacyRequestId}),contentType:'application/json'}:{})};}
           if(this.action.payload.authOp){const {authOp,username,password,email}=this.action.payload;this.webRequest={method:authOp==='status'?'GET':'POST',path:'/ucet/'+authOp,host:address.host,...(authOp!=='status'?{message:JSON.stringify(authOp==='logout'?{}:{username,password,...(authOp==='register'?{email}:{})}),contentType:'application/json'}:{})};}
           const cached=this.browser().dnsCache[address.host];
-          if(cached) {
+          if(!this.net.featureEnabled('dns')) {
+            // With the DNS lesson disabled, endpoint addresses are prepared.
+            // Do not fabricate a DNS response or populate the learned cache.
+            e.description=address.secure?'Následuje navázání TLS a šifrovaný požadavek na server.':'Zařízení odešle HTTP požadavek na server.';
+            this.webConnect();
+          } else if(cached) {
             e.description=`DNS odpověď už zařízení zná: ${address.host} → ${cached}. ${address.secure?'Následuje navázání TLS a až potom šifrovaný požadavek.':'Nový HTTP požadavek přesto odešle po síti.'}`;
             this.webConnect();
           } else this.next([this.originate(this.createPacket('dns-query',client,'dns',{name:address.host,type:'A'}))]);

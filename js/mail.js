@@ -126,7 +126,8 @@
         if(session.phase==='relay'||e.origin===e.destination){e.state='delivered';return this.completeSend();}
         this.phase='mx';this.state.current.phase='mx';
         if(c)Object.assign(c,{state:'ready',notice:'Tvůj server zprávu převzal. Následuje předání druhému poskytovateli.'});
-        else this.net.phishing.hacker.notice='SMTP předalo zprávu tvému serveru. Ten hledá server příjemce.';
+        else this.net.phishing.hacker.notice='SMTP předalo zprávu tvému serveru. Následuje předání serveru příjemce.';
+        if(!this.net.featureEnabled('dns'))return this.lookupMX();
         s.next([{kind:'mail-mx',node:e.origin,title:'Poštovní server hledá cílovou doménu',description:'Použije DNS záznam MX.'}]);
       }else if(session.index++===0)this.imapCommand(session);
       else if(s.action.type==='mail-seen'){
@@ -155,6 +156,11 @@
     }
     lookupMX(){
       const s=this.sim,domain=domainOf(this.entry.message.to),cached=this.state.mxCache[this.entry.origin+':'+domain];
+      if(!this.net.featureEnabled('dns')){
+        const prepared=this.net.mailMXRecords[domain];
+        if(!prepared)return s.failure('Pro doménu příjemce není připravený poštovní server.',null,this.entry.origin);
+        this.entry.destination=prepared.server;return this.beginSMTP(true);
+      }
       if(cached){this.entry.destination=cached.server;return this.beginSMTP(true);}
       const p=s.createPacket('dns-query',this.entry.origin,'dns',{name:domain,type:'MX'},{sport:53006,dport:53,connection:'mail-dns',label:'DNS · MX pro poštu'});s.next([s.originate(p)]);
     }

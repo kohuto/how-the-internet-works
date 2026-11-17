@@ -22,8 +22,8 @@
   const decor=`
     <defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#213d37" flood-opacity=".09"/></filter></defs>
     <rect x="-3000" y="-3000" width="7000" height="7000" fill="#f0f3eb"/>
-    <g class="advertising-center"><rect x="1370" y="-550" width="950" height="300" rx="18" fill="#eee8de" stroke="#c7b7a0" stroke-width="3"/><text x="1400" y="-530" class="place-label">17 / WEBY A REKLAMNÍ PARTNER</text><text x="1400" y="-510" class="center-subtitle">TŘI SAMOSTATNÉ SLUŽBY · SPOLEČNÝ REKLAMNÍ SERVER</text></g>
-    <g class="satellite-scenery"><rect x="45" y="-550" width="1170" height="240" rx="40" fill="#e7eef3" stroke="#cadce7" stroke-dasharray="6 10"/><path d="M100-360Q660-580 1160-360" fill="none" stroke="#b8cfdf" stroke-dasharray="4 10"/><text x="600" y="-525" class="place-label">11 / SATELITNÍ PŘÍSTUP · LEO</text><text x="600" y="-500" class="center-subtitle">POLOHA A VZDÁLENOSTI JSOU SCHEMATICKÉ</text>
+    <g class="advertising-center" data-region="partners"><rect x="1370" y="-550" width="950" height="300" rx="18" fill="#eee8de" stroke="#c7b7a0" stroke-width="3"/><text x="1400" y="-530" class="place-label">17 / WEBY A REKLAMNÍ PARTNER</text><text x="1400" y="-510" class="center-subtitle">TŘI SAMOSTATNÉ SLUŽBY · SPOLEČNÝ REKLAMNÍ SERVER</text></g>
+    <g class="satellite-scenery" data-region="satellite"><rect x="45" y="-550" width="1170" height="240" rx="40" fill="#e7eef3" stroke="#cadce7" stroke-dasharray="6 10"/><path d="M100-360Q660-580 1160-360" fill="none" stroke="#b8cfdf" stroke-dasharray="4 10"/><text x="600" y="-525" class="place-label">11 / SATELITNÍ PŘÍSTUP · LEO</text><text x="600" y="-500" class="center-subtitle">POLOHA A VZDÁLENOSTI JSOU SCHEMATICKÉ</text>
     <path d="M70-145 255-235 435-145" fill="#ddd9bf" stroke="#babda5" stroke-width="4"/><rect x="70" y="-145" width="365" height="350" rx="9" fill="#faf8ee" stroke="#b7c1b2" stroke-width="4"/><rect x="106" y="2" width="90" height="75" rx="9" fill="#e4d4b8" stroke="#cbb897"/><text x="70" y="-255" class="place-label">10 / CHATA ZA MĚSTEM</text>
     <path d="M80 235q210 90 450 0" stroke="#c8d8be" fill="none" stroke-width="2" stroke-dasharray="8 10"/><g fill="#d9e5ce" stroke="#b2c5a7" stroke-width="2"><path d="m50-100-30 65h60Z"/><path d="m470 125-30 65h60Z"/></g>
     <rect x="820" y="-140" width="160" height="150" rx="14" fill="#e7eef3" stroke="#bdd1df" stroke-width="2"/><text x="820" y="-165" class="place-label">12 / POZEMNÍ BRÁNA</text></g>
@@ -50,11 +50,11 @@
       [1950,-205,'14 / CIZÍ HOSTING','SERVER PODVODNÉ STRÁNKY','#f2e8e5','#d6bdb6'],
       [1000,1230,'16 / POŠTA DOPIS','SCHRÁNKY PRO DOMÉNU DOPIS.TEST','#e7edf4','#b8c9de'],
       [1480,1120,'09 / VPN CENTRUM','ŠIFROVANÝ TUNEL · VÝSTUP DO INTERNETU','#ece8f4','#c7bdd8']
-    ].map(([x,y,title,subtitle,fill,stroke,height=300])=>`<g class="data-center"><rect x="${x}" y="${y}" width="320" height="${height}" rx="14" fill="${fill}" stroke="${stroke}" stroke-width="2"/><path d="M${x+14} ${y+18}h292M${x+14} ${y+height-18}h292" stroke="${stroke}" stroke-width="4" opacity=".45"/><g fill="${stroke}" opacity=".38"><rect x="${x+16}" y="${y+38}" width="24" height="77" rx="3"/><rect x="${x+46}" y="${y+38}" width="24" height="77" rx="3"/></g><text x="${x+4}" y="${y-28}" class="place-label">${title}</text><text x="${x+4}" y="${y-10}" class="center-subtitle">${subtitle}</text></g>`).join('')}
+    ].map(([x,y,title,subtitle,fill,stroke,height=300],index)=>`<g class="data-center" data-region="${['dc','instagram','cloud','replica','phish','mail-b','vpn'][index]}"><rect x="${x}" y="${y}" width="320" height="${height}" rx="14" fill="${fill}" stroke="${stroke}" stroke-width="2"/><path d="M${x+14} ${y+18}h292M${x+14} ${y+height-18}h292" stroke="${stroke}" stroke-width="4" opacity=".45"/><g fill="${stroke}" opacity=".38"><rect x="${x+16}" y="${y+38}" width="24" height="77" rx="3"/><rect x="${x+46}" y="${y+38}" width="24" height="77" rx="3"/></g><text x="${x+4}" y="${y-28}" class="place-label">${title}</text><text x="${x+4}" y="${y-10}" class="center-subtitle">${subtitle}</text></g>`).join('')}
     <text x="73" y="292" class="place-label">01 / BYT NA LIPOVÉ</text><text x="520" y="149" class="place-label">02 / MĚSTO LIPOV</text>
     <text x="658" y="195" class="region-subtitle">JEDEN POSKYTOVATEL · DVĚ VĚTVE</text>
-    <path d="M1240 455q100-65 180 12l-5 125q-89 69-180 0Z" fill="#e8ede5" stroke="#d2decd" stroke-dasharray="5 8"/>
-    <text x="1240" y="425" class="place-label">DALŠÍ POSKYTOVATEL</text><g transform="translate(460 30)">
+    <g data-region="peer"><path d="M1240 455q100-65 180 12l-5 125q-89 69-180 0Z" fill="#e8ede5" stroke="#d2decd" stroke-dasharray="5 8"/>
+    <text x="1240" y="425" class="place-label">DALŠÍ POSKYTOVATEL</text></g><g data-region="friend" transform="translate(460 30)">
     <rect x="1475" y="400" width="350" height="340" rx="10" fill="#faf8ee" stroke="#b7c1b2" stroke-width="5"/>
 
     <path d="M1480 650h160m65 0h117M1635 405v37m0 90v115" fill="none" stroke="#b7c1b2" stroke-width="5"/>
@@ -64,11 +64,11 @@
     <g transform="translate(1520 460)"><rect width="59" height="44" rx="9" fill="#dde3c9" stroke="#bdcbaa" stroke-width="1.5"/><path d="M6 18h47M15 8v20m29-20v20" stroke="#bdcbaa" stroke-width="2" fill="none"/></g>
     <g transform="translate(1770 690)"><circle r="20" fill="#d7e2c0"/><path d="M0 14V-13M-10-1 0 5 11-7" stroke="#a2b784" fill="none" stroke-width="2"/><rect x="-11" y="12" width="22" height="16" rx="3" fill="#d2b89a"/></g>
     <text x="1490" y="375" class="place-label">07 / U MATĚJE</text><text x="1680" y="441" class="room-label">MATĚJŮV POKOJ</text>
-    </g><path d="M150 815q430-150 800 5v192H150Z" fill="#ece7f2" stroke="#d6c9e3" stroke-dasharray="6 9"/>
-    <text x="170" y="785" class="place-label">08 / MOBILNÍ SÍŤ</text>
-    <g class="cafe-house"><rect x="65" y="1135" width="765" height="425" rx="18" fill="#f4ede0" stroke="#c7b797" stroke-width="4"/><path d="M100 1135h690" stroke="#b58e67" stroke-width="14" stroke-dasharray="40 14"/><circle cx="180" cy="1300" r="63" fill="#e5d4b8" stroke="#c6ac84" stroke-width="2"/><circle cx="440" cy="1440" r="63" fill="#dac9d5" stroke="#b69aaf" stroke-width="2"/><path d="M635 1160h160v65H635z" fill="#dfceb1" stroke="#c7b797"/><path d="M673 1182h20v21h-20zm20 3q16-3 12 9h-12" fill="none" stroke="#a48c67" stroke-width="3"/><text x="560" y="1105" class="place-label">15 / KAVÁRNA NA ROHU</text><text x="78" y="1538" class="region-subtitle">HOST · VEŘEJNÁ WI-FI · NAPODOBENÝ HOTSPOT</text></g>
-    <g class="hacker-house"><rect x="1935" y="1080" width="350" height="350" rx="12" fill="#ede6ee" stroke="#c3b4c8" stroke-width="4"/><rect x="2125" y="1140" width="92" height="82" rx="9" fill="#c6bbce" stroke="#a597af" stroke-width="2"/><text x="1935" y="1050" class="place-label">13 / HACKERSKÉ DOUPĚ</text><text x="1950" y="1405" class="region-subtitle">POČÍTAČ ÚTOČNÍKA · VLASTNÍ PŘÍPOJKA</text></g>
-    <text x="650" y="1020" class="region-subtitle">BTS · PŘÍPOJKA · SÍŤ OPERÁTORA</text>
+    </g><g data-region="mobile"><path d="M150 815q430-150 800 5v192H150Z" fill="#ece7f2" stroke="#d6c9e3" stroke-dasharray="6 9"/>
+    <text x="170" y="785" class="place-label">08 / MOBILNÍ SÍŤ</text></g>
+    <g class="cafe-house" data-region="cafe"><rect x="65" y="1135" width="765" height="425" rx="18" fill="#f4ede0" stroke="#c7b797" stroke-width="4"/><path d="M100 1135h690" stroke="#b58e67" stroke-width="14" stroke-dasharray="40 14"/><circle cx="180" cy="1300" r="63" fill="#e5d4b8" stroke="#c6ac84" stroke-width="2"/><circle data-feature="mitm" cx="440" cy="1440" r="63" fill="#dac9d5" stroke="#b69aaf" stroke-width="2"/><path d="M635 1160h160v65H635z" fill="#dfceb1" stroke="#c7b797"/><path d="M673 1182h20v21h-20zm20 3q16-3 12 9h-12" fill="none" stroke="#a48c67" stroke-width="3"/><text x="560" y="1105" class="place-label">15 / KAVÁRNA NA ROHU</text><text x="78" y="1538" class="region-subtitle">HOST · VEŘEJNÁ WI-FI · NAPODOBENÝ HOTSPOT</text></g>
+    <g class="hacker-house" data-region="hacker"><rect x="1935" y="1080" width="350" height="350" rx="12" fill="#ede6ee" stroke="#c3b4c8" stroke-width="4"/><rect x="2125" y="1140" width="92" height="82" rx="9" fill="#c6bbce" stroke="#a597af" stroke-width="2"/><text x="1935" y="1050" class="place-label">13 / HACKERSKÉ DOUPĚ</text><text x="1950" y="1405" class="region-subtitle">POČÍTAČ ÚTOČNÍKA · VLASTNÍ PŘÍPOJKA</text></g>
+    <text data-region="mobile" x="650" y="1020" class="region-subtitle">BTS · PŘÍPOJKA · SÍŤ OPERÁTORA</text>
     </g>`;
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   class NetworkMap {
@@ -150,7 +150,14 @@
       if(this.drag&&this.pointers.size===1)this.drag={...this.pointers.values().next().value,box:[...this.box]};
     }
     setBox() {this.svg.setAttribute('viewBox',this.box.join(' '));}
-    setScene(scene) {this.scene=scene;this.svg.dataset.scene=scene;this.box=[...presets[scene]];this.setBox();}
+    setScene(scene) {this.scene=scene;this.svg.dataset.scene=scene;this.box=scene==='all'?this.networkBounds():[...presets[scene]];this.setBox();}
+    networkBounds() {
+      if(!this.net.settings)return [...presets.all];
+      const boxes={home:[40,270,460,430],city:[475,110,500,640],dc:[840,50,520,510],friend:[1820,365,560,510],mobile:[100,530,930,530],cafe:[25,1070,865,540],hacker:[1810,1000,560,490],peer:[1200,390,230,240],cabin:[10,-280,470,565],satellite:[10,-565,1215,700],instagram:[1380,45,500,440],cloud:[840,670,520,430],replica:[1380,670,500,430],vpn:[1300,1040,620,440],phish:[1810,-275,560,450],'mail-b':[820,1170,560,430],partners:[1320,-600,1040,450]};
+      const regions=new Set(this.net.visibleNodes().map(n=>n.region)),enabled=[...regions].map(r=>boxes[r]);
+      const x=Math.min(...enabled.map(b=>b[0])),y=Math.min(...enabled.map(b=>b[1]));
+      return [x,y,Math.max(...enabled.map(b=>b[0]+b[2]))-x,Math.max(...enabled.map(b=>b[1]+b[3]))-y];
+    }
     zoom(factor,origin,destination=origin) {
       if(!Number.isFinite(factor)||factor<=0)return;
       const [x,y,w,h]=this.box,rect=this.svg.getBoundingClientRect();
@@ -183,15 +190,24 @@
     render(event=this.lastEvent,selected=this.selected,selectedPacket=this.selectedPacket,animate=false,duration=650,packets=this.packets,frame=this.frame) {
       this.lastEvent=event;this.selected=selected;this.selectedPacket=selectedPacket;this.packets=packets;this.frame=frame;
       this.svg.classList.toggle('hide-labels',!this.labels);
+      const regions=new Set(this.net.visibleNodes().map(n=>n.region));
+      this.svg.querySelectorAll('[data-region]').forEach(el=>{el.style.display=regions.has(el.dataset.region)?'':'none';});
+      this.svg.querySelectorAll('[data-feature]').forEach(el=>{el.style.display=this.net.featureEnabled(el.dataset.feature)?'':'none';});
+      const subtitle=this.svg.querySelector('[data-region="dc"] .center-subtitle');
+      if(subtitle)subtitle.textContent=['WEB',...(this.net.featureEnabled('dns')?['DNS']:[]),...(this.net.featureEnabled('mail')?['POŠTA']:[]),...(this.net.featureEnabled('chatbot')?['CHATBOT']:[])].join(' · ');
+      const partners=this.svg.querySelector('[data-region="partners"] .center-subtitle');
+      if(partners)partners.textContent=this.net.featureEnabled('ads')?'TŘI SAMOSTATNÉ SLUŽBY · SPOLEČNÝ REKLAMNÍ SERVER':'SAMOSTATNÉ WEBOVÉ SLUŽBY';
+      const cafe=this.svg.querySelector('.cafe-house .region-subtitle');
+      if(cafe)cafe.textContent=this.net.featureEnabled('mitm')?'HOST · VEŘEJNÁ WI-FI · NAPODOBENÝ HOTSPOT':'HOST · VEŘEJNÁ WI-FI';
       const vpnLinks=new Set(Object.values(this.net.vpn?.clients||{}).filter(c=>c.enabled).flatMap(c=>c.path));
-      this.svg.querySelector('#links-layer').innerHTML=Object.values(this.net.links).map(l=> {
+      this.svg.querySelector('#links-layer').innerHTML=this.net.visibleLinks().map(l=> {
         const a=this.net.nodes[l.a],b=this.net.nodes[l.b],active=this.net.isActive(l),current=frame.some(e=>['hop','satellite-flight'].includes(e.kind)&&e.link===l.id);
         let x=(a.x+b.x)/2,y=(a.y+b.y)/2;if(l.id==='north-peer'){x+=120;y-=35;}
         const unused=!this.net.selectedAccess(l),radio=['wifi','cellular','satellite'].includes(l.medium);
         const label=radio&&active?`<g class="link-label radio-label" transform="translate(${x},${y-12})"><rect x="-27" y="-11" width="54" height="20" rx="6"/><text text-anchor="middle" y="3">${l.medium==='satellite'?'rádio':l.medium==='wifi'?'Wi-Fi':'data'}</text></g>`:['uplink','edge-north','north-dc','edge-south','south-dc','dc-access','north-peer','friend-uplink','mobile-uplink'].includes(l.id)&&!l.on?`<g class="link-label" transform="translate(${x},${y-13})"><rect x="-22" y="-11" width="44" height="20" rx="6"/><text text-anchor="middle" y="3">odpojeno</text></g>`:'';
         return `<g class="map-link medium-${l.medium} ${active?'':'offline'} ${unused?'unused':''} ${selected?.kind==='link'&&selected.id===l.id?'selected':''} ${current?'carrying':''} ${active&&vpnLinks.has(l.id)?'vpn-route':''} ${active&&['cafe-twin','cafe-relay'].includes(l.id)?'mitm-route':''}" data-map-kind="link" data-id="${l.id}" role="button" aria-label="${esc(l.name)} · ${unused?'nevybrané připojení':active?'spojeno':'nedostupné'}" tabindex="0"><title>${esc(l.name)} · otevřít detail</title><path class="link-hit" d="M${a.x},${a.y}L${b.x},${b.y}"/><path class="link-line" d="M${a.x},${a.y}L${b.x},${b.y}"/>${label}${!active&&!unused?`<g transform="translate(${x},${y})" class="cut-mark"><circle r="10"/><path d="m-4-4 8 8m0-8-8 8"/></g>`:''}</g>`;
       }).join('');
-      this.svg.querySelector('#nodes-layer').innerHTML=Object.values(this.net.nodes).map(n=> {
+      this.svg.querySelector('#nodes-layer').innerHTML=this.net.visibleNodes().map(n=> {
         const icon=icons[n.id]||icons[n.type]||icons.server;
         const chosen=selected?.kind==='node'&&selected.id===n.id,current=frame.some(e=>e.node===n.id);
         const below=n.id==='friend-home'?72:n.id==='printer'?49:n.id==='dns'||n.id==='web'||n.id==='chatbot'||n.id==='instagram'?53:48;

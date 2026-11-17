@@ -20,6 +20,7 @@
     receivePage(response,secure){
       const sim=this.sim,b=sim.browser(),a=webAddress(b.address);
       Object.assign(b,{content:response.title,revision:1,pageType:response.pageType,loadedHost:a.host,loadedSecure:secure,state:'ready',tlsPhase:'done',visitor:null,receipt:'',adPage:{...response.partnerPage,run:sim.run,ad:null,state:'waiting',notice:'Stránka dorazila. Její vložený reklamní kód nyní kontaktuje jiný server.'}});
+      if(!this.net.featureEnabled('ads')){b.adPage.state='disabled';sim.finish('Webová stránka dorazila do prohlížeče','Obsah byl přijat ze serveru.',sim.clientId());return;}
       this.context={phase:'page',site:a.host,kind:response.pageType,topic:response.partnerPage.topic,topSecure:secure};
       sim.next([{kind:'ads-prepare',node:sim.clientId(),title:'Stránka obsahuje kód reklamního partnera',description:`Prohlížeč načetl ${a.host}. Nyní samostatně požádá reklamy.test o výběr reklamy.`}]);
     }
@@ -29,8 +30,8 @@
       const client=this.state.clients[sim.clientId()];
       const data={site:c.site,context:c.topic,...(client.allowed?{event:c.kind==='shop'?'prohlizeni':'zobrazeni',...(c.kind==='shop'?{topic:c.topic}:{})}:{event:'kontextova-reklama'})};
       sim.webRequest={method:'POST',host:HOSTS.ads,path:'/vyber',contentType:'application/json',message:JSON.stringify(data)};
-      Object.assign(sim.browser(),{tlsPhase:'dns',certificateVerified:false});
-      if(sim.browser().dnsCache[HOSTS.ads])sim.webConnect();
+      Object.assign(sim.browser(),{tlsPhase:this.net.featureEnabled('dns')?'dns':'handshake',certificateVerified:false});
+      if(!this.net.featureEnabled('dns')||sim.browser().dnsCache[HOSTS.ads])sim.webConnect();
       else sim.next([sim.originate(sim.createPacket('dns-query',sim.clientId(),'dns',{name:HOSTS.ads,type:'A'}))]);
     }
     cookieHeader(){

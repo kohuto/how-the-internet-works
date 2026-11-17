@@ -7,39 +7,43 @@
   <meta name="description" content="Prozkoumej, jak funguje internet. Česká interaktivní síťová laboratoř: web, místní tisk, pakety a náhradní cesta.">
   <title>Jak funguje internet · Síť pod lupou</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./assets/style.css?v=74">
-  <link rel="stylesheet" href="./assets/computer.css?v=74">
-  <link rel="stylesheet" href="./assets/browser.css?v=74">
-  <link rel="stylesheet" href="./assets/instagram.css?v=74">
-  <script src="./js/network.js?v=74" defer></script>
-  <script src="./js/cloud.js?v=74" defer></script>
-  <script src="./js/media.js?v=74" defer></script>
-  <script src="./js/web.js?v=74" defer></script>
-  <script src="./js/privacy.js?v=74" defer></script>
-  <script src="./js/auth.js?v=74" defer></script>
-  <script src="./js/vpn.js?v=74" defer></script>
-  <script src="./js/phishing.js?v=74" defer></script>
-  <script src="./js/mitm.js?v=74" defer></script>
-  <script src="./js/mail.js?v=74" defer></script>
-  <script src="./js/ads.js?v=74" defer></script>
-  <script src="./js/simulation.js?v=74" defer></script>
-  <script src="./js/map.js?v=74" defer></script>
-  <script src="./js/browser-navigation.js?v=74" defer></script>
-  <script src="./js/instagram-ui.js?v=74" defer></script>
-  <script src="./js/computer.js?v=74" defer></script>
-  <script src="./js/browser-ui.js?v=74" defer></script>
-  <script src="./js/phishing-ui.js?v=74" defer></script>
-  <script src="./js/mitm-ui.js?v=74" defer></script>
-  <script src="./js/mail-ui.js?v=74" defer></script>
-  <script src="./js/privacy-ui.js?v=74" defer></script>
-  <script src="./js/auth-ui.js?v=74" defer></script>
-  <script src="./js/ads-ui.js?v=74" defer></script>
-  <script src="./js/app.js?v=74" defer></script>
+  <link rel="stylesheet" href="./assets/style.css?v=82">
+  <link rel="stylesheet" href="./assets/computer.css?v=82">
+  <link rel="stylesheet" href="./assets/browser.css?v=82">
+  <link rel="stylesheet" href="./assets/instagram.css?v=82">
+  <link rel="stylesheet" href="./assets/settings.css?v=82">
+  <script src="./js/network.js?v=82" defer></script>
+  <script src="./js/settings.js?v=82" defer></script>
+  <script src="./js/cloud.js?v=82" defer></script>
+  <script src="./js/media.js?v=82" defer></script>
+  <script src="./js/web.js?v=82" defer></script>
+  <script src="./js/privacy.js?v=82" defer></script>
+  <script src="./js/auth.js?v=82" defer></script>
+  <script src="./js/vpn.js?v=82" defer></script>
+  <script src="./js/phishing.js?v=82" defer></script>
+  <script src="./js/mitm.js?v=82" defer></script>
+  <script src="./js/mail.js?v=82" defer></script>
+  <script src="./js/ads.js?v=82" defer></script>
+  <script src="./js/simulation.js?v=82" defer></script>
+  <script src="./js/map.js?v=82" defer></script>
+  <script src="./js/settings-ui.js?v=82" defer></script>
+  <script src="./js/browser-navigation.js?v=82" defer></script>
+  <script src="./js/instagram-ui.js?v=82" defer></script>
+  <script src="./js/computer.js?v=82" defer></script>
+  <script src="./js/browser-ui.js?v=82" defer></script>
+  <script src="./js/phishing-ui.js?v=82" defer></script>
+  <script src="./js/mitm-ui.js?v=82" defer></script>
+  <script src="./js/mail-ui.js?v=82" defer></script>
+  <script src="./js/privacy-ui.js?v=82" defer></script>
+  <script src="./js/auth-ui.js?v=82" defer></script>
+  <script src="./js/ads-ui.js?v=82" defer></script>
+  <script src="./js/app.js?v=82" defer></script>
 </head>
 <body>
   <main class="workspace">
     <section class="map-area" aria-label="Interaktivní mapa sítě">
       <div class="stage" id="stage">
+        <button id="open-settings" class="icon-button settings-launch" aria-label="Nastavení aplikace" title="Nastavení aplikace"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-1 3-3 1-2 3 2 2-1 3 3 2 1 3h4l1-3 3-1 2-3-2-2 1-3-3-2-1-3Z"/><circle cx="10" cy="11" r="3"/></svg></button>
         <nav class="scene-nav" aria-label="Měřítko mapy"><button data-scene="home" class="active" aria-pressed="true">Byt</button><button data-scene="city" aria-pressed="false">Město</button><button data-scene="all" aria-pressed="false">Celá síť</button></nav>
         <svg id="network-map" role="group" aria-label="Síťová mapa. Zařízení a spoje lze otevřít klepnutím. Přiblížení gestem dvěma prsty nebo Ctrl a kolečkem myši." viewBox="35 270 465 440"></svg>
         <div class="map-tools"><button id="zoom-in" class="icon-button" aria-label="Přiblížit mapu" title="Přiblížit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">+</button><button id="zoom-out" class="icon-button" aria-label="Oddálit mapu" title="Oddálit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">−</button></div>
@@ -51,8 +55,6 @@
         <div class="device-overlay" id="device-overlay" hidden>
           <section class="device-window" id="device-content" role="dialog" aria-modal="false" aria-labelledby="device-title" tabindex="-1">
             <div class="device-window-bar">
-              <button id="device-back" class="icon-button" data-action="back-device" aria-label="Zpět na předchozí detail" hidden>←</button>
-              <span id="device-eyebrow" hidden></span>
               <button class="device-close" data-action="close-device" aria-label="Zavřít informace o zařízení a vrátit se k mapě"><span aria-hidden="true">×</span></button>
             </div>
             <div class="device-body" id="device-body"></div>
@@ -65,6 +67,13 @@
       </footer>
     </section>
   </main>
+  <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description">
+    <form>
+      <header class="settings-header"><div><h2 id="settings-title">Nastavení aplikace</h2><p id="settings-description">Sestav si síť a vyber, kolik podrobností chceš vidět.<br>Po obnovení stránky se vrátí základní sestava.</p></div><button type="button" class="device-close" data-settings-action="close" aria-label="Zavřít nastavení bez použití změn" autofocus>×</button></header>
+      <div class="settings-scroll"><div class="settings-toolbar"><span id="settings-count"></span><button type="button" class="inline-link" data-settings-action="base">Základní sestava</button><button type="button" class="inline-link" data-settings-action="all">Zapnout vše</button></div><div id="settings-options"></div></div>
+      <footer class="settings-footer"><p id="settings-change-note" role="status"></p><button type="submit" class="primary-button">Použít změny</button></footer>
+    </form>
+  </dialog>
   <div id="toast" class="toast" role="status"></div>
   <noscript>Pro interaktivní model povol JavaScript. Aplikace neposílá žádná data mimo prohlížeč.</noscript>
 </body>

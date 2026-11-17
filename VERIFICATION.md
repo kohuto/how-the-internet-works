@@ -2,6 +2,57 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## DNS jako volitelné rozšíření — 17. listopadu 2026, v82
+
+DNS server je samostatná volba mezi zařízeními a službami, výchozí sestava jej nemá. Obsahuje nyní 10 zařízení a 10 spojů. Názvy webů a nabízené odkazy zůstávají funkční díky připraveným adresám, bez DNS událostí, paketů a naplňování cache. Po zapnutí DNS se objeví jeho uzel/spoj v hostingu a běžné dotazy i odpovědi A/MX s cache. Výpadek napájení či spoje zapnutého DNS tuto zkratku neaktivuje. Vynechání funguje i pro vložený reklamní požadavek a poštovní MX při předání i opakovaném předání mezi poskytovateli. Změna volby nadále podléhá společnému tlačítku Použít změny.
+
+Prošlo všech 244 testů. Čtyři nové testy ověřují HTTP/HTTPS formulář se zachovaným obsahem také přes VPN, zapnuté DNS a cache včetně selhání vypnutého serveru, samostatné vyhledání reklamního partnera a SMTP předání s DNS MX i bez něj. Upraveno očekávání základní topologie a nepřítomnosti DNS přenosů.
+
+V prohlížeči základní sestava bez DNS načetla knihovnu z původního odkazu https://knihovna.test/ za 90 kroků, s původním nadpisem a bez DNS událostí. Po zaškrtnutí DNS a použití změn se objevil server i popisek WEB · DNS; stejná knihovna se načetla za 124 kroků včetně DNS dotazu a odpovědi. Základní popis v nastavení i nápověda hostingu odpovídají výběru. Ověřena syntaxe změněných skriptů a verze prostředků v82.
+
+## Odebrání popisku cesty připojení — 17. listopadu 2026, v81
+
+Ze společného přehledu připojení odstraněn popisek Kabel → switch → domácí síť včetně jeho variant pro Wi-Fi a mobilní data. Odstraněn také nepoužívaný styl connection-path. Stav připojení, IP adresy a ovládací prvky zůstávají.
+
+V prohlížeči ověřeno kabelové i Wi-Fi připojení notebooku a mobilní připojení telefonu: bez popisku, se správnými IP adresami a stavem připojení. Konzole bez chyb a varování. Ověřena syntaxe skriptu a aktualizována verze prostředků na v81.
+
+## Odebrání odkazů na mapu z připojení — 17. listopadu 2026, v80
+
+Z aplikace Připojení odstraněna tlačítka Sledovat síť v mapě a Prohlédnout připojení v mapě. Společná změna platí pro notebook, telefon, Matějův notebook, chatu a doupě; tlačítko Sledovat síť v mapě odstraněno také z kavárenské varianty připojení. Odstraněna nepoužívaná proměnná pro odkaz na přístupový spoj.
+
+V prohlížeči ověřena nepřítomnost obou odkazů ve všech šesti variantách připojení, zachování ovládání připojení a VPN, odpojení i opětovné připojení notebooku kabelem. Konzole bez chyb a varování. Ověřena syntaxe obou změněných skriptů a aktualizována verze prostředků na v80.
+
+## Volitelné části a podrobnosti — 17. listopadu 2026, v79
+
+Přidáno vždy dostupné nastavení s 20 samostatnými rozšířeními a čtyřmi přepínači podrobností. Základní sestava obsahuje 11 zařízení a 11 spojů pro otevření webu. Automatické návaznosti ukazují, která volba součást vyžaduje. Telefon bez mobilní sítě přidá Wi-Fi, samotná mobilní síť domácí Wi-Fi nevyžaduje. Vypnuté oblasti nemají viditelné budovy, uzly, spoje, DNS záznamy ani dostupné aplikace/příjemce a nesměrují provoz. Celá síť přizpůsobuje výřez zapnutým oblastem.
+
+Změny se použijí společně tlačítkem Použít změny. Změna sestavy zruší starý pokus, časovač i asynchronní výpočet a vytvoří výchozí data nové sítě; samotná změna podrobností zachová současný pokus. Zavření nastavení změny zahodí. Přehrávání během otevřeného nastavení stojí a po zavření se obnoví, pokud předtím běželo. Nastavení není ukládané; nové načtení obnoví základ.
+
+- Všech 240 testů modelu prošlo, včetně devíti nových testů základního HTTPS webu, závislostí, jednotlivých rozšíření a nezměněného chování se skrytými podrobnostmi.
+- V prohlížeči ověřeno HTTPS načtení knihovny v základní sestavě (124 kroků), pouze Prohlížeč/Připojení na ploše a pouze Knihovna v záložkách. Přidání Instagramu přidá Matějův byt, ale mapa se nemění před použitím změn. Zapnout vše obnoví všech 61 zařízení a 67 spojů.
+- Zkontrolováno všech 61 oken bez chybějícího názvu, také se všemi čtyřmi podrobnostmi vypnutými. Ověřeno skrytí MAC/směrovací tabulky a NAT, zachování adres/portů a skrytí bajtů TLS. Zapnutí podrobností při otevřeném paketu zachovalo jeho číslo a pokus, pouze doplnilo obsah a tabulky.
+- Samostatně zapnutý e-shop se načetl bez reklamního požadavku, reklamního bloku a odkazu na vypnuté Zprávy. Samostatná kavárna nemá nabídku napodobeného hotspotu. Telefon bez BTS má pouze Wi-Fi/odpojení, bez vypnutých voleb VPN/NAT.
+- Ověřeno zahazování změn křížkem i Escape, obnovení základní sestavy po reloadu bez localStorage/sessionStorage a změna sestavy během přehrávání bez pozdějšího pokračování starého časovače. Při 853 × 858 a 320 × 844 px dialog nepřetéká vodorovně, má posuvný obsah a dostupné použití změn. Opraveno překrytí nastavení a zavírání monitoru na úzké obrazovce.
+- Konzole bez chyb a varování, ověřena syntaxe všech skriptů a existence všech místních prostředků. Aktualizována verze prostředků na v79.
+
+## Odebrání adresy knihovny — 17. listopadu 2026, v78
+
+Z patičky webu knihovny odstraněn text Lipov · Školní 12. Odkaz Soukromí zůstává zarovnaný vpravo. Ověřeno odstranění textu ze zdroje, zachování odkazu, zarovnání patičky a syntaxe skriptu. Aktualizována verze prostředků.
+
+## Zjednodušení detailu paketu — 17. listopadu 2026, v77
+
+Z detailů paketů odstraněno oznámení Přenos je pozastavený a dekorativní ikona vedle nadpisu, včetně varianty VPN. Ze společného záhlaví odstraněny zbývající šipka zpět a popisek Pod lupou; odstraněna jejich nepoužívaná historie navigace a styly. Zavírací křížek, údaje paketů a ovládání skupin zůstávají.
+
+V rozhraní ověřen DNS dotaz s IP/UDP údaji a VPN paket s vnějším obalem. Otevření detailu nadále pozastaví přenos: během čekání se stav nezměnil, po zavření se dříve přehrávaný přenos automaticky rozběhl a dříve ručně pozastavený zůstal pozastavený. Znovu otevřeno všech 61 zařízení bez chybějících názvů a chyb po odstranění společného záhlaví. Při 853 × 858 a 320 × 844 px bez vodorovného přetékání, konzole bez chyb a varování. Ověřena syntaxe skriptu, odstranění nepoužívaných prvků, vyvážení CSS bloků a existence 29 místních prostředků, aktualizována verze prostředků.
+
+## Odebrání mapy z podrobností prohlížeče — 17. listopadu 2026, v76
+
+Z panelu Síťový přenos odstraněno tlačítko Sledovat v mapě ↗. Pokud není dostupný aktuální paket, nevytváří se ani prázdný řádek akcí. V prohlížeči ověřeno otevření a zavření panelu, nepřítomnost tlačítka mapy a zachování tlačítka Prozkoumat aktuální paket včetně funkčního otevření detailu. Konzole bez chyb a varování. Syntaxe skriptu ověřena, aktualizována verze prostředků.
+
+## Čistší obrazovka načítání prohlížeče — 17. listopadu 2026, v75
+
+Z obrazovky načítání odstraněn odkaz Sledovat průběh přenosu. Ze spodní lišty odstraněn popis fáze přenosu a odkaz Sledovat v mapě; zbývající Podrobnosti jsou zarovnány vpravo. Podrobné fáze zůstávají v rozbaleném síťovém panelu. V prohlížeči ověřena nepřítomnost všech tří označených prvků, otevření a zavření Podrobností a úspěšné dokončení HTTPS načítání na notebooku i telefonu. Rozložení ověřeno při 853 × 858 a 320 × 844 px bez vodorovného přetékání, konzole bez chyb a varování. Ověřena syntaxe skriptu, aktualizována verze prostředků.
+
 ## Odebrání odkazu na připojení telefonu — 17. listopadu 2026, v74
 
 Z oken BTS odstraněno tlačítko Připojení telefonu ↗. V prohlížeči ověřena jeho nepřítomnost u BTS Lipová i BTS Park a zachování obou portů, napájení a sbalené nápovědy. Konzole bez chyb a varování. Syntaxe skriptu ověřena, aktualizována verze prostředků.
