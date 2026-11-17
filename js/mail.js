@@ -53,16 +53,19 @@
       const s=this.sim,bytes=encoder.encode(JSON.stringify(value)),transfer=++this.#transfer,from=response?session.to:session.from,to=response?session.from:session.to;
       if(!this.net.nodes[from].on)return s.failure(`${this.net.nodes[from].name} je vypnutý.`,null,from);
       this.log(from,session,'out',value);
-      const events=[];for(let offset=0;offset<bytes.length;offset+=CHUNK){
-        const data={transfer,offset,length:bytes.length,bytes:Array.from(bytes.slice(offset,offset+CHUNK))},record=session.tls.seal('mail-chunk',data,to);
+      const sequence=response?'responseSeq':'requestSeq',firstSeq=session[sequence],events=[];
+      for(let position=0;position<bytes.length;position+=CHUNK){
+        const data={transfer,length:bytes.length,bytes:Array.from(bytes.slice(position,position+CHUNK))},record=session.tls.seal('mail-chunk',data,to);
         const payload={record,mailSession:session.id};
         const kind=`${session.protocol.toLowerCase()}-${response?'response':'request'}`;
         const p=response?s.replyPacket(kind,session.lastRequest,payload):s.createPacket(kind,from,to,payload,{sport:session.phase==='relay'?52006:session.protocol==='SMTP'?51006:51007,dport:session.phase==='relay'?25:session.protocol==='SMTP'?465:993});
-        p.connection=session.protocol.toLowerCase();p.label=`${session.protocol} · ${response?'odpověď':'požadavek'}${bytes.length>CHUNK?' '+(Math.floor(offset/CHUNK)+1)+'/'+Math.ceil(bytes.length/CHUNK):''}`;
-        p.seq=session[response?'responseSeq':'requestSeq'];session[response?'responseSeq':'requestSeq']+=record.data.length;
-        p.mailMeta={protocol:session.protocol,phase:session.phase,session:session.id,offset,total:bytes.length,partBytes:data.bytes.length};
-        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+Math.floor(offset/CHUNK)*3,title:`${session.protocol} · příprava části ${Math.floor(offset/CHUNK)+1} / ${Math.ceil(bytes.length/CHUNK)}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.phase==='relay'?'Samostatné předání mezi poštovními servery.':session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes vlastní poštovní server.'}`});
-      }s.next(events);
+        p.connection=session.protocol.toLowerCase();p.label=`${session.protocol} · ${response?'odpověď':'požadavek'}${bytes.length>CHUNK?' '+(Math.floor(position/CHUNK)+1)+'/'+Math.ceil(bytes.length/CHUNK):''}`;
+        p.seq=session[sequence];session[sequence]=(session[sequence]+record.data.length)>>>0;
+        p.mailMeta={protocol:session.protocol,phase:session.phase,session:session.id,seq:p.seq,total:bytes.length,partBytes:data.bytes.length};
+        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+Math.floor(position/CHUNK)*3,title:`${session.protocol} · příprava části ${Math.floor(position/CHUNK)+1} / ${Math.ceil(bytes.length/CHUNK)}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.phase==='relay'?'Samostatné předání mezi poštovními servery.':session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes vlastní poštovní server.'}`});
+      }
+      this.#buffers.set(session.id+':'+transfer,{length:bytes.length,stream:new globalThis.InternetLab.TCPReceiveStream(firstSeq,(session[sequence]-firstSeq)>>>0),chunks:new Map()});
+      s.next(events);
     }
     beginSMTP(relay=false){
       this.phase=relay?'relay':'submission';this.state.current.phase=this.phase;
@@ -178,10 +181,13 @@
         const response=p.kind.endsWith('response'),receiver=response?session.from:session.to;
         if(p.destination!==receiver)throw new Error('Poštovní data dorazila jinému konci spojení.');
         const part=session.tls.open(p.payload.record,receiver,'mail-chunk'),key=session.id+':'+part.transfer;
-        let buffer=this.#buffers.get(key);if(!buffer){buffer={length:part.length,chunks:new Map()};this.#buffers.set(key,buffer);}
-        if(part.length!==buffer.length||part.offset<0||part.offset+part.bytes.length>buffer.length)throw new Error('Neplatná část poštovního přenosu.');
-        buffer.chunks.set(part.offset,new Uint8Array(part.bytes));if([...buffer.chunks.values()].reduce((n,b)=>n+b.length,0)!==buffer.length)return;
-        const bytes=new Uint8Array(buffer.length);let contiguous=0;for(const [at,b] of [...buffer.chunks].sort((a,b)=>a[0]-b[0])){if(at!==contiguous)throw new Error('Poštovní přenos nemá souvislé bajty.');bytes.set(b,at);contiguous+=b.length;}
+        const buffer=this.#buffers.get(key);
+        if(!buffer||part.length!==buffer.length)throw new Error('Neplatná část poštovního přenosu.');
+        buffer.stream.receive(p.seq,p.payload.record.data);buffer.chunks.set(p.seq,new Uint8Array(part.bytes));
+        if(!buffer.stream.complete)return;
+        const bytes=new Uint8Array(buffer.length);let position=0;
+        for(const [,data] of [...buffer.chunks].sort((a,b)=>((a[0]-buffer.stream.firstSeq)>>>0)-((b[0]-buffer.stream.firstSeq)>>>0))){bytes.set(data,position);position+=data.length;}
+        if(position!==buffer.length)throw new Error('Poštovní přenos nemá souvislé bajty.');
         this.#buffers.delete(key);const value=JSON.parse(decoder.decode(bytes));this.log(receiver,session,'in',value);
         if(response)this.clientReply(session,value);else{session.lastRequest={...p};this.serverCommand(session,value,e);}
       }catch(error){s.failure(error.message,p,e.node);}

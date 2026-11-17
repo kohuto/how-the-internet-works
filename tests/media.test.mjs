@@ -65,9 +65,9 @@ test('Video packets have independent identities, scheduling, SEQ, bytes and MTU 
   for(const p of packets) {
     bytes+=p.payload.bytes.length;assert.equal(p.payload.packetCount,1);
     assert(p.payload.bytes.length<=1400);assert(p.payload.bytes.length+40<=1440);
-    assert.equal(p.seq,1001+p.payload.offset);assert.equal(p.seq,previousSeq);
+    assert(!Object.hasOwn(p.payload,'offset'));assert.equal(p.seq,previousSeq);
     previousSeq=p.seq+p.payload.bytes.length;
-    assert.deepEqual(p.payload.bytes,sim.net.sender.content.bytes.slice(p.payload.offset,p.payload.end));
+    assert.deepEqual(p.payload.bytes,sim.net.sender.content.bytes.slice(p.seq-1001,p.seq-1001+p.payload.bytes.length));
   }
   assert.equal(bytes,48000);assert.equal(packets.at(-1).payload.bytes.length,400);
   const events=finish(sim);assert.equal(sim.status,'success');assert.equal(sim.net.friend.receivedPackets,35);

@@ -64,7 +64,7 @@ test('Replication transports a complete UTF-8 snapshot and ACLs between independ
   const packets=[...sim.packets.values()];assert(packets.length>1);
   assert(packets.every(p=>p.kind==='cloud-replica'&&p.src==='203.0.113.140'&&p.dst==='203.0.113.204'&&p.natHistory.length===0));
   const snapshot=new Uint8Array(packets[0].payload.totalBytes);
-  for(const p of packets)snapshot.set(p.payload.bytes,p.payload.offset);
+  for(const p of packets)snapshot.set(p.payload.bytes,p.seq-1001);
   assert.equal(JSON.parse(new TextDecoder().decode(snapshot)).files.find(f=>f.id===file.id).content,text);
 });
 

@@ -104,7 +104,7 @@ test('An independent partner website loads without making hidden advertising req
 test('Showing details changes no forwarding, data delivery or address translation',()=>{
   const settings=new LabSettings(),net=new Network(settings),sim=new Simulation(net);
   sim.start('web',{address:'http://knihovna.test/'});const first=finish(sim).filter(e=>e.kind==='hop').map(e=>[e.from,e.to]);
-  settings.details={mac:true,routes:true,nat:true,ttl:true,tcp:true};
+  settings.details={mac:true,routes:true,nat:true,ttl:true,headers:true};
   const same=new Network(settings),second=new Simulation(same);second.start('web',{address:'http://knihovna.test/'});
   assert.deepEqual(finish(second).filter(e=>e.kind==='hop').map(e=>[e.from,e.to]),first);
   assert.deepEqual(same.nat.home.rows,net.nat.home.rows);

@@ -31,7 +31,7 @@
     {id:'routes',label:'Směrovací tabulky',description:'Cílové sítě, další uzly a výstupní rozhraní routerů.'},
     {id:'nat',label:'NAT',description:'Tabulky a záznamy překladu IP adres a portů v routerech.'},
     {id:'ttl',label:'TTL',description:'Hodnota životnosti v IP hlavičce paketu.'},
-    {id:'tcp',label:'TCP hlavička',description:'Zdrojový a cílový port a pořadové číslo SEQ v náhledu paketu.'}
+    {id:'headers',label:'IP a TCP hlavička',description:'Oddělené IP a TCP/UDP hlavičky. U TCP se místo zjednodušeného pořadí zobrazí skutečné číslo SEQ.'}
   ];
   const featureById=new Map(FEATURES.map(f=>[f.id,f]));
   class LabSettings {

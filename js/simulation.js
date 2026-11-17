@@ -7,9 +7,30 @@
   const PACKET_GAP=3;
   const CLOUD_MSS=160;
   const DEFAULT_MESSAGE='Čau Matěji! Nechceš zítra po škole vyrazit ven?';
+  class TCPReceiveStream {
+    constructor(firstSeq,length) {
+      this.firstSeq=firstSeq>>>0;this.length=length;
+      this.bytes=new Uint8Array(length);this.covered=new Uint8Array(length);
+      this.parts=new Map();this.received=0;this.contiguous=0;
+    }
+    receive(seq,data) {
+      if(!Number.isInteger(seq)||seq<0||seq>0xffffffff)throw new Error('Neplatné pořadové číslo TCP.');
+      const position=(seq-this.firstSeq)>>>0;
+      if(position>this.length||data.length>this.length-position)throw new Error('TCP SEQ je mimo očekávaný proud dat.');
+      for(let i=0;i<data.length;i++)if(this.covered[position+i]&&this.bytes[position+i]!==data[i])throw new Error('Překrývající se TCP data se neshodují.');
+      for(let i=0;i<data.length;i++) {
+        if(!this.covered[position+i]){this.covered[position+i]=1;this.received++;}
+        this.bytes[position+i]=data[i];
+      }
+      this.parts.set(seq,data);
+      while(this.contiguous<this.length&&this.covered[this.contiguous])this.contiguous++;
+      return this;
+    }
+    get complete() {return this.contiguous===this.length;}
+  }
   class Simulation {
     constructor(network=new Network()) {
-      this.net=network;this.queue=[];this.packets=new Map();this.current=null;this.status='idle';this.lastAction=null;this.action=null;this.run=0;this.serial=0;this.steps=0;this.chunks=new Map();this.totalBytes=0;
+      this.net=network;this.queue=[];this.packets=new Map();this.current=null;this.status='idle';this.lastAction=null;this.action=null;this.run=0;this.serial=0;this.steps=0;this.tcpStream=null;this.totalBytes=0;this.packetOrders=new Map();
       this.time=0;this.order=0;this.linkReady=new Map();this.frame=[];this.phase='upload';this.vpn=new VPNTransport(this);this.phishing=new PhishingScenario(this);this.mitm=new MITMScenario(this);this.mail=new MailScenario(this);this.privacy=new PrivacyService(this.net);this.auth=new AuthService(this);this.ads=new AdsScenario(this);
     }
     clientId() {return this.action?.payload.device||'laptop';}
@@ -29,10 +50,10 @@
       const protocol=kind.startsWith('dns')?'UDP':'TCP';
       const response=kind.endsWith('response');
       const p={id:`${this.run}.${++this.serial}`,kind,src:this.net.nodes[src].ip,dst:this.net.nodes[dst].ip,source:src,destination:dst,protocol,ttl:64,payload,location:src,state:'waiting',run:this.run,
-        sport:response?(protocol==='UDP'?53:80):(protocol==='UDP'?53000:kind==='print'?51001:51000),dport:response?(protocol==='UDP'?53000:51000):(protocol==='UDP'?53:kind==='print'?9100:80),seq:protocol==='TCP'?(response?8001:1001)+(payload.offset||0):null,
+        sport:response?(protocol==='UDP'?53:80):(protocol==='UDP'?53000:kind==='print'?51001:51000),dport:response?(protocol==='UDP'?53000:51000):(protocol==='UDP'?53:kind==='print'?9100:80),seq:protocol==='TCP'?(response?8001:1001):null,
         label:kind==='dns-query'?'DNS · dotaz':kind==='dns-response'?'DNS · odpověď':kind==='http-request'?'HTTP · požadavek':kind==='http-response'?'HTTP · obsah':kind==='print'?'Dokument':`Část zprávy ${payload.index+1}/${payload.total}`,direction:response?'response':'request'};
       if(kind==='message')Object.assign(p,{sport:src==='friend'?52002:51002,dport:443,connection:src==='friend'?'instagram-matej':'ty-instagram',label:`${this.instagramName(src)} → Instagram · ${payload.index+1}/${payload.total}`});
-      if(kind==='ig-delivery')Object.assign(p,{sport:443,dport:dst==='friend'?52002:51002,seq:8001+(payload.offset||0),connection:dst==='friend'?'instagram-matej':'ty-instagram',direction:'delivery',label:`Instagram → ${this.instagramName(dst)} · ${payload.index+1}/${payload.total}`});
+      if(kind==='ig-delivery')Object.assign(p,{sport:443,dport:dst==='friend'?52002:51002,seq:8001,connection:dst==='friend'?'instagram-matej':'ty-instagram',direction:'delivery',label:`Instagram → ${this.instagramName(dst)} · ${payload.index+1}/${payload.total}`});
       if(kind==='ig-read'){const client=src==='instagram'?dst:src;Object.assign(p,{sport:src==='instagram'?443:client==='friend'?52002:51002,dport:src==='instagram'?(client==='friend'?52002:51002):443,seq:src==='instagram'?12001:4001,connection:client==='friend'?'instagram-matej':'ty-instagram',direction:'receipt',label:src==='instagram'?`Přečtení · Instagram → ${this.instagramName(dst)}`:`Přečtení · ${this.instagramName(src)} → Instagram`});}
       if(kind.startsWith('cloud-'))Object.assign(p,{sport:response?443:51003,dport:response?51003:443,connection:'cloud',label:`Cloud · ${response?'odpověď':'požadavek'} ${payload.index+1}/${payload.total}`});
       if(kind.startsWith('chatbot-'))Object.assign(p,{sport:response?443:51004,dport:response?51004:443,connection:'chatbot',label:`Chatbot · ${response?'odpověď':'dotaz'} ${payload.index+1}/${payload.total}`});
@@ -45,7 +66,10 @@
         this.webSeq[response?'response':'request']+=(payload.record?.data.length||0)+encoder.encode(payload.publicText||'').length;
       }
       if(this.ads.embedded&&['https-request','https-response'].includes(kind))p.label=kind==='https-request'?'HTTPS · žádost o reklamu':'HTTPS · vybraná reklama';
-      Object.assign(p,header);this.vpn.prepare(p);p.initialHeader=this.net.packetHeader(p);p.natHistory=[];
+      Object.assign(p,header);
+      const flow=[src,dst,p.protocol,p.sport,p.dport].join('|');
+      p.packetOrder=header.packetOrder??(this.packetOrders.get(flow)||0)+1;this.packetOrders.set(flow,p.packetOrder);
+      this.vpn.prepare(p);p.initialHeader=this.net.packetHeader(p);p.natHistory=[];
       this.packets.set(p.id,p);return p;
     }
     replyPacket(kind,request,payload) {
@@ -82,7 +106,7 @@
         if(this.net.chatbot.server.state==='processing')this.net.chatbot.server.state='interrupted';
       }
       this.auth.cancel();this.ads.reset();this.mitm.reset();this.vpn.reset();for(const c of Object.values(this.net.vpn.clients))c.path=[];
-      this.run++;this.serial=0;this.steps=0;this.packets.clear();this.queue=[];this.chunks.clear();this.current=null;this.totalBytes=0;
+      this.run++;this.serial=0;this.steps=0;this.packets.clear();this.packetOrders.clear();this.queue=[];this.tcpStream=null;this.current=null;this.totalBytes=0;
       this.time=0;this.order=0;this.linkReady.clear();this.frame=[];
       this.tls=null;this.webSeq={request:1001,response:8001};this.webRequest=null;this.webReply=null;
       this.action={type,payload:{...payload}};this.lastAction={type,payload:{...payload}};this.status='running';
@@ -134,9 +158,9 @@
       this.status='waiting';this.queue=[];this.current={kind:'waiting',at:this.time,title,description,node,packet:this.current?.packet};return this.current;
     }
     continuation() {
-      if(this.action?.type!=='message'){this.run++;this.serial=0;this.packets.clear();this.time=0;this.order=0;}
+      if(this.action?.type!=='message'){this.run++;this.serial=0;this.packets.clear();this.packetOrders.clear();this.time=0;this.order=0;}
       for(const p of this.packets.values())if(p.state==='transit'||p.state==='waiting')p.state='stopped';
-      this.queue=[];this.chunks.clear();this.linkReady.clear();this.frame=[];this.totalBytes=this.net.instagram.totalBytes;
+      this.queue=[];this.tcpStream=null;this.linkReady.clear();this.frame=[];this.totalBytes=this.net.instagram.totalBytes;
       this.action={type:'message',payload:{text:this.net.sender.text,messageType:this.net.instagram.content?.type||'text',device:this.net.instagram.senderDevice,targetDevice:this.net.instagram.recipientDevice}};this.lastAction={...this.action,payload:{...this.action.payload}};this.status='running';
     }
     resumePending() {
@@ -160,47 +184,58 @@
       return this.resumePending();
     }
     messagePackets(kind,from,to,bytes,size,header={}) {
-      const total=Math.ceil(bytes.length/size),events=[];
-      for(let offset=0,index=0;offset<bytes.length;offset+=size,index++) {
-        const data=bytes.slice(offset,offset+size);
-        const packet=this.createPacket(kind,from,to,{bytes:data,offset,end:offset+data.length,index,total,totalBytes:bytes.length,packetCount:1,mss:size,contentType:this.net.sender.content?.type||'text',messageId:this.net.instagram.id},header);
-        events.push({...this.originate(packet),at:this.time+1+index*PACKET_GAP});
+      const total=Math.ceil(bytes.length/size),events=[],firstSeq=kind.endsWith('response')||kind==='ig-delivery'?8001:1001;
+      this.tcpStream=new TCPReceiveStream(firstSeq,bytes.length);
+      for(let position=0,index=0;position<bytes.length;position+=size,index++) {
+        const data=bytes.slice(position,position+size);
+        const p=this.createPacket(kind,from,to,{bytes:data,index,total,totalBytes:bytes.length,packetCount:1,mss:size,contentType:this.net.sender.content?.type||'text',messageId:this.net.instagram.id},{...header,seq:(firstSeq+position)>>>0,packetOrder:index+1});
+        events.push({...this.originate(p),at:this.time+1+index*PACKET_GAP});
       }
       this.next(events);return total;
     }
     cloudPackets(kind,from,to,value,header={}) {
-      const bytes=encoder.encode(JSON.stringify(value)),total=Math.ceil(bytes.length/CLOUD_MSS),events=[];
-      for(let offset=0,index=0;offset<bytes.length;offset+=CLOUD_MSS,index++) {
-        const data=bytes.slice(offset,offset+CLOUD_MSS);
-        const p=this.createPacket(kind,from,to,{bytes:data,offset,end:offset+data.length,index,total,totalBytes:bytes.length},header);
+      const bytes=encoder.encode(JSON.stringify(value));
+      const total=Math.ceil(bytes.length/CLOUD_MSS),events=[],firstSeq=kind.endsWith('response')||kind==='ig-delivery'?8001:1001;
+      this.tcpStream=new TCPReceiveStream(firstSeq,bytes.length);
+      for(let position=0,index=0;position<bytes.length;position+=CLOUD_MSS,index++) {
+        const data=bytes.slice(position,position+CLOUD_MSS);
+        const p=this.createPacket(kind,from,to,{bytes:data,index,total,totalBytes:bytes.length},{...header,seq:(firstSeq+position)>>>0,packetOrder:index+1});
         events.push({...this.originate(p),at:this.time+1+index*PACKET_GAP});
       }
       this.next(events);return bytes.length;
     }
     chatTurn() {return this.net.chatbot.clients[this.clientId()]?.turns.find(t=>t.id===this.action?.payload.turnId);}
     chatbotPackets(kind,from,to,text,header={}) {
-      const bytes=encoder.encode(text),total=Math.ceil(bytes.length/MSS),events=[];
-      for(let offset=0,index=0;offset<bytes.length;offset+=MSS,index++) {
-        const data=bytes.slice(offset,offset+MSS);
-        const p=this.createPacket(kind,from,to,{bytes:data,offset,end:offset+data.length,index,total,totalBytes:bytes.length,turnId:this.chatTurn().id},header);
+      const bytes=encoder.encode(text);
+      const total=Math.ceil(bytes.length/MSS),events=[],firstSeq=kind.endsWith('response')||kind==='ig-delivery'?8001:1001;
+      this.tcpStream=new TCPReceiveStream(firstSeq,bytes.length);
+      for(let position=0,index=0;position<bytes.length;position+=MSS,index++) {
+        const data=bytes.slice(position,position+MSS);
+        const p=this.createPacket(kind,from,to,{bytes:data,index,total,totalBytes:bytes.length,turnId:this.chatTurn().id},{...header,seq:(firstSeq+position)>>>0,packetOrder:index+1});
         events.push({...this.originate(p),at:this.time+1+index*PACKET_GAP});
       }
       this.next(events);return bytes.length;
     }
+    receiveTCPData(p) {
+      try {
+        if(!this.tcpStream)throw new Error('TCP spojení nemá připravený přijímací proud.');
+        return this.tcpStream.receive(p.seq,p.payload.bytes);
+      }catch(error){this.failure(error.message,p,p.location);return null;}
+    }
     receiveChatbot(p,event) {
       const turn=this.chatTurn(),server=this.net.chatbot.server,request=p.kind==='chatbot-request';
-      this.chunks.set(p.payload.offset,p.payload.bytes);
-      const received=[...this.chunks.values()].reduce((n,b)=>n+b.length,0);
+      const stream=this.receiveTCPData(p);if(!stream)return;
+      const received=stream.received;
       if(request) {
         turn.sentBytes=received;
-        if(this.chunks.size===1)Object.assign(server,{prompt:'',answer:'',step:0,client:this.clientId()});
+        if(stream.parts.size===1)Object.assign(server,{prompt:'',answer:'',step:0,client:this.clientId()});
         Object.assign(server,{state:'receiving',receivedBytes:received,totalBytes:p.payload.totalBytes});
       }else turn.receivedBytes=received;
-      let contiguous=0;while(this.chunks.has(contiguous))contiguous+=this.chunks.get(contiguous).length;
+      const contiguous=stream.contiguous;
       event.description=`${request?'Server přijímá dotaz':'Zařízení přijímá odpověď'}: ${received} / ${p.payload.totalBytes} B. Aplikace čeká na všechny bajty v pořadí.`;
       if(contiguous!==p.payload.totalBytes)return;
-      const bytes=new Uint8Array(contiguous);for(const [offset,data] of this.chunks)bytes.set(data,offset);
-      const text=decoder.decode(bytes);this.chunks.clear();
+      const bytes=stream.bytes;
+      const text=decoder.decode(bytes);this.tcpStream=null;
       if(request) {
         Object.assign(server,{state:'processing',step:0,prompt:text,answer:'',client:this.clientId()});turn.state='processing';
         // Reply to the tuple actually seen by the server, including the client's NAT translation.
@@ -214,16 +249,14 @@
     }
     receiveCloud(p,event) {
       const client=this.net.cloud.clients[this.clientId()],request=p.kind==='cloud-request';
-      this.chunks.set(p.payload.offset,p.payload.bytes);
-      const received=[...this.chunks.values()].reduce((n,b)=>n+b.length,0);
+      const stream=this.receiveTCPData(p);if(!stream)return;
+      const received=stream.received;
       if(request)client.sentBytes=received;else client.receivedBytes=received;
-      let contiguous=0;
-      while(this.chunks.has(contiguous))contiguous+=this.chunks.get(contiguous).length;
+      const contiguous=stream.contiguous;
       event.description=`Cloudový ${request?'požadavek':'výsledek'}: přijato ${received} / ${p.payload.totalBytes} B, v pořadí ${contiguous} B. Aplikace čeká na celý přenos.`;
       if(contiguous!==p.payload.totalBytes)return;
-      const bytes=new Uint8Array(contiguous);
-      for(const [offset,data] of this.chunks)bytes.set(data,offset);
-      const value=JSON.parse(decoder.decode(bytes));this.chunks.clear();
+      const bytes=stream.bytes;
+      const value=JSON.parse(decoder.decode(bytes));this.tcpStream=null;
       if(request) {
         const response=this.net.cloud.handle(this.clientId(),value,p.destination);
         this.net.nodes[p.destination].lastDecision={kind:'cloud',operation:value.op,user:this.net.cloud.user(this.clientId()).name,status:response.status,message:response.message,packetId:p.id};
@@ -237,14 +270,14 @@
       }
     }
     receiveReplica(p,event) {
-      this.chunks.set(p.payload.offset,p.payload.bytes);
-      const received=[...this.chunks.values()].reduce((n,b)=>n+b.length,0);
+      const stream=this.receiveTCPData(p);if(!stream)return;
+      const received=stream.received;
       this.net.cloud.replica.message=`Přijato ${received} / ${p.payload.totalBytes} B kopie. Původní úplná kopie zůstává zachovaná.`;
       event.description=this.net.cloud.replica.message;
-      let contiguous=0;while(this.chunks.has(contiguous))contiguous+=this.chunks.get(contiguous).length;
+      const contiguous=stream.contiguous;
       if(contiguous!==p.payload.totalBytes)return;
-      const bytes=new Uint8Array(contiguous);for(const [offset,data] of this.chunks)bytes.set(data,offset);
-      this.net.cloud.applyReplica(JSON.parse(decoder.decode(bytes)));this.chunks.clear();
+      const bytes=stream.bytes;
+      this.net.cloud.applyReplica(JSON.parse(decoder.decode(bytes)));this.tcpStream=null;
       this.finish('Kopie dorazila do cloudového centra B','Soubory, verze i přístupová práva jsou zkopírované. Centrum B je může poskytovat ke čtení.','cloud-backup');
     }
     webTarget() {return this.ads.address()?.server||'web';}
@@ -470,7 +503,7 @@
           e.title=`${this.net.nodes[device].name} otevírá spojení k Instagramu`;e.description='Klient zahájí spojení směrem ven. Domácí NAT si připraví překlad pro návrat zprávy.';
           this.next([this.originate(this.createPacket('ig-connect',device,'instagram',{purpose:'delivery'}))]);return e;
         }
-        ig.state='delivering';ig.error='';this.phase='delivery';this.chunks.clear();Object.assign(this.net.friend,{state:'receiving',receivedBytes:0,receivedPackets:0,streamBytes:0});ig.sentBytes=0;ig.sentPackets=0;
+        ig.state='delivering';ig.error='';this.phase='delivery';this.tcpStream=null;Object.assign(this.net.friend,{state:'receiving',receivedBytes:0,receivedPackets:0,streamBytes:0});ig.sentBytes=0;ig.sentPackets=0;
         const total=this.messagePackets('ig-delivery','instagram',device,ig.content.bytes,DELIVERY_MSS,{dst:channel.ip,dport:channel.port});
         e.title=`Instagram vytváří nové pakety pro ${this.net.nodes[device].name}`;e.description=`Připravené spojení: 203.0.113.80:443 → ${channel.ip}:${channel.port}. ${total} nových částí; návrat využije připravené připojení příjemce.`;
       } else if(e.kind==='receipt-relay') {
@@ -611,14 +644,13 @@
           this.finish('Dokument je vytištěný',`${p.payload.document} dorazil do tiskárny po místní síti.`,'printer');
         } else if(p.kind==='message'||p.kind==='ig-delivery') {
           const recipient=p.kind==='message'?this.net.instagram:this.net.friend;
-          this.chunks.set(p.payload.offset,p.payload.bytes);recipient.receivedPackets=[...this.chunks.values()].reduce((n,b)=>n+Math.ceil(b.length/MSS),0);recipient.receivedBytes=[...this.chunks.values()].reduce((n,b)=>n+b.length,0);
-          let contiguous=0;
-          while(this.chunks.has(contiguous))contiguous+=this.chunks.get(contiguous).length;
+          const stream=this.receiveTCPData(p);if(!stream)return this.current;
+          recipient.receivedPackets=stream.parts.size;recipient.receivedBytes=stream.received;
+          const contiguous=stream.contiguous;
           recipient.streamBytes=contiguous;
           e.description=`TCP přijalo ${recipient.receivedBytes} B a v pořadí předalo aplikaci ${contiguous} B. ${p.kind==='message'?'Instagram':this.net.nodes[p.destination].name} čeká na všech ${this.totalBytes} B.`;
-          if(recipient.receivedBytes===this.totalBytes) {
-            const bytes=new Uint8Array(this.totalBytes);
-            for(const [offset,data] of this.chunks)bytes.set(data,offset);
+          if(stream.complete) {
+            const bytes=stream.bytes;
             const original=p.kind==='message'?this.net.sender.content:this.net.instagram.content;
             recipient.content={...original,bytes};recipient.text=original.type==='text'?decoder.decode(bytes):original.name;
             if(p.kind==='message') {
@@ -650,5 +682,5 @@
       return this.current;
     }
   }
-  Object.assign(globalThis.InternetLab,{Simulation,MSS,DELIVERY_MSS,CLOUD_MSS,DEFAULT_MESSAGE});
+  Object.assign(globalThis.InternetLab,{Simulation,TCPReceiveStream,MSS,DELIVERY_MSS,CLOUD_MSS,DEFAULT_MESSAGE});
 })();

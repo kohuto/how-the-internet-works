@@ -91,8 +91,8 @@ test('Message splits into genuinely needed segments on sender and reassembles UT
   assert.equal(parts.length,Math.ceil(encoded.length/MSS));
   for(const [i,p] of parts.entries()) {
     assert.equal(p.location,'laptop');assert.equal(p.seq,1001+i*MSS);
-    assert.equal(p.payload.offset,i*MSS);assert(p.payload.bytes.length<=MSS);
-    assert.deepEqual(p.payload.bytes,encoded.slice(p.payload.offset,p.payload.end));
+    assert(!Object.hasOwn(p.payload,'offset'));assert(p.payload.bytes.length<=MSS);
+    assert.deepEqual(p.payload.bytes,encoded.slice(p.seq-1001,p.seq-1001+p.payload.bytes.length));
     assert(40+p.payload.bytes.length<1500,'No IP fragmentation required');
   }
   finish(sim);assert.equal(sim.status,'success');assert.equal(sim.net.friend.text,LONG_MESSAGE);
