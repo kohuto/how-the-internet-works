@@ -97,12 +97,13 @@ test('Corrupted VPN ciphertext cannot reach its inner application and can be ret
  assert(s.repeat());finish(s);assert.equal(s.status,'success');
 });
 
-test('Grouped Instagram image data and read receipts survive VPN on both households without double counting',()=>{
+test('Individual Instagram image packets and read receipts survive VPN on both households without double counting',()=>{
  const s=new Simulation();s.net.setVPN('laptop',true);s.net.setVPN('friend',true);
- const events=run(s,'message',{messageType:'image'});assert.equal(s.status,'success');assert.equal(s.net.sender.sentPackets,72);assert.equal(s.net.friend.receivedPackets,72);
- assert.deepEqual(s.net.friend.content.bytes,s.net.sender.content.bytes);assert(events.some(e=>e.packet?.kind==='vpn-outbound'&&e.packet.payload.packetCount===10));
+ const events=run(s,'message',{messageType:'image'});assert.equal(s.status,'success');assert.equal(s.net.sender.sentPackets,9);assert.equal(s.net.friend.receivedPackets,9);
+ assert.deepEqual(s.net.friend.content.bytes,s.net.sender.content.bytes);
+ const envelopes=events.filter(e=>e.packet?.kind.startsWith('vpn-'));assert(envelopes.length>1);assert(envelopes.every(e=>e.packet.payload.packetCount===1),'Each VPN envelope carries one original packet');
  const rows=s.net.vpn.rows.filter(r=>r.protocol==='TCP'&&r.remotePort===443);assert.equal(rows.length,2);assert.notEqual(rows[0].outsidePort,rows[1].outsidePort);
- assert.equal(s.net.vpn.sent,73);assert.equal(s.net.vpn.received,72);assert(s.markRead());finish(s);assert.equal(s.net.sender.state,'read');
+ assert.equal(s.net.vpn.sent,10);assert.equal(s.net.vpn.received,9);assert(s.markRead());finish(s);assert.equal(s.net.sender.state,'read');
 });
 
 test('Cloud authorization and queued Instagram delivery retain their behavior through VPN',()=>{

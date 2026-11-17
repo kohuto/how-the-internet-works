@@ -2,6 +2,14 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Samostatný přenos každého mediálního paketu — 17. listopadu 2026, v92
+
+Odstraněno společné plánování a zpracování skupin. Každý mediální segment nyní vzniká jako samostatný paket s vlastním ID, TCP SEQ, nejvýše 1 400 B dat, časem odeslání, polohou a stavem doručení. Další paket odchází po třech logických krocích, zatímco dřívější jsou dál na cestě. Instagram po úplném přijetí vytvoří druhou nezávislou sadu paketů. Ukázkový obrázek zmenšen na 12 000 B (9 paketů na spojení) a video na 48 000 B (35 paketů), aby přenos zůstal zvládnutelný bez seskupování. Modelové bajty i místní náhledy zůstávají oddělené. Odstraněny značky skupin, rozbalování členů, společný detail a doprovodné texty/styly; kliknutí otevírá přímo konkrétní paket. Každý mediální paket má vlastní VPN obal, pokud je VPN zapnutá.
+
+Prošlo všech 268 testů. Aktualizované mediální testy ověřují vlastní identity, samostatné bajtové buffery, rozvrh odchodů, souběžné různé polohy i stavy, TCP SEQ a MTU každého paketu, přesné složení obou přenosů, NAT, přerušení a obnovení uložené druhé fáze, opakování a potvrzení přečtení. Testy obousměrného chatu a VPN ověřují nová média i přes tunely obou domácností a správné jednotlivé počítání. Velikost určuje počet paketů i pro větší vstupy, nezávisle na typu obsahu.
+
+V prohlížeči ověřeno osm současně viditelných paketů obrázku na osmi různých místech trasy, bez skupinových značek. Detail paketu 2/9 ukázal 1 400 B dat, IPv4 délku 1 440 B a TCP SEQ 2 401. Poslední paket videa 35/35 měl vlastní ID, 400 B dat, délku 440 B a SEQ 48 601. Obě média dorazila celá; pro video bylo při obou cestách pozorováno 70 samostatných ID, u příjemce funkční přehrávač a potvrzení přečtení. V opačném směru ověřen detail Matěj → Instagram · 1/9. Přes VPN viditelných šest samostatných obalů, detail jednoho vnitřního paketu a úspěšné doručení obrázku. Otevření detailu pozastavuje krokování, po zavření lze pokračovat. Při 1025 × 858 a 320 × 844 px bez vodorovného přetékání, konzole bez chyb a varování. Syntaxe všech 26 skriptů, vyvážení CSS a existence 32 místních prostředků ověřeny. Verze prostředků v92.
+
 ## Odebrání přehledu přenosu z Instagramu — 17. listopadu 2026, v91
 
 Z Instagramu odstraněn celý rozbalovací přehled Přenos v síti včetně počtu paketů, podrobností a tlačítka pro přechod do mapy. Odebrány příslušné pomocné funkce, ikona, styly a uchovávání posuvu tohoto panelu. Chat, přílohy, stavy doručení/přečtení a simulovaný přenos používají původní model.

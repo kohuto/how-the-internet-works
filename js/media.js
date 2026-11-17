@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const MESSAGE_MSS=1400;
-  const MESSAGE_TYPES={text:{label:'Text',name:'Textová zpráva'},image:{label:'Obrázek',name:'Odpoledne na hřišti.jpg',size:100000},video:{label:'Video',name:'Hra na hřišti.mp4',size:5000000}};
+  const MESSAGE_TYPES={text:{label:'Text',name:'Textová zpráva'},image:{label:'Obrázek',name:'Odpoledne na hřišti.jpg',size:12000},video:{label:'Video',name:'Hra na hřišti.mp4',size:48000}};
   const formatBytes=n=>n<1000?`${n} B`:n<1000000?`${(n/1000).toLocaleString('cs-CZ',{maximumFractionDigits:1})} kB`:`${(n/1000000).toLocaleString('cs-CZ',{maximumFractionDigits:2})} MB`;
   const packetWord=n=>n===1?'paket':n>=2&&n<=4?'pakety':'paketů';
   const formatPackets=(n,data=false)=>`${n.toLocaleString('cs-CZ')} ${data?(n===1?'datový paket':n>=2&&n<=4?'datové pakety':'datových paketů'):packetWord(n)}`;
@@ -13,8 +13,7 @@
     return {type,name:spec.name,size:bytes.length,bytes};
   }
   function messagePlan(size) {
-    const packets=Math.ceil(size/MESSAGE_MSS),groupSize=packets<=16?1:packets<=200?10:100;
-    return {packets,groupSize,groups:Math.ceil(packets/groupSize)};
+    return {packets:Math.ceil(size/MESSAGE_MSS)};
   }
   function messagePreview(content,playable=false) {
     if(!content||content.type==='text')return '';

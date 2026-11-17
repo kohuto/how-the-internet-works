@@ -49,7 +49,7 @@ test('Alternating messages retain history and their own delivery and read receip
 
 test('Matěj can send image and video; both legs account for every data packet and reconstruct exact bytes',()=>{
   const s=new Simulation();
-  for(const [type,count] of [['image',72],['video',3572]]) {
+  for(const [type,count] of [['image',9],['video',35]]) {
     send(s,'friend','',{messageType:type});
     assert.equal(s.status,'success');assert.equal(s.net.sender.sentPackets,count);assert.equal(s.net.instagram.receivedPackets,count);assert.equal(s.net.friend.receivedPackets,count);
     assert.deepEqual(s.net.friend.content.bytes,s.net.sender.content.bytes);
@@ -86,7 +86,7 @@ test('Reply targets the device that last wrote to Matěj and waits on the server
 
 test('Interrupted reverse delivery never exposes partial media and resumes the same history entry',()=>{
   const s=new Simulation();assert(s.start('message',{device:'friend',messageType:'image'}));
-  until(s,()=>s.net.friend.receivedPackets>0&&s.net.friend.receivedPackets<72);
+  until(s,()=>s.net.friend.receivedPackets>0&&s.net.friend.receivedPackets<9);
   assert(!html(s,'laptop').includes('Odpoledne na hřišti.jpg'));s.net.toggleLink('uplink');finish(s);
   assert.equal(s.status,'waiting');assert.equal(s.net.instagram.history[0].delivered,false);
   s.net.toggleLink('uplink');assert(s.resumePending());finish(s);
@@ -97,7 +97,7 @@ test('Interrupted reverse delivery never exposes partial media and resumes the s
 test('Reverse media and read receipts traverse VPN and independent channels in both households',()=>{
   const s=new Simulation();s.net.setVPN('laptop',true);s.net.setVPN('friend',true);
   send(s,'friend','',{messageType:'image'});assert.equal(s.status,'success');
-  assert.equal(s.net.friend.receivedPackets,72);assert(s.net.instagramChannel('laptop'));assert(s.net.instagramChannel('friend'));
+  assert.equal(s.net.friend.receivedPackets,9);assert(s.net.instagramChannel('laptop'));assert(s.net.instagramChannel('friend'));
   assert([...s.packets.values()].some(p=>p.vpnHistory?.some(t=>t.client==='friend'&&t.direction==='out')));
   read(s,'laptop');assert.equal(s.net.instagram.history[0].status,'read');assert.equal(s.net.sender.state,'read');
 });

@@ -45,7 +45,6 @@
         this.webSeq[response?'response':'request']+=(payload.record?.data.length||0)+encoder.encode(payload.publicText||'').length;
       }
       if(this.ads.embedded&&['https-request','https-response'].includes(kind))p.label=kind==='https-request'?'HTTPS · žádost o reklamu':'HTTPS · vybraná reklama';
-      if(payload.packetCount>1)p.label=`${kind==='message'?'Do Instagramu':'K příjemci'} · skupina ${payload.index+1}–${payload.index+payload.packetCount} / ${payload.total}`;
       Object.assign(p,header);this.vpn.prepare(p);p.initialHeader=this.net.packetHeader(p);p.natHistory=[];
       this.packets.set(p.id,p);return p;
     }
@@ -161,18 +160,13 @@
       return this.resumePending();
     }
     messagePackets(kind,from,to,bytes,size,header={}) {
-      const {packets:total,groupSize,groups}=messagePlan(bytes.length),events=[];
-      for(let offset=0,groupIndex=0;offset<bytes.length;offset+=size*groupSize,groupIndex++) {
-        const data=bytes.slice(offset,offset+size*groupSize),index=offset/size,packetCount=Math.ceil(data.length/size);
-        const packet=this.createPacket(kind,from,to,{bytes:data,offset,end:offset+data.length,index,total,totalBytes:bytes.length,packetCount,groupSize,groupIndex,groups,mss:size,contentType:this.net.sender.content?.type||'text',messageId:this.net.instagram.id},header);
-        events.push({...this.originate(packet),at:this.time+1+groupIndex*PACKET_GAP});
+      const total=Math.ceil(bytes.length/size),events=[];
+      for(let offset=0,index=0;offset<bytes.length;offset+=size,index++) {
+        const data=bytes.slice(offset,offset+size);
+        const packet=this.createPacket(kind,from,to,{bytes:data,offset,end:offset+data.length,index,total,totalBytes:bytes.length,packetCount:1,mss:size,contentType:this.net.sender.content?.type||'text',messageId:this.net.instagram.id},header);
+        events.push({...this.originate(packet),at:this.time+1+index*PACKET_GAP});
       }
       this.next(events);return total;
-    }
-    packetMember(group,index=0) {
-      const pl=group.payload;if(!Number.isInteger(index)||index<0||index>=(pl.packetCount||1))return null;
-      const offset=index*pl.mss,data=pl.bytes.slice(offset,offset+pl.mss),absolute=pl.offset+offset;
-      return {...group,id:`${group.id}:${index}`,parentId:group.id,seq:group.seq+offset,label:`Paket ${pl.index+index+1} / ${pl.total}`,payload:{...pl,bytes:data,offset:absolute,end:absolute+data.length,index:pl.index+index,packetCount:1}};
     }
     cloudPackets(kind,from,to,value,header={}) {
       const bytes=encoder.encode(JSON.stringify(value)),total=Math.ceil(bytes.length/CLOUD_MSS),events=[];
@@ -466,7 +460,7 @@
         if(!this.net.accessReady(this.clientId()))return this.failure(`${this.clientName()} nemá dostupné připojení.`,null,this.clientId());
         const bytes=this.net.sender.content.bytes;this.totalBytes=bytes.length;
         const total=this.messagePackets('message',this.clientId(),'instagram',bytes,MSS);
-        const plan=messagePlan(bytes.length);e.description=`${bytes.length} B → ${total} datových paketů, nejvýše ${MSS} B dat v jednom. ${plan.groupSize>1?`Zhuštěné zobrazení: jedna značka představuje nejvýše ${plan.groupSize} paketů.`:'Pakety odcházejí jednotlivě s odstupem.'}`;
+        e.description=`${bytes.length} B → ${total} datových paketů, nejvýše ${MSS} B dat v jednom. Pakety odcházejí jednotlivě s odstupem.`;
       } else if(e.kind==='relay') {
         const ig=this.net.instagram,device=ig.recipientDevice;
         if(!this.net.canReach('instagram',device)) {ig.state='queued';return this.wait('Zpráva čeká na Instagramu','Zařízení příjemce nebo cesta k němu je nedostupná. Zpráva je uložená pro pozdější doručení.');}

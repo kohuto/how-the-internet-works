@@ -23,60 +23,71 @@ function until(sim,predicate) {
   assert(predicate());
 }
 
-test('Content size determines packet counts with the same 1400-byte data limit',()=> {
+test('Content size determines individual packet counts with the same 1400-byte data limit',()=> {
   assert.equal(MESSAGE_MSS,1400);
   assert.equal(messagePlan(makeMessage('text','a'.repeat(1000)).size).packets,1);
-  assert.deepEqual(messagePlan(100000),{packets:72,groupSize:10,groups:8});
-  assert.deepEqual(messagePlan(5000000),{packets:3572,groupSize:100,groups:36});
+  assert.deepEqual(messagePlan(100000),{packets:72});
+  assert.deepEqual(messagePlan(5000000),{packets:3572});
+  assert.deepEqual(messagePlan(makeMessage('image').size),{packets:9});
+  assert.deepEqual(messagePlan(makeMessage('video').size),{packets:35});
   assert.equal(messagePlan(makeMessage('text','🙂'.repeat(1000)).size).packets,3,'UTF-8 bytes, not character count');
 });
 
-test('Image groups overlap in flight and counters account for every data packet on both legs',()=> {
+test('Individual image packets overlap in flight and both legs account for every byte and packet',()=> {
   const sim=new Simulation();assert(sim.start('message',{messageType:'image'}));
   const expected=sim.net.sender.content.bytes.slice();
-  let overlap=false,partial=false;
+  let overlap=false,partial=false,independentState=false;
   for(let i=0;sim.status==='running'&&i<4000;i++) {
     sim.advanceFrame();
-    if(new Set([...sim.packets.values()].filter(p=>p.state==='transit').map(p=>p.location)).size>=3)overlap=true;
+    const packets=[...sim.packets.values()].filter(p=>p.kind==='message');
+    if(new Set(packets.filter(p=>p.state==='transit').map(p=>p.location)).size>=3)overlap=true;
+    if(packets.some(p=>p.state==='delivered')&&packets.some(p=>p.state==='transit'))independentState=true;
     if(sim.net.instagram.receivedBytes>0&&!sim.net.instagram.content)partial=true;
   }
-  assert.equal(sim.status,'success');assert(overlap);assert(partial);
-  assert.equal(sim.net.sender.sentPackets,72);assert.equal(sim.net.instagram.receivedPackets,72);
-  assert.equal(sim.net.instagram.sentPackets,72);assert.equal(sim.net.friend.receivedPackets,72);
-  assert.equal(sim.net.sender.sentBytes,100000);assert.equal(sim.net.friend.receivedBytes,100000);
+  assert.equal(sim.status,'success');assert(overlap);assert(partial);assert(independentState);
+  assert.equal(sim.net.sender.sentPackets,9);assert.equal(sim.net.instagram.receivedPackets,9);
+  assert.equal(sim.net.instagram.sentPackets,9);assert.equal(sim.net.friend.receivedPackets,9);
+  assert.equal(sim.net.sender.sentBytes,12000);assert.equal(sim.net.friend.receivedBytes,12000);
   assert.deepEqual(sim.net.instagram.content.bytes,expected);assert.deepEqual(sim.net.friend.content.bytes,expected);
   assert.equal(sim.net.friend.content.type,'image');
   for(const kind of ['message','ig-delivery']) {
-    const groups=[...sim.packets.values()].filter(p=>p.kind===kind);
-    assert.equal(groups.length,8);assert.equal(groups.at(-1).payload.packetCount,2);
+    const packets=[...sim.packets.values()].filter(p=>p.kind===kind);
+    assert.equal(packets.length,9);assert(packets.every(p=>p.payload.packetCount===1));
+    assert.equal(new Set(packets.map(p=>p.id)).size,9);assert.equal(packets.at(-1).payload.bytes.length,800);
   }
 });
 
-test('A video is bounded to 36 groups per leg; expanded members keep correct SEQ, bytes and MTU',()=> {
+test('Video packets have independent identities, scheduling, SEQ, bytes and MTU on both connections',()=> {
   const sim=new Simulation();assert(sim.start('message',{messageType:'video'}));sim.advanceFrame();
-  const groups=[...sim.packets.values()];assert.equal(groups.length,36);
-  let total=0,bytes=0,previousSeq=null;
-  for(const group of groups)for(let i=0;i<group.payload.packetCount;i++) {
-    const p=sim.packetMember(group,i);assert(p);total++;bytes+=p.payload.bytes.length;
+  const packets=[...sim.packets.values()];assert.equal(packets.length,35);
+  let bytes=0,previousSeq=1001;
+  assert.equal(new Set(packets.map(p=>p.payload.bytes)).size,35,'Each packet owns a separate byte buffer');
+  for(const p of packets) {
+    bytes+=p.payload.bytes.length;assert.equal(p.payload.packetCount,1);
     assert(p.payload.bytes.length<=1400);assert(p.payload.bytes.length+40<=1440);
-    assert.equal(p.seq,1001+p.payload.offset);
-    if(previousSeq!==null)assert.equal(p.seq,previousSeq);
+    assert.equal(p.seq,1001+p.payload.offset);assert.equal(p.seq,previousSeq);
     previousSeq=p.seq+p.payload.bytes.length;
     assert.deepEqual(p.payload.bytes,sim.net.sender.content.bytes.slice(p.payload.offset,p.payload.end));
   }
-  assert.equal(total,3572);assert.equal(bytes,5000000);
-  const last=sim.packetMember(groups.at(-1),71);assert.equal(last.payload.bytes.length,600);
-  assert.equal(sim.packetMember(groups[0],100),null);
-  finish(sim);assert.equal(sim.status,'success');assert.equal(sim.net.friend.receivedPackets,3572);
+  assert.equal(bytes,48000);assert.equal(packets.at(-1).payload.bytes.length,400);
+  const events=finish(sim);assert.equal(sim.status,'success');assert.equal(sim.net.friend.receivedPackets,35);
+  const departures=events.filter(e=>e.kind==='origin'&&sim.packets.get(e.id)?.kind==='message');
+  assert.equal(departures.length,35);
+  for(let i=1;i<departures.length;i++)assert.equal(departures[i].at-departures[i-1].at,3);
+  const delivered=[...sim.packets.values()].filter(p=>p.kind==='ig-delivery');
+  assert.equal(delivered.length,35);assert(delivered.every(p=>p.payload.packetCount===1));
+  assert.equal(delivered[0].seq,8001);assert.equal(delivered.at(-1).seq,8001+34*1400);
+  assert(!delivered.some(p=>packets.some(q=>q.id===p.id)),'The second connection creates new packets');
   assert.deepEqual(sim.net.friend.content.bytes,sim.net.sender.content.bytes);
 });
 
-test('NAT counts grouped data packets rather than just the number of map markers',()=> {
+test('NAT counts each individually forwarded media packet and restores its own return header',()=> {
   const sim=new Simulation();run(sim,'message',{messageType:'video'});
   const sender=sim.net.nat.home.rows.find(r=>r.remotePort===443),recipient=sim.net.nat['friend-home'].rows.find(r=>r.remotePort===443);
-  assert.equal(sender.outbound,3572);assert.equal(recipient.inbound,3572);assert.equal(recipient.outbound,1,'Outbound Instagram registration is a separate control packet');
-  const packet=[...sim.packets.values()].find(p=>p.kind==='ig-delivery');
-  const member=sim.packetMember(packet,42);assert.equal(member.dst,'172.16.20.10');assert.equal(member.dport,52002);assert.equal(member.natHistory[0].direction,'in');
+  assert.equal(sender.outbound,35);assert.equal(recipient.inbound,35);assert.equal(recipient.outbound,1,'Outbound Instagram registration is a separate control packet');
+  for(const p of [...sim.packets.values()].filter(p=>p.kind==='ig-delivery')){
+    assert.equal(p.dst,'172.16.20.10');assert.equal(p.dport,52002);assert.equal(p.natHistory[0].direction,'in');
+  }
 });
 
 test('An accepted attachment survives another experiment and a disconnected recipient',()=> {
@@ -87,21 +98,21 @@ test('An accepted attachment survives another experiment and a disconnected reci
   assert.equal(sim.status,'success');assert.equal(sim.net.friend.content.type,'image');assert.deepEqual(sim.net.friend.content.bytes,stored);
 });
 
-test('An interrupted grouped delivery exposes no partial attachment and retries only the stored leg',()=> {
+test('An interrupted individual delivery exposes no partial attachment and retries only the stored leg',()=> {
   const sim=new Simulation();assert(sim.start('message',{messageType:'image'}));
   until(sim,()=>sim.net.friend.receivedBytes>0);
-  assert.equal(sim.net.friend.content,null);assert(sim.net.friend.receivedPackets<72);
+  assert.equal(sim.net.friend.content,null);assert(sim.net.friend.receivedPackets<9);
   const stored=sim.net.instagram.content.bytes.slice();sim.net.toggleLink('friend-laptop-switch');finish(sim);
   assert.equal(sim.status,'waiting');assert.equal(sim.net.friend.receivedPackets,0);assert.equal(sim.net.friend.content,null);
   sim.net.toggleLink('friend-laptop-switch');assert(sim.resumePending());const events=finish(sim);
   assert(!events.some(e=>e.kind==='origin'&&sim.packets.get(e.id)?.kind==='message'));
-  assert.deepEqual(sim.net.friend.content.bytes,stored);assert.equal(sim.net.friend.receivedPackets,72);
+  assert.deepEqual(sim.net.friend.content.bytes,stored);assert.equal(sim.net.friend.receivedPackets,9);
 });
 
 test('Video read receipts and repeat preserve attachment type while a new text replaces it',()=> {
   const sim=new Simulation();run(sim,'message',{messageType:'video'});assert(sim.markRead());finish(sim);
   assert.equal(sim.net.sender.state,'read');assert.equal(sim.net.friend.content.type,'video');
-  assert(sim.repeat());finish(sim);assert.equal(sim.net.friend.content.type,'video');assert.equal(sim.net.friend.receivedBytes,5000000);
+  assert(sim.repeat());finish(sim);assert.equal(sim.net.friend.content.type,'video');assert.equal(sim.net.friend.receivedBytes,48000);
   run(sim,'message',{text:'Hotovo 🙂',messageType:'text'});
   assert.equal(sim.net.friend.content.type,'text');assert.equal(sim.net.friend.text,'Hotovo 🙂');assert.equal(sim.net.friend.receivedPackets,1);
 });
