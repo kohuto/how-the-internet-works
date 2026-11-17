@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const {Network,Simulation,NetworkMap,DEFAULT_MESSAGE,MSS,CLOUD_MSS,MESSAGE_TYPES,formatBytes,formatPackets,messagePlan,messagePreview,requestText,responseText,esc,computerView}=globalThis.InternetLab;
+  const {Network,Simulation,NetworkMap,DEFAULT_MESSAGE,MSS,CLOUD_MSS,formatPackets,messagePreview,requestText,responseText,esc,computerView}=globalThis.InternetLab;
   const ANIMATION_DELAY=650;
   const $=s=>document.querySelector(s),encoder=new TextEncoder();
   let net=new Network(new globalThis.InternetLab.LabSettings()),sim=new Simulation(net),timer=null,playing=false,toastTimer=null;
@@ -343,8 +343,6 @@
     if(authField){const el=$(`[data-auth-field="${authField}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number'&&el.type!=='email')el.setSelectionRange(start,end);}}
     if(field) {const el=$(`[data-field="${field}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number')el.setSelectionRange(start,end);}}
     const current=sim.current;
-    const badge=$('#message-map-status'),ig=net.instagram;badge.hidden=sim.action?.type!=='message'||!net.sender.content;
-    if(!badge.hidden){const c=net.sender.content,plan=messagePlan(c.size);badge.innerHTML=`<strong>${MESSAGE_TYPES[c.type].label} · ${formatBytes(c.size)} · ${formatPackets(plan.packets)}</strong><span>Odesláno: ${net.sender.sentPackets||0} · Instagram přijal: ${ig.receivedPackets||0} · ${sim.instagramName(ig.recipientDevice)}: přijato ${net.friend.receivedPackets||0}</span>`;}
     $('#event-title').textContent=current?.title||'Síť čeká na tvůj první přenos';$('#event-description').textContent=current?.description||(ui.monitorOpen?(ui.monitorDevice==='cafe-attacker'?'Otevři MITM a nastav napodobený hotspot.':ui.monitorDevice==='cafe'?'Porovnej HTTP a HTTPS přes Wi-Fi kavárny.':ui.monitorDevice==='hacker'?'Otevři Phishing a vyber příjemce e-mailu v mapě.':ui.monitorDevice==='cabin'?'Otevři některou z dostupných aplikací na chatě.':ui.monitorDevice==='friend'?'Otevři některou z dostupných aplikací u Matěje.':ui.monitorDevice==='phone'?'Otevři některou z dostupných aplikací v telefonu.':'Na ploše otevři některou z dostupných aplikací.'):'Klikni na notebook v mapě a otevři jeho plochu.');
     $('#run-dot').className=`status-dot ${sim.status}`;
     $('#play').disabled=ui.packetOpen||sim.status!=='running';$('#play').innerHTML=playing?'Ⅱ <span>Pauza</span>':'▶ <span>Přehrát</span>';$('#play').setAttribute('aria-label',playing?'Pozastavit přenos':'Přehrát přenos');

@@ -2,6 +2,12 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Odebrání přehledu Instagramových paketů z mapy — 17. listopadu 2026, v93
+
+Z levého dolního rohu mapy odstraněn fialový přehled typu zprávy, velikosti, počtu odeslaných a přijatých paketů. Odebrán jeho HTML prvek, vykreslování, nepoužívané importy a styly včetně mobilní varianty.
+
+V prohlížeči při 939 × 858 px doručeno celé video s 35 pakety na každém spojení za 269 kroků, nejvýše osm současných samostatných značek. Přehled se nevyskytuje při přenosu ani po doručení. Při 320 × 844 px ověřeno opakování přenosu, osm viditelných paketů a otevření detailu 1/35 se správným pozastavením a pokračováním po zavření, bez vodorovného přetékání. Konzole bez chyb a varování. Prošlo všech 16 cílených testů médií a Instagramové konverzace, syntaxe aplikace, vyvážení CSS a existence všech 32 místních prostředků. Verze prostředků v93.
+
 ## Samostatný přenos každého mediálního paketu — 17. listopadu 2026, v92
 
 Odstraněno společné plánování a zpracování skupin. Každý mediální segment nyní vzniká jako samostatný paket s vlastním ID, TCP SEQ, nejvýše 1 400 B dat, časem odeslání, polohou a stavem doručení. Další paket odchází po třech logických krocích, zatímco dřívější jsou dál na cestě. Instagram po úplném přijetí vytvoří druhou nezávislou sadu paketů. Ukázkový obrázek zmenšen na 12 000 B (9 paketů na spojení) a video na 48 000 B (35 paketů), aby přenos zůstal zvládnutelný bez seskupování. Modelové bajty i místní náhledy zůstávají oddělené. Odstraněny značky skupin, rozbalování členů, společný detail a doprovodné texty/styly; kliknutí otevírá přímo konkrétní paket. Každý mediální paket má vlastní VPN obal, pokud je VPN zapnutá.

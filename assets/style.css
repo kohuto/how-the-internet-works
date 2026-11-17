@@ -66,9 +66,6 @@
 
 .packet.replication rect{fill:#f2ead7;stroke:#bca36b}.packet.replication text{fill:#9a814d}
 
-.message-map-status{position:absolute;left:15px;bottom:14px;max-width:calc(100% - 105px);padding:10px 13px;border-radius:10px;border:1px solid #e1d4e7;background:#fffdf7ed;pointer-events:none;box-shadow:0 3px 15px #31482b09}.message-map-status strong,.message-map-status span,.message-map-status small{display:block}.message-map-status strong{font-size:10px;color:#816492}.message-map-status span{font-size:9px;color:#8e8194;line-height:1.7;margin-top:3px}.message-map-status small{font-size:8px;color:#a494ac;line-height:1.6}
-@media(max-width:700px){.message-map-status{left:8px;bottom:9px;padding:8px;max-width:calc(100% - 78px)}.message-map-status strong{font-size:9px}.message-map-status span{font-size:8px}.message-map-status small{font-size:7px}}
-
 /* A static highlight follows simulation steps and therefore also respects pause. */
 .map-node.node-chatbot .node-halo{fill:#e3eff0;stroke:#a9c6c9}.map-node.node-chatbot .device-icon{color:#386c79;stroke:#386c79}.map-node.node-chatbot.computing .node-halo{fill:#c9e7e3;stroke:#2d857f;stroke-width:4}
 
