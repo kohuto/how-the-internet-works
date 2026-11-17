@@ -2,6 +2,12 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Výběr zařízení a spojnic bez ohraničení — 17. listopadu 2026, v100
+
+Odstraněn obrys zaměřených zařízení a spojnic v mapě, barevné zvýraznění vybraného zařízení i zesílení vybrané spojnice. Zrušeno také zvýraznění zařízení při ovládání klávesnicí v úzkém zobrazení. Výběr a otevírání detailů zůstávají funkční; ostatní ovládací prvky si zachovávají indikátor zaměření.
+
+Prošlo všech devět testů ovládání mapy. V prohlížeči při 939 × 858 px ověřeno kliknutí na domácí router a kabel, stejné výsledné styly vybraného a běžného prvku a návrat zaměření bez obrysu po zavření detailu. Enter znovu otevřel kabel; při 320 × 844 px mezerník otevřel router, Escape vrátil zaměření bez obrysu a bez zesílení kruhu. Tlačítko nastavení při ovládání klávesnicí nadále má viditelný indikátor zaměření. Úzká mapa bez vodorovného přetékání, vizuální kontrola mapy po výběru a konzole bez chyb a varování. Verze prostředků v100.
+
 ## Volitelné podrobnosti spojnic, routerů a switchů — 17. listopadu 2026, v99
 
 Základní detail kabelu obsahuje název Kabelové spojení a tlačítko Odpojit / Obnovit spoj. Údaje První konec, Druhý konec, označení portů a Připojená síť jsou dostupné při zapnutí MAC tabulek nebo směrovacích tabulek. U routerů směrovací tabulky zpřístupní také rozhraní s adresami a připojené spoje; u switchů a Wi-Fi přístupových bodů MAC tabulky zpřístupní seznam portů a spojů. Skryty také konkrétní vstupní/výstupní porty v základním přehledu posledního rozhodnutí. Doplněny popisy obou voleb v nastavení.
