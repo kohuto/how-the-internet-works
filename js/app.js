@@ -316,9 +316,9 @@
     const fullComputerKey=key+':'+browserKey;
     const computerDetails=fullComputerKey===computerViewKey?[...document.querySelectorAll('.computer-app-body details[open]')].map(d=>d.dataset.detailKey||d.querySelector('summary')?.textContent):[];
     const computerScroll=fullComputerKey===computerViewKey?$('.computer-app-body')?.scrollTop||0:0;
-    const oldChat=$('.ig-conversation'),oldNetwork=$('.ig-network-body');
+    const oldChat=$('.ig-conversation');
     const chatScroll=fullComputerKey===computerViewKey&&oldChat?{top:oldChat.scrollTop,bottom:oldChat.scrollHeight-oldChat.scrollTop-oldChat.clientHeight<24}:null;
-    const networkScroll=fullComputerKey===computerViewKey?oldNetwork?.scrollTop||0:0;computerViewKey=fullComputerKey;
+    computerViewKey=fullComputerKey;
     const infoOpen=ui.deviceOpen||ui.linkOpen||ui.packetOpen;
     const deviceKey=infoOpen?`${ui.selection.kind}:${ui.selection.id}${ui.packetOpen?':'+ui.packetMember:''}`:'',sameDevice=deviceKey!==''&&deviceKey===deviceViewKey;
     const deviceScroll=sameDevice?$('#device-body').scrollTop:0;
@@ -332,7 +332,6 @@
     if($('.real-browser'))$('.real-browser').style.setProperty('--browser-panel-height',`${Math.max(80,$('.computer-app-body').clientHeight-$('.browser-chrome').offsetHeight-12)}px`);
     if($('.computer-app-body'))$('.computer-app-body').scrollTop=computerScroll;
     const chat=$('.ig-conversation');if(chat)chat.scrollTop=!chatScroll||chatScroll.bottom?chat.scrollHeight:chatScroll.top;
-    if($('.ig-network-body'))$('.ig-network-body').scrollTop=networkScroll;
     document.querySelectorAll('#monitor-content video').forEach((video,i)=>{const key=video.closest('[data-instagram-message]')?.dataset.instagramMessage||`index:${i}`,state=videoStates.find(v=>v.key===key&&v.device===ui.monitorDevice&&v.src===video.querySelector('source')?.getAttribute('src'));if(state){const restore=()=>{video.currentTime=state.time;if(!state.paused)video.play().catch(()=>{});};if(video.readyState)restore();else video.addEventListener('loadedmetadata',restore,{once:true});}});
     $('#device-overlay').hidden=!infoOpen;
     $('#device-content').classList.toggle('packet-window',ui.packetOpen);

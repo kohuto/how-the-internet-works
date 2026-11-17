@@ -2,6 +2,12 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Odebrání přehledu přenosu z Instagramu — 17. listopadu 2026, v91
+
+Z Instagramu odstraněn celý rozbalovací přehled Přenos v síti včetně počtu paketů, podrobností a tlačítka pro přechod do mapy. Odebrány příslušné pomocné funkce, ikona, styly a uchovávání posuvu tohoto panelu. Chat, přílohy, stavy doručení/přečtení a simulovaný přenos používají původní model.
+
+V prohlížeči ověřena nepřítomnost panelu před odesláním, při odesílání i po doručení. Obrázek doručen z notebooku Matějovi za 107 kroků, následných 45 kroků doručilo potvrzení přečtení. Náhled obrázku a pole pro odpověď fungují na obou koncích. Při 1025 × 858 a 320 × 844 px pole pro zprávu navazuje na spodní okraj chatu, konverzace se posouvá a dokument nepřetéká vodorovně. Prošlo všech 9 testů obousměrného Instagramového chatu včetně textu, obrázků/videa, historie, escapování, VPN, výpadků a potvrzení přečtení. Konzole bez chyb a varování, syntaxe obou změněných skriptů a vyvážení CSS ověřeny; všech 32 místních prostředků existuje. Verze prostředků v91.
+
 ## Přenos bez hnědého zvýraznění — 17. listopadu 2026, v90
 
 Z mapy odstraněny třídy a styly, které při pohybu paketu měnily spoj na hnědý a při zpracování zvýrazňovaly obrys zařízení. Odebrána i samostatná hnědá varianta satelitních spojů. Pohyb a výběr paketů, ruční výběr zařízení a spojů, značení výpadků a zvláštní styly VPN zůstávají zachované.
