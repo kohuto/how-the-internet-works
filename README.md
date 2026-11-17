@@ -2,6 +2,8 @@
 
 Česká síťová laboratoř pro badatelskou výuku. Začíná propojením bytu na Lipové, města Lipov a hostingu webu knihovny. V nastavení dostupném všem lze jednotlivě přidávat další oblasti, zařízení, služby a podrobnosti. Kompletní sestava zahrnuje Matějovu domácnost, chatu se satelitním přístupem, mobilní síť s BTS, Instagram, cloud A/B, VPN, poštu, chatbot, kavárnu, hackerské doupě, podvodný hosting a partnerské weby s reklamním serverem. Otázky a úkoly lze zadávat mimo aplikaci.
 
+Městské routery A–D mají vyhrazený větší prostor mezi bytem a vzdálenými službami. Hosting, Instagram a ostatní oblasti leží mimo průchozí trasy cizích spojů. Rozložení mění jen polohy v mapě; propojení, směrování a počet kroků přenosu zůstávají stejné. Výřez Celá síť se přizpůsobí zapnutým oblastem.
+
 ## Spuštění
 
 Otevřete **index.html** v běžném současném prohlížeči. Funguje i přímo ze souboru, bez serveru, instalace, sestavení, databáze nebo API klíče. Všechny soubory z tohoto adresáře ponechte pohromadě. Domény `.test` jsou pouze názvy uvnitř simulace. Aplikace nemá externí fonty, knihovny ani jiné síťové závislosti. Po úplném načtení aplikace probíhají všechny pokusy lokálně; modelové servery nevyžadují připojení k internetu.
@@ -243,7 +245,7 @@ Ověřované principy: [MDN — cookies třetích stran a omezení prohlížeč�
 1. Vytvořte repozitář na GitHubu. Nahrajte `index.html`, složky `assets` a `js` do jeho kořene; README a ostatní soubory můžete přidat také. `index.html` nesmí zůstat v další nadbytečné podsložce.
 2. V repozitáři otevřete **Settings → Pages**. V části Build and deployment zvolte **Deploy from a branch**, publikační větev (typicky `main`) a složku **/ (root)**. Uložte.
 3. Počkejte na dokončení publikování. Projekt otevřete na adrese `https://UZIVATEL.github.io/REPOZITAR/` uvedené v nastavení Pages.
-4. Další verze zveřejníte běžným nahráním změněných souborů nebo commitem do stejné větve. Vlastní workflow, balíčky a build nejsou potřeba. Při změně JS/CSS současně zvyšte `v=87` v odpovídajících cestách v `index.html`, aby prohlížeče rychleji načetly novou verzi prostředků.
+4. Další verze zveřejníte běžným nahráním změněných souborů nebo commitem do stejné větve. Vlastní workflow, balíčky a build nejsou potřeba. Při změně JS/CSS současně zvyšte `v=88` v odpovídajících cestách v `index.html`, aby prohlížeče rychleji načetly novou verzi prostředků.
 
 Všechny cesty jsou relativní (`./assets/…`, `./js/…`), proto aplikace funguje i v podcestě projektových GitHub Pages. Soubor `.nojekyll` ponechá statické soubory bez zpracování Jekyllem.
 

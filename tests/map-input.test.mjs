@@ -10,6 +10,7 @@ class MapSurface extends EventTarget {
   dataset={};attributes=new Map();captures=new Set();
   constructor(width=1000,height=600) {super();this.clientWidth=width;this.clientHeight=height;}
   closest() {return null;}
+  querySelectorAll() {return [];}
   setAttribute(name,value) {this.attributes.set(name,value);}
   getBoundingClientRect() {return {left:40,top:20,width:this.clientWidth,height:this.clientHeight};}
   setPointerCapture(id) {this.captures.add(id);}

@@ -18,7 +18,12 @@
   icons['sat-gateway']=icons.terminal;
   icons.satellite='<rect x="-12" y="-18" width="24" height="36" rx="4"/><path d="M-15-13h-25v26h25m30-26h25v26H15M-31-13v26m62-26v26M0-18v-10m-5-3h10M0 18v13m-8-3q8 9 16 0"/>';
   icons.friend=icons.laptop;icons.instagram=icons.server;
-  const presets={ads:[1320,-650,1040,500],mail:[820,70,620,1500],cafe:[25,1070,865,540],home:[35,270,465,440],city:[470,100,1020,650],dc:[840,35,1020,1530],friend:[1820,365,560,510],mobile:[100,530,930,530],vpn:[1300,1040,620,440],hacker:[1810,1000,560,490],satellite:[10,-565,1325,1080],all:[20,-565,2320,2180]};
+  const {MAP_LAYOUT}=globalThis.InternetLab;
+  const bounds=regions=>{
+    const boxes=regions.map(id=>MAP_LAYOUT.bounds[id]),x=Math.min(...boxes.map(b=>b[0])),y=Math.min(...boxes.map(b=>b[1]));
+    return [x,y,Math.max(...boxes.map(b=>b[0]+b[2]))-x,Math.max(...boxes.map(b=>b[1]+b[3]))-y];
+  };
+  const presets={home:[35,270,465,440],city:[480,100,1720,1140],all:bounds(Object.keys(MAP_LAYOUT.bounds)),ads:bounds(['partners']),mail:bounds(['dc','mail-b']),dc:bounds(['dc']),friend:bounds(['friend']),mobile:bounds(['home','mobile']),cafe:bounds(['cafe']),vpn:bounds(['vpn']),hacker:bounds(['hacker']),satellite:bounds(['cabin','satellite'])};
   const decor=`
     <defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#213d37" flood-opacity=".09"/></filter></defs>
     <rect x="-3000" y="-3000" width="7000" height="7000" fill="#f0f3eb"/>
@@ -27,11 +32,13 @@
     <path d="M70-145 255-235 435-145" fill="#ddd9bf" stroke="#babda5" stroke-width="4"/><rect x="70" y="-145" width="365" height="350" rx="9" fill="#faf8ee" stroke="#b7c1b2" stroke-width="4"/><rect x="106" y="2" width="90" height="75" rx="9" fill="#e4d4b8" stroke="#cbb897"/><text x="70" y="-255" class="place-label">10 / CHATA ZA MĚSTEM</text>
     <path d="M80 235q210 90 450 0" stroke="#c8d8be" fill="none" stroke-width="2" stroke-dasharray="8 10"/><g fill="#d9e5ce" stroke="#b2c5a7" stroke-width="2"><path d="m50-100-30 65h60Z"/><path d="m470 125-30 65h60Z"/></g>
     <rect x="820" y="-140" width="160" height="150" rx="14" fill="#e7eef3" stroke="#bdd1df" stroke-width="2"/><text x="820" y="-165" class="place-label">12 / POZEMNÍ BRÁNA</text></g>
-    <g class="scenery"><path d="M483 181q139-70 310 0t168 109v329q-23 106-185 97T483 659Z" fill="#e7ede3" stroke="#d7e0d3" stroke-dasharray="5 8"/>
-    <path d="M525 406h367M627 211v492" fill="none" stroke="#d3dccd" stroke-width="27"/><path d="M525 406h367M627 211v492" fill="none" stroke="#f4f5ee" stroke-width="23"/><path d="M525 406h367M627 211v492" fill="none" stroke="#d7dece" stroke-width="1" stroke-dasharray="5 8"/>
-    <g fill="#d9e2d6" stroke="#c1cfbe" stroke-width="1.5"><rect x="528" y="233" width="52" height="65" rx="5"/><rect x="779" y="202" width="57" height="62" rx="4"/><path d="m774 549 31-22 31 22v66h-62z"/><rect x="527" y="589" width="48" height="76" rx="3"/></g>
-    <g stroke="#b9c7b5" stroke-width="5" stroke-dasharray="8 8"><path d="M539 247h29m-29 13h29m-29 13h29m224-57h34m-34 15h34m-34 15h34M789 561h32m-32 16h32M537 605h27m-27 16h27m-27 16h27"/></g>
-    <g fill="#d4e3c8"><circle cx="872" cy="236" r="22"/><circle cx="853" cy="657" r="27"/><circle cx="505" cy="354" r="21"/><circle cx="927" cy="626" r="18"/></g><g stroke="#a7bd9f" stroke-width="2"><path d="M872 220v40m-8-24 8 9 9-12M853 640v43m-11-23 11 8 12-14M505 342v32M927 615v28"/></g>
+    <g class="scenery"><g class="city-scenery" data-region="city">
+    <path d="M610 175Q1040 100 1510 210Q1630 330 1600 650L1400 1090Q1200 1190 1090 1070L960 840 595 750Q520 550 560 320Z" fill="#e7ede3" stroke="#d7e0d3" stroke-dasharray="5 8"/>
+    <path d="M620 620h900M950 230v590l240 230" fill="none" stroke="#d3dccd" stroke-width="27"/><path d="M620 620h900M950 230v590l240 230" fill="none" stroke="#f4f5ee" stroke-width="23"/><path d="M620 620h900M950 230v590l240 230" fill="none" stroke="#d7dece" stroke-width="1" stroke-dasharray="5 8"/>
+    <g fill="#d9e2d6" stroke="#c1cfbe" stroke-width="1.5"><rect x="670" y="260" width="52" height="65" rx="5"/><rect x="1320" y="245" width="57" height="62" rx="4"/><path d="m1320 780 31-22 31 22v66h-62z"/><rect x="685" y="665" width="48" height="76" rx="3"/></g>
+    <g stroke="#b9c7b5" stroke-width="5" stroke-dasharray="8 8"><path d="M681 274h29m-29 13h29m-29 13h29m621-42h34m-34 15h34m-34 15h34M1335 792h32m-32 16h32M695 680h27m-27 16h27m-27 16h27"/></g>
+    <g fill="#d4e3c8"><circle cx="1510" cy="300" r="22"/><circle cx="1420" cy="970" r="27"/><circle cx="605" cy="405" r="21"/><circle cx="1120" cy="750" r="18"/></g><g stroke="#a7bd9f" stroke-width="2"><path d="M1510 284v40m-8-24 8 9 9-12M1420 953v43m-11-23 11 8 12-14M605 393v32M1120 739v28"/></g>
+    <text x="780" y="150" class="place-label">02 / MĚSTO LIPOV</text><text x="780" y="198" class="region-subtitle">JEDEN POSKYTOVATEL · DVĚ VĚTVE</text></g>
     <rect x="62" y="316" width="395" height="342" rx="10" fill="#faf8ee" stroke="#b7c1b2" stroke-width="5"/>
 
     <path d="M67 538h134m58 0h43M249 323v59m0 73v83M351 555v98" fill="none" stroke="#b7c1b2" stroke-width="5"/>
@@ -51,8 +58,7 @@
       [1000,1230,'16 / POŠTA DOPIS','SCHRÁNKY PRO DOMÉNU DOPIS.TEST','#e7edf4','#b8c9de'],
       [1480,1120,'09 / VPN CENTRUM','ŠIFROVANÝ TUNEL · VÝSTUP DO INTERNETU','#ece8f4','#c7bdd8']
     ].map(([x,y,title,subtitle,fill,stroke,height=300],index)=>`<g class="data-center" data-region="${['dc','instagram','cloud','replica','phish','mail-b','vpn'][index]}"><rect x="${x}" y="${y}" width="320" height="${height}" rx="14" fill="${fill}" stroke="${stroke}" stroke-width="2"/><path d="M${x+14} ${y+18}h292M${x+14} ${y+height-18}h292" stroke="${stroke}" stroke-width="4" opacity=".45"/><g fill="${stroke}" opacity=".38"><rect x="${x+16}" y="${y+38}" width="24" height="77" rx="3"/><rect x="${x+46}" y="${y+38}" width="24" height="77" rx="3"/></g><text x="${x+4}" y="${y-28}" class="place-label">${title}</text><text x="${x+4}" y="${y-10}" class="center-subtitle">${subtitle}</text></g>`).join('')}
-    <text x="73" y="292" class="place-label">01 / BYT NA LIPOVÉ</text><text x="520" y="149" class="place-label">02 / MĚSTO LIPOV</text>
-    <text x="658" y="195" class="region-subtitle">JEDEN POSKYTOVATEL · DVĚ VĚTVE</text>
+    <text x="73" y="292" class="place-label">01 / BYT NA LIPOVÉ</text>
     <g data-region="peer"><path d="M1240 455q100-65 180 12l-5 125q-89 69-180 0Z" fill="#e8ede5" stroke="#d2decd" stroke-dasharray="5 8"/>
     <text x="1240" y="425" class="place-label">DALŠÍ POSKYTOVATEL</text></g><g data-region="friend" transform="translate(460 30)">
     <rect x="1475" y="400" width="350" height="340" rx="10" fill="#faf8ee" stroke="#b7c1b2" stroke-width="5"/>
@@ -76,6 +82,10 @@
       this.svg=svg;this.net=net;this.scene='home';this.box=[...presets.home];this.onSelect=onSelect;this.labels=true;this.lastEvent=null;this.selected=null;this.selectedPacket=null;svg.dataset.scene='home';
       this.packets=new Map();this.packetViews=new Map();this.frame=[];this.pointers=new Map();
       svg.innerHTML=decor+'<g id="links-layer"></g><g id="nodes-layer"></g><g id="packet-layer"></g>';
+      svg.querySelectorAll('[data-region]').forEach(el=>{
+        const offset=MAP_LAYOUT.offsets[el.dataset.region];
+        if(offset)el.setAttribute('transform',`translate(${offset.join(' ')}) ${el.getAttribute('transform')||''}`);
+      });
       svg.addEventListener('click',e=> {
         if(this.dragged)return;
         const target=e.target.closest('[data-map-kind]');if(target)this.onSelect(target.dataset.mapKind,target.dataset.id);
@@ -153,10 +163,7 @@
     setScene(scene) {this.scene=scene;this.svg.dataset.scene=scene;this.box=scene==='all'?this.networkBounds():[...presets[scene]];this.setBox();}
     networkBounds() {
       if(!this.net.settings)return [...presets.all];
-      const boxes={home:[40,270,460,430],city:[475,110,500,640],dc:[840,50,520,510],friend:[1820,365,560,510],mobile:[100,530,930,530],cafe:[25,1070,865,540],hacker:[1810,1000,560,490],peer:[1200,390,230,240],cabin:[10,-280,470,565],satellite:[10,-565,1215,700],instagram:[1380,45,500,440],cloud:[840,670,520,430],replica:[1380,670,500,430],vpn:[1300,1040,620,440],phish:[1810,-275,560,450],'mail-b':[820,1170,560,430],partners:[1320,-600,1040,450]};
-      const regions=new Set(this.net.visibleNodes().map(n=>n.region)),enabled=[...regions].map(r=>boxes[r]);
-      const x=Math.min(...enabled.map(b=>b[0])),y=Math.min(...enabled.map(b=>b[1]));
-      return [x,y,Math.max(...enabled.map(b=>b[0]+b[2]))-x,Math.max(...enabled.map(b=>b[1]+b[3]))-y];
+      return bounds([...new Set(this.net.visibleNodes().map(n=>n.region))]);
     }
     zoom(factor,origin,destination=origin) {
       if(!Number.isFinite(factor)||factor<=0)return;

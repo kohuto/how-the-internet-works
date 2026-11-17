@@ -4,6 +4,19 @@
   const HOME = '192.168.10.0/24', DC = '203.0.113.0/26', IG = '203.0.113.64/26', CLOUD = '203.0.113.128/26', REPLICA = '203.0.113.192/26', FRIEND = '172.16.20.0/24', MOBILE = '198.51.100.0/24';
   const VPN='192.0.2.128/27', CABIN='192.168.30.0/24', SAT_WAN='192.0.2.52/30', HACKER='192.168.40.0/24', PHISH='192.0.2.160/27', CAFE='192.168.50.0/24', MAIL_B='192.0.2.192/27';
   const PARTNERS='192.0.2.224/27';
+  // Shared placement keeps devices, scenery and camera bounds together.
+  const MAP_LAYOUT={
+    offsets:{dc:[500,-400],instagram:[1170,100],friend:[770,200],mobile:[0,120],cloud:[500,600],replica:[670,480],vpn:[520,700],hacker:[1070,110],phish:[420,-50],'mail-b':[210,620],cafe:[150,250],partners:[510,-230],peer:[630,30]},
+    routers:{edge:[680,550],north:[1030,280],south:[1240,1000],dc:[1450,550]},
+    bounds:{
+      home:[40,270,460,430],city:[520,120,1110,1090],peer:[1820,390,320,330],
+      cabin:[10,-280,470,565],satellite:[10,-565,1215,700],
+      dc:[1340,-350,520,510],instagram:[2540,150,470,400],friend:[2580,570,540,470],
+      mobile:[100,850,920,370],cafe:[175,1320,865,540],
+      cloud:[1340,1270,520,430],replica:[2050,1150,500,430],vpn:[1820,1740,620,440],
+      hacker:[2870,1100,540,520],phish:[2240,-320,500,410],'mail-b':[1030,1790,560,430],partners:[1820,-850,1080,420]
+    }
+  };
   const browserState=()=>({content:null,pageDocument:null,revision:null,state:'idle',error:'',dnsCache:{},address:'knihovna.test',secure:false,loadedSecure:false,tlsPhase:'idle',certificateVerified:false,receipt:'',visitor:null,greeting:'',cookies:{allowed:true,items:[],lastSent:'',lastReceived:'',sendNote:'Zatím žádný webový požadavek.',receiveNote:'Zatím žádná odpověď s cookie.'}});
   const CHATBOT_REPLY='Ahoj! Tvůj dotaz dorazil na server. Tady jsem připravil tuto odpověď a poslal ji přes síť zpět do tvého zařízení.';
   const MAC = {laptop:'02:00:00:00:10:10', printer:'02:00:00:00:10:20', home:'02:00:00:00:10:01', dc:'02:00:00:00:20:01', dns:'02:00:00:00:20:53', web:'02:00:00:00:20:10',instagram:'02:00:00:00:20:80',friend:'02:00:00:00:30:10','friend-home':'02:00:00:00:30:01'};
@@ -150,6 +163,10 @@
       // The application supplies its explicit, session-only starting selection.
       this.settings=settings;
       this.nodes = Object.fromEntries(nodeDefinitions.map(([id,name,type,x,y,ip,mac,region])=>[id,{id,name,type,x,y,ip,mac,region,on:true,interfaces:{},macTable:{},lastDecision:null}]));
+      for(const n of Object.values(this.nodes)){
+        const offset=MAP_LAYOUT.offsets[n.region]||[0,0];n.x+=offset[0];n.y+=offset[1];
+        if(MAP_LAYOUT.routers[n.id])[n.x,n.y]=MAP_LAYOUT.routers[n.id];
+      }
       this.satellite={clearView:true};this.mitm={active:false,mode:'observe',logs:[],serial:0};
       this.access={cafe:{mode:'wifi',hotspot:'trusted'},hacker:{mode:'cable'},cabin:{mode:'wifi'},laptop:{mode:'cable'},friend:{mode:'cable'},phone:{mode:'cellular',tower:'bts-lipova'}};
       this.links = Object.fromEntries(linkDefinitions.map(([id,a,b,pa,pb,name,addresses,options={}],i)=> {
@@ -397,5 +414,5 @@
       return {link:l,frame:{src:iface.mac,dst:target.mac},row};
     }
   }
-  globalThis.InternetLab={Network,HOME,DC,IG,CLOUD,REPLICA,FRIEND,MOBILE,MAC,contains,CHATBOT_REPLY,VPN,CABIN,SAT_WAN,HACKER,PHISH,CAFE,MAIL_B,PARTNERS};
+  globalThis.InternetLab={Network,HOME,DC,IG,CLOUD,REPLICA,FRIEND,MOBILE,MAC,contains,CHATBOT_REPLY,VPN,CABIN,SAT_WAN,HACKER,PHISH,CAFE,MAIL_B,PARTNERS,MAP_LAYOUT};
 })();

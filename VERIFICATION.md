@@ -2,6 +2,14 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Rozšířené rozložení městské sítě — 17. listopadu 2026, v88
+
+Routery A–D rozestoupeny ve větší oblasti města Lipov, router E posunut vpravo. Hosting a ostatní volitelné oblasti mají samostatná místa kolem městské sítě. Polohy zařízení, dekorací a hranice výřezů vycházejí ze společného popisu rozložení. Propojení, adresy, směrování ani časování modelu se nemění; animace paketů používají nové koncové body spojů. Celá síť přizpůsobuje výřez právě zapnutým oblastem.
+
+Prošlo všech 262 testů ve 21 souborech. Tři nové geometrické kontroly pokrývají routery včetně jejich obrysů mimo cizí oblasti, všech 67 spojů s odstupem od cizích oblastí a zahrnutí všech zařízení do základního i úplného výřezu. Devět testů ovládání mapy ověřuje přiblížení, oddálení, posun a gesta v obou poměrech stran.
+
+V prohlížeči vizuálně ověřena základní sestava (10 zařízení / 10 spojů), samostatný Instagram s Matějovým bytem (18 / 19) a úplná síť (61 / 67), včetně městského výřezu. Všechna vykreslená zařízení i konce spojů odpovídají souřadnicím modelu. Knihovna se v základu načetla za 34 kroků, animace odpovědi sledovala nový spoj server–switch. Instagram doručil zkušební zprávu za 45 kroků. Při 1400 × 1050, 853 × 858 a 320 × 844 px byly dostupné přepínače měřítek a přiblížení, bez vodorovného přetékání dokumentu. Běžné načtení a ovládání bez chyb a varování konzole. Syntaxe všech 26 skriptů a existence všech 32 místních prostředků ověřeny. Verze prostředků v88.
+
 ## Odebrání poznámky o velikosti paketů — 17. listopadu 2026, v87
 
 Z detailu datových paketů odstraněn odstavec začínající V tomto porovnání nese datový paket nejvýše 1400 B aplikačních dat. V náhledu ověřen paket Instagram → Matěj · 1/1: odstavec chybí, údaje IPv4, TCP, pořadové číslo a velikost dat segmentu zůstávají dostupné. Konzole bez chyb a varování. Ověřena syntaxe skriptu a existence všech 32 místních prostředků, verze prostředků v87.
