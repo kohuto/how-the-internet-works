@@ -2,6 +2,14 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Datové centrum hostingu se třemi servery — 17. listopadu 2026, v97
+
+Oblast 03 přejmenována na Datové centrum hostingu. V základu obsahuje router, switch a tři samostatně připojené servery: web knihovny, pekárnu a cykloservis. Dva nové servery mají vlastní IP/MAC, porty switche a oddělené úložiště index.html s rozbalovacím náhledem. Weby dalších zákazníků slouží k prohlížení uložených souborů; síťový pokus prohlížeče dál používá knihovnu. DNS, pošta a chatbot zůstávají volitelné. Základ má 14 zařízení / 14 spojů, úplná síť 80 / 86. Rozšířeno vyobrazení budovy a upraveny polohy jejích zařízení; přípojka a vnitřní spoje se nekříží ani nezasahují do cizích zařízení či oblastí.
+
+Prošlo všech 284 testů ve 24 souborech. Nová kontrola ověřuje oddělení souborů zákazníků, skutečné připojení do společného switche, odmítnutí cizích unicastových kopií a nezávislost dostupnosti knihovny na napájení sousedních serverů. Aktualizovány počty základní, DNS a úplné sestavy. Všech šest geometrických testů prošlo také po konečné úpravě výřezu. Syntaxe všech 27 skriptů, vyvážení CSS a existence 33 místních prostředků ověřeny.
+
+V prohlížeči ověřeny všechny tři uložené stránky, nepřítomnost editace, zachování souboru po vypnutí serveru, 14/14 v základu a 80/86 po Zapnout vše. Knihovna se v základu načetla za 38 kroků, s úplným rozšířením včetně DNS/TLS/Cookies za 138 kroků. Vizuální kontrola při 1400 × 1050 a 939 × 858 px; název oblasti je zahrnutý do celkového výřezu. Při 320 × 844 px rozbalený soubor cykloservisu bez vodorovného přetékání. Konzole bez chyb a varování. Verze prostředků v97.
+
 ## Porty v základní hlavičce paketu — 17. listopadu 2026, v96
 
 Základní Hlavička paketu nově ukazuje zdrojový a cílový port pro TCP i UDP. Po zapnutí rozlišených hlaviček se porty zobrazují pouze v TCP nebo UDP hlavičce. Ostatní údaje a data se nemění.

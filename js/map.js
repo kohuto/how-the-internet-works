@@ -50,14 +50,14 @@
     <g transform="translate(285 610)"><circle r="19" fill="#d7e2c0"/><path d="M0 14V-13M-10-1 0 5 11-7" stroke="#a2b784" fill="none" stroke-width="2"/><rect x="-11" y="12" width="22" height="16" rx="3" fill="#d2b89a"/></g>
     <path d="M90 316h69m190 0h53" stroke="#a9ccc9" stroke-width="7"/><path d="M96 316h56m203 0h40" stroke="#e2f2ea" stroke-width="4"/>
     ${[
-      [1000,110,'03 / HOSTING','WEB · DNS · POŠTA · CHATBOT','#e8edf1','#bfccd2',410],
+      [840,60,'03 / DATOVÉ CENTRUM HOSTINGU','WEBY RŮZNÝCH ZÁKAZNÍKŮ','#e8edf1','#bfccd2',500,520],
       [1480,110,'04 / INSTAGRAM','ZPRÁVY A ÚČTY','#f0e8f3','#d4c3dc'],
       [1000,735,'05 / CLOUD · CENTRUM A','HLAVNÍ SOUBORY · ZÁPIS A ČTENÍ','#e5eff1','#b8d4d8'],
       [1480,735,'06 / CLOUD · CENTRUM B','KOPIE SOUBORŮ · ČTENÍ','#f4eddf','#d9caa8'],
       [1950,-205,'14 / CIZÍ HOSTING','SERVER PODVODNÉ STRÁNKY','#f2e8e5','#d6bdb6'],
       [1000,1230,'16 / POŠTA DOPIS','SCHRÁNKY PRO DOMÉNU DOPIS.TEST','#e7edf4','#b8c9de'],
       [1480,1120,'09 / VPN CENTRUM','ŠIFROVANÝ TUNEL · VÝSTUP DO INTERNETU','#ece8f4','#c7bdd8']
-    ].map(([x,y,title,subtitle,fill,stroke,height=300],index)=>`<g class="data-center" data-region="${['dc','instagram','cloud','replica','phish','mail-b','vpn'][index]}"><rect x="${x}" y="${y}" width="320" height="${height}" rx="14" fill="${fill}" stroke="${stroke}" stroke-width="2"/><path d="M${x+14} ${y+18}h292M${x+14} ${y+height-18}h292" stroke="${stroke}" stroke-width="4" opacity=".45"/><g fill="${stroke}" opacity=".38"><rect x="${x+16}" y="${y+38}" width="24" height="77" rx="3"/><rect x="${x+46}" y="${y+38}" width="24" height="77" rx="3"/></g><text x="${x+4}" y="${y-28}" class="place-label">${title}</text><text x="${x+4}" y="${y-10}" class="center-subtitle">${subtitle}</text></g>`).join('')}
+    ].map(([x,y,title,subtitle,fill,stroke,height=300,width=320],index)=>`<g class="data-center" data-region="${['dc','instagram','cloud','replica','phish','mail-b','vpn'][index]}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="14" fill="${fill}" stroke="${stroke}" stroke-width="2"/><path d="M${x+14} ${y+18}h${width-28}M${x+14} ${y+height-18}h${width-28}" stroke="${stroke}" stroke-width="4" opacity=".45"/>${index===0?'':`<g fill="${stroke}" opacity=".38"><rect x="${x+16}" y="${y+38}" width="24" height="77" rx="3"/><rect x="${x+46}" y="${y+38}" width="24" height="77" rx="3"/></g>`}<text x="${x+4}" y="${y-28}" class="place-label">${title}</text><text x="${x+4}" y="${y-10}" class="center-subtitle">${subtitle}</text></g>`).join('')}
     <text x="73" y="292" class="place-label">01 / BYT NA LIPOVÉ</text>
     <g data-region="peer"><path d="M1240 455q100-65 180 12l-5 125q-89 69-180 0Z" fill="#e8ede5" stroke="#d2decd" stroke-dasharray="5 8"/>
     <text x="1240" y="425" class="place-label">DALŠÍ POSKYTOVATEL</text></g><g data-region="friend" transform="translate(460 30)">
@@ -201,7 +201,7 @@
       this.svg.querySelectorAll('[data-region]').forEach(el=>{el.style.display=regions.has(el.dataset.region)?'':'none';});
       this.svg.querySelectorAll('[data-feature]').forEach(el=>{el.style.display=this.net.featureEnabled(el.dataset.feature)?'':'none';});
       const subtitle=this.svg.querySelector('[data-region="dc"] .center-subtitle');
-      if(subtitle)subtitle.textContent=['WEB',...(this.net.featureEnabled('dns')?['DNS']:[]),...(this.net.featureEnabled('mail')?['POŠTA']:[]),...(this.net.featureEnabled('chatbot')?['CHATBOT']:[])].join(' · ');
+      if(subtitle)subtitle.textContent=['WEBY ZÁKAZNÍKŮ',...(this.net.featureEnabled('dns')?['DNS']:[]),...(this.net.featureEnabled('mail')?['POŠTA']:[]),...(this.net.featureEnabled('chatbot')?['CHATBOT']:[])].join(' · ');
       const partners=this.svg.querySelector('[data-region="partners"] .center-subtitle');
       if(partners)partners.textContent=this.net.featureEnabled('ads')?'TŘI SAMOSTATNÉ SLUŽBY · SPOLEČNÝ REKLAMNÍ SERVER':'SAMOSTATNÉ WEBOVÉ SLUŽBY';
       const cafe=this.svg.querySelector('.cafe-house .region-subtitle');

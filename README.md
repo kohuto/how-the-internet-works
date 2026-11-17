@@ -14,7 +14,7 @@ Při každém novém otevření se vytvoří výchozí model. Obsah ani zásahy 
 
 ## Nastavení sestavy a podrobností
 
-Ozubené kolo nad mapou je dostupné vždy, také při otevřeném monitoru nebo detailu zařízení. Po každém otevření či obnovení stránky se začne základní sestavou: notebook, domácí switch a router v bytě na Lipové, město Lipov a hosting s webem knihovny. Základ obsahuje 12 zařízení a 12 spojů; web se otevře přes HTTP bez kroků DNS a TLS a bez cookies. Ostatní oblasti, zařízení a služby se přidávají jednotlivě v nastavení; nejde o učitelský či žákovský režim.
+Ozubené kolo nad mapou je dostupné vždy, také při otevřeném monitoru nebo detailu zařízení. Po každém otevření či obnovení stránky se začne základní sestavou: notebook, domácí switch a router v bytě na Lipové, město Lipov a datové centrum hostingu se třemi servery zákazníků. Základ obsahuje 14 zařízení a 14 spojů; web se otevře přes HTTP bez kroků DNS a TLS a bez cookies. Ostatní oblasti, zařízení a služby se přidávají jednotlivě v nastavení; nejde o učitelský či žákovský režim.
 
 - **Části sítě:** Matějův byt, chata se satelitem, mobilní síť s BTS, kavárna a hackerské doupě.
 - **Zařízení a služby:** tiskárna, DNS server, TLS / HTTPS, cookies, domácí Wi-Fi, telefon, Pošta Lipov, Pošta Dopis, Instagram, cloud, záložní cloud, VPN, chatbot, podvodný web, útočník v kavárně, e-shop, zprávy a reklamní partner.
@@ -85,6 +85,7 @@ Horní navigace nabízí pouze **Byt**, **Město** a **Celá síť**. Další ob
 
 - **Cloud a soubory:** v obou noteboocích otevřete aplikaci Cloud. Na kartě V počítači je textový soubor; lze ho upravit, uložit místně nebo vytvořit nový. Uložit na cloud odešle soubor na cloudový server v datovém centru. Na kartě Na cloudu použijte Obnovit seznam; soubor stáhnete tlačítkem Stáhnout kopii. Stažený text je nová místní kopie a sám se nesynchronizuje. U souboru, který vlastníte, nastavíte přístup pro druhého uživatele: soukromý, čtení/stažení nebo také úpravy. Změnu odešlete tlačítkem Uložit přístup a dokončete přenos krokováním nebo přehráním. S právem upravovat lze stáhnout soubor, změnit místní text a použít Uložit novou verzi; vlastník a ID původního cloudového souboru se zachovají. Nahrát jako nový soubor vytvoří vlastní soukromou kopii. Předpřipravený Plán na víkend.txt vlastní Matěj a tobě ho sdílí ke čtení. Vyzkoušejte odebrání přístupu a pokus stáhnout soubor podle známého ID. Samotná znalost ID přístup neuděluje.
 
+- **Datové centrum hostingu:** oblast 03 sdružuje router, switch a tři servery různých zákazníků. Webový server uchovává knihovna.test; Server pekárny uchovává pekarna.test a Server cykloservisu cykloservis.test. U každého lze otevřít uložený index.html. Pekárna a cykloservis jsou ukázkou dalších zákazníků; síťový pokus prohlížeče používá knihovnu. Všechna zařízení mají vlastní adresy a skutečné spoje modelu. Vypnutí jiného zákazníka knihovnu neodpojí. DNS, pošta a chatbot se přidávají volitelně.
 - **Čtyři datová centra:** přepínač Centra ukáže hosting, Instagram, cloud A a cloud B. Každé má vlastní router, switch, podsíť a přípojku. Vypněte přípojku hostingu: web a DNS přestanou být dostupné, ale Instagram a cloud dál fungují. Okna zařízení vysvětlují, ke kterému centru patří.
 - **Kopie v druhém centru:** nahrajte soubor do cloudu A. Přes šipku v aplikaci otevřete jeho server a použijte Synchronizovat centra A → B. Soubory i práva vyrazí jako samostatné pakety do druhé budovy. Po dokončení v aplikaci Cloud vyberte B · kopie ke čtení, obnovte seznam a stáhněte soubor. Funguje i při vypnutém serveru A nebo jeho přípojce. B je jen ke čtení; změny ukládejte do A a potom znovu synchronizujte.
 - **VPN a paket uvnitř paketu:** v aplikaci Připojení zapněte přepínač VPN. Je nezávislý na kabelu, Wi-Fi i mobilních datech a funguje v obou noteboocích i telefonu. Internetový provoz včetně DNS se zabalí do neprůhledného IPv4/UDP obalu s cílem VPN server `192.0.2.130`. V mapě má podobu většího fialového paketu se skrytým vnitřním paketem; postupně se zvýrazní skutečně projeté úseky tunelu. Jeho samostatné centrum najdete v pohledu Celá síť. Na VPN serveru se obal ověří a odstraní, vnitřní paket pokračuje běžnými spoji ke službě a zdrojová IP se přeloží na veřejnou IP VPN serveru. Odpověď se vrací podle jeho tabulky, znovu se zabalí a rozbalí až v zařízení. Detail vnějšího paketu ukáže IP/UDP hlavičky a chráněné bajty; po rozbalení ukazuje původní paket bez historie obalu. Otevření detailu zastaví animaci stejně jako u ostatních paketů.
@@ -136,6 +137,8 @@ Také všechny spoje (kabely, Wi-Fi, mobilní rádio, přípojky BTS a propojen�
 | Telefon — mobilní data | 198.51.100.10/24 | Mobilní kanál, Ethernet se nezobrazuje |
 | Tiskárna eth0 | 192.168.10.20/24 | 02:00:00:00:10:20 |
 | Domácí router lan0 | 192.168.10.1/24 | 02:00:00:00:10:01 |
+| Server pekárny eth0 | 203.0.113.11/26 | 02:00:00:00:20:11 |
+| Server cykloservisu eth0 | 203.0.113.12/26 | 02:00:00:00:20:12 |
 | Router hostingu lan0 | 203.0.113.1/26 | 02:00:00:00:20:01 |
 | Webový server | 203.0.113.10/26 | 02:00:00:00:20:10 |
 | Server chatbota | 203.0.113.30/26 | 02:00:00:00:20:30 |
@@ -196,7 +199,7 @@ Veřejnou adresu domácnosti v modelu tvoří WAN rozhraní domácího routeru: 
 
 Nové krátké propojovací úseky mají samostatné modelové sítě /30 z rozsahu `198.18.0.0/24`.
 
-MAC každého rozhraní propojů mezi routery je odlišná a zobrazuje se v detailu rozhraní. Switche nemají připravenou řídicí IP adresu, protože ji pro přepínání rámců nepotřebují. Dvanáct switchů obsluhuje tři domácí LAN, doupě, čtyři základní sítě služeb, VPN centrum, cizí hosting a samostatného poskytovatele pošty Dopis a partnerské weby s reklamním serverem. Celkem má úplný model 78 zařízení a 84 spojů. Partneři mají samostatnou síť 192.0.2.224/27 a přípojku 192.0.2.76/30 do routeru J. Pošta Dopis má vlastní síť 192.0.2.192/27 a přípojku 192.0.2.72/30 do routeru T. Kavárna přidává dva notebooky (útočníkův zároveň plní roli AP/mostu), přístupový bod a router; další switch nepotřebuje. Domácnosti a centra propojuje směrovaná síť. Hosting používá 203.0.113.0/26, Instagram 203.0.113.64/26, cloud A 203.0.113.128/26 a cloud B 203.0.113.192/26. Router D je nyní tranzitním uzlem poskytovatele; centra mají vlastní brány.
+MAC každého rozhraní propojů mezi routery je odlišná a zobrazuje se v detailu rozhraní. Switche nemají připravenou řídicí IP adresu, protože ji pro přepínání rámců nepotřebují. Dvanáct switchů obsluhuje tři domácí LAN, doupě, čtyři základní sítě služeb, VPN centrum, cizí hosting a samostatného poskytovatele pošty Dopis a partnerské weby s reklamním serverem. Celkem má úplný model 80 zařízení a 86 spojů. Partneři mají samostatnou síť 192.0.2.224/27 a přípojku 192.0.2.76/30 do routeru J. Pošta Dopis má vlastní síť 192.0.2.192/27 a přípojku 192.0.2.72/30 do routeru T. Kavárna přidává dva notebooky (útočníkův zároveň plní roli AP/mostu), přístupový bod a router; další switch nepotřebuje. Domácnosti a centra propojuje směrovaná síť. Hosting používá 203.0.113.0/26, Instagram 203.0.113.64/26, cloud A 203.0.113.128/26 a cloud B 203.0.113.192/26. Router D je nyní tranzitním uzlem poskytovatele; centra mají vlastní brány.
 
 ### Co se skutečně modeluje
 
@@ -268,7 +271,7 @@ Ověřované principy: [MDN — cookies třetích stran a omezení prohlížeč�
 1. Vytvořte repozitář na GitHubu. Nahrajte `index.html`, složky `assets` a `js` do jeho kořene; README a ostatní soubory můžete přidat také. `index.html` nesmí zůstat v další nadbytečné podsložce.
 2. V repozitáři otevřete **Settings → Pages**. V části Build and deployment zvolte **Deploy from a branch**, publikační větev (typicky `main`) a složku **/ (root)**. Uložte.
 3. Počkejte na dokončení publikování. Projekt otevřete na adrese `https://UZIVATEL.github.io/REPOZITAR/` uvedené v nastavení Pages.
-4. Další verze zveřejníte běžným nahráním změněných souborů nebo commitem do stejné větve. Vlastní workflow, balíčky a build nejsou potřeba. Při změně JS/CSS současně zvyšte `v=96` v odpovídajících cestách v `index.html`, aby prohlížeče rychleji načetly novou verzi prostředků.
+4. Další verze zveřejníte běžným nahráním změněných souborů nebo commitem do stejné větve. Vlastní workflow, balíčky a build nejsou potřeba. Při změně JS/CSS současně zvyšte `v=97` v odpovídajících cestách v `index.html`, aby prohlížeče rychleji načetly novou verzi prostředků.
 
 Všechny cesty jsou relativní (`./assets/…`, `./js/…`), proto aplikace funguje i v podcestě projektových GitHub Pages. Soubor `.nojekyll` ponechá statické soubory bez zpracování Jekyllem.
 

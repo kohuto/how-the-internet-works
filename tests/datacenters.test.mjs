@@ -47,6 +47,28 @@ test('Hosting and Instagram outages affect their own service while the other cen
   cloud(sim);assert.equal(sim.status,'success');
 });
 
+test('Hosting customers share a switch but keep separate stored pages and server availability',()=> {
+  const sim=new Simulation(),net=sim.net,customers=['hosting-web-2','hosting-web-3'];
+  for(const id of customers){
+    const node=net.nodes[id],link=net.adjacent(id)[0];
+    assert.equal(net.peer(link,id),'dc-switch');
+    assert(contains('203.0.113.0/26',node.ip));
+    assert.notEqual(node.mac,net.nodes.web.mac);
+    assert.notEqual(net.hostedSites[id].files['index.html'],net.server.files['index.html']);
+  }
+  const stored=structuredClone(net.hostedSites);
+  const events=run(sim,'web');assert.equal(sim.status,'success');
+  for(const id of customers){
+    assert(events.some(e=>e.kind==='hop'&&e.to===id&&e.discarded),'Unknown-unicast copies are rejected by the other customers');
+    assert(!events.some(e=>e.kind==='deliver'&&e.node===id));
+    net.toggleNode(id);
+  }
+  run(sim,'web');assert.equal(sim.status,'success');assert.equal(net.browser.content,net.server.title);
+  for(const id of customers)net.toggleNode(id);
+  net.toggleNode('web');run(sim,'web');assert.equal(sim.status,'failed');
+  assert.deepEqual(net.hostedSites,stored,'A library request or power change does not overwrite another customer’s files');
+});
+
 test('Replication transports a complete UTF-8 snapshot and ACLs between independent centers before publishing it',()=> {
   const sim=new Simulation(),text='Žluťoučký kůň 🙂 '.repeat(40),file=upload(sim,text),storage=sim.net.cloud;
   cloud(sim,'permissions','cloud','laptop',{fileId:file.id,permission:'read',aclVersion:file.aclVersion});

@@ -7,11 +7,15 @@
   // Shared placement keeps devices, scenery and camera bounds together.
   const MAP_LAYOUT={
     offsets:{dc:[500,-400],instagram:[1170,100],friend:[770,200],mobile:[0,120],cloud:[500,600],replica:[670,480],vpn:[520,700],hacker:[1070,110],phish:[420,-50],'mail-b':[210,620],cafe:[150,250],partners:[510,-230],peer:[630,30]},
-    positions:{edge:[680,550],north:[1030,280],south:[1240,1000],dc:[1450,550],ap:[150,590],printer:[305,355],'bts-park':[550,900],'mobile-core':[780,1100]},
+    positions:{
+      edge:[680,550],north:[1030,280],south:[1240,1000],dc:[1450,550],ap:[150,590],printer:[305,355],'bts-park':[550,900],'mobile-core':[780,1100],
+      'hosting-router':[1450,-70],'dc-switch':[1600,-70],web:[1750,-70],
+      'hosting-web-2':[1750,-250],'hosting-web-3':[1750,100],dns:[1600,-285],chatbot:[1440,-260],mail:[1600,100]
+    },
     bounds:{
       home:[40,270,460,430],city:[520,120,1110,1090],peer:[1820,390,320,330],
       cabin:[10,-280,470,565],satellite:[10,-565,1215,700],
-      dc:[1340,-350,520,510],instagram:[2540,150,470,400],friend:[2580,570,540,470],
+      dc:[1340,-420,520,580],instagram:[2540,150,470,400],friend:[2580,570,540,470],
       mobile:[100,850,920,370],cafe:[175,1320,865,540],
       cloud:[1340,1270,520,430],replica:[2050,1150,500,430],vpn:[1820,1740,620,440],
       hacker:[2870,1100,540,520],phish:[2240,-320,500,410],'mail-b':[1030,1790,560,430],partners:[1820,-850,1080,420]
@@ -39,6 +43,8 @@
     ['dc-switch','Switch hostingu','switch',1100,270,null,null,'dc'],
     ['dns','DNS server','host',1230,190,'203.0.113.53',MAC.dns,'dc'],
     ['web','Webový server','host',1230,345,'203.0.113.10',MAC.web,'dc'],
+    ['hosting-web-2','Server pekárny','host',1250,150,'203.0.113.11','02:00:00:00:20:11','dc'],
+    ['hosting-web-3','Server cykloservisu','host',1250,500,'203.0.113.12','02:00:00:00:20:12','dc'],
     ['chatbot','Chatbot · server','host',1100,155,'203.0.113.30','02:00:00:00:20:30','dc'],
     ['instagram','Instagram','host',1710,270,'203.0.113.80',MAC.instagram,'instagram'],
     ['peer','Router E','router',1320,520,null,null,'peer'],
@@ -199,6 +205,10 @@
   for(const [index,[id,a,b,pa,pb]] of backboneLinks.entries()){
     linkDefinitions.push([`backbone-${id}`,a,b,pa,pb,`${backboneLetter(a)} — ${backboneLetter(b)}`,[`198.18.0.${index*4+1}`,`198.18.0.${index*4+2}`,`198.18.0.${index*4}/30`]]);
   }
+  linkDefinitions.push(
+    ['hosting-web-2-switch','dc-switch','hosting-web-2','p6','eth0','Hosting — web pekárny',null,{prefix:DC}],
+    ['hosting-web-3-switch','dc-switch','hosting-web-3','p7','eth0','Hosting — web cykloservisu',null,{prefix:DC}]
+  );
   const ipv4 = ip => ip.split('.').reduce((n,b)=>(n*256 + Number(b))>>>0,0);
   const contains = (prefix,ip) => {
     const [net,bits] = prefix.split('/'); const shift = 32-Number(bits);
@@ -232,6 +242,10 @@
         get title(){return this.files['index.html'].content.title;},
         set title(value){this.files['index.html'].content.title=value;},
         revision:1,certificate:{name:'knihovna.test',issuer:'Výuková certifikační autorita',trusted:true,valid:true},lastRequest:null
+      };
+      this.hostedSites={
+        'hosting-web-2':{host:'pekarna.test',files:{'index.html':{name:'index.html',mediaType:'text/html; charset=utf-8',content:{brand:'Pekárna U lípy',kicker:'PEKÁRNA V LIPOVĚ',title:'Každé ráno čerstvý chléb',description:'Chléb, rohlíky a koláče z naší pekárny.'}}}},
+        'hosting-web-3':{host:'cykloservis.test',files:{'index.html':{name:'index.html',mediaType:'text/html; charset=utf-8',content:{brand:'Cykloservis Lipov',kicker:'SERVIS JÍZDNÍCH KOL',title:'Připravíme vaše kolo na cestu',description:'Opravy kol, seřízení brzd a pravidelná údržba.'}}}}
       };
       this.sender={text:'',content:null,sentBytes:0,sentPackets:0,state:'idle'};
       this.instagram={id:0,text:'',content:null,receivedPackets:0,sentBytes:0,sentPackets:0,state:'idle',totalBytes:0,receivedBytes:0,streamBytes:0,readRequested:false,readKnown:false,readNotified:false,error:'',senderDevice:'laptop',recipientDevice:'friend',replyDevice:'laptop',openDevice:null,selfReceipts:true,history:[]};

@@ -25,8 +25,8 @@ function finish(sim,expected='success') {
 }
 test('The base is a usable web network without optional hosts or DNS transfers',()=>{
   const net=network([]),sim=new Simulation(net);
-  assert.deepEqual(net.visibleNodes().map(n=>n.id).sort(),['laptop','switch','home','edge','north','south','dc','dc-switch','web','hosting-router','transit-f','transit-v'].sort());
-  assert.equal(net.visibleLinks().length,12);
+  assert.deepEqual(net.visibleNodes().map(n=>n.id).sort(),['laptop','switch','home','edge','north','south','dc','dc-switch','web','hosting-web-2','hosting-web-3','hosting-router','transit-f','transit-v'].sort());
+  assert.equal(net.visibleLinks().length,14);
   assert.deepEqual(net.dnsRecords,{'knihovna.test':'203.0.113.10'});
   assert.deepEqual(net.mailMXRecords,{});
   assert.equal(net.appAvailable('web','laptop'),true);
@@ -71,7 +71,7 @@ test('Every optional area can stand alone with its dependencies; all restores th
     }
   }
   const net=new Network(LabSettings.full());
-  assert.equal(net.visibleNodes().length,78);assert.equal(net.visibleLinks().length,84);
+  assert.equal(net.visibleNodes().length,80);assert.equal(net.visibleLinks().length,86);
 });
 test('Phone Wi-Fi and mobile access only offer enabled connections',()=>{
   const wifi=network(['phone']);
@@ -126,7 +126,7 @@ test('Without DNS, normal domain URLs still deliver HTTP, HTTPS and forms, also 
 });
 test('Enabling DNS restores cold lookups and learned cache; a powered-off DNS server is not bypassed',()=>{
   const net=network(['dns','tls']),sim=new Simulation(net);
-  assert(net.nodeAvailable('dns'));assert.equal(net.visibleLinks().length,13);
+  assert(net.nodeAvailable('dns'));assert.equal(net.visibleLinks().length,15);
   sim.start('web',{address:'https://knihovna.test/'});finish(sim);
   assert([...sim.packets.values()].some(p=>p.kind==='dns-query'&&p.payload.name==='knihovna.test'));
   assert.equal(net.browser.dnsCache['knihovna.test'],net.nodes.web.ip);
@@ -171,7 +171,7 @@ test('DNS and TLS are independent steps; the same form is delivered in all four 
     assert.equal(request.initialHeader.dport,tls?443:80);
     if(tls){assert(request.payload.record);assert(!JSON.stringify(request).includes(message));}
     else assert(requestText(request.payload).includes(message));
-    assert.equal(net.visibleNodes().length,dns?13:12,'TLS adds no map devices');
+    assert.equal(net.visibleNodes().length,dns?15:14,'TLS adds no map devices');
   }
 });
 test('Certificate rejection is restored by TLS, while disabled TLS delivers readable HTTP',()=>{
@@ -243,7 +243,7 @@ test('Cookies, DNS and TLS are independent; GET and POST work in all eight combi
     if(cookies){assert.equal(net.server.cookies.last.returning,true);assert.equal(net.server.cookies.visitors.get('v1').loads,2);assert.equal(net.server.cookies.visitors.get('v1').requests,3);}
     else{assert.equal(net.server.cookies.serial,0);assert.equal(net.server.cookies.last,null);}
     assert.equal(net.server.auth.sessions.size,cookies&&tls?5:0);
-    assert.equal(net.visibleNodes().length,dns?13:12,'Cookies add no network nodes');
+    assert.equal(net.visibleNodes().length,dns?15:14,'Cookies add no network nodes');
   }
 });
 
