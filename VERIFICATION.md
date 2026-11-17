@@ -2,6 +2,14 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Volitelné podrobnosti spojnic, routerů a switchů — 17. listopadu 2026, v99
+
+Základní detail kabelu obsahuje název Kabelové spojení a tlačítko Odpojit / Obnovit spoj. Údaje První konec, Druhý konec, označení portů a Připojená síť jsou dostupné při zapnutí MAC tabulek nebo směrovacích tabulek. U routerů směrovací tabulky zpřístupní také rozhraní s adresami a připojené spoje; u switchů a Wi-Fi přístupových bodů MAC tabulky zpřístupní seznam portů a spojů. Skryty také konkrétní vstupní/výstupní porty v základním přehledu posledního rozhodnutí. Doplněny popisy obou voleb v nastavení.
+
+Nezávisle na podrobnostech zůstává viditelné hlášení o odpojení, vypnutém zařízení na konci nebo zakrytém výhledu antény. Nevybrané připojení Wi-Fi dostává neutrální informaci, že se právě používá jiná cesta. Vysvětlení rádiového přenosu je součástí rozšířeného detailu spoje. Napájení routerů a switchů i odpojování spojů zůstávají dostupné.
+
+Prošlo všech 24 testů nastavení a přenosů; model sítě se nemění. Ověřena syntaxe obou změněných skriptů a existence 33 místních prostředků. V prohlížeči při 939 × 858 px ověřeny všechny čtyři kombinace MAC/směrování, obě zařízení, zachování názvu Kabelové spojení, odpojení/obnova a nefunkční spoj při vypnutém switchi. Ověřeno čekání na Použít změny, zahození změn zavřením nastavení a zachování otevřené spojnice. U Wi-Fi a satelitu ověřeny skryté údaje a správná informace o neaktivním nebo zakrytém spoji; přístupový bod bez portů v základu a s porty při zapnutí MAC. Knihovna se načetla za 34 kroků, základní rozhodnutí routeru a switche neukázala označení portů. Při 320 × 844 px základní i rozšířená spojnice s odpojením bez vodorovného přetékání. Konzole bez chyb a varování. Verze prostředků v99.
+
 ## Propojené okruhy páteřních routerů — 17. listopadu 2026, v98
 
 Přidáno sedm skutečně směrujících routerů W, X, Y, Z, AA, AB a AC a osmnáct spojů. Horní, pravá i spodní větev nyní tvoří propojené okruhy. Páteř má v úplné sestavě 29 routerů; po výpadku kteréhokoli jednoho páteřního spoje nebo routeru zůstávají ostatní zapnuté páteřní routery propojené. Dostupnost konkrétní služby dále závisí také na jejím přístupovém uzlu, jediné přípojce a koncovém zařízení. Způsob směrování, stabilní volba stejné metriky, NAT a chování přerušeného pokusu zachovány; ztracená data se automaticky neopakují. Nový pokus použije aktuálně dostupnou cestu.

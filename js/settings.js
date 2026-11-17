@@ -27,8 +27,8 @@
     {id:'ads',group:'services',label:'Reklamní partner',description:'Společná reklama dvou webů. Tento pokus používá HTTPS a zabezpečenou cookie.',requires:['shop','news','tls','cookies'],nodes:['ads']}
   ];
   const DETAILS=[
-    {id:'mac',label:'MAC tabulky',description:'Naučené adresy a porty switchů a přístupových bodů.'},
-    {id:'routes',label:'Směrovací tabulky',description:'Cílové sítě, další uzly a výstupní rozhraní routerů.'},
+    {id:'mac',label:'MAC tabulky',description:'Naučené adresy, porty a připojené spoje switchů a přístupových bodů. Také podrobnosti spojnic.'},
+    {id:'routes',label:'Směrovací tabulky',description:'Cílové sítě, rozhraní a připojené spoje routerů. Také podrobnosti spojnic.'},
     {id:'nat',label:'NAT',description:'Tabulky a záznamy překladu IP adres a portů v routerech.'},
     {id:'ttl',label:'TTL',description:'Hodnota životnosti v IP hlavičce paketu.'},
     {id:'headers',label:'IP a TCP hlavička',description:'Oddělené IP a TCP/UDP hlavičky. U TCP se místo zjednodušeného pořadí zobrazí skutečné číslo SEQ.'}
