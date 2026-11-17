@@ -39,18 +39,19 @@ test('TTL and split headers are independent session-only details; payload is alw
   assert(settings.sameNetwork(restored));
 });
 
-test('Base HTTP reveals request and received HTML, keeps MAC addresses and hides TTL and TCP fields',()=>{
+test('Base HTTP reveals ports, request and received HTML, keeps MAC addresses and hides TTL and SEQ',()=>{
   const net=network(),sim=run(net),request=packet(sim,'http-request'),response=packet(sim,'http-response');
   const html=packetView(net,request);
   assert(html.includes('GET / HTTP/1.1'));assert(html.includes('Host: knihovna.test'));
   assert(html.includes(request.src));assert(html.includes(request.dst));
   assert(html.includes('Ethernetový rámec'));assert(html.includes(request.frame.src));
   assert(!html.includes('TTL'));assert(!html.includes('TCP HLAVIČKA'));
-  assert(!html.includes('Zdrojový port'));assert(!html.includes('SEQ'));
+  assert(html.includes(`<dt>Zdrojový port → cílový port</dt><dd>${request.sport} → ${request.dport}</dd>`));assert(!html.includes('SEQ'));
   assert(html.includes('HLAVIČKA PAKETU'));assert(!html.includes('IP HLAVIČKA'));
   assert(html.includes('<dt>Pořadí paketu</dt><dd>1</dd>'));
   assert(!html.includes('<dt>Protokol</dt>'));
   const body=packetView(net,response);
+  assert(body.includes(`<dt>Zdrojový port → cílový port</dt><dd>${response.sport} → ${response.dport}</dd>`));
   assert(body.includes('HTTP/1.1 200 OK'));assert(body.includes('&lt;h1&gt;Dnes otevřeno do 16 hodin&lt;/h1&gt;'));
   assert(!body.includes('<h1>'),'Received markup must be displayed as text');
 });
@@ -65,7 +66,9 @@ test('All four TTL/header combinations change only their fields and preserve pac
     assert.equal(html.includes('Pořadové číslo TCP'),tcp);
     assert.equal(html.includes('IP HLAVIČKA'),tcp);
     assert.equal(html.includes('<dt>Pořadí paketu</dt>'),!tcp);
-    if(tcp)assert(html.includes(`${p.sport} → ${p.dport}`));
+    assert(html.includes(`${p.sport} → ${p.dport}`));
+    assert.equal(html.split('<dt>Zdrojový port → cílový port</dt>').length-1,1);
+    if(tcp)assert(!html.split('</section>')[0].includes('Zdrojový port'),'Ports belong to the transport header in detailed mode');
     assert(html.includes('GET / HTTP/1.1'));
     assert.deepEqual(p,before);
   }
@@ -105,6 +108,7 @@ test('The visible VPN envelope contains only its UDP/IP fields and encrypted byt
   for(let i=0;i<100&&!outer;i++){sim.advanceFrame();outer=[...sim.packets.values()].find(p=>p.kind.startsWith('vpn-'));}
   assert(outer);outer=structuredClone(outer);
   const html=packetView(net,outer);
+  assert(html.includes(`<dt>Zdrojový port → cílový port</dt><dd>${outer.sport} → ${outer.dport}</dd>`));
   assert(html.includes('HLAVIČKA PAKETU'));assert(!html.includes('UDP HLAVIČKA'));assert(html.includes(hex(outer.payload.cipher.slice(0,160))));
   assert(!html.includes('VPN-SECRET'));assert(!html.includes('POST /'));assert(!html.includes('TTL'));
   assert(!html.includes('VPN obal'));assert(!html.includes('VPN server'));
@@ -117,6 +121,10 @@ test('The visible VPN envelope contains only its UDP/IP fields and encrypted byt
 test('DNS has the same simple header and reveals its actual UDP header in detailed mode',()=>{
   const net=network(['dns']),sim=run(net);
   const query=packetView(net,packet(sim,'dns-query')),answer=packetView(net,packet(sim,'dns-response'));
+  for(const kind of ['dns-query','dns-response']) {
+    const p=packet(sim,kind);
+    assert(packetView(net,p).includes(`<dt>Zdrojový port → cílový port</dt><dd>${p.sport} → ${p.dport}</dd>`));
+  }
   assert(query.includes('HLAVIČKA PAKETU'));assert(!query.includes('UDP HLAVIČKA'));assert(query.includes('Dotaz A: knihovna.test'));
   net.settings=new LabSettings({features:['dns'],details:{headers:true}});
   const detailed=packetView(net,packet(sim,'dns-query'));

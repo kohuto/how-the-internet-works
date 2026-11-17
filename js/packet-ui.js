@@ -41,10 +41,11 @@
 
   function packetView(net,p) {
     const detailed=net.detailEnabled('headers');
+    const ports=definition('Zdrojový port → cílový port',`${p.sport} → ${p.dport}`);
     let html='<div class="packet-heading"><h2 id="packet-title">Paket</h2></div>';
-    html+=`<section class="protocol-box"><h3>${detailed?'IP HLAVIČKA · IPv4':'HLAVIČKA PAKETU'}</h3><dl class="dl">${definition('Zdrojová IP adresa',p.src)}${definition('Cílová IP adresa',p.dst)}${detailed?definition('Protokol',p.protocol):definition('Pořadí paketu',p.packetOrder)}${net.detailEnabled('ttl')?definition('TTL',p.ttl):''}${detailed&&p.payload.bytes?definition('Celková délka modelového IP paketu',`${40+p.payload.bytes.length} B`):''}</dl></section>`;
+    html+=`<section class="protocol-box"><h3>${detailed?'IP HLAVIČKA · IPv4':'HLAVIČKA PAKETU'}</h3><dl class="dl">${definition('Zdrojová IP adresa',p.src)}${definition('Cílová IP adresa',p.dst)}${detailed?definition('Protokol',p.protocol):ports+definition('Pořadí paketu',p.packetOrder)}${net.detailEnabled('ttl')?definition('TTL',p.ttl):''}${detailed&&p.payload.bytes?definition('Celková délka modelového IP paketu',`${40+p.payload.bytes.length} B`):''}</dl></section>`;
     if(detailed) {
-      html+=`<section class="protocol-box tcp"><h3>${p.protocol==='TCP'?'TCP HLAVIČKA':'UDP HLAVIČKA'}</h3><dl class="dl">${definition('Zdrojový port → cílový port',`${p.sport} → ${p.dport}`)}${p.protocol==='TCP'?definition('Pořadové číslo TCP · SEQ',p.seq):''}</dl></section>`;
+      html+=`<section class="protocol-box tcp"><h3>${p.protocol==='TCP'?'TCP HLAVIČKA':'UDP HLAVIČKA'}</h3><dl class="dl">${ports}${p.protocol==='TCP'?definition('Pořadové číslo TCP · SEQ',p.seq):''}</dl></section>`;
     }
     html+=packetData(p);
     if(p.frame&&!p.frame.satellite&&!p.frame.cellular) {

@@ -2,6 +2,14 @@
 
 Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Porty v základní hlavičce paketu — 17. listopadu 2026, v96
+
+Základní Hlavička paketu nově ukazuje zdrojový a cílový port pro TCP i UDP. Po zapnutí rozlišených hlaviček se porty zobrazují pouze v TCP nebo UDP hlavičce. Ostatní údaje a data se nemění.
+
+Prošlo všech devět testů náhledu paketů, včetně portů HTTP požadavku a odpovědi, UDP/DNS a vnějšího VPN obalu, všech kombinací TTL a rozlišených hlaviček a kontroly, že se porty nezobrazují dvakrát ani v samostatné IP hlavičce. Syntaxe změněného skriptu ověřena.
+
+V prohlížeči ověřen HTTP paket před NATem (51000 → 80) a po NATu (40000 → 80). Přepnutí stejného paketu zachovalo data a přesunulo porty do TCP hlavičky. Při 320 × 844 px základní náhled s rozbalenými MAC nepřetéká vodorovně; konzole bez chyb a varování. Verze prostředků v96.
+
 ## Společná a rozlišená hlavička, skládání podle SEQ — 17. listopadu 2026, v95
 
 Základní náhled má obecný nadpis Paket a jedinou Hlavičku paketu: zdrojovou IP, cílovou IP a pořadí 1, 2, 3… v daném směru přenosu. Data i MAC adresy zůstávají dostupné. Původní samostatnou volbu TCP hlavička nahrazuje jeden přepínač IP a TCP hlavička. Po zapnutí oddělí IP a TCP/UDP údaje a zjednodušené pořadí nahradí u TCP skutečným SEQ. UDP nezobrazuje falešné SEQ. Nezávislé TTL zůstává volitelné v obou zobrazeních. Změna podrobností zachovává otevřený paket i přenos a platí až po Použít změny.
