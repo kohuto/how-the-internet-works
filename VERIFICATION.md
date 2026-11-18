@@ -2,6 +2,12 @@
 
 Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Rozhodování routerů jako podrobnost směrování — 18. listopadu 2026, v104
+
+Rozhodnutí routeru i hlášení, že zatím žádné rozhodnutí nevzniklo, jsou dostupné až po zapnutí Směrovacích tabulek. Stejná volba už zpřístupňuje směrovací tabulku, rozhraní a připojené spoje. Doplněn její popis v nastavení. Zobrazení samostatné tabulky NAT a ovládání napájení zůstávají nezávislé.
+
+Ověřena syntaxe obou změněných skriptů. V prohlížeči při 1053 × 858 px potvrzen základní domácí router bez rozhodnutí, čekání na rozhodnutí se zapnutými tabulkami a opětovné skrytí po vypnutí volby. Během HTTP přenosu po 12 krocích zapnutí tabulek zobrazilo skutečné rozhodnutí pro paket 1.1 a ponechalo stejný stav pokusu. Zapnuté MAC a NAT bez směrovacích tabulek rozhodnutí neukázaly; NAT zůstal dostupný. Ověřen také Router A a nepřítomnost odkazu na paket. Přenos po dalších 22 krocích úspěšně zobrazil knihovnu. Při 320 × 844 px router s podrobnostmi bez vodorovného přetékání; konzole bez chyb a varování. Verze prostředků v104.
+
 ## Rozhodování switchů a Wi-Fi jako podrobnost MAC — 18. listopadu 2026, v103
 
 Rozhodnutí switchů a Wi-Fi přístupových bodů se zobrazuje jen se zapnutými MAC tabulkami. Totéž platí pro hlášení, že zařízení zatím nezpracovalo žádný rámec. Záznamy rozhodnutí již neobsahují odkaz na otevření paketu, ani u routerů, BTS a satelitu. Spodní tlačítko Prozkoumat paket zůstává funkční. SSID přístupových bodů je běžný údaj Wi-Fi síť bez barevného stavového rámečku; vysvětlení jeho funkce zůstalo v Nápovědě. Doplněn popis volby MAC tabulky v nastavení.

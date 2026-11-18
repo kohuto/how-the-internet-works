@@ -28,7 +28,7 @@
   ];
   const DETAILS=[
     {id:'mac',label:'MAC tabulky',description:'Naučené adresy, rozhodování, porty a připojené spoje switchů a přístupových bodů. Také podrobnosti spojnic.'},
-    {id:'routes',label:'Směrovací tabulky',description:'Cílové sítě, rozhraní a připojené spoje routerů. Také podrobnosti spojnic.'},
+    {id:'routes',label:'Směrovací tabulky',description:'Cílové sítě, rozhodování, rozhraní a připojené spoje routerů. Také podrobnosti spojnic.'},
     {id:'nat',label:'NAT',description:'Tabulky a záznamy překladu IP adres a portů v routerech.'},
     {id:'ttl',label:'TTL',description:'Hodnota životnosti v IP hlavičce paketu.'},
     {id:'headers',label:'IP a TCP hlavička',description:'Oddělené IP a TCP/UDP hlavičky. U TCP se místo zjednodušeného pořadí zobrazí skutečné číslo SEQ.'}

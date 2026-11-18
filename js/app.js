@@ -188,8 +188,9 @@
     } else if(n.type==='router') {
       if(['cabin-router','sat-gateway'].includes(n.id))html+=satelliteInfo(n);
       if(n.id==='mobile-core')html+='<div class="note-card" data-device-help="Mobilní síť"><strong>Brána mobilních dat do internetu</strong>Převezme data od BTS a směruje je dál. Návratové pakety pošle přes vybranou BTS do telefonu. Model shrnuje uživatelskou část mobilního jádra (například UPF).</div>';
-      html+=`${natTable(n)}<p class="hint" data-device-help="Jak zařízení funguje">IP paket předává podle <strong>cílové IP adresy</strong>. Další spoj určuje nejpřesnější odpovídající záznam v tabulce.</p>${decision(n)}`;
+      html+=`${natTable(n)}<p class="hint" data-device-help="Jak zařízení funguje">IP paket předává podle <strong>cílové IP adresy</strong>. Další spoj určuje nejpřesnější odpovídající záznam v tabulce.</p>`;
       if(net.detailEnabled('routes')) {
+      html+=decision(n);
       html+='<div class="section-label">AKTUÁLNÍ SMĚROVACÍ TABULKA</div>';
       html+=n.routes.length?`<table class="data-table"><thead><tr><th>CÍLOVÁ SÍŤ</th><th>DALŠÍ IP</th><th>VÝSTUP</th></tr></thead><tbody>${n.routes.map(r=>`<tr class="${n.lastDecision?.version===net.version&&n.lastDecision?.row?.prefix===r.prefix&&n.lastDecision?.row?.link===r.link?'used':''}"><td>${r.prefix}</td><td>${r.nextIp||'přímo'}</td><td>${r.out}</td></tr>`).join('')}</tbody></table>`:'<p class="empty-table">Žádná dostupná cesta.</p>';
       html+=`<details><summary class="hint">Rozhraní a připravené adresy</summary><dl class="dl">${Object.values(n.interfaces).filter(i=>net.linkAvailable(net.links[i.link])).map(i=>['satellite','satellite-access'].includes(net.links[i.link].medium)?definition(`${i.port} · satelitní přenos`,i.ip||'Přenosový kanál bez samostatné IP'):net.links[i.link].medium==='backhaul'?definition(`${i.port} · přípojka BTS`,'Uživatelský kanál mobilní sítě'):definition(`${i.port} · ${net.links[i.link].prefix}`,`${i.ip} · ${i.mac}`)).join('')}</dl></details><div class="section-label">PŘIPOJENÉ SPOJE</div>${portList(n)}`;
