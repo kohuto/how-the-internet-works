@@ -2,6 +2,14 @@
 
 Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Zapínatelný ilustrační dosah Wi-Fi — 18. listopadu 2026, v105
+
+Do mapy přidán přepínač Dosah Wi-Fi vedle Popisků, zpočátku vypnutý a dostupný až při přidání některého Wi-Fi bodu. Vrstva za spoji, zařízeními a pakety vykresluje jemný radiální přechod od každého zapnutého AP až do úplné průhlednosti bez obrysu. Z ikony AP odstraněny směrově působící oblouky. Poloměr je pouze schematický; model připojení, dosah, směrování ani přenosovou rychlost nijak nevyhodnocuje. Popis přepínače a README uvádějí ilustrační význam. Napodobený hotspot kreslí oblast pouze při aktivním vysílání. Vrstva je bez interakčních cílů a neblokuje zařízení, spoje ani posouvání mapy.
+
+Prošlo všech 15 testů geometrie a ovládání mapy a syntaxe obou změněných skriptů. V prohlížeči při 1053 × 858 px ověřen skrytý přepínač a žádná oblast v základu; po přidání Wi-Fi dostupný vypnutý přepínač a po kliknutí oblast se správným středem. Vizuálně zkontrolován plynulý přechod, pořadí vrstev a žádné překrytí přepínačů. Otevření zařízení i spoje přes oblast fungovalo. Vypnutí a obnovení AP odstranilo a vrátilo plochu; odpojení jeho přípojky ji ponechalo. Popisky, dosah a přiblížení fungují nezávisle. Přepnutí dosahu během přehrávání zachovalo stejný objekt animace paketu, výřez, stav i běžící přehrávání. Knihovna přes Wi-Fi úspěšně dorazila za 38 kroků. V úplné sestavě byly čtyři oblasti skutečných AP, aktivace napodobeného hotspotu přidala pátou a jeho zastavení ji odstranilo. Středy všech oblastí odpovídaly skutečným polohám zařízení.
+
+Při 320 × 844 px oba přepínače bez překrytí a vodorovného přetékání; přepínání mezerníkem fungovalo. Při 700 × 400 px ovládání uvnitř mapy a bez vodorovného přetékání. Přechod na základní sestavu skryl plochy i volbu, opětovné přidání Wi-Fi zachovalo volbu v rámci stejného otevření. Po obnovení stránky ověřen návrat do základní sestavy s vypnutou vrstvou. Testování zásahu myši potvrdilo zařízení i Wi-Fi spojnici pod plochou. Konzole bez chyb a varování. Verze prostředků v105.
+
 ## Rozhodování routerů jako podrobnost směrování — 18. listopadu 2026, v104
 
 Rozhodnutí routeru i hlášení, že zatím žádné rozhodnutí nevzniklo, jsou dostupné až po zapnutí Směrovacích tabulek. Stejná volba už zpřístupňuje směrovací tabulku, rozhraní a připojené spoje. Doplněn její popis v nastavení. Zobrazení samostatné tabulky NAT a ovládání napájení zůstávají nezávislé.

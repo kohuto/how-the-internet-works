@@ -6,7 +6,7 @@
     switch:'<rect x="-32" y="-17" width="64" height="34" rx="7"/><path d="M-23-3h10v10h-10zm18 0H5v10H-5zm18 0h10v10H13z"/><path d="m-18-9 5-4m12 4 5-4m12 4 5-4"/>',
     router:'<circle r="27"/><path d="M-17-10h15m-5-5 5 5-5 5M17 10H2m5-5-5 5 5 5M10-17v15m-5-5 5 5 5-5M-10 17V2m-5 5 5-5 5 5"/>',
     server:'<rect x="-24" y="-34" width="48" height="68" rx="5"/><path d="M-24-11h48m-48 22h48M-15-23H3m-18 23H3m-18 22H3"/><circle cx="14" cy="-23" r="2" class="led"/><circle cx="14" cy="0" r="2" class="led"/><circle cx="14" cy="22" r="2" class="led"/>',
-    ap:'<rect x="-27" y="4" width="54" height="22" rx="7"/><path d="M-18 4v-19M18 4v-19M-18-21q18-17 36 0m-28 5q10-9 20 0"/><circle cx="0" cy="15" r="2" class="led"/>',
+    ap:'<rect x="-27" y="4" width="54" height="22" rx="7"/><path d="M-18 4v-19M18 4v-19"/><circle cx="0" cy="15" r="2" class="led"/>',
     phone:'<rect x="-18" y="-32" width="36" height="64" rx="7"/><path d="M-7-24H7M-5 24H5"/><path class="icon-screen" d="m-7-5 5 5-5 5m12 0h6"/>',
     bts:'<path d="M0-25-22 32M0-25l22 57M-12 8h24M-18 23h36M-20 32h40M0-35v22M-11-30q-12 12 0 24m22-24q12 12 0 24M-21-38q-20 20 0 40m42-40q20 20 0 40"/>'
   };
@@ -25,7 +25,7 @@
   };
   const presets={home:[35,270,465,440],city:[480,100,1720,1140],all:bounds(Object.keys(MAP_LAYOUT.bounds)),ads:bounds(['partners']),mail:bounds(['dc','mail-b']),dc:bounds(['dc']),friend:bounds(['friend']),mobile:bounds(['home','mobile']),cafe:bounds(['cafe']),vpn:bounds(['vpn']),hacker:bounds(['hacker']),satellite:bounds(['cabin','satellite'])};
   const decor=`
-    <defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#213d37" flood-opacity=".09"/></filter></defs>
+    <defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#213d37" flood-opacity=".09"/></filter><radialGradient id="wifi-coverage-gradient"><stop offset="0%" stop-color="#438568" stop-opacity=".24"/><stop offset="45%" stop-color="#438568" stop-opacity=".14"/><stop offset="75%" stop-color="#438568" stop-opacity=".05"/><stop offset="100%" stop-color="#438568" stop-opacity="0"/></radialGradient></defs>
     <rect x="-3000" y="-3000" width="7000" height="7000" fill="#f0f3eb"/>
     <g class="advertising-center" data-region="partners"><rect x="1370" y="-550" width="950" height="300" rx="18" fill="#eee8de" stroke="#c7b7a0" stroke-width="3"/><text x="1400" y="-530" class="place-label">17 / WEBY A REKLAMNÍ PARTNER</text><text x="1400" y="-510" class="center-subtitle">TŘI SAMOSTATNÉ SLUŽBY · SPOLEČNÝ REKLAMNÍ SERVER</text></g>
     <g class="satellite-scenery" data-region="satellite"><rect x="45" y="-550" width="1170" height="240" rx="40" fill="#e7eef3" stroke="#cadce7" stroke-dasharray="6 10"/><path d="M100-360Q660-580 1160-360" fill="none" stroke="#b8cfdf" stroke-dasharray="4 10"/><text x="600" y="-525" class="place-label">11 / SATELITNÍ PŘÍSTUP · LEO</text><text x="600" y="-500" class="center-subtitle">POLOHA A VZDÁLENOSTI JSOU SCHEMATICKÉ</text>
@@ -80,8 +80,8 @@
   class NetworkMap {
     constructor(svg,net,onSelect) {
       this.svg=svg;this.net=net;this.scene='home';this.box=[...presets.home];this.onSelect=onSelect;this.labels=true;this.lastEvent=null;this.selected=null;this.selectedPacket=null;svg.dataset.scene='home';
-      this.packets=new Map();this.packetViews=new Map();this.frame=[];this.pointers=new Map();
-      svg.innerHTML=decor+'<g id="links-layer"></g><g id="nodes-layer"></g><g id="packet-layer"></g>';
+      this.packets=new Map();this.packetViews=new Map();this.frame=[];this.pointers=new Map();this.wifiCoverage=false;
+      svg.innerHTML=decor+'<g id="wifi-coverage-layer" aria-hidden="true" pointer-events="none"></g><g id="links-layer"></g><g id="nodes-layer"></g><g id="packet-layer"></g>';
       svg.querySelectorAll('[data-region]').forEach(el=>{
         const offset=MAP_LAYOUT.offsets[el.dataset.region];
         if(offset)el.setAttribute('transform',`translate(${offset.join(' ')}) ${el.getAttribute('transform')||''}`);
@@ -206,6 +206,10 @@
       if(partners)partners.textContent=this.net.featureEnabled('ads')?'TŘI SAMOSTATNÉ SLUŽBY · SPOLEČNÝ REKLAMNÍ SERVER':'SAMOSTATNÉ WEBOVÉ SLUŽBY';
       const cafe=this.svg.querySelector('.cafe-house .region-subtitle');
       if(cafe)cafe.textContent=this.net.featureEnabled('mitm')?'HOST · VEŘEJNÁ WI-FI · NAPODOBENÝ HOTSPOT':'HOST · VEŘEJNÁ WI-FI';
+      // Schematic signal illustration only; neither radius nor opacity affects connectivity.
+      this.svg.querySelector('#wifi-coverage-layer').innerHTML=this.wifiCoverage?this.net.visibleNodes()
+        .filter(n=>n.type==='ap'&&n.on&&(n.id!=='cafe-attacker'||this.net.mitm.active))
+        .map(n=>`<circle class="wifi-coverage-area" data-wifi-source="${esc(n.id)}" cx="${n.x}" cy="${n.y}" r="320" fill="url(#wifi-coverage-gradient)"/>`).join(''):'';
       const vpnLinks=new Set(Object.values(this.net.vpn?.clients||{}).filter(c=>c.enabled).flatMap(c=>c.path));
       this.svg.querySelector('#links-layer').innerHTML=this.net.visibleLinks().map(l=> {
         const a=this.net.nodes[l.a],b=this.net.nodes[l.b],active=this.net.isActive(l);
