@@ -2,6 +2,12 @@
 
 Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Gmail bez konceptů — 18. listopadu 2026, v113
+
+Odstraněna složka Koncepty, počítadlo, její prázdné i vyplněné zobrazení, ikona, související styly a ovládání ukládání či zahození konceptu. V Gmailu zůstávají pouze Přijaté a Odeslané, hledání, čtení, odpovědi a Napsat. Okno nové zprávy udržuje pouze právě vyplňovaný formulář; křížek nebo Escape jej vyčistí, stejně jako zavření monitoru a opuštění aplikace. Zrušení formuláře nezasahuje do již zahájeného přenosu. Interní stav přejmenován na mailComposer, odstraněna pomocná příznaková logika konceptu a aktualizována dokumentace. Verze prostředků v113.
+
+Ověřena syntaxe app.js a mail-ui.js a všech 17 testů pošty a jejího rozhraní. V prohlížeči při 1053 × 858 px potvrzeny právě dvě složky Přijaté/Odeslané, nepřítomnost textů a ovládání konceptů a prázdná pole po zavření a opětovném otevření okna nové zprávy. Escape ponechal monitor otevřený a rozepsaný text odstranil; zavření monitoru text také neuchovalo. Následný e-mail se skutečně přenesl, objevil v Odeslaných a Matěj ho načetl přes IMAP do Přijatých. Při 320 × 844 px obě složky i okno zprávy bez vodorovného přetékání a tlačítko Odeslat celé dostupné. Konzole bez chyb a varování.
+
 ## Zjednodušené rozhraní Gmailu — 18. listopadu 2026, v112
 
 Klientskou poštu nahrazuje rozhraní ve stylu Gmailu s bočními složkami Doručené, Odeslané a Koncepty, hledáním v místních zprávách, počtem nepřečtených zpráv, seznamem s náhledy a samostatným čtením zprávy. Napsat otevře okno s příjemcem, předmětem, textem, odesláním a zahozením; zavření a Escape zachovají jeden místní koncept každého zařízení. Odpovědět připraví příjemce a Re: bez přepsání již rozepsaného konceptu. Ctrl/Cmd + Enter odešle platný formulář. Technické karty, vysvětlení a rozhovory SMTP/IMAP jsou přesunuty do Podrobností přenosu; podrobnosti společného serveru zůstávají dostupné. Přibyl samostatný gmail.css, Gmail má vlastní velikosti podle šířky aplikace a na úzké obrazovce okno zprávy vyplní aplikaci. Síťový průběh a porty se nemění. Odeslané používají samostatnou místní kopii přidanou až po SMTP potvrzení, doručené nadále vyžadují IMAP.
