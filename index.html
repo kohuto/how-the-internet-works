@@ -7,38 +7,38 @@
   <meta name="description" content="Prozkoumej, jak funguje internet. Česká interaktivní síťová laboratoř: web, místní tisk, pakety a náhradní cesta.">
   <title>Jak funguje internet · Síť pod lupou</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./assets/style.css?v=108">
-  <link rel="stylesheet" href="./assets/computer.css?v=108">
-  <link rel="stylesheet" href="./assets/browser.css?v=108">
-  <link rel="stylesheet" href="./assets/instagram.css?v=108">
-  <link rel="stylesheet" href="./assets/settings.css?v=108">
-  <script src="./js/network.js?v=108" defer></script>
-  <script src="./js/settings.js?v=108" defer></script>
-  <script src="./js/cloud.js?v=108" defer></script>
-  <script src="./js/media.js?v=108" defer></script>
-  <script src="./js/web.js?v=108" defer></script>
-  <script src="./js/privacy.js?v=108" defer></script>
-  <script src="./js/auth.js?v=108" defer></script>
-  <script src="./js/vpn.js?v=108" defer></script>
-  <script src="./js/phishing.js?v=108" defer></script>
-  <script src="./js/mitm.js?v=108" defer></script>
-  <script src="./js/mail.js?v=108" defer></script>
-  <script src="./js/ads.js?v=108" defer></script>
-  <script src="./js/simulation.js?v=108" defer></script>
-  <script src="./js/map.js?v=108" defer></script>
-  <script src="./js/settings-ui.js?v=108" defer></script>
-  <script src="./js/browser-navigation.js?v=108" defer></script>
-  <script src="./js/instagram-ui.js?v=108" defer></script>
-  <script src="./js/computer.js?v=108" defer></script>
-  <script src="./js/browser-ui.js?v=108" defer></script>
-  <script src="./js/phishing-ui.js?v=108" defer></script>
-  <script src="./js/mitm-ui.js?v=108" defer></script>
-  <script src="./js/mail-ui.js?v=108" defer></script>
-  <script src="./js/privacy-ui.js?v=108" defer></script>
-  <script src="./js/auth-ui.js?v=108" defer></script>
-  <script src="./js/ads-ui.js?v=108" defer></script>
-  <script src="./js/packet-ui.js?v=108" defer></script>
-  <script src="./js/app.js?v=108" defer></script>
+  <link rel="stylesheet" href="./assets/style.css?v=109">
+  <link rel="stylesheet" href="./assets/computer.css?v=109">
+  <link rel="stylesheet" href="./assets/browser.css?v=109">
+  <link rel="stylesheet" href="./assets/instagram.css?v=109">
+  <link rel="stylesheet" href="./assets/settings.css?v=109">
+  <script src="./js/network.js?v=109" defer></script>
+  <script src="./js/settings.js?v=109" defer></script>
+  <script src="./js/cloud.js?v=109" defer></script>
+  <script src="./js/media.js?v=109" defer></script>
+  <script src="./js/web.js?v=109" defer></script>
+  <script src="./js/privacy.js?v=109" defer></script>
+  <script src="./js/auth.js?v=109" defer></script>
+  <script src="./js/vpn.js?v=109" defer></script>
+  <script src="./js/phishing.js?v=109" defer></script>
+  <script src="./js/mitm.js?v=109" defer></script>
+  <script src="./js/mail.js?v=109" defer></script>
+  <script src="./js/ads.js?v=109" defer></script>
+  <script src="./js/simulation.js?v=109" defer></script>
+  <script src="./js/map.js?v=109" defer></script>
+  <script src="./js/settings-ui.js?v=109" defer></script>
+  <script src="./js/browser-navigation.js?v=109" defer></script>
+  <script src="./js/instagram-ui.js?v=109" defer></script>
+  <script src="./js/computer.js?v=109" defer></script>
+  <script src="./js/browser-ui.js?v=109" defer></script>
+  <script src="./js/phishing-ui.js?v=109" defer></script>
+  <script src="./js/mitm-ui.js?v=109" defer></script>
+  <script src="./js/mail-ui.js?v=109" defer></script>
+  <script src="./js/privacy-ui.js?v=109" defer></script>
+  <script src="./js/auth-ui.js?v=109" defer></script>
+  <script src="./js/ads-ui.js?v=109" defer></script>
+  <script src="./js/packet-ui.js?v=109" defer></script>
+  <script src="./js/app.js?v=109" defer></script>
 </head>
 <body>
   <main class="workspace">
@@ -70,11 +70,11 @@
       </footer>
     </section>
   </main>
-  <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description">
+  <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
     <form>
-      <header class="settings-header"><div><h2 id="settings-title">Nastavení aplikace</h2><p id="settings-description">Sestav si síť a vyber, kolik podrobností chceš vidět.<br>Po obnovení stránky se vrátí základní sestava.</p></div><button type="button" class="device-close" data-settings-action="close" aria-label="Zavřít nastavení bez použití změn" autofocus>×</button></header>
+      <header class="settings-header"><div><h2 id="settings-title">Nastavení aplikace</h2></div><button type="button" class="device-close" data-settings-action="close" aria-label="Zavřít nastavení bez použití změn" autofocus>×</button></header>
       <div class="settings-scroll"><div class="settings-toolbar"><span id="settings-count"></span><button type="button" class="inline-link" data-settings-action="base">Základní sestava</button><button type="button" class="inline-link" data-settings-action="all">Zapnout vše</button></div><div id="settings-options"></div></div>
-      <footer class="settings-footer"><p id="settings-change-note" role="status"></p><button type="submit" class="primary-button">Použít změny</button></footer>
+      <footer class="settings-footer"><button type="submit" class="primary-button">Použít změny</button></footer>
     </form>
   </dialog>
   <div id="toast" class="toast" role="status"></div>

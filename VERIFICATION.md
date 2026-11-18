@@ -2,6 +2,12 @@
 
 Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Nastavení bez úvodních a stavových textů — 18. listopadu 2026, v109
+
+Odstraněn popis pod nadpisem Nastavení aplikace, rámeček Základ je vždy zapnutý a textový stav v patě dialogu včetně jeho dynamických variant. Pata obsahuje pouze tlačítko Použít změny. Odstraněny nepoužívané styly, odkaz aria-describedby a aktualizace odebraného stavu; nadpis zůstává přístupným názvem dialogu.
+
+Ověřena syntaxe settings-ui.js a všech 24 testů nastavení. V prohlížeči při 691 × 858 px potvrzena nepřítomnost všech tří částí, návaznost seznamu na panel nástrojů a pata s tlačítkem vpravo. Instagram automaticky zapnul Matějův byt, potvrzení vytvořilo novou sestavu a Základní sestava vrátila 14 zařízení. Při 320 × 844 px žádné vodorovné přetékání, tlačítko celé dostupné; Zapnout vše a potvrzení zobrazily všech 87 zařízení. Escape zahodil nepotvrzenou změnu a opětovné otevření ukázalo uloženou sestavu s neaktivním tlačítkem. Konzole bez chyb a varování. Verze prostředků v109.
+
 ## Šířka pásma a latence jednotlivých připojení — 18. listopadu 2026, v108
 
 Do Připojení přidány dvě nezávislé volby Nižší / Vyšší, potvrzované tlačítkem Použít změny. Každý z šesti klientů má vlastní nastavení pro oba směry internetového připojení. Vyšší šířka pásma mění rozestupy segmentů ze tří modelových kroků na jeden a stejný limit se uplatní při předání do internetové přípojky. Vyšší latence přidá šest kroků čekání každému paketu; neobsadí jimi výstup a nevytváří přenos typu odeslat–čekat na doručení. Čekání jsou skutečné přehrávané události. Snímek voleb na začátku pokusu zachovává běžící přenos i po uložení nových hodnot; opakování použije nové. Lokální tisk se nemění. Model neudává Mb/s či milisekundy ani nemění tempo animace, data, TCP SEQ či počet paketů.
