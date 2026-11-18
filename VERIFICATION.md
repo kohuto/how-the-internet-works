@@ -2,6 +2,14 @@
 
 Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Jednotný dosah bezdrátových připojení — 18. listopadu 2026, v107
+
+Přepínač Dosah Wi-Fi přejmenován na Dosah signálu a zpřístupněn také pro sestavy s BTS nebo satelitem. Zapnuté přístupové body, BTS a satelit LEO kreslí kruhový radiální přechod ve vlastním odstínu, s ilustračními poloměry 320, 800 a 900 mapových jednotek. Vrstva leží za spoji, zařízeními a pakety a nezachytává interakce. Rádiové spoje Wi-Fi, telefon–BTS a anténa–satelit–pozemní stanice nemají v mapě čáry, štítky, značky přerušení ani interakční plochy. Modelová propojení a samostatné pakety zůstávají zachované; kabelové přípojky se kreslí dál. Dosah nemění připojení ani rychlost.
+
+Prošlo všech 15 testů geometrie a ovládání mapy a syntaxe obou změněných skriptů. V prohlížeči při 1053 × 858 px ověřena mobilní sestava bez Wi-Fi s dvěma oblastmi BTS, jejich skrytí při vypnutí vysílače a obnovení po zapnutí. Při kroku telefon → BTS byl viditelný a animovaný samostatný paket bez čáry; knihovna se načetla za 34 kroků. V samostatné satelitní sestavě byly oblasti Wi-Fi Chata a LEO; vypnutí a zapnutí LEO skrylo a obnovilo jeho oblast. Detail skrytého satelitního spoje se otevřel ze seznamu portů a po zavření vrátil zaměření na LEO. Kabel router–anténa zůstal. Paket na úseku anténa → LEO byl viditelný a animovaný bez čáry; knihovna dorazila za 54 kroků.
+
+Úplná sestava měla sedm oblastí (čtyři skutečné AP, dvě BTS a LEO) se středy na příslušných zařízeních. Ze 104 modelových spojů se kreslilo 93: všech 11 rádiových spojů zůstalo pouze v modelu. Zachovány obě kabelové přípojky BTS i kabel k satelitní anténě. Vizuálně zkontrolovány přechody i vrstvy. Při 320 × 844 px přepínače uvnitř mapy bez překrytí a vodorovného přetékání; mezerník skryl oblasti, obnovení je vrátilo a změna Popisků je neovlivnila. Obnovení stránky vrátilo základních 14 zařízení, vypnutý a skrytý přepínač a žádné oblasti. Konzole bez chyb a varování. Verze prostředků v107.
+
 ## Wi-Fi bez nakreslených spojnic — 18. listopadu 2026, v106
 
 Z mapy odstraněny skupiny spojnic s médiem Wi-Fi: jejich čáry, štítky, značky přerušení i neviditelné klikací plochy. Platí také pro Matěje, chatu, telefon a hotspoty v kavárně. Modelové bezdrátové spoje nadále přenášejí jednotlivé pakety; ilustrační dosah se zobrazuje nezávisle. Kabelové přípojky AP zůstávají zakreslené. Detail Wi-Fi spoje z rozšířeného seznamu portů zůstává dostupný; při zavření se zaměření vrátí na připojené zařízení.

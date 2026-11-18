@@ -321,7 +321,7 @@
     $('#step').disabled=ui.packetOpen||sim.status!=='running'||sim.auth.working;$('#repeat').disabled=ui.packetOpen||!sim.lastAction;
     const activePacket=ui.selection.kind==='packet'?ui.selection.id:current?.packet?.id;
     $('#packet-detail').disabled=ui.packetOpen||!activePacket;
-    $('#wifi-coverage-control').hidden=!net.visibleNodes().some(n=>n.type==='ap');
+    $('#signal-coverage-control').hidden=!net.visibleNodes().some(n=>['ap','bts','satellite'].includes(n.type));
     map.render(current,ui.selection,ui.selection.kind==='packet'?ui.selection.id:null,animate,ANIMATION_DELAY,sim.packets,sim.frame);
   }
   function advance() {if(ui.packetOpen)return;map.finishAnimations();remaining=0;sim.advanceFrame();if(sim.status!=='running'){stop();if(sim.action?.type!=='message')sim.resumePending();}render(true);}
@@ -501,7 +501,7 @@
   sceneButtons.forEach(b=>b.addEventListener('click',()=>setScene(b.dataset.scene)));
   $('#zoom-in').addEventListener('click',()=>map.zoom(.78));$('#zoom-out').addEventListener('click',()=>map.zoom(1.28));
   $('#labels').addEventListener('change',e=>{map.labels=e.target.checked;map.render();});
-  $('#wifi-coverage').addEventListener('change',e=>{map.wifiCoverage=e.target.checked;map.render();});
+  $('#signal-coverage').addEventListener('change',e=>{map.signalCoverage=e.target.checked;map.render();});
   $('#packet-detail').addEventListener('click',()=>{const p=ui.selection.kind==='packet'?ui.selection.id:sim.current?.packet?.id;if(p)select('packet',p);});
   $('#step').addEventListener('click',()=>{stop();advance();});
   $('#play').addEventListener('click',()=> {
