@@ -5,7 +5,7 @@
   const CLIENTS=['laptop','friend','phone','cabin','cafe'];
   const PHISH_HOST='knihovna-podpora.test';
   const DEMO_LOGIN=Object.freeze({username:'ctenar-demo',password:'UKAZKOVE-HESLO'});
-  const emailFor=id=>({laptop:'ty@posta.test',friend:'matej@dopis.test',phone:'telefon@posta.test',cabin:'chata@posta.test',cafe:'host@posta.test'})[id];
+  const emailFor=id=>({laptop:'ty@gmail.com',friend:'matej@gmail.com',phone:'telefon@gmail.com',cabin:'chata@gmail.com',cafe:'host@gmail.com'})[id];
   function mailTemplate(target,id) {
     return {id,target,to:emailFor(target),fromName:'Podpora knihovny',from:'podpora@knihovna-podpora.test',subject:'Ověření čtenářského účtu',body:'Dobrý den, ověřte prosím svůj čtenářský účet pomocí odkazu níže. Po ověření můžete pokračovat v používání knihovny.',linkLabel:'Ověřit účet knihovny',link:`https://${PHISH_HOST}/overeni?zprava=${id}`};
   }

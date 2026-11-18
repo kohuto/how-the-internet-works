@@ -28,7 +28,6 @@ test('The base is a usable web network without optional hosts or DNS transfers',
   assert.deepEqual(net.visibleNodes().map(n=>n.id).sort(),['laptop','switch','home','edge','north','south','dc','dc-switch','web','hosting-web-2','hosting-web-3','hosting-router','transit-f','transit-v'].sort());
   assert.equal(net.visibleLinks().length,15);
   assert.deepEqual(net.dnsRecords,{'knihovna.test':'203.0.113.10'});
-  assert.deepEqual(net.mailMXRecords,{});
   assert.equal(net.appAvailable('web','laptop'),true);
   for(const app of ['print','mail','message','cloud','chatbot'])assert.equal(net.appAvailable(app,'laptop'),false);
   sim.start('web',{address:'https://knihovna.test/'});const events=finish(sim);
@@ -71,7 +70,7 @@ test('Every optional area can stand alone with its dependencies; all restores th
     }
   }
   const net=new Network(LabSettings.full());
-  assert.equal(net.visibleNodes().length,87);assert.equal(net.visibleLinks().length,104);
+  assert.equal(net.visibleNodes().length,84);assert.equal(net.visibleLinks().length,101);
 });
 test('Phone Wi-Fi and mobile access only offer enabled connections',()=>{
   const wifi=network(['phone']);
@@ -86,7 +85,7 @@ test('Satellite, Instagram, printing and two-provider mail work as individual ad
     [['satellite'],'web',{device:'cabin',address:'https://knihovna.test/'}],
     [['instagram'],'message',{device:'laptop',text:'Ahoj!'}],
     [['printer'],'print',{document:'Ukázka.pdf'}],
-    [['mail-b'],'mail-send',{device:'laptop',target:'friend',subject:'Pozdrav',body:'Ahoj!'}]
+    [['mail'],'mail-send',{device:'laptop',target:'friend',subject:'Pozdrav',body:'Ahoj!'}]
   ]){const sim=new Simulation(network(features));assert(sim.start(type,payload));finish(sim);}
 });
 test('Hidden services cannot be started through simulation controls',()=>{
@@ -146,14 +145,18 @@ test('The advertising partner uses its own DNS lookup only when the DNS extensio
     assert.deepEqual(names,enabled?['obchod.test','reklamy.test']:[]);
   }
 });
-test('Mail between providers preserves delivery and SMTP relay with or without DNS MX',()=>{
+test('The single Gmail option adds Matej and sends within one provider with or without DNS',()=>{
+  assert.equal(LAB_FEATURES.filter(f=>f.id==='mail').length,1);assert(!LAB_FEATURES.some(f=>f.id==='mail-b'));
   for(const enabled of [false,true]){
-    const sim=new Simulation(network(['mail-b',...(enabled?['dns']:[])]));
+    const net=network(['mail',...(enabled?['dns']:[])]),sim=new Simulation(net);
+    assert(net.settings.has('friend'));assert.equal(net.nodes.mail.name,'Gmail');assert(net.nodeAvailable('friend'));
+    assert(net.appAvailable('mail','laptop'));assert(net.appAvailable('mail','friend'));
+    assert(!net.visibleNodes().some(n=>n.region==='mail-b'));
     sim.start('mail-send',{device:'laptop',target:'friend',subject:'Pozdrav',body:'Stejný obsah bez DNS.'});const events=finish(sim);
     assert.equal(sim.net.mail.boxes.friend[0].body,'Stejný obsah bez DNS.');
-    assert([...sim.packets.values()].some(p=>p.mailMeta?.phase==='relay'));
-    assert.equal([...sim.packets.values()].some(p=>p.connection==='mail-dns'),enabled);
-    if(!enabled){assert(!events.some(e=>e.kind==='mail-mx'));assert.deepEqual(sim.net.mail.mxCache,{});}
+    assert.equal(sim.net.mail.boxes.friend[0].to,'matej@gmail.com');
+    assert(![...sim.packets.values()].some(p=>p.mailMeta?.phase==='relay'||p.kind.startsWith('dns-')));
+    assert(!events.some(e=>e.kind==='mail-mx'));assert.equal(sim.net.mail.deliveries.size,1);
   }
 });
 test('DNS and TLS are independent steps; the same form is delivered in all four combinations',()=>{

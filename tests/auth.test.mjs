@@ -4,7 +4,7 @@ const {Simulation,WebCookies,requestText,responseText,passwordHash}=globalThis.I
 const jar=(s,d='laptop')=>s.net.browserFor(d).cookies;
 const client=(s,d='laptop')=>s.auth.state.clients[d];
 const packet=(s,k)=>[...s.packets.values()].find(p=>p.kind===k);
-const credentials={username:'tester',password:'FIKTIVNI-TAJEMSTVI',email:'tester@posta.test'};
+const credentials={username:'tester',password:'FIKTIVNI-TAJEMSTVI',email:'tester@knihovna.test'};
 function start(s,op,p={}){assert(s.start('web',{address:'https://knihovna.test',authOp:op,...(['login','register'].includes(op)?credentials:{}),...p}));}
 async function finish(s){const events=[];for(let i=0;i<6000&&s.status==='running';i++){if(!s.queue.length){assert(s.auth.pending,'Unexpected stalled simulation');await s.auth.pending.promise;}s.advanceFrame();events.push(...structuredClone(s.frame));}assert.notEqual(s.status,'running');return events;}
 async function run(s,op,p={}){start(s,op,p);return finish(s);}

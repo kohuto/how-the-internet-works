@@ -78,6 +78,6 @@ test('Losing a relay after interception fails rather than inventing client deliv
 });
 
 test('Cafe mail and phishing use the same real path while their model TLS remains opaque to MITM',()=>{
- const s=attack('http');assert(s.start('phish-send',{device:'hacker',target:'cafe'}));finish(s);assert.equal(s.status,'success');assert(s.start('mail-check',{device:'cafe'}));finish(s);assert.equal(s.status,'success');assert.equal(s.net.phishing.clients.cafe.inbox.to,'host@posta.test');
+ const s=attack('http');assert(s.start('phish-send',{device:'hacker',target:'cafe'}));finish(s);assert.equal(s.status,'success');assert(s.start('mail-check',{device:'cafe'}));finish(s);assert.equal(s.status,'success');assert.equal(s.net.phishing.clients.cafe.inbox.to,'host@gmail.com');
  assert(s.net.mitm.logs.every(r=>r.protection==='TLS'&&!r.before));const address=s.net.phishing.clients.cafe.inbox.link;assert(s.start('web',{device:'cafe',address,method:'POST',phishLogin:true}));finish(s);assert.equal(s.status,'success');assert.equal(s.net.phishing.captures.size,1);assert(!JSON.stringify(s.net.mitm.logs).includes(DEMO_LOGIN.password));assert.equal(s.net.phishing.lastWeb.sourceIp,'192.0.2.69');
 });

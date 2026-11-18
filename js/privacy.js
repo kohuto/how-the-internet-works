@@ -6,9 +6,9 @@
     constructor(net){
       this.net=net;
       this.state=net.server.privacy??={serial:0,revision:0,requests:new Map(),clients:Object.fromEntries(Object.keys(owners).map(id=>[id,{snapshot:null,receipt:null,state:'idle',error:'',notice:'Údaje ze serveru zatím nebyly vyžádány.'}])),accounts:new Map([
-        ['ctenar-1',{profile:{name:'Alex Lipovský',email:'alex@posta.test',genres:'Dobrodružné příběhy, příroda'},hold:true}],
-        ['ctenar-2',{profile:{name:'Matěj Dopis',email:'matej@dopis.test',genres:'Komiksy, technika'},hold:false}],
-        ['ctenar-3',{profile:{name:'Host Kavárenský',email:'host@posta.test',genres:'Cestování, historie'},hold:false}]
+        ['ctenar-1',{profile:{name:'Alex Lipovský',email:'alex@gmail.com',genres:'Dobrodružné příběhy, příroda'},hold:true}],
+        ['ctenar-2',{profile:{name:'Matěj Dopis',email:'matej@gmail.com',genres:'Komiksy, technika'},hold:false}],
+        ['ctenar-3',{profile:{name:'Host Kavárenský',email:'host@gmail.com',genres:'Cestování, historie'},hold:false}]
       ].map(([id,a])=>[id,{...a,id,visits:[],visitorIds:new Set(),collecting:true,erased:false,revision:0,document:{holder:a.profile.name,label:'Ukázkový účetní doklad o čtenářském poplatku',reason:'Modelová zákonná povinnost uchovat účetní doklad po stanovenou dobu.'}}]))};
     }
     owner(device){return owners[device];}

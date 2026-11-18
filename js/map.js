@@ -12,7 +12,7 @@
     bts:'<path d="M0-25-22 32M0-25l22 57M-12 8h24M-18 23h36M-20 32h40M0-35v22M-11-30q-12 12 0 24m22-24q12 12 0 24M-21-38q-20 20 0 40m42-40q20 20 0 40"/>'
   };
   icons.vpn='<path d="M0-34 27-24v24c0 19-27 34-27 34S-27 19-27 0v-24Z"/><rect x="-12" y="-6" width="24" height="22" rx="4"/><path d="M-7-6v-7a7 7 0 0 1 14 0v7"/>';
-  icons.cafe=icons.laptop;icons['cafe-attacker']=icons.laptop;icons.hacker=icons.laptop;icons['phish-web']=icons.server;icons['mail-dopis']=icons.mail='<rect x="-30" y="-22" width="60" height="44" rx="6"/><path d="m-29-18 29 24 29-24M-30 20-9 1m39 19L9 1"/>';
+  icons.cafe=icons.laptop;icons['cafe-attacker']=icons.laptop;icons.hacker=icons.laptop;icons['phish-web']=icons.server;icons.mail='<rect x="-30" y="-22" width="60" height="44" rx="6"/><path d="m-29-18 29 24 29-24M-30 20-9 1m39 19L9 1"/>';
   icons.shop=icons.news=icons.ads=icons.server;
   icons.cabin=icons.laptop;
   icons.terminal='<path d="M-24-22q-2 38 38 37Z"/><path d="M-7-5 18-30m-3-3 6 6M-2 13v16m-14 3h32"/>';
@@ -30,7 +30,7 @@
     const boxes=[...regions.map(id=>MAP_LAYOUT.bounds[id]),...nodes.map(n=>[n.x-65,n.y-55,130,125])],x=Math.min(...boxes.map(b=>b[0])),y=Math.min(...boxes.map(b=>b[1]));
     return [x,y,Math.max(...boxes.map(b=>b[0]+b[2]))-x,Math.max(...boxes.map(b=>b[1]+b[3]))-y];
   };
-  const presets={home:[35,270,465,440],city:[480,100,1720,1140],all:bounds(Object.keys(MAP_LAYOUT.bounds)),ads:bounds(['partners']),mail:bounds(['dc','mail-b']),dc:bounds(['dc']),friend:bounds(['friend']),mobile:bounds(['home','mobile']),cafe:bounds(['cafe']),vpn:bounds(['vpn']),hacker:bounds(['hacker']),satellite:bounds(['cabin','satellite'])};
+  const presets={home:[35,270,465,440],city:[480,100,1720,1140],all:bounds(Object.keys(MAP_LAYOUT.bounds)),ads:bounds(['partners']),mail:bounds(['dc']),dc:bounds(['dc']),friend:bounds(['friend']),mobile:bounds(['home','mobile']),cafe:bounds(['cafe']),vpn:bounds(['vpn']),hacker:bounds(['hacker']),satellite:bounds(['cabin','satellite'])};
   const decor=`
     <defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#213d37" flood-opacity=".09"/></filter>${Object.values(signalStyles).map(s=>`<radialGradient id="${s.medium}-coverage-gradient"><stop offset="0%" stop-color="${s.color}" stop-opacity=".24"/><stop offset="45%" stop-color="${s.color}" stop-opacity=".14"/><stop offset="75%" stop-color="${s.color}" stop-opacity=".05"/><stop offset="100%" stop-color="${s.color}" stop-opacity="0"/></radialGradient>`).join('')}</defs>
     <rect x="-3000" y="-3000" width="7000" height="7000" fill="#f0f3eb"/>
@@ -62,9 +62,8 @@
       [1000,735,'05 / CLOUD · CENTRUM A','HLAVNÍ SOUBORY · ZÁPIS A ČTENÍ','#e5eff1','#b8d4d8'],
       [1480,735,'06 / CLOUD · CENTRUM B','KOPIE SOUBORŮ · ČTENÍ','#f4eddf','#d9caa8'],
       [1950,-205,'14 / CIZÍ HOSTING','SERVER PODVODNÉ STRÁNKY','#f2e8e5','#d6bdb6'],
-      [1000,1230,'16 / POŠTA DOPIS','SCHRÁNKY PRO DOMÉNU DOPIS.TEST','#e7edf4','#b8c9de'],
       [1480,1120,'09 / VPN CENTRUM','ŠIFROVANÝ TUNEL · VÝSTUP DO INTERNETU','#ece8f4','#c7bdd8']
-    ].map(([x,y,title,subtitle,fill,stroke,height=300,width=320],index)=>`<g class="data-center" data-region="${['dc','instagram','cloud','replica','phish','mail-b','vpn'][index]}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="14" fill="${fill}" stroke="${stroke}" stroke-width="2"/><path d="M${x+14} ${y+18}h${width-28}M${x+14} ${y+height-18}h${width-28}" stroke="${stroke}" stroke-width="4" opacity=".45"/>${index===0?'':`<g fill="${stroke}" opacity=".38"><rect x="${x+16}" y="${y+38}" width="24" height="77" rx="3"/><rect x="${x+46}" y="${y+38}" width="24" height="77" rx="3"/></g>`}<text x="${x+4}" y="${y-28}" class="place-label">${title}</text><text x="${x+4}" y="${y-10}" class="center-subtitle">${subtitle}</text></g>`).join('')}
+    ].map(([x,y,title,subtitle,fill,stroke,height=300,width=320],index)=>`<g class="data-center" data-region="${['dc','instagram','cloud','replica','phish','vpn'][index]}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="14" fill="${fill}" stroke="${stroke}" stroke-width="2"/><path d="M${x+14} ${y+18}h${width-28}M${x+14} ${y+height-18}h${width-28}" stroke="${stroke}" stroke-width="4" opacity=".45"/>${index===0?'':`<g fill="${stroke}" opacity=".38"><rect x="${x+16}" y="${y+38}" width="24" height="77" rx="3"/><rect x="${x+46}" y="${y+38}" width="24" height="77" rx="3"/></g>`}<text x="${x+4}" y="${y-28}" class="place-label">${title}</text><text x="${x+4}" y="${y-10}" class="center-subtitle">${subtitle}</text></g>`).join('')}
     <text x="73" y="292" class="place-label">01 / BYT NA LIPOVÉ</text>
     <g data-region="peer"><path d="M1240 455q100-65 180 12l-5 125q-89 69-180 0Z" fill="#e8ede5" stroke="#d2decd" stroke-dasharray="5 8"/>
     <text x="1240" y="425" class="place-label">DALŠÍ POSKYTOVATEL</text></g><g data-region="friend" transform="translate(460 30)">
@@ -208,7 +207,7 @@
       this.svg.querySelectorAll('[data-region]').forEach(el=>{el.style.display=regions.has(el.dataset.region)?'':'none';});
       this.svg.querySelectorAll('[data-feature]').forEach(el=>{el.style.display=this.net.featureEnabled(el.dataset.feature)?'':'none';});
       const subtitle=this.svg.querySelector('[data-region="dc"] .center-subtitle');
-      if(subtitle)subtitle.textContent=['WEBY ZÁKAZNÍKŮ',...(this.net.featureEnabled('dns')?['DNS']:[]),...(this.net.featureEnabled('mail')?['POŠTA']:[]),...(this.net.featureEnabled('chatbot')?['CHATBOT']:[])].join(' · ');
+      if(subtitle)subtitle.textContent=['WEBY ZÁKAZNÍKŮ',...(this.net.featureEnabled('dns')?['DNS']:[]),...(this.net.featureEnabled('mail')?['GMAIL']:[]),...(this.net.featureEnabled('chatbot')?['CHATBOT']:[])].join(' · ');
       const partners=this.svg.querySelector('[data-region="partners"] .center-subtitle');
       if(partners)partners.textContent=this.net.featureEnabled('ads')?'TŘI SAMOSTATNÉ SLUŽBY · SPOLEČNÝ REKLAMNÍ SERVER':'SAMOSTATNÉ WEBOVÉ SLUŽBY';
       const cafe=this.svg.querySelector('.cafe-house .region-subtitle');

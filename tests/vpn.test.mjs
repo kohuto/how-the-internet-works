@@ -12,7 +12,7 @@ test('VPN is an independent layer above cable, Wi-Fi and data with separate tunn
   const access=structuredClone(s.net.access[id]),ip=s.net.nodes[id].ip;assert(s.net.setVPN(id,true));
   assert.deepEqual(s.net.access[id],access);assert.equal(s.net.nodes[id].ip,ip);assert.equal(s.net.vpn.clients[id].ip,`10.8.0.${10+i}`);
  }
- assert.equal(Object.keys(s.net.nodes).length,87);assert.equal(Object.keys(s.net.links).length,104);
+ assert.equal(Object.keys(s.net.nodes).length,84);assert.equal(Object.keys(s.net.links).length,101);
 });
 
 test('The VPN envelope hides the entire DNS and HTTP packet on the access path and exposes HTTP only at the exit',()=>{

@@ -1,24 +1,23 @@
-/* Local mail transport: prepared TLS sessions, a short SMTP dialogue, MX relay,
+/* Local Gmail model: prepared TLS sessions, a short SMTP dialogue,
    IMAP snapshots and flags. No real mail, sockets or credentials are used. */
 (() => {
   'use strict';
   const {ModelTLS,PHISH_CLIENTS,emailFor,mailTemplate}=globalThis.InternetLab;
   const encoder=new TextEncoder(),decoder=new TextDecoder(),CHUNK=192;
-  const serverFor=id=>id==='friend'?'mail-dopis':'mail';
+  const serverFor=()=>'mail';
   const domainOf=address=>address.split('@')[1];
   const mailWire=m=>`Message-ID: <${m.id}@${domainOf(m.from)}>\r\nFrom: ${m.from}\r\nTo: ${m.to}\r\nSubject: ${m.subject}\r\n\r\n${m.body.replace(/\r?\n/g,'\r\n').replace(/^\./gm,'..')}\r\n.\r\n`;
   class MailScenario {
     #sessions=new Map();#buffers=new Map();#transfer=0;#sessionSerial=0;
     constructor(sim){
       this.sim=sim;this.net=sim.net;
-      this.state=this.net.mail??={serial:0,boxes:Object.fromEntries(PHISH_CLIENTS.map(id=>[id,[]])),queue:new Map(),mxCache:{},dialogue:[],current:null};
+      this.state=this.net.mail??={serial:0,boxes:Object.fromEntries(PHISH_CLIENTS.map(id=>[id,[]])),deliveries:new Map(),dialogue:[],current:null};
       for(const c of Object.values(this.net.phishing.clients)){c.items??=[];c.notice??='';}
       this.entry=null;this.phase='idle';
     }
-    accepts(type){return ['mail-send','mail-check','mail-seen','mail-retry','phish-send'].includes(type);}
+    accepts(type){return ['mail-send','mail-check','mail-seen','phish-send'].includes(type);}
     validate(type,p){
       if(type==='phish-send')return p.device==='hacker'&&PHISH_CLIENTS.includes(p.target);
-      if(type==='mail-retry')return this.state.queue.get(String(p.messageId))?.state==='queued';
       if(!PHISH_CLIENTS.includes(p.device))return false;
       if(type==='mail-send')return PHISH_CLIENTS.includes(p.target)&&typeof p.subject==='string'&&p.subject.trim().length>0&&p.subject.length<=100&&typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200;
       if(type==='mail-seen')return this.net.phishing.clients[p.device].items.some(m=>String(m.id)===String(p.messageId));
@@ -30,16 +29,15 @@
       if(type==='mail-send'||type==='phish-send'){
         if(type==='phish-send')p.messageId??=++this.net.phishing.serial;else p.messageId??=`mail-${++this.state.serial}`;
         s.lastAction.payload.messageId=p.messageId;
-        const old=this.state.queue.get(String(p.messageId));
+        const old=this.state.deliveries.get(String(p.messageId));
         const message=old?.message||(type==='phish-send'?{...mailTemplate(p.target,p.messageId),source:'hacker'}:{id:p.messageId,source:p.device,target:p.target,from:emailFor(p.device),fromName:this.net.nodes[p.device].name,to:emailFor(p.target),subject:p.subject.trim().replace(/[\r\n]/g,' '),body:p.body});
-        this.entry=old||{message,origin:serverFor(p.device),destination:serverFor(p.target),state:'new',accepted:false,clientAccepted:false,attempts:0,lastError:''};
+        this.entry=old||{message,origin:serverFor(p.device),destination:serverFor(p.target),state:'new',accepted:false,clientAccepted:false};
         this.phase='submission';
         if(c)Object.assign(c,{state:'sending',error:'',notice:'SMTP připravuje odeslání zprávy.'});
         else Object.assign(this.net.phishing.hacker,{state:'sending',lastTarget:p.target,notice:'SMTP připravuje podvodný e-mail.'});
-      }else if(type==='mail-retry'){this.entry=this.state.queue.get(String(p.messageId));this.phase='retry';}
-      else {this.phase='imap';Object.assign(c,{state:'loading',error:'',notice:type==='mail-check'?'IMAP načítá schránku.':'IMAP ukládá příznak přečtení.'});}
+      }else {this.phase='imap';Object.assign(c,{state:'loading',error:'',notice:type==='mail-check'?'IMAP načítá schránku.':'IMAP ukládá příznak přečtení.'});}
       this.state.current={run:s.run,device:s.clientId(),phase:this.phase,messageId:p.messageId||null};
-      s.next([{kind:'mail-prepare',node:type==='mail-retry'?this.entry.origin:s.clientId(),title:this.phase==='imap'?'IMAP · přístup ke schránce':'SMTP · odesílání zprávy',description:'Přenos spusť krokováním nebo přehráním.'}]);
+      s.next([{kind:'mail-prepare',node:s.clientId(),title:this.phase==='imap'?'IMAP · přístup ke schránce':'SMTP · odesílání zprávy',description:'Přenos spusť krokováním nebo přehráním.'}]);
     }
     log(node,session,direction,value){
       this.state.dialogue.push({run:this.sim.run,node,session:session.id,protocol:session.protocol,phase:session.phase,direction,wire:value.wire,say:value.say});
@@ -58,23 +56,22 @@
         const data={transfer,length:bytes.length,bytes:Array.from(bytes.slice(position,position+CHUNK))},record=session.tls.seal('mail-chunk',data,to);
         const payload={record,mailSession:session.id};
         const kind=`${session.protocol.toLowerCase()}-${response?'response':'request'}`;
-        const p=response?s.replyPacket(kind,session.lastRequest,payload):s.createPacket(kind,from,to,payload,{sport:session.phase==='relay'?52006:session.protocol==='SMTP'?51006:51007,dport:session.phase==='relay'?25:session.protocol==='SMTP'?465:993});
+        const p=response?s.replyPacket(kind,session.lastRequest,payload):s.createPacket(kind,from,to,payload,{sport:session.protocol==='SMTP'?51006:51007,dport:session.protocol==='SMTP'?465:993});
         p.connection=session.protocol.toLowerCase();p.label=`${session.protocol} · ${response?'odpověď':'požadavek'}${bytes.length>CHUNK?' '+(Math.floor(position/CHUNK)+1)+'/'+Math.ceil(bytes.length/CHUNK):''}`;
         p.seq=session[sequence];session[sequence]=(session[sequence]+record.data.length)>>>0;
         p.mailMeta={protocol:session.protocol,phase:session.phase,session:session.id,seq:p.seq,total:bytes.length,partBytes:data.bytes.length};
-        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+Math.floor(position/CHUNK)*s.packetGap(from,to),title:`${session.protocol} · příprava části ${Math.floor(position/CHUNK)+1} / ${Math.ceil(bytes.length/CHUNK)}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.phase==='relay'?'Samostatné předání mezi poštovními servery.':session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes vlastní poštovní server.'}`});
+        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+Math.floor(position/CHUNK)*s.packetGap(from,to),title:`${session.protocol} · příprava části ${Math.floor(position/CHUNK)+1} / ${Math.ceil(bytes.length/CHUNK)}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes společný server Gmailu.'}`});
       }
       this.#buffers.set(session.id+':'+transfer,{length:bytes.length,stream:new globalThis.InternetLab.TCPReceiveStream(firstSeq,(session[sequence]-firstSeq)>>>0),chunks:new Map()});
       s.next(events);
     }
-    beginSMTP(relay=false){
-      this.phase=relay?'relay':'submission';this.state.current.phase=this.phase;
-      const e=this.entry;e.lastError='';if(relay)e.attempts++;
-      const session=this.session(relay?e.origin:this.sim.clientId(),relay?e.destination:e.origin,'SMTP',this.phase);
+    beginSMTP(){
+      this.phase='submission';this.state.current.phase=this.phase;
+      const session=this.session(this.sim.clientId(),this.entry.origin,'SMTP',this.phase);
       this.smtpCommand(session);
     }
     smtpCommand(session){
-      const m=this.entry.message,from=m.source==='hacker'?'utocnik@posta.test':m.from;
+      const m=this.entry.message,from=m.source==='hacker'?'utocnik@gmail.com':m.from;
       const commands=[
         {cmd:'MAIL',wire:`MAIL FROM:<${from}>`,say:'Chci odeslat e-mail. Toto je odesílatel.'},
         {cmd:'RCPT',wire:`RCPT TO:<${m.to}>`,say:'Zpráva je pro tuto adresu.'},
@@ -103,11 +100,9 @@
           const entry=this.entry;
           if(!value.message||value.message.id!==entry.message.id||value.message.target!==entry.message.target)throw new Error('SMTP: obsah nepatří této obálce.');
           entry.message=structuredClone(value.message);const m=entry.message;
-          if(session.phase==='submission'){
-            if(!entry.accepted){entry.accepted=true;entry.state='queued';this.state.queue.set(String(m.id),entry);this.net.phishing.messages.set(m.id,structuredClone(m));this.net.phishing.requests.set(m.id,true);}
-            if(entry.origin===entry.destination){this.storeInbox();entry.state='delivered';}
-          }else this.storeInbox();
-          reply={cmd:'OK',wire:'250 2.0.0 Zpráva přijata',say:session.phase==='relay'||this.entry.origin===this.entry.destination?'Zpráva je uložená ve schránce na serveru.':'Zprávu jsem převzal do odchozí fronty.'};
+          if(!entry.accepted){entry.accepted=true;this.state.deliveries.set(String(m.id),entry);this.net.phishing.messages.set(m.id,structuredClone(m));this.net.phishing.requests.set(m.id,true);}
+          this.storeInbox();entry.state='delivered';
+          reply={cmd:'OK',wire:'250 2.0.0 Zpráva přijata',say:'Zpráva je uložená ve schránce na společném serveru Gmailu.'};
         }else reply={cmd:'OK',wire:value.cmd==='DATA'?'354 Pošli obsah, ukonči jej tečkou':'250 2.1.0 OK',say:value.cmd==='MAIL'?'Odesílatele přijímám.':value.cmd==='RCPT'?'Adresu příjemce přijímám.':'Pošli hlavičku a obsah e-mailu.'};
       }else{
         const client=s.clientId(),box=this.state.boxes[client];
@@ -125,13 +120,7 @@
       const s=this.sim,c=this.net.phishing.clients[s.clientId()];
       if(session.protocol==='SMTP'){
         if(++session.index<4)return this.smtpCommand(session);
-        const e=this.entry;e.clientAccepted=true;
-        if(session.phase==='relay'||e.origin===e.destination){e.state='delivered';return this.completeSend();}
-        this.phase='mx';this.state.current.phase='mx';
-        if(c)Object.assign(c,{state:'ready',notice:'Tvůj server zprávu převzal. Následuje předání druhému poskytovateli.'});
-        else this.net.phishing.hacker.notice='SMTP předalo zprávu tvému serveru. Následuje předání serveru příjemce.';
-        if(!this.net.featureEnabled('dns'))return this.lookupMX();
-        s.next([{kind:'mail-mx',node:e.origin,title:'Poštovní server hledá cílovou doménu',description:'Použije DNS záznam MX.'}]);
+        this.entry.clientAccepted=true;return this.completeSend();
       }else if(session.index++===0)this.imapCommand(session);
       else if(s.action.type==='mail-seen'){
         for(const m of c.items)if(m.id===value.messageId)m.seen=true;if(c.inbox?.id===value.messageId)c.inbox.seen=true;
@@ -152,31 +141,13 @@
       const s=this.sim;
       if(e.kind==='mail-part'){s.next([s.originate(e.packet)]);return;}
       if(e.kind==='mail-prepare'){
-        if(s.action.type==='mail-retry'){this.phase='mx';this.state.current.phase='mx';return this.lookupMX();}
         const id=s.clientId();if(!this.net.nodes[id].on||!this.net.accessReady(id))return s.failure(`${this.net.nodes[id].name} nemá dostupné připojení.`,null,id);
         if(this.phase==='imap'){const session=this.session(id,serverFor(id),'IMAP','access');this.imapCommand(session);}else this.beginSMTP();return;
-      }if(e.kind==='mail-mx')this.lookupMX();
-    }
-    lookupMX(){
-      const s=this.sim,domain=domainOf(this.entry.message.to),cached=this.state.mxCache[this.entry.origin+':'+domain];
-      if(!this.net.featureEnabled('dns')){
-        const prepared=this.net.mailMXRecords[domain];
-        if(!prepared)return s.failure('Pro doménu příjemce není připravený poštovní server.',null,this.entry.origin);
-        this.entry.destination=prepared.server;return this.beginSMTP(true);
       }
-      if(cached){this.entry.destination=cached.server;return this.beginSMTP(true);}
-      const p=s.createPacket('dns-query',this.entry.origin,'dns',{name:domain,type:'MX'},{sport:53006,dport:53,connection:'mail-dns',label:'DNS · MX pro poštu'});s.next([s.originate(p)]);
     }
     receive(p,e){
       const s=this.sim;
       try{
-        if(p.connection==='mail-dns'){
-          if(p.kind==='dns-query'){
-            const answer=this.net.mailMXRecords[p.payload.name];if(!answer)throw new Error('DNS nemá MX pro doménu příjemce.');
-            const q=s.replyPacket('dns-response',p,{name:p.payload.name,type:'MX',exchange:answer.exchange,preference:10,answer:answer.address,server:answer.server});q.connection='mail-dns';q.label='DNS · MX a přidružený záznam A';s.next([s.originate(q)]);
-            e.description=`MX ${p.payload.name} → ${answer.exchange}; přidružený A → ${answer.address}.`;
-          }else{this.state.mxCache[this.entry.origin+':'+p.payload.name]={server:p.payload.server};this.entry.destination=p.payload.server;this.beginSMTP(true);}return;
-        }
         const session=this.#sessions.get(p.payload.mailSession);if(!session)throw new Error('Poštovní spojení už není platné.');
         const response=p.kind.endsWith('response'),receiver=response?session.from:session.to;
         if(p.destination!==receiver)throw new Error('Poštovní data dorazila jinému konci spojení.');
@@ -193,13 +164,7 @@
       }catch(error){s.failure(error.message,p,e.node);}
     }
     failure(reason){
-      const s=this.sim,c=this.net.phishing.clients[s.action.type==='mail-retry'?this.entry.message.source:s.clientId()];
-      if(this.entry?.accepted&&['mx','relay','retry'].includes(this.phase)){
-        this.entry.state='queued';this.entry.lastError=reason;this.state.current.phase='queued';
-        if(c)Object.assign(c,{state:'ready',notice:'Tvůj server drží zprávu ve frontě.',error:''});
-        if(s.action.type==='phish-send')Object.assign(this.net.phishing.hacker,{state:'ready',notice:'E-mail čeká ve frontě poštovního serveru.'});
-        s.wait('SMTP · zpráva čeká ve frontě',reason+' Server ji uchoval. Pozdější doručení spusť v jeho okně.',this.entry.origin);return true;
-      }
+      const s=this.sim,c=this.net.phishing.clients[s.clientId()];
       if(c)Object.assign(c,{state:'error',error:reason});
       if(s.action.type==='phish-send')Object.assign(this.net.phishing.hacker,{state:'error',notice:reason+' Pokud server zprávu už převzal, zůstává u něj.'});return false;
     }

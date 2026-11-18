@@ -8,7 +8,7 @@ const c=(s,d='laptop')=>s.net.ads.clients[d],page=(s,d='laptop')=>s.net.browserF
 const packets=(s,kind,target)=>[...s.packets.values()].filter(p=>p.kind===kind&&(!target||p.destination===target));
 
 test('Three distinct domains and server addresses share an actual routed partner LAN',()=>{
- const s=new Simulation(),n=s.net;assert.equal(Object.keys(n.nodes).length,87);assert.equal(Object.keys(n.links).length,104);
+ const s=new Simulation(),n=s.net;assert.equal(Object.keys(n.nodes).length,84);assert.equal(Object.keys(n.links).length,101);
  for(const [site,id] of [['obchod','shop'],['zpravy','news']]){const a=webAddress('https://'+site+'.test');assert.equal(a.server,id);assert.equal(n.dnsRecords[a.host],n.nodes[id].ip);assert.equal(n.ethernetFor(id,n.nodes.laptop.ip).frame.dst,n.nodes['partners-router'].mac);}
  assert.equal(n.dnsRecords['reklamy.test'],n.nodes.ads.ip);assert.equal(webAddress('obchod.test/?tema=hudba').path,'/?tema=hudba');assert(!webAddress('https://cizi.test'));assert(!webAddress('https://reklamy.test'));assert(!webAddress('https://obchod.test/?tema=hesla'));
 });

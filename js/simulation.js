@@ -43,7 +43,6 @@
     browser() {return this.net.browserFor(this.clientId());}
     connectionChanged(id) {
       if(this.status!=='running')return;
-      if(this.mail.accepts(this.action?.type)&&this.mail.entry?.accepted&&['mx','relay','retry'].includes(this.mail.phase))return;
       const p=[...this.packets.values()].find(p=>['waiting','transit'].includes(p.state)&&(p.source===id||p.destination===id));
       if(p||((!this.packets.size||(['chatbot','web','phish-results'].includes(this.action?.type)||this.mail.accepts(this.action?.type)))&&this.clientId()===id))this.failure(`${this.net.nodes[id].name} změnil připojení. Původní přenos je ukončený; spusť akci znovu.`,p,id);
     }
@@ -450,7 +449,7 @@
         if(e.kind==='auth-begin')this.auth.beginServer(this.tls.open(p.payload.record,'web','request'),p);else this.auth.complete();
         return this.current;
       }
-      if(['mail-prepare','mail-part','mail-mx'].includes(e.kind)){this.mail.handle(e);return this.current;}
+      if(['mail-prepare','mail-part'].includes(e.kind)){this.mail.handle(e);return this.current;}
       if(e.kind==='mitm'){this.mitm.inspect(e);return this.current;}
       if(e.kind==='phishing-prepare'){this.phishing.prepare(e);return this.current;}
       if(['vpn-wrap','vpn-unpack'].includes(e.kind))return this.vpn.handle(e);
@@ -619,7 +618,7 @@
         const n=this.net.nodes[e.node];if(!n.on)return this.failure(`${n.name} je vypnutý.`,p,n.id);
         p.state='delivered';p.location=n.id;p.visual={kind:'deliver',node:n.id};e.title=`${n.name} přijímá: ${p.label}`;e.description=`IP paket je u cíle ${p.dst}.`;
         if(p.kind.startsWith('vpn-')||n.id==='vpn'){this.vpn.receive(p,e);return this.current;}
-        if(['smtp','imap','mail-dns'].includes(p.connection)){this.mail.receive(p,e);return this.current;}
+        if(['smtp','imap'].includes(p.connection)){this.mail.receive(p,e);return this.current;}
         if(p.connection==='phishing-api'){this.phishing.receive(p,e);return this.current;}
         if(p.destination==='instagram'&&p.source!=='instagram')this.net.rememberInstagramChannel(p);
         if(p.kind==='ig-connect') {
