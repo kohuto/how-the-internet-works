@@ -27,6 +27,7 @@
     {id:'ads',group:'services',label:'Reklamní partner',description:'Společná reklama dvou webů. Tento pokus používá HTTPS a zabezpečenou cookie.',requires:['shop','news','tls','cookies'],nodes:['ads']}
   ];
   const DETAILS=[
+    {id:'devices',label:'Routery a switche',description:'Rozliší chytré křižovatky na routery a switche a zobrazí jejich původní názvy a ikony.'},
     {id:'mac',label:'MAC tabulky',description:'Naučené adresy, rozhodování, porty a připojené spoje switchů a přístupových bodů. Také podrobnosti spojnic.'},
     {id:'routes',label:'Směrovací tabulky',description:'Cílové sítě, rozhodování, rozhraní a připojené spoje routerů. Také podrobnosti spojnic.'},
     {id:'nat',label:'NAT',description:'Tabulky a záznamy překladu IP adres a portů v routerech.'},

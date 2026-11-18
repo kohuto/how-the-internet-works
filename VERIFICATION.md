@@ -2,6 +2,14 @@
 
 Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Chytré křižovatky a volitelné routery a switche — 18. listopadu 2026, v110
+
+Přidána společná volba Routery a switche mezi zobrazované podrobnosti, výchozí stav vypnuto. Všechna zařízení typu router a switch mají v tomto stavu společný název Chytrá křižovatka a stejnou zelenou ikonu; přepínají se také jejich detaily, názvy konců spojů a aktuální stav přenosu. Každý původní uzel i spoj zůstává zachován. Zapnutí obnoví původní názvy a ikony, nezmění síťový model ani přenos. MAC, směrovací tabulky a NAT zůstávají samostatnými volbami; ovládání napájení i satelitní přípojky je dostupné také ve zjednodušeném detailu. Uživatelský obsah se nepřejmenovává.
+
+Prošla kontrola syntaxe změněných skriptů a všech 297 automatických testů. Čtyři nové testy ověřují všechna routerová a switchová zařízení, samostatnost volby, totožný průběh webového přenosu včetně hlaviček, časování a síťového stavu a doručení nezměněné uživatelské zprávy obsahující původní názvy zařízení. Cílených 39 testů nastavení a mapy rovněž prošlo.
+
+V prohlížeči při 1053 × 858 px potvrzeno 10 chytrých křižovatek v základní sestavě a všech 56 v úplné síti, shodná ikona i barva, původní názvy a ikony ostatních typů zařízení, napájení a nezávislé zobrazení MAC a směrovací tabulky. Přepnutí oběma směry během webového přenosu zachovalo stejné objekty simulace, aktuální události, fronty a paketů včetně polohy animace a výřezu mapy; následné načtení knihovny uspělo. Na chatě ověřeno odpojení a obnovení satelitní přípojky v detailu chytré křižovatky. Při 320 × 844 px bez vodorovného přetékání, volba dostupná klávesnicí a po potvrzení skutečný nadpis Domácí router. Obnovení stránky vrátilo vypnutou volbu a základních 14 uzlů včetně 10 chytrých křižovatek. Konzole bez chyb a varování. Verze prostředků v110.
+
 ## Nastavení bez úvodních a stavových textů — 18. listopadu 2026, v109
 
 Odstraněn popis pod nadpisem Nastavení aplikace, rámeček Základ je vždy zapnutý a textový stav v patě dialogu včetně jeho dynamických variant. Pata obsahuje pouze tlačítko Použít změny. Odstraněny nepoužívané styly, odkaz aria-describedby a aktualizace odebraného stavu; nadpis zůstává přístupným názvem dialogu.

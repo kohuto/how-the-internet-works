@@ -299,6 +299,25 @@
       return address&&!this.featureEnabled('tls')?{...address,secure:false,url:address.url.replace(/^https:/,'http:')}:address;
     }
     detailEnabled(id) {return this.settings?.details[id]??true;}
+    displayType(node) {
+      const n=typeof node==='string'?this.nodes[node]:node;
+      return !this.detailEnabled('devices')&&['router','switch'].includes(n.type)?'junction':n.type;
+    }
+    displayName(node) {
+      const n=typeof node==='string'?this.nodes[node]:node;
+      return this.displayType(n)==='junction'?'Chytrá křižovatka':n.name;
+    }
+    displayLinkName(link) {
+      return !this.detailEnabled('devices')&&[link.a,link.b].some(id=>this.displayType(id)==='junction')?`${this.displayName(link.a)} — ${this.displayName(link.b)}`:link.name;
+    }
+    displayText(value) {
+      if(this.detailEnabled('devices'))return value;
+      // Event text retains the real names so changing presentation is reversible mid-transfer.
+      let text=String(value);
+      const names=Object.values(this.nodes).filter(n=>['router','switch'].includes(n.type)).map(n=>n.name).sort((a,b)=>b.length-a.length);
+      for(const name of names)text=text.split(name).join('Chytrá křižovatka');
+      return text.replace(/další router/g,'další zařízení').replace(/rozhodnutí routeru/g,'rozhodnutí zařízení');
+    }
     appAvailable(app,device) {
       const feature={mail:'mail',print:'printer',message:'instagram',cloud:'cloud',chatbot:'chatbot',attack:'hacker',mitm:'mitm'}[app];
       return this.nodeAvailable(device)&&(!feature||this.featureEnabled(feature))&&(app!=='mail'||this.nodeAvailable(globalThis.InternetLab.mailServerFor(device)));
