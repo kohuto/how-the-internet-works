@@ -1,0 +1,152 @@
+/* A simplified mail client. Only received client copies appear in its folders. */
+.gmail-application{container-type:inline-size;background:#f6f8fc;border-color:#e3e7ee}
+.gmail-application>.computer-app-title{display:none}
+.gmail-application>.computer-app-body{display:flex;min-height:0;overflow:hidden;background:#f6f8fc}
+.gmail-app{display:flex;flex-direction:column;position:relative;width:100%;height:100%;min-height:0;padding:0;background:#f6f8fc;color:#202124;font:12px Arial,Helvetica,sans-serif}
+.gmail-app button,.gmail-app input,.gmail-app textarea,.gmail-app select{font-family:inherit}
+.gmail-app button{cursor:pointer}
+.gmail-app button:disabled{cursor:default;opacity:.45}
+.gmail-app button:focus-visible,.gmail-app input:focus-visible,.gmail-app select:focus-visible,.gmail-app textarea:focus-visible,.gmail-scroll:focus-visible{outline:2px solid #1a73e8;outline-offset:-2px}
+.gmail-app svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.gmail-header{display:flex;align-items:center;flex-shrink:0;gap:14px;height:64px;padding:10px 18px}
+.gmail-brand{display:flex;align-items:center;gap:10px;flex-shrink:0;width:150px;color:#5f6368;font-size:24px;letter-spacing:-.6px}
+.gmail-brand .gmail-logo{width:31px;height:28px}
+.gmail-logo path{stroke-width:5;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.gmail-search{display:flex;align-items:center;gap:11px;flex:1;min-width:0;max-width:480px;min-height:42px;border-radius:24px;background:#e9eef6;padding:0 16px;color:#5f6368}
+.gmail-search:focus-within{background:#fff;box-shadow:0 1px 4px #3c404326}
+.gmail-search input{width:100%;min-width:0;padding:10px 0;border:0;border-radius:0;box-shadow:none;background:none;color:#202124;font-size:12px;outline:0}
+.gmail-search input::placeholder{color:#62686e}
+.gmail-account{display:grid;place-items:center;flex-shrink:0;margin-left:auto;width:31px;height:31px;border-radius:50%;background:#476b53;color:#fff;font-size:13px}
+.gmail-layout{display:grid;grid-template-columns:168px minmax(0,1fr);flex:1;min-height:0}
+.gmail-sidebar{display:flex;flex-direction:column;min-width:0;padding:0 12px 12px 0}
+.gmail-app .gmail-new{display:flex;align-items:center;justify-content:center;gap:12px;align-self:flex-start;min-height:49px;padding:12px 20px;margin:0 0 17px 11px;border:0;border-radius:15px;background:#c2e7ff;color:#162c46;font-size:13px;font-weight:600;box-shadow:0 1px 2px #3c404310}
+.gmail-new:hover{box-shadow:0 2px 5px #3c404326}
+.gmail-sidebar nav{display:flex;flex-direction:column;gap:3px}
+.gmail-sidebar nav button{display:flex;align-items:center;gap:13px;width:100%;min-height:34px;padding:7px 13px 7px 22px;border:0;border-radius:0 18px 18px 0;background:none;text-align:left;color:#444746;font-size:11px}
+.gmail-sidebar nav button:hover{background:#e9ecf1}
+.gmail-sidebar nav button[aria-current=page]{background:#d3e3fd;color:#143666;font-weight:700}
+.gmail-sidebar nav button b{margin-left:auto;font-size:10px}
+.gmail-sidebar-account{margin-top:auto;padding:16px 0 0 20px;font-size:9px;color:#767b80;overflow-wrap:anywhere}
+.gmail-main{display:flex;flex-direction:column;position:relative;min-width:0;min-height:0;margin:0 10px 10px 0;overflow:hidden;border-radius:14px;background:#fff}
+.gmail-toolbar{display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:45px;padding:4px 10px;border-bottom:1px solid #eef0f3}
+.gmail-toolbar h3{margin:0;font-size:12px;font-weight:500;color:#5f6368}
+.gmail-toolbar>span{margin-left:auto;font-size:10px;color:#777d84}
+.gmail-app .gmail-icon-button{display:grid;place-items:center;flex-shrink:0;width:30px;height:30px;min-height:30px;padding:6px;border:0;border-radius:50%;background:transparent;color:#5f6368}
+.gmail-app .gmail-icon-button:hover{background:#e8eaed}
+.gmail-scroll{flex:1;min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#ccd0d7 transparent}
+.gmail-app .gmail-row{display:grid;grid-template-columns:20px minmax(90px,125px) minmax(0,1fr) auto;align-items:center;gap:10px;min-height:43px;width:100%;border:0;border-bottom:1px solid #e6eaf0;border-radius:0;padding:10px 14px;background:#f2f6fc;text-align:left;color:#202124;font-size:11px}
+.gmail-app .gmail-row:hover{box-shadow:inset 0 1px #ccd3df,inset 0 -1px #ccd3df,0 1px 3px #3c404326;position:relative;z-index:1}
+.gmail-app .gmail-row.unread{background:#fff;font-weight:700}
+.gmail-row-person{font-size:11px;font-weight:400;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.gmail-row.unread .gmail-row-person,.gmail-row.unread b{font-weight:700}
+.gmail-row-symbol{color:#8490a0;display:flex}
+.gmail-row-symbol svg{width:16px;height:16px}
+.gmail-row-content{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.6}
+.gmail-row-content b{font-weight:400}
+.gmail-row-content>span{font-weight:400;color:#7a8088}
+.gmail-row>small{font-size:9px;font-weight:400;color:#62758c;white-space:nowrap}
+.gmail-draft-row .gmail-row-person{color:#b3261e}
+.gmail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px;height:100%;padding:30px 20px;text-align:center;color:#5f6368}
+.gmail-empty>span{display:grid;place-items:center;width:68px;height:68px;margin-bottom:17px;border-radius:50%;background:#f0f5fc;color:#82a6cf}
+.gmail-empty>span svg{width:31px;height:31px;stroke-width:1.3}
+.gmail-empty h3{margin:0 0 9px;font-size:16px;font-weight:400;color:#3c4043}
+.gmail-empty p{margin:0;font-size:11px;line-height:1.7;max-width:260px;color:#858b93}
+.gmail-app .gmail-empty-refresh{display:flex;align-items:center;gap:7px;margin-top:19px;padding:9px 15px;border:1px solid #dce2eb;border-radius:19px;background:#fff;color:#1967d2;font-size:11px}
+.gmail-status{flex-shrink:0;min-height:27px;padding:7px 14px;background:#fff;color:#7b828b;font-size:9px;border-top:1px solid #f0f2f5;line-height:1.5}
+.gmail-status.error{color:#b3261e;background:#fff4f3}
+.gmail-pending{padding:15px;border-bottom:1px solid #e6eaf0;color:#52667d;font-size:11px;background:#f7faff}
+.gmail-letter{padding:21px 24px;color:#202124}
+.gmail-letter h2{margin:0 0 25px;font-size:22px;font-weight:400;line-height:1.3;overflow-wrap:anywhere;letter-spacing:0}
+.gmail-sender{display:flex;align-items:flex-start;gap:10px;margin-bottom:23px;min-width:0}
+.gmail-avatar{display:grid;place-items:center;flex-shrink:0;width:31px;height:31px;border-radius:50%;background:#e3edfc;color:#3c6398;font-size:13px}
+.gmail-sender>div{min-width:0;flex:1;line-height:1.6;overflow-wrap:anywhere}
+.gmail-sender strong{font-size:11px;font-weight:700;margin-right:6px}
+.gmail-sender>div>span{font-size:10px;color:#737980}
+.gmail-sender small{display:block;font-size:10px;color:#737980}
+.gmail-letter-state{flex-shrink:0;padding-top:4px;font-size:9px;color:#899099}
+.gmail-letter-body{margin:0 0 25px 41px;font-size:12px;line-height:1.85;white-space:pre-wrap;overflow-wrap:anywhere}
+.gmail-app .gmail-reply{display:flex;align-items:center;gap:9px;margin:30px 0 0 41px;padding:9px 18px;border:1px solid #bdc1c6;border-radius:20px;background:#fff;font-size:11px;color:#444746}
+.gmail-mail-link{margin:0 0 20px 41px}
+.gmail-mail-link button{padding:0;border:0;background:none;font-size:12px;color:#1967d2;text-decoration:underline;text-underline-offset:3px}
+.gmail-mail-link small{display:block;margin-top:10px;color:#858b93;font-size:9px;overflow-wrap:anywhere;line-height:1.7}
+.gmail-mail-link code{font-size:9px}
+.gmail-app .gmail-report-button,.gmail-safe-link{display:block;margin:10px 0 0 41px;border:0;padding:5px 0;background:none;color:#b3261e;font-size:10px;text-align:left}
+.gmail-safe-link{color:#1967d2}
+.gmail-report{margin:10px 0 0 41px;padding:11px;border-radius:7px;background:#fceeed;color:#943f38;font-size:11px;line-height:1.7}
+.gmail-network{flex-shrink:0;max-height:55%;overflow:auto;padding:15px 19px;background:#f7faff;border-bottom:1px solid #e1e8f3;font-size:11px;line-height:1.7;color:#5b6b7f}
+.gmail-network p{font-size:11px;margin:7px 0}
+.gmail-network .inline-link{font-size:10px}
+.gmail-network .mail-dialogue{margin:12px 0 0;padding-top:10px}
+.gmail-compose-window{position:absolute;bottom:0;right:16px;z-index:5;display:flex;flex-direction:column;width:min(430px,calc(100% - 38px));height:min(373px,calc(100% - 56px));border:1px solid #d8dce4;border-radius:10px 10px 0 0;background:#fff;box-shadow:0 4px 25px #3c40434a;overflow:hidden}
+.gmail-compose-window>header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:35px;padding:3px 8px 3px 16px;background:#f2f6fc;color:#394457}
+.gmail-compose-window>header strong{font-size:11px;font-weight:600}
+.gmail-compose-form{display:flex;flex:1;flex-direction:column;min-height:0;padding:0 17px}
+.gmail-compose-form fieldset{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;margin:0;padding:0;border:0}
+.gmail-compose-form label{display:flex;align-items:center;min-width:0;margin:0;color:#6e747c;font-size:11px}
+.gmail-compose-form input,.gmail-compose-form select,.gmail-compose-form textarea{width:100%;min-width:0;border:0;border-radius:0;padding:10px 0;background:#fff;color:#202124;box-shadow:none;font-size:12px}
+.gmail-to{gap:13px;min-height:37px;border-bottom:1px solid #edf0f3}
+.gmail-to select{flex:1;font-size:11px}
+.gmail-subject{flex-shrink:0;min-height:39px;border-bottom:1px solid #edf0f3}
+.gmail-compose-form .gmail-message{align-items:stretch;flex:1;min-height:70px;padding-top:6px}
+.gmail-compose-form textarea{height:100%;min-height:60px;resize:none;font-size:12px;line-height:1.7}
+.gmail-compose-form>footer{display:flex;align-items:center;gap:10px;flex-shrink:0;padding:10px 0 13px}
+.gmail-app .gmail-send{display:flex;align-items:center;gap:13px;padding:10px 17px;border:0;border-radius:19px;background:#0b57d0;color:#fff;font-size:11px;font-weight:600}
+.gmail-app .gmail-send:hover{background:#174ea6;box-shadow:0 1px 3px #3c40434a}
+.gmail-send svg{width:14px;height:14px}
+.gmail-compose-form>footer>span{margin-left:auto;font-size:9px;color:#9aa0a6}
+.gmail-visually-hidden{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@container(max-width:580px){
+  .gmail-header{gap:10px;padding:9px 12px;height:57px}
+  .gmail-brand{width:112px;font-size:21px;gap:8px}
+  .gmail-brand .gmail-logo{width:26px;height:24px}
+  .gmail-layout{grid-template-columns:135px minmax(0,1fr)}
+  .gmail-sidebar nav button{gap:9px;padding-left:15px;font-size:10px}
+  .gmail-sidebar-account{padding-left:14px;font-size:8px}
+  .gmail-app .gmail-new{padding:12px 17px;margin-left:10px;gap:9px;font-size:12px}
+  .gmail-app .gmail-row{grid-template-columns:17px minmax(65px,90px) minmax(0,1fr);gap:8px;padding:10px}
+  .gmail-row>small{display:none}
+  .gmail-letter{padding:18px 17px}
+  .gmail-letter h2{font-size:20px}
+  .gmail-letter-state{display:none}
+}
+@container(max-width:430px){
+  .gmail-header{height:92px;flex-wrap:wrap;gap:7px;padding:9px 12px}
+  .gmail-brand{width:auto;font-size:20px}
+  .gmail-account{width:27px;height:27px;font-size:11px}
+  .gmail-search{order:3;flex-basis:100%;min-height:31px;padding:0 12px;gap:8px}
+  .gmail-search input{font-size:12px;padding:7px 0}
+  .gmail-layout{display:flex;flex-direction:column}
+  .gmail-sidebar{flex-direction:row;align-items:center;gap:4px;flex-shrink:0;padding:4px 7px 9px}
+  .gmail-app .gmail-new{align-self:auto;min-height:32px;margin:0 4px 0 0;padding:8px;border-radius:10px}
+  .gmail-new span,.gmail-sidebar-account{display:none}
+  .gmail-sidebar nav{flex:1;flex-direction:row;gap:2px}
+  .gmail-sidebar nav button{flex:1;justify-content:center;gap:5px;min-height:32px;padding:6px 7px;border-radius:15px;font-size:10px}
+  .gmail-sidebar nav button svg{display:none}
+  .gmail-sidebar nav button b{margin:0;font-size:8px}
+  .gmail-main{flex:1;margin:0 7px 7px;border-radius:10px}
+  .gmail-toolbar{min-height:39px;padding:3px 7px;gap:7px}
+  .gmail-toolbar h3{font-size:11px}
+  .gmail-toolbar>span{font-size:8px}
+  .gmail-toolbar .gmail-icon-button{width:26px;height:26px;min-height:26px;padding:5px}
+  .gmail-empty{min-height:190px;padding:22px 15px}
+  .gmail-empty>span{width:55px;height:55px;margin-bottom:14px}
+  .gmail-empty h3{font-size:15px}
+  .gmail-empty p{font-size:10px}
+  .gmail-app .gmail-row{grid-template-columns:15px minmax(0,1fr);gap:4px 9px;padding:10px 12px}
+  .gmail-row-person{font-size:11px}
+  .gmail-row-content{grid-column:2;font-size:10px}
+  .gmail-row-symbol{grid-row:1 / 3}
+  .gmail-letter{padding:17px 14px}
+  .gmail-letter h2{font-size:19px;margin-bottom:19px}
+  .gmail-sender{gap:8px;flex-wrap:wrap}
+  .gmail-sender>div>span{display:block;font-size:9px}
+  .gmail-letter-body{margin-left:0;font-size:12px}
+  .gmail-app .gmail-reply,.gmail-mail-link,.gmail-app .gmail-report-button,.gmail-report,.gmail-safe-link{margin-left:0}
+  .gmail-status{font-size:8px;padding:6px 10px}
+  .gmail-compose-window{inset:0;width:100%;height:100%;border-radius:0;border:0}
+  .gmail-compose-window>header{min-height:42px}
+  .gmail-compose-form{padding:0 14px}
+  .gmail-compose-form input,.gmail-compose-form select,.gmail-compose-form textarea{font-size:16px}
+  .gmail-compose-form>footer>span{font-size:8px}
+  .gmail-network{padding:12px;font-size:10px}
+}

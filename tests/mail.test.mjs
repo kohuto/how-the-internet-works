@@ -58,11 +58,14 @@ test('An outage of the common server blocks new sending and fetching; restore pe
 });
 test('A lost submission acknowledgement retains accepted mail and explicit repeat does not duplicate this model ID',()=>{
  const s=new Simulation();assert(s.start('mail-send',draft('laptop','phone')));until(s,()=>s.mail.entry?.accepted);s.net.clearNat('home');finish(s);assert.equal(s.status,'failed');assert.equal(s.net.mail.boxes.phone.length,1);
+ assert.equal(s.net.phishing.clients.laptop.sent.length,0,'A stored server message is not yet a confirmed local sent copy');
  assert(s.repeat());finish(s);assert.equal(s.status,'success');assert.equal(s.net.mail.boxes.phone.length,1);assert.equal(s.net.mail.deliveries.size,1);
+ assert.equal(s.net.phishing.clients.laptop.sent.length,1);assert.equal(s.net.phishing.clients.laptop.sent[0].body,draft().body);
 });
 test('IMAP SELECT precedes FETCH, with no local update until all response bytes arrive',()=>{
  const s=new Simulation();send(s);assert(s.start('mail-check',{device:'friend'}));until(s,()=>outgoing(s,'mail','access').some(r=>r.wire.includes('A2 OK')));assert.equal(s.net.phishing.clients.friend.items.length,0);finish(s);
  const c=s.net.phishing.clients.friend;assert.equal(c.items.length,1);assert.equal(c.inbox.body,draft().body);assert(!c.inbox.seen);assert(!s.net.mail.boxes.friend[0].seen);assert.deepEqual(outgoing(s,'friend','access').map(r=>r.wire.split(' ').slice(0,2).join(' ')),['A1 SELECT','A2 UID']);
+ assert(c.checked);assert.equal(s.net.phishing.clients.laptop.checked,false);assert.equal(c.sent.length,0);
 });
 test('Multiple messages retain immutable UID; opening uses IMAP STORE, no receipt to the sender',()=>{
  const s=new Simulation();send(s);send(s,'laptop','friend',{subject:'Druhá zpráva',body:'Další obsah'});check(s);const c=s.net.phishing.clients.friend;assert.deepEqual(c.items.map(m=>m.uid),[1,2]);assert.equal(c.inbox.id,'mail-2');assert(s.mail.open('friend','mail-1'));

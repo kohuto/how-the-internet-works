@@ -12,7 +12,7 @@
     constructor(sim){
       this.sim=sim;this.net=sim.net;
       this.state=this.net.mail??={serial:0,boxes:Object.fromEntries(PHISH_CLIENTS.map(id=>[id,[]])),deliveries:new Map(),dialogue:[],current:null};
-      for(const c of Object.values(this.net.phishing.clients)){c.items??=[];c.notice??='';}
+      for(const c of Object.values(this.net.phishing.clients)){c.items??=[];c.sent??=[];c.checked??=false;c.notice??='';}
       this.entry=null;this.phase='idle';
     }
     accepts(type){return ['mail-send','mail-check','mail-seen','phish-send'].includes(type);}
@@ -127,12 +127,12 @@
         Object.assign(c,{state:'ready',notice:'IMAP uložilo příznak přečtení na serveru.'});s.finish('IMAP · příznak přečtení uložen','Příznak schránky není automatické potvrzení odesílateli.',s.clientId());
       }else{
         const old=c.inbox?.id;c.items=value.items;c.inbox=c.items.at(-1)||null;c.opened=!!c.inbox&&c.inbox.id===old&&c.opened;
-        Object.assign(c,{state:'ready',error:'',notice:`IMAP načetlo zprávy do zařízení. Počet: ${c.items.length}.`});s.finish('IMAP · obsah schránky dorazil do zařízení','Serverová schránka a místní kopie zpráv jsou samostatné.',s.clientId());
+        Object.assign(c,{state:'ready',checked:true,error:'',notice:`IMAP načetlo zprávy do zařízení. Počet: ${c.items.length}.`});s.finish('IMAP · obsah schránky dorazil do zařízení','Serverová schránka a místní kopie zpráv jsou samostatné.',s.clientId());
       }
     }
     completeSend(){
       const s=this.sim,c=this.net.phishing.clients[this.entry.message.source];
-      if(c)Object.assign(c,{state:'ready',error:'',notice:'Zpráva je v modelu doručená do serverové schránky příjemce.'});
+      if(c){if(!c.sent.some(m=>m.id===this.entry.message.id))c.sent.push(structuredClone(this.entry.message));Object.assign(c,{state:'ready',error:'',notice:'Zpráva je v modelu doručená do serverové schránky příjemce.'});}
       if(this.entry.message.source==='hacker')Object.assign(this.net.phishing.hacker,{state:'ready',notice:'SMTP doručilo podvodný e-mail do schránky. Příjemce si jej načte přes IMAP.'});
       this.state.current.phase='delivered';s.finish('SMTP · zpráva dorazila do schránky','Příjemce nemusí mít zapnuté zařízení. IMAP si obsah načte samostatným přenosem.',this.entry.destination);
     }
