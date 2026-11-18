@@ -211,7 +211,7 @@
         .filter(n=>n.type==='ap'&&n.on&&(n.id!=='cafe-attacker'||this.net.mitm.active))
         .map(n=>`<circle class="wifi-coverage-area" data-wifi-source="${esc(n.id)}" cx="${n.x}" cy="${n.y}" r="320" fill="url(#wifi-coverage-gradient)"/>`).join(''):'';
       const vpnLinks=new Set(Object.values(this.net.vpn?.clients||{}).filter(c=>c.enabled).flatMap(c=>c.path));
-      this.svg.querySelector('#links-layer').innerHTML=this.net.visibleLinks().map(l=> {
+      this.svg.querySelector('#links-layer').innerHTML=this.net.visibleLinks().filter(l=>l.medium!=='wifi').map(l=> {
         const a=this.net.nodes[l.a],b=this.net.nodes[l.b],active=this.net.isActive(l);
         const x=(a.x+b.x)/2,y=(a.y+b.y)/2;
         const unused=!this.net.selectedAccess(l),radio=['wifi','cellular','satellite'].includes(l.medium);

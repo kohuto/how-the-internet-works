@@ -2,6 +2,12 @@
 
 Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Wi-Fi bez nakreslených spojnic — 18. listopadu 2026, v106
+
+Z mapy odstraněny skupiny spojnic s médiem Wi-Fi: jejich čáry, štítky, značky přerušení i neviditelné klikací plochy. Platí také pro Matěje, chatu, telefon a hotspoty v kavárně. Modelové bezdrátové spoje nadále přenášejí jednotlivé pakety; ilustrační dosah se zobrazuje nezávisle. Kabelové přípojky AP zůstávají zakreslené. Detail Wi-Fi spoje z rozšířeného seznamu portů zůstává dostupný; při zavření se zaměření vrátí na připojené zařízení.
+
+Prošlo všech 15 testů geometrie a ovládání mapy a syntaxe obou změněných skriptů. V prohlížeči při 1053 × 858 px potvrzena absence Wi-Fi skupin i interakčního cíle notebook–AP při zapnutém i vypnutém dosahu; přípojka AP–switch zůstala. Ověřen detail Wi-Fi ze seznamu portů a návrat zaměření na notebook. Při kroku Notebook → Wi-Fi Lipová byl viditelný a animovaný samostatný paket bez čáry; knihovna se načetla za 38 kroků. V úplné sestavě ověřen počet vykreslených spojů odpovídající všem modelovým spojům kromě Wi-Fi, zachované kabely, mobilní i satelitní spoje a vrstva dosahu. Při 320 × 844 px stejné skrytí bez vodorovného přetékání; konzole bez chyb a varování. Verze prostředků v106.
+
 ## Zapínatelný ilustrační dosah Wi-Fi — 18. listopadu 2026, v105
 
 Do mapy přidán přepínač Dosah Wi-Fi vedle Popisků, zpočátku vypnutý a dostupný až při přidání některého Wi-Fi bodu. Vrstva za spoji, zařízeními a pakety vykresluje jemný radiální přechod od každého zapnutého AP až do úplné průhlednosti bez obrysu. Z ikony AP odstraněny směrově působící oblouky. Poloměr je pouze schematický; model připojení, dosah, směrování ani přenosovou rychlost nijak nevyhodnocuje. Popis přepínače a README uvádějí ilustrační význam. Napodobený hotspot kreslí oblast pouze při aktivním vysílání. Vrstva je bez interakčních cílů a neblokuje zařízení, spoje ani posouvání mapy.

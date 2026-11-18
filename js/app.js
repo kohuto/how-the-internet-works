@@ -58,7 +58,8 @@
   function closeDevice() {
     const resume=ui.packetOpen&&ui.packetResume;
     ui.deviceOpen=false;ui.linkOpen=false;ui.packetOpen=false;ui.packetResume=false;render();
-    ($(`#network-map [data-map-kind="${ui.selection.kind}"][data-id="${ui.selection.id}"]`)||$('#packet-detail')).focus({preventScroll:true});
+    const source=ui.selection.kind==='link'?net.links[ui.selection.id]?.a:null;
+    ($(`#network-map [data-map-kind="${ui.selection.kind}"][data-id="${ui.selection.id}"]`)||(source&&$(`#network-map [data-map-kind="node"][data-id="${source}"]`))||$('#packet-detail')).focus({preventScroll:true});
     if(resume)resumePlayback();
   }
   function openComputerApp(app) {
