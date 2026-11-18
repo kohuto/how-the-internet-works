@@ -2,6 +2,12 @@
 
 Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Rozhodování switchů a Wi-Fi jako podrobnost MAC — 18. listopadu 2026, v103
+
+Rozhodnutí switchů a Wi-Fi přístupových bodů se zobrazuje jen se zapnutými MAC tabulkami. Totéž platí pro hlášení, že zařízení zatím nezpracovalo žádný rámec. Záznamy rozhodnutí již neobsahují odkaz na otevření paketu, ani u routerů, BTS a satelitu. Spodní tlačítko Prozkoumat paket zůstává funkční. SSID přístupových bodů je běžný údaj Wi-Fi síť bez barevného stavového rámečku; vysvětlení jeho funkce zůstalo v Nápovědě. Doplněn popis volby MAC tabulky v nastavení.
+
+Prošlo všech 24 testů nastavení a syntaxe obou změněných skriptů. V prohlížeči při 1053 × 858 px ověřen Wi-Fi bod bez rozhodnutí a tabulky v základu i před prvním přenosem; zapnutí MAC před přenosem ukázalo prázdnou tabulku a čekání na rozhodnutí. Web přes Wi-Fi se načetl za 38 kroků. Po přenosu měly Wi-Fi bod i switch bez MAC skryté rozhodnutí, po zapnutí MAC se bez opakování přenosu ukázalo skutečné rozhodnutí a naučené adresy. Odkaz na paket chybí u Wi-Fi, switche i routeru; hlavní Prozkoumat paket otevřelo náhled. Při 320 × 844 px základní i rozšířený Wi-Fi detail bez vodorovného přetékání; samotné směrovací tabulky rozhodnutí Wi-Fi nezpřístupnily. Konzole bez chyb a varování. Verze prostředků v103.
+
 ## Připojení bez ikony nadpisu — 18. listopadu 2026, v102
 
 Odstraněna ikona vedle nadpisu Připojení k síti ve společném okně připojení zařízení. Nadpis je zarovnaný s navazujícím obsahem; odstraněny styly ikony i jejího původního sloupce.
