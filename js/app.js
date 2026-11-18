@@ -13,6 +13,7 @@
     ui.cafeTab='desktop';ui.cafeAttackerTab='desktop';ui.cafeAddress='http://knihovna.test';
     ui.mailDraft=Object.fromEntries(globalThis.InternetLab.PHISH_CLIENTS.map(id=>[id,{tab:'inbox',target:id!=='friend'&&net.nodeAvailable('friend')&&net.nodeAvailable('mail-dopis')?'friend':'laptop',subject:'Pozdrav',body:'Ahoj! Posílám ti zprávu přes poštovní servery.'}]));
     ui.mailDialogue={};
+    ui.connectionDrafts={};
     ui.authDraft=Object.fromEntries(Object.keys(globalThis.InternetLab.PRIVACY_OWNERS).map(device=>[device,{mode:'login',username:device==='friend'?'matej':device==='cafe'?'host':'alex',email:'novy@posta.test',password:'KNIHOVNA-DEMO'}]));
     ui.privacyOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
     ui.cookieOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
@@ -360,6 +361,7 @@
     advance();
   }
   function handleInput(e) {
+    if(e.target.dataset.connectionField){const id=e.target.closest('[data-device]').dataset.device;ui.connectionDrafts[id]??={...net.connectionProfiles[id]};ui.connectionDrafts[id][e.target.dataset.connectionField]=e.target.value;return;}
     if(e.target.dataset.authField){ui.authDraft[ui.monitorDevice][e.target.dataset.authField]=e.target.value;return;}
     if(e.target.dataset.mailField){ui.mailDraft[ui.monitorDevice][e.target.dataset.mailField]=e.target.value;if(e.target.dataset.mailField==='target'){render();document.querySelector('[data-mail-field=target]')?.focus();}return;}
     if(e.target.dataset.field==='webMessage'){ui.webMessages[ui.monitorDevice]=e.target.value;return;}
@@ -370,6 +372,11 @@
   }
   function handleSubmit(e) {
     e.preventDefault();const form=e.target.dataset.form;
+    if(form==='connection-profile'){
+      const id=e.target.dataset.device,values=new FormData(e.target),profile={bandwidth:values.get('bandwidth'),latency:values.get('latency')};
+      if(net.setConnectionProfile(id,profile)){delete ui.connectionDrafts[id];notify('Vlastnosti připojení jsou nastavené pro další přenos.');render();$(`#monitor-content [data-form="connection-profile"] button`).focus({preventScroll:true});}
+      return;
+    }
     if(form==='auth'){const d=ui.authDraft[ui.monitorDevice],address='https://knihovna.test';ui[addressKey(ui.monitorDevice)]=address;if(!sim.auth.validate({...d,device:ui.monitorDevice,address,authOp:d.mode})){notify('Použij jméno o 3–24 znacích (a–z, číslice, _ nebo -), heslo o 4–80 znacích a fiktivní e-mail končící .test.');return;}startAction('web',{address,authOp:d.mode,username:d.username,password:d.password,...(d.mode==='register'?{email:d.email}:{})});return;}
     if(form==='mail-send'){startMail('mail-send',{...ui.mailDraft[ui.monitorDevice]});return;}
     if(form==='phish-login'){const b=net.browserFor(ui.monitorDevice);ui[addressKey(ui.monitorDevice)]=`${b.loadedSecure?'https':'http'}://knihovna-podpora.test/overeni${b.loadedMessageId?'?zprava='+b.loadedMessageId:''}`;startAction('web',{method:'POST',phishLogin:true});

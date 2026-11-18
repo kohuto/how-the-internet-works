@@ -62,7 +62,7 @@
         p.connection=session.protocol.toLowerCase();p.label=`${session.protocol} · ${response?'odpověď':'požadavek'}${bytes.length>CHUNK?' '+(Math.floor(position/CHUNK)+1)+'/'+Math.ceil(bytes.length/CHUNK):''}`;
         p.seq=session[sequence];session[sequence]=(session[sequence]+record.data.length)>>>0;
         p.mailMeta={protocol:session.protocol,phase:session.phase,session:session.id,seq:p.seq,total:bytes.length,partBytes:data.bytes.length};
-        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+Math.floor(position/CHUNK)*3,title:`${session.protocol} · příprava části ${Math.floor(position/CHUNK)+1} / ${Math.ceil(bytes.length/CHUNK)}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.phase==='relay'?'Samostatné předání mezi poštovními servery.':session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes vlastní poštovní server.'}`});
+        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+Math.floor(position/CHUNK)*s.packetGap(from,to),title:`${session.protocol} · příprava části ${Math.floor(position/CHUNK)+1} / ${Math.ceil(bytes.length/CHUNK)}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.phase==='relay'?'Samostatné předání mezi poštovními servery.':session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes vlastní poštovní server.'}`});
       }
       this.#buffers.set(session.id+':'+transfer,{length:bytes.length,stream:new globalThis.InternetLab.TCPReceiveStream(firstSeq,(session[sequence]-firstSeq)>>>0),chunks:new Map()});
       s.next(events);

@@ -2,6 +2,14 @@
 
 Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Šířka pásma a latence jednotlivých připojení — 18. listopadu 2026, v108
+
+Do Připojení přidány dvě nezávislé volby Nižší / Vyšší, potvrzované tlačítkem Použít změny. Každý z šesti klientů má vlastní nastavení pro oba směry internetového připojení. Vyšší šířka pásma mění rozestupy segmentů ze tří modelových kroků na jeden a stejný limit se uplatní při předání do internetové přípojky. Vyšší latence přidá šest kroků čekání každému paketu; neobsadí jimi výstup a nevytváří přenos typu odeslat–čekat na doručení. Čekání jsou skutečné přehrávané události. Snímek voleb na začátku pokusu zachovává běžící přenos i po uložení nových hodnot; opakování použije nové. Lokální tisk se nemění. Model neudává Mb/s či milisekundy ani nemění tempo animace, data, TCP SEQ či počet paketů.
+
+Prošlo všech 293 automatických testů včetně šesti nových scénářů porovnávajících přesný obsah a TCP SEQ fotky i videa, rozestupy a dobu dokončení, konstantní posun doručení při vyšší latenci, nezávislou druhou větev Instagramu, změny během pokusu, opakování, validaci a obnovení hodnot, mobilní síť, satelit, VPN a místní tisk. Ověřena syntaxe pěti změněných skriptů. V prohlížeči při 1053 × 858 px potvrzeno, že nepotvrzená volba neovlivní odeslání fotky; uložené nové hodnoty se během pokusu do jeho snímku nepromítnou. Opakovaná fotka při vyšší šířce pásma měla na přípojce rozestupy jeden krok; zvýšení samotné latence posunulo všech devět doručení Instagramu přesně o šest kroků a rozestupy zachovalo. Paket byl během čekání viditelný na domácím routeru. Video dorazilo jako 35 samostatných paketů a úplných 48 000 B. Matějovy volby zůstaly nezávislé.
+
+Při 320 × 844 px zkontrolovány ovládací prvky ve všech šesti klientských zařízeních včetně telefonu a kavárny bez vodorovného přetékání; tlačítko fungovalo klávesou Enter a zachovalo zaměření. Obnovení stránky vrátilo základní sestavu a obě volby Nižší. Konzole bez chyb a varování. Verze prostředků v108.
+
 ## Jednotný dosah bezdrátových připojení — 18. listopadu 2026, v107
 
 Přepínač Dosah Wi-Fi přejmenován na Dosah signálu a zpřístupněn také pro sestavy s BTS nebo satelitem. Zapnuté přístupové body, BTS a satelit LEO kreslí kruhový radiální přechod ve vlastním odstínu, s ilustračními poloměry 320, 800 a 900 mapových jednotek. Vrstva leží za spoji, zařízeními a pakety a nezachytává interakce. Rádiové spoje Wi-Fi, telefon–BTS a anténa–satelit–pozemní stanice nemají v mapě čáry, štítky, značky přerušení ani interakční plochy. Modelová propojení a samostatné pakety zůstávají zachované; kabelové přípojky se kreslí dál. Dosah nemění připojení ani rychlost.

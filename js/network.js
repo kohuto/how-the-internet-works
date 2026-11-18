@@ -252,6 +252,7 @@
       }
       this.satellite={clearView:true};this.mitm={active:false,mode:'observe',logs:[],serial:0};
       this.access={cafe:{mode:'wifi',hotspot:'trusted'},hacker:{mode:'cable'},cabin:{mode:'wifi'},laptop:{mode:'cable'},friend:{mode:'cable'},phone:{mode:'cellular',tower:'bts-lipova'}};
+      this.connectionProfiles=Object.fromEntries(Object.keys(this.access).map(id=>[id,{bandwidth:'low',latency:'low'}]));
       this.links = Object.fromEntries(linkDefinitions.map(([id,a,b,pa,pb,name,addresses,options={}],i)=> {
         if(id==='laptop-switch')options={...options,device:'laptop',mode:'cable'};
         const link={id,a,b,pa,pb,name,on:true,cost:1,medium:'cable',prefix:addresses?.[2]|| (this.nodes[a].region==='friend'?FRIEND:['laptop-switch','printer-switch','switch-home'].includes(id)?HOME:DC),...options};
@@ -320,6 +321,13 @@
     advanceCookieTime(seconds=3600) {if(!Number.isFinite(seconds)||seconds<0)return false;this.cookieTime+=seconds;for(const id of ['laptop','friend','phone','cabin','cafe'])globalThis.InternetLab.WebCookies.expire(this.browserFor(id).cookies,this.cookieTime);for(const c of Object.values(this.ads?.clients||{}))if(c.cookie?.expiresAt<=this.cookieTime)c.cookie=null;return true;}
     accessLink(id) {return this.adjacent(id).find(l=>l.device===id&&this.selectedAccess(l))||null;}
     accessReady(id) {return this.isActive(this.accessLink(id));}
+    setConnectionProfile(id,profile) {
+      const current=this.connectionProfiles[id];
+      if(!this.nodeAvailable(id)||!current||!profile||!['low','high'].includes(profile.bandwidth)||!['low','high'].includes(profile.latency))return false;
+      if(current.bandwidth===profile.bandwidth&&current.latency===profile.latency)return false;
+      this.connectionProfiles[id]={bandwidth:profile.bandwidth,latency:profile.latency};return true;
+    }
+    connectionLink(id) {return id==='phone'&&this.access.phone.mode==='cellular'?'mobile-uplink':this.nat[this.natRouterFor(id)]?.wanLink;}
     applyAccess(id) {
       const n=this.nodes[id],mode=this.access[id].mode;
       const profiles={cafe:{wifi:['192.168.50.10','02:00:00:00:c0:10']},hacker:{cable:['192.168.40.10','02:00:00:00:a0:10']},cabin:{cable:['192.168.30.10','02:00:00:00:90:10'],wifi:['192.168.30.11','02:00:00:00:90:11']},laptop:{cable:['192.168.10.10',MAC.laptop],wifi:['192.168.10.11','02:00:00:00:10:11']},friend:{cable:['172.16.20.10',MAC.friend],wifi:['172.16.20.11','02:00:00:00:30:11']},phone:{wifi:['192.168.10.30','02:00:00:00:10:30'],cellular:['198.51.100.10',null]}};

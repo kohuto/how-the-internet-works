@@ -32,6 +32,7 @@
     constructor(network=new Network()) {
       this.net=network;this.queue=[];this.packets=new Map();this.current=null;this.status='idle';this.lastAction=null;this.action=null;this.run=0;this.serial=0;this.steps=0;this.tcpStream=null;this.totalBytes=0;this.packetOrders=new Map();
       this.time=0;this.order=0;this.linkReady=new Map();this.frame=[];this.phase='upload';this.vpn=new VPNTransport(this);this.phishing=new PhishingScenario(this);this.mitm=new MITMScenario(this);this.mail=new MailScenario(this);this.privacy=new PrivacyService(this.net);this.auth=new AuthService(this);this.ads=new AdsScenario(this);
+      this.connectionProfiles=structuredClone(this.net.connectionProfiles);
     }
     clientId() {return this.action?.payload.device||'laptop';}
     clientName() {return this.net.nodes[this.clientId()].name;}
@@ -108,6 +109,7 @@
       this.auth.cancel();this.ads.reset();this.mitm.reset();this.vpn.reset();for(const c of Object.values(this.net.vpn.clients))c.path=[];
       this.run++;this.serial=0;this.steps=0;this.packets.clear();this.packetOrders.clear();this.queue=[];this.tcpStream=null;this.current=null;this.totalBytes=0;
       this.time=0;this.order=0;this.linkReady.clear();this.frame=[];
+      this.connectionProfiles=structuredClone(this.net.connectionProfiles);
       this.tls=null;this.webSeq={request:1001,response:8001};this.webRequest=null;this.webReply=null;
       this.action={type,payload:{...payload}};this.lastAction={type,payload:{...payload}};this.status='running';
       for(const n of Object.values(this.net.nodes))n.lastDecision=null;
@@ -161,6 +163,7 @@
       if(this.action?.type!=='message'){this.run++;this.serial=0;this.packets.clear();this.packetOrders.clear();this.time=0;this.order=0;}
       for(const p of this.packets.values())if(p.state==='transit'||p.state==='waiting')p.state='stopped';
       this.queue=[];this.tcpStream=null;this.linkReady.clear();this.frame=[];this.totalBytes=this.net.instagram.totalBytes;
+      this.connectionProfiles=structuredClone(this.net.connectionProfiles);
       this.action={type:'message',payload:{text:this.net.sender.text,messageType:this.net.instagram.content?.type||'text',device:this.net.instagram.senderDevice,targetDevice:this.net.instagram.recipientDevice}};this.lastAction={...this.action,payload:{...this.action.payload}};this.status='running';
     }
     resumePending() {
@@ -189,7 +192,7 @@
       for(let position=0,index=0;position<bytes.length;position+=size,index++) {
         const data=bytes.slice(position,position+size);
         const p=this.createPacket(kind,from,to,{bytes:data,index,total,totalBytes:bytes.length,packetCount:1,mss:size,contentType:this.net.sender.content?.type||'text',messageId:this.net.instagram.id},{...header,seq:(firstSeq+position)>>>0,packetOrder:index+1});
-        events.push({...this.originate(p),at:this.time+1+index*PACKET_GAP});
+        events.push({...this.originate(p),at:this.time+1+index*this.packetGap(from,to)});
       }
       this.next(events);return total;
     }
@@ -200,7 +203,7 @@
       for(let position=0,index=0;position<bytes.length;position+=CLOUD_MSS,index++) {
         const data=bytes.slice(position,position+CLOUD_MSS);
         const p=this.createPacket(kind,from,to,{bytes:data,index,total,totalBytes:bytes.length},{...header,seq:(firstSeq+position)>>>0,packetOrder:index+1});
-        events.push({...this.originate(p),at:this.time+1+index*PACKET_GAP});
+        events.push({...this.originate(p),at:this.time+1+index*this.packetGap(from,to)});
       }
       this.next(events);return bytes.length;
     }
@@ -212,7 +215,7 @@
       for(let position=0,index=0;position<bytes.length;position+=MSS,index++) {
         const data=bytes.slice(position,position+MSS);
         const p=this.createPacket(kind,from,to,{bytes:data,index,total,totalBytes:bytes.length,turnId:this.chatTurn().id},{...header,seq:(firstSeq+position)>>>0,packetOrder:index+1});
-        events.push({...this.originate(p),at:this.time+1+index*PACKET_GAP});
+        events.push({...this.originate(p),at:this.time+1+index*this.packetGap(from,to)});
       }
       this.next(events);return bytes.length;
     }
@@ -364,13 +367,29 @@
       } catch(error){return this.failure(error.message,p,e.node);}
       return this.current;
     }
+    packetGap(from,to) {
+      const profiles=[from,to].map(id=>this.connectionProfiles[id]).filter(Boolean);
+      return profiles.length&&profiles.every(p=>p.bandwidth==='high')?1:PACKET_GAP;
+    }
+    connectionTiming(event) {
+      const p=this.vpn.logical(event.packet);
+      const device=[p.source,p.destination].find(id=>this.connectionProfiles[id]&&this.net.connectionLink(id)===event.link);
+      return device?{device,...this.connectionProfiles[device]}:null;
+    }
     next(events) {
       for(const event of events) {
         let at=event.at??this.time+1;
         // One frame per directed link and time slot; different links run concurrently.
         if(event.kind==='hop') {
-          const key=`${event.link}:${event.from}`;
-          at=Math.max(at,this.linkReady.get(key)||0);this.linkReady.set(key,at+1);
+          const key=`${event.link}:${event.from}`,timing=this.connectionTiming(event),ready=at;
+          // Latency delays each packet independently; it never reserves the link for the whole wait.
+          if(timing) {
+            const shapedKey=`${key}:${timing.device}`;
+            at=Math.max(at+(timing.latency==='high'?6:0),this.linkReady.get(shapedKey)||0,this.linkReady.get(key)||0);
+            this.linkReady.set(shapedKey,at+(timing.bandwidth==='high'?1:PACKET_GAP));
+          } else at=Math.max(at,this.linkReady.get(key)||0);
+          this.linkReady.set(key,at+1);
+          if(timing)for(let wait=ready;wait<at;wait++)this.queue.push({...event,kind:'connection-wait',node:event.from,at:wait,order:++this.order});
           const travel=this.net.links[event.link].travelSteps||1;
           for(let part=1;part<travel;part++)this.queue.push({...event,kind:'satellite-flight',progress:part/travel,startProgress:(part-1)/travel,at:at+part-1,order:++this.order});
           if(travel>1){event.startProgress=(travel-1)/travel;at+=travel-1;}
@@ -522,6 +541,10 @@
         const logical=this.vpn.logical(p);
         if(!p.sent&&['message','ig-delivery'].includes(logical.kind)){const source=logical.kind==='message'?this.net.sender:this.net.instagram;source.sentBytes+=logical.payload.bytes.length;source.sentPackets+=logical.payload.packetCount||1;}p.sent=true;
         e.frame={...out.frame};this.next([this.hop(e.node,out.link,p,out.frame)]);
+      } else if(e.kind==='connection-wait') {
+        const l=this.net.links[e.link];if(!this.net.isActive(l))return this.failure(`Spoj „${l.name}“ není dostupný.`,p,e.from);
+        p.state='transit';p.location=e.from;p.visual={kind:'connection-wait',node:e.from};
+        e.title=`${this.net.nodes[e.from].name} čeká na předání paketu`;e.description='Zdržení a rozestupy odpovídají nastaveným vlastnostem připojení. Ostatní pakety mohou pokračovat souběžně.';
       } else if(e.kind==='satellite-flight') {
         const l=this.net.links[e.link];if(!this.net.isActive(l))return this.failure(`Satelitní spoj „${l.name}“ není dostupný.`,p,e.from);
         p.frame={...e.frame};p.visual={kind:'hop',from:e.from,to:e.to,link:e.link,progress:e.progress,startProgress:e.startProgress};
