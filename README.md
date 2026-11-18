@@ -291,7 +291,7 @@ Ověřované principy: [MDN — cookies třetích stran a omezení prohlížeč�
 1. Vytvořte repozitář na GitHubu. Nahrajte `index.html`, složky `assets` a `js` do jeho kořene; README a ostatní soubory můžete přidat také. `index.html` nesmí zůstat v další nadbytečné podsložce.
 2. V repozitáři otevřete **Settings → Pages**. V části Build and deployment zvolte **Deploy from a branch**, publikační větev (typicky `main`) a složku **/ (root)**. Uložte.
 3. Počkejte na dokončení publikování. Projekt otevřete na adrese `https://UZIVATEL.github.io/REPOZITAR/` uvedené v nastavení Pages.
-4. Další verze zveřejníte běžným nahráním změněných souborů nebo commitem do stejné větve. Vlastní workflow, balíčky a build nejsou potřeba. Při změně JS/CSS současně zvyšte `v=101` v odpovídajících cestách v `index.html`, aby prohlížeče rychleji načetly novou verzi prostředků.
+4. Další verze zveřejníte běžným nahráním změněných souborů nebo commitem do stejné větve. Vlastní workflow, balíčky a build nejsou potřeba. Při změně JS/CSS současně zvyšte `v=102` v odpovídajících cestách v `index.html`, aby prohlížeče rychleji načetly novou verzi prostředků.
 
 Všechny cesty jsou relativní (`./assets/…`, `./js/…`), proto aplikace funguje i v podcestě projektových GitHub Pages. Soubor `.nojekyll` ponechá statické soubory bez zpracování Jekyllem.
 

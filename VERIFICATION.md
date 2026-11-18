@@ -1,6 +1,12 @@
 # Záznam ověření
 
-Poslední ověření 17. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
+Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
+
+## Připojení bez ikony nadpisu — 18. listopadu 2026, v102
+
+Odstraněna ikona vedle nadpisu Připojení k síti ve společném okně připojení zařízení. Nadpis je zarovnaný s navazujícím obsahem; odstraněny styly ikony i jejího původního sloupce.
+
+Ověřena syntaxe computer.js. V prohlížeči při 1053 × 858 px potvrzena nepřítomnost ikony u nadpisu, zarovnání s označením používaného připojení, zachování ikon tlačítek a odpojení / obnovení kabelu. Při 320 × 844 px stejné zarovnání a žádné vodorovné přetékání. Konzole bez chyb a varování. Verze prostředků v102.
 
 ## Připojení bez úvodní instrukce — 17. listopadu 2026, v101
 
