@@ -2,9 +2,9 @@
 
 Po každé dokončené a ověřené změně proveď commit a nahraj jej do repozitáře `https://github.com/kohuto/how-the-internet-works.git`. Uživatel výslovně požaduje průběžné nahrávání; nečekej na další žádost o push.
 
-Větší změny posílej přes samostatnou větev a pull request do `main`. Patří sem zejména nové funkce, změny chování simulace, přenosů, směrování, návazností rozšíření a úpravy více propojených částí. Před začleněním nech proběhnout GitHub kontrolu kódu Codexem. Využij automatickou kontrolu; pokud se nespustí, vyžádej ji komentářem `@codex review` u pull requestu. Uživatel tento způsob vyžádání kontroly schválil. Vyčkej na výsledek, vyhodnoť nálezy, oprav relevantní chyby a ověř opravy. Poté změnu začleň do `main`; k běžnému dokončení tohoto postupu není potřeba další souhlas uživatele. Pokud kontrolu nelze spustit nebo dokončit, ponech pull request otevřený a popiš překážku; kontrolu tiše neobcházej.
+Všechny dokončené a ověřené změny, včetně větších úprav a nových funkcí, nahrávej přímo do větve `main`. Nevytvářej kvůli tomu samostatné větve ani pull requesty a nevyžaduj kontrolu kódu Codexem, pokud o to uživatel znovu výslovně nepožádá.
 
-Drobné úpravy textů, popisků, vzhledu a pokynů projektu bez změny chování mohou po odpovídajícím ověření pokračovat přímo do `main`. Kontrola kódu doplňuje testy a kontrolu v prohlížeči, nenahrazuje je.
+Před nahráním proveď ověření odpovídající změně, zejména relevantní testy a u změn rozhraní kontrolu v prohlížeči.
 
 Před nahráním ověř aktuální vzdálenou větev a zachovej případné cizí změny. Nepoužívej force push. Pokud pracovní složka nemá metadata Git, použij oddělený checkout a přenes do něj pouze soubory projektu. ZIP archivy nevytvářej.
 
