@@ -25,8 +25,6 @@
   let browserNavigation=ui.browserNavigation=new globalThis.InternetLab.BrowserNavigation(net);
   for(const device of Object.keys(browserNavigation.devices))ui[addressKey(device)]='';
   const map=new NetworkMap($('#network-map'),net,select);
-  // The SVG also has data-scene; only navigation buttons may reset its viewport.
-  const sceneButtons=document.querySelectorAll('.scene-nav button[data-scene]');
   const disabled=()=>sim.status==='running'?'disabled':'';
   const definition=(label,value)=>`<dt>${label}</dt><dd>${esc(value)}</dd>`;
   const serverServices=value=>net.detailEnabled('headers')?`<dl class="dl">${definition('Služby',value)}</dl>`:'';
@@ -41,7 +39,6 @@
   }
   function setScene(scene) {
     ui.scene=scene;map.setScene(scene);
-    sceneButtons.forEach(b=>{b.classList.toggle('active',b.dataset.scene===scene);b.setAttribute('aria-pressed',b.dataset.scene===scene);});
   }
   function select(kind,id) {
     if(kind==='node'&&!net.nodeAvailable(id)||kind==='link'&&!net.linkAvailable(net.links[id]))return;
@@ -530,7 +527,6 @@
     root.addEventListener('submit',handleSubmit);
     root.addEventListener('click',handleClick);
   }
-  sceneButtons.forEach(b=>b.addEventListener('click',()=>setScene(b.dataset.scene)));
   $('#zoom-in').addEventListener('click',()=>map.zoom(.78));$('#zoom-out').addEventListener('click',()=>map.zoom(1.28));
   $('#labels').addEventListener('change',e=>{map.labels=e.target.checked;map.render();});
   $('#signal-coverage').addEventListener('change',e=>{map.signalCoverage=e.target.checked;map.render();});

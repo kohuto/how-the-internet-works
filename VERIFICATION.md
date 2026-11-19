@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Odstranění přepínače měřítka mapy · 19. listopadu 2026
+
+Z mapy odstraněna navigace Byt / Město / Celá síť včetně jejího obslužného kódu a nepoužívaných stylů. Zachována tlačítka +/−, posouvání a gesta i automatické přizpůsobení výřezu při změně nastavení a zahájení přenosů. Nápověda v README upravena podle současného ovládání.
+
+Ověřeno 15 stávajících testů ovládání a geometrie mapy, syntaxe skriptu a prohlížeč při 1074 × 858 a 320 × 568 px. Přepínač chybí, zoom funguje a po přidání rozšíření se výřez přizpůsobí celé dostupné síti. Nastavení je dostupné a obsah nepřetéká. Cache prostředků `v=129`.
+
+
 ## Sjednocené informace serverů · 19. listopadu 2026
 
 Ostatní servery přebírají zjednodušení webového serveru knihovny: vlastní IP a MAC adresa ani seznam připojených fyzických portů se v jejich detailu neopakují. IP zůstávají v mapě, síťový model a adresy v paketech se nemění. Služby chatbota, Instagramu a cloudu, SMTP/IMAP na Gmailu, výchozí brána DNS a technické údaje VPN jsou dostupné pouze při zapnutí IP a TCP hlavička. Web knihovny používá stejný společný způsob zobrazení služeb jako ostatní služby. Stav VPN už neopakuje její vlastní IP.

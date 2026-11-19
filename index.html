@@ -7,46 +7,45 @@
   <meta name="description" content="Prozkoumej, jak funguje internet. Česká interaktivní síťová laboratoř: web, místní tisk, pakety a náhradní cesta.">
   <title>Jak funguje internet · Síť pod lupou</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./assets/style.css?v=128">
-  <link rel="stylesheet" href="./assets/computer.css?v=128">
-  <link rel="stylesheet" href="./assets/browser.css?v=128">
-  <link rel="stylesheet" href="./assets/instagram.css?v=128">
-  <link rel="stylesheet" href="./assets/gmail.css?v=128">
-  <link rel="stylesheet" href="./assets/settings.css?v=128">
-  <script src="./js/network.js?v=128" defer></script>
-  <script src="./js/settings.js?v=128" defer></script>
-  <script src="./js/cloud.js?v=128" defer></script>
-  <script src="./js/media.js?v=128" defer></script>
-  <script src="./js/web.js?v=128" defer></script>
-  <script src="./js/privacy.js?v=128" defer></script>
-  <script src="./js/auth.js?v=128" defer></script>
-  <script src="./js/vpn.js?v=128" defer></script>
-  <script src="./js/phishing.js?v=128" defer></script>
-  <script src="./js/mitm.js?v=128" defer></script>
-  <script src="./js/mail.js?v=128" defer></script>
-  <script src="./js/ads.js?v=128" defer></script>
-  <script src="./js/simulation.js?v=128" defer></script>
-  <script src="./js/map.js?v=128" defer></script>
-  <script src="./js/settings-ui.js?v=128" defer></script>
-  <script src="./js/browser-navigation.js?v=128" defer></script>
-  <script src="./js/instagram-ui.js?v=128" defer></script>
-  <script src="./js/computer.js?v=128" defer></script>
-  <script src="./js/browser-ui.js?v=128" defer></script>
-  <script src="./js/phishing-ui.js?v=128" defer></script>
-  <script src="./js/mitm-ui.js?v=128" defer></script>
-  <script src="./js/mail-ui.js?v=128" defer></script>
-  <script src="./js/privacy-ui.js?v=128" defer></script>
-  <script src="./js/auth-ui.js?v=128" defer></script>
-  <script src="./js/ads-ui.js?v=128" defer></script>
-  <script src="./js/packet-ui.js?v=128" defer></script>
-  <script src="./js/app.js?v=128" defer></script>
+  <link rel="stylesheet" href="./assets/style.css?v=129">
+  <link rel="stylesheet" href="./assets/computer.css?v=129">
+  <link rel="stylesheet" href="./assets/browser.css?v=129">
+  <link rel="stylesheet" href="./assets/instagram.css?v=129">
+  <link rel="stylesheet" href="./assets/gmail.css?v=129">
+  <link rel="stylesheet" href="./assets/settings.css?v=129">
+  <script src="./js/network.js?v=129" defer></script>
+  <script src="./js/settings.js?v=129" defer></script>
+  <script src="./js/cloud.js?v=129" defer></script>
+  <script src="./js/media.js?v=129" defer></script>
+  <script src="./js/web.js?v=129" defer></script>
+  <script src="./js/privacy.js?v=129" defer></script>
+  <script src="./js/auth.js?v=129" defer></script>
+  <script src="./js/vpn.js?v=129" defer></script>
+  <script src="./js/phishing.js?v=129" defer></script>
+  <script src="./js/mitm.js?v=129" defer></script>
+  <script src="./js/mail.js?v=129" defer></script>
+  <script src="./js/ads.js?v=129" defer></script>
+  <script src="./js/simulation.js?v=129" defer></script>
+  <script src="./js/map.js?v=129" defer></script>
+  <script src="./js/settings-ui.js?v=129" defer></script>
+  <script src="./js/browser-navigation.js?v=129" defer></script>
+  <script src="./js/instagram-ui.js?v=129" defer></script>
+  <script src="./js/computer.js?v=129" defer></script>
+  <script src="./js/browser-ui.js?v=129" defer></script>
+  <script src="./js/phishing-ui.js?v=129" defer></script>
+  <script src="./js/mitm-ui.js?v=129" defer></script>
+  <script src="./js/mail-ui.js?v=129" defer></script>
+  <script src="./js/privacy-ui.js?v=129" defer></script>
+  <script src="./js/auth-ui.js?v=129" defer></script>
+  <script src="./js/ads-ui.js?v=129" defer></script>
+  <script src="./js/packet-ui.js?v=129" defer></script>
+  <script src="./js/app.js?v=129" defer></script>
 </head>
 <body>
   <main class="workspace">
     <section class="map-area" aria-label="Interaktivní mapa sítě">
       <div class="stage" id="stage">
         <button id="open-settings" class="icon-button settings-launch" aria-label="Nastavení aplikace" title="Nastavení aplikace"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-1 3-3 1-2 3 2 2-1 3 3 2 1 3h4l1-3 3-1 2-3-2-2 1-3-3-2-1-3Z"/><circle cx="10" cy="11" r="3"/></svg></button>
-        <nav class="scene-nav" aria-label="Měřítko mapy"><button data-scene="home" class="active" aria-pressed="true">Byt</button><button data-scene="city" aria-pressed="false">Město</button><button data-scene="all" aria-pressed="false">Celá síť</button></nav>
         <svg id="network-map" role="group" aria-label="Síťová mapa. Zařízení a spoje lze otevřít klepnutím. Přiblížení gestem dvěma prsty nebo Ctrl a kolečkem myši." viewBox="35 270 465 440"></svg>
         <div class="map-tools"><button id="zoom-in" class="icon-button" aria-label="Přiblížit mapu" title="Přiblížit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">+</button><button id="zoom-out" class="icon-button" aria-label="Oddálit mapu" title="Oddálit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">−</button></div>
         <div class="map-display-controls">
