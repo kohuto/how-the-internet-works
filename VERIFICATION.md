@@ -1,5 +1,10 @@
 # Záznam ověření
 
+## Další zjednodušení chatbota · 19. listopadu 2026
+
+Z chatbota odstraněna lišta Čekání na dokončení přenosu / Sledovat v mapě a její vlastní styly. Z detailu serveru odstraněno tlačítko Otevřít Chatbot na notebooku. Ověřena syntaxe obou skriptů a prohlížeč při 1074 × 858 px: po odeslání lišta chybí, čekání v konverzaci i blokování odesílání funguje, po 37 krocích dorazí celá odpověď. V detailu serveru tlačítko chybí a ovládání napájení je dostupné. Cache prostředků `v=127`.
+
+
 ## Zjednodušení rozhraní chatbota · 19. listopadu 2026
 
 Odstraněn štítek Výuková ukázka v záhlaví, nápověda Enter / Shift + Enter pod polem zprávy a celá rozbalovací položka Průběh přenosu včetně nepoužitých stylů a pomocných údajů. Odstraněn také odkaz `aria-describedby` na zrušenou nápovědu. Odesílání, historie, stav čekání a serverový přenos se nemění. Detail serveru je dostupný z mapy.

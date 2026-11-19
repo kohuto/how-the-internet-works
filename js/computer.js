@@ -74,7 +74,7 @@
       <div class="chatbot-conversation" data-turn-count="${turns.length}" role="region" tabindex="0" aria-label="Konverzace s chatbotem"><div class="chatbot-thread">${turns.length?messages:`<div class="chatbot-empty"><span class="chatbot-empty-icon" aria-hidden="true">${icon('chatbot')}</span><h3>S čím ti můžu pomoct?</h3><p>Napiš zprávu a začni konverzaci.</p></div>`}</div></div>
       <footer class="chatbot-footer">
         <form data-form="chatbot" class="chatbot-compose"><div class="chatbot-input-box"><label for="chatbot-prompt" class="sr-only">Zpráva pro chatbota</label><textarea id="chatbot-prompt" data-field="chatPrompt" rows="2" maxlength="4000" placeholder="Napiš zprávu…" required>${esc(ui.chatbot[device])}</textarea><button type="submit" class="chatbot-send" aria-label="Odeslat zprávu" title="Odeslat zprávu" ${busy?'disabled':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button></div></form>
-        <p class="chatbot-model-note">Výuková ukázka · odpověď je vždy stejná.</p>${transfer(sim,'chatbot',device)}
+        <p class="chatbot-model-note">Výuková ukázka · odpověď je vždy stejná.</p>
       </footer>
     </div>`;
   }
