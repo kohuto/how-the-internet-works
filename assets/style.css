@@ -11,6 +11,8 @@
 .packet.selected>rect{stroke:#426c59;stroke-width:3}.packet.frame-copy{opacity:.65}.packet.frame-copy>rect{stroke-dasharray:3 2}
 #network-map .map-node.node-junction .node-halo{fill:#edf2e4;stroke:#c9d7bd}#network-map .map-node.node-junction .device-icon{fill:#eaf1df;stroke:#6a865d}#network-map .map-node.node-junction.off .node-halo{fill:#eeece4;stroke:#d5c6b5}
 #network-map .node-junction .device-name{font-size:12px}
+.device-ip{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:9px;font-weight:400;fill:#6d7f65;paint-order:stroke;stroke:#f3f5ed;stroke-width:3px;stroke-linejoin:round}
+#network-map[data-scene="all"] .device-ip,#network-map[data-scene="satellite"] .device-ip{font-size:11px}
 .packet.delivery rect{fill:#f0e3f7;stroke:#b58cce}.packet.delivery text{fill:#9a66b3}.packet.receipt rect{fill:#e1f2e8;stroke:#83b79b}.packet.receipt text{fill:#518d6b}.node-instagram .node-halo{fill:#f1e7f5;stroke:#d7c2df}.node-instagram .device-icon{stroke:#a779ba}.status-dot.waiting{background:#a186b6}.part-chip.delivery{background:#f3eaf9;border-color:#e1ceed;color:#9b75b4}
 #network-map[data-scene="all"] .device-name{font-size:15px}#network-map[data-scene="all"] .place-label{font-size:14px}#network-map[data-scene="all"] .packet-label text{font-size:11px}
 

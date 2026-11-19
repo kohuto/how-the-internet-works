@@ -257,6 +257,15 @@
         }
         return [id,link];
       }));
+      // Schematic identities for simplified junctions, without adding switch IP interfaces.
+      const usedAddresses=new Set(Object.values(this.nodes).flatMap(n=>[n.ip,...Object.values(n.interfaces).map(i=>i.ip)]).filter(Boolean));
+      for(const n of Object.values(this.nodes).filter(n=>n.type==='switch')) {
+        const [subnet,bits]=Object.values(n.interfaces)[0].prefix.split('/'),first=ipv4(subnet),last=first+2**(32-Number(bits))-1;
+        for(let address=first+2;address<last;address++) {
+          const ip=[24,16,8,0].map(shift=>(address>>>shift)&255).join('.');
+          if(!usedAddresses.has(ip)){n.junctionIp=ip;usedAddresses.add(ip);break;}
+        }
+      }
       this.version=1;
       this.server={
         files:{'index.html':{name:'index.html',mediaType:'text/html; charset=utf-8',content:{brand:'knihovna na rohu',kicker:'MĚSTSKÁ KNIHOVNA LIPOV',title:'Dnes otevřeno do 16 hodin',description:'Vítejte v knihovně na rohu. Spravujte své výpůjčky nebo nám napište.'}}},
@@ -299,6 +308,13 @@
     displayName(node) {
       const n=typeof node==='string'?this.nodes[node]:node;
       return this.displayType(n)==='junction'?'Chytrá křižovatka':n.name;
+    }
+    displayIp(node) {
+      const n=typeof node==='string'?this.nodes[node]:node;
+      if(n.type==='switch') {
+        return this.displayType(n)==='junction'?n.junctionIp:null;
+      }
+      return n.ip||(n.type==='router'?Object.values(n.interfaces).find(i=>i.ip&&this.linkAvailable(this.links[i.link]))?.ip:null)||null;
     }
     displayLinkName(link) {
       return !this.detailEnabled('devices')&&[link.a,link.b].some(id=>this.displayType(id)==='junction')?`${this.displayName(link.a)} — ${this.displayName(link.b)}`:link.name;
