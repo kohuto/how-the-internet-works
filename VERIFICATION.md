@@ -2,6 +2,12 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Detail webového serveru bez IP a MAC adres — 19. listopadu 2026, v121
+
+Z detailu serveru knihovny odstraněn řádek IP adresa a skryt řádek MAC adresa. Úložiště, služby a pravidlo HTTP cache zůstávají zobrazené. IP pod názvem serveru v mapě a adresy používané přenosy zůstávají zachované. Prostředky v121.
+
+Ověřena syntaxe js/app.js a detail v prohlížeči při 1074 × 858 px v základní i úplné sestavě: oba řádky chybí, mapa dál ukazuje 203.0.113.10, uložená stránka a služby zůstaly dostupné. Úplná sestava zachovala HTTPS a ovládání certifikátu. Konzole bez chyb a varování.
+
 ## IP adresy pod názvy zařízení v mapě — 19. listopadu 2026, v120
 
 Pod názvy koncových zařízení a routerů přidán menší, méně výrazný řádek s jednou IPv4 adresou. Router přednostně ukazuje svou připravenou adresu, jinak adresu jednoho rozhraní do zapnuté části sítě. Adresa zůstává zobrazená při vypnutí zařízení či odpojení spoje. Chytré křižovatky představující switche dostávají odlišné schematické adresy ze své LAN s vynecháním již použitých adres; tyto adresy se nestávají IP rozhraními switchů. Zapnutí Routery a switche je u switchů skryje. IP koncových zařízení sleduje aktuální kabelové, Wi-Fi či mobilní připojení. Wi-Fi body, BTS, anténa a satelit vlastní adresu v modelu nemají. Popisky skrývají jméno i IP společně; adresa je také v přístupném názvu zařízení. Rozšířeny okraje výřezů pro druhý řádek. Prostředky v120.

@@ -218,7 +218,7 @@
       html+=serverStorage(site,site.host)+`<dl class="dl">${definition('IP adresa',n.ip)}${definition('MAC adresa',n.mac)}</dl>${portList(n)}`;
     } else if(n.id==='web') {
       html+=serverStorage();
-      html+=`<dl class="dl">${definition('IP adresa',n.ip)}${definition('Služby',net.featureEnabled('tls')?'HTTP · TCP/80 a HTTPS · TLS nad TCP/443':'HTTP · TCP/80')}${definition('Pravidlo HTTP cache','Cache-Control: no-store')}${definition('MAC adresa',n.mac)}</dl>`;
+      html+=`<dl class="dl">${definition('Služby',net.featureEnabled('tls')?'HTTP · TCP/80 a HTTPS · TLS nad TCP/443':'HTTP · TCP/80')}${definition('Pravidlo HTTP cache','Cache-Control: no-store')}</dl>`;
       if(net.featureEnabled('tls')&&net.featureEnabled('cookies')){html+=globalThis.InternetLab.authServer(net,sim);html+=globalThis.InternetLab.privacyServer(net,sim);}
       if(net.featureEnabled('cookies'))html+=cookieServer();
       const cert=net.server.certificate,last=net.server.lastRequest;
