@@ -185,7 +185,7 @@
       if(!(n.type==='switch'?net.detailEnabled('mac'):net.detailEnabled('routes')||net.detailEnabled('nat')))return html;
     }
     if(['shop','news','ads'].includes(n.id))return html+globalThis.InternetLab.adsServer(net,sim,n)+`<dl class="dl">${definition('Doména',globalThis.InternetLab.AD_HOSTS[n.id])}${definition('IP adresa',n.ip)}${definition('MAC adresa',n.mac)}</dl>${portList(n)}`;
-    if(n.id==='mail')return html+globalThis.InternetLab.mailServerDetail(net,sim,n)+`<dl class="dl">${definition('IP adresa',n.ip)}${definition('MAC adresa',n.mac)}</dl>${portList(n)}`;
+    if(n.id==='mail')return html+globalThis.InternetLab.mailServerDetail(net,sim,n)+`<dl class="dl">${definition('IP adresa',n.ip)}${definition('MAC adresa',n.mac)}</dl>`;
     if(n.id==='phish-web')return html+globalThis.InternetLab.phishingServerDetail(net,sim,n)+`<dl class="dl">${definition('IP adresa',n.ip)}${definition('MAC adresa',n.mac)}</dl>${portList(n)}`;
     if(['terminal','satellite'].includes(n.type))return html+satelliteInfo(n)+decision(n)+`<div class="section-label">PŘIPOJENÍ</div>${portList(n)}`;
     if(n.type==='bts')return html+`<p class="hint" data-device-help="Jak zařízení funguje">Spojuje telefon rádiem se sítí mobilního operátora. Přijatá data předává po své přípojce dál.</p>${decision(n)}<div class="section-label">PŘIPOJENÍ</div>${portList(n)}<div class="note-card" data-device-help="Mobilní síť">BTS zajišťuje rádiový přístup. Uživatelská data pokračují sítí operátora k jeho bráně do internetu. Vnitřní IP adresy a TCP segmenty při tomto předání zůstávají stejné.</div>`;
