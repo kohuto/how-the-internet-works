@@ -29,7 +29,6 @@
 .gmail-main{display:flex;flex-direction:column;position:relative;min-width:0;min-height:0;margin:0 10px 10px 0;overflow:hidden;border-radius:14px;background:#fff}
 .gmail-toolbar{display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:45px;padding:4px 10px;border-bottom:1px solid #eef0f3}
 .gmail-toolbar h3{margin:0;font-size:12px;font-weight:500;color:#5f6368}
-.gmail-toolbar>span{margin-left:auto;font-size:10px;color:#777d84}
 .gmail-app .gmail-icon-button{display:grid;place-items:center;flex-shrink:0;width:30px;height:30px;min-height:30px;padding:6px;border:0;border-radius:50%;background:transparent;color:#5f6368}
 .gmail-app .gmail-icon-button:hover{background:#e8eaed}
 .gmail-scroll{flex:1;min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#ccd0d7 transparent}
@@ -120,7 +119,6 @@
   .gmail-main{flex:1;margin:0 7px 7px;border-radius:10px}
   .gmail-toolbar{min-height:39px;padding:3px 7px;gap:7px}
   .gmail-toolbar h3{font-size:11px}
-  .gmail-toolbar>span{font-size:8px}
   .gmail-toolbar .gmail-icon-button{width:26px;height:26px;min-height:26px;padding:5px}
   .gmail-empty{min-height:190px;padding:22px 15px}
   .gmail-empty>span{width:55px;height:55px;margin-bottom:14px}

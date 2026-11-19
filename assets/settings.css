@@ -1,6 +1,6 @@
 .settings-launch{position:absolute;right:58px;top:16px;z-index:9;width:34px;height:34px;background:#fafcf5;border-color:#dbe3d5}
 .settings-launch svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.stage:has(.monitor-overlay:not([hidden]),.device-overlay:not([hidden])) .settings-launch{left:16px;right:auto}
+.stage:has(.monitor-overlay:not([hidden]),.device-overlay:not([hidden])) .settings-launch{visibility:hidden}
 .settings-dialog{width:min(760px,calc(100% - 32px));max-height:calc(100dvh - 48px);padding:0;border:1px solid #ccd9ce;border-radius:18px;background:#fffefb;color:var(--ink);box-shadow:0 24px 90px #18332940;overflow:hidden}
 .settings-dialog::backdrop{background:#1f393450;backdrop-filter:blur(3px)}
 .settings-dialog form{display:flex;flex-direction:column;max-height:calc(100dvh - 50px)}

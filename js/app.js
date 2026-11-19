@@ -281,7 +281,7 @@
   }
   function render(animate=false) {
     sim.onAsyncReady=()=>render();
-    for(const [device,draft] of Object.entries(ui.mailComposer))if(draft.sendingId&&net.phishing.clients[device].sent.some(m=>m.id===draft.sendingId))Object.assign(draft,{sendingId:null,subject:'',body:'',composeOpen:false,justSent:true});
+    for(const [device,draft] of Object.entries(ui.mailComposer))if(draft.sendingId&&net.phishing.clients[device].sent.some(m=>m.id===draft.sendingId))Object.assign(draft,{sendingId:null,subject:'',body:'',composeOpen:false});
     const webStarted=browserNavigation.sync(sim);
     if(webStarted)ui[addressKey(webStarted)]=browserNavigation.active(webStarted).draft;
     for(const device of ['laptop','friend','cabin']) {
@@ -356,7 +356,7 @@
     if(ui.packetOpen||sim.status==='running')return;stop();
     const device=ui.monitorDevice;if(!sim.start(type,{device,target:ui.attackTarget,...extra}))return;
     const draft=ui.mailComposer[device];
-    if(draft){draft.justSent=false;if(type==='mail-send')Object.assign(draft,{sendingId:sim.action.payload.messageId,composeOpen:false,tab:'sent',sentId:null});}
+    if(draft&&type==='mail-send')Object.assign(draft,{sendingId:sim.action.payload.messageId,composeOpen:false,tab:'sent',sentId:null});
     if(ui.monitorOpen)ui.selection={kind:'node',id:device};
     if(type!=='mail-seen'&&['home','hacker'].includes(ui.scene))setScene('all');advance();
   }
@@ -452,10 +452,10 @@
     if(b.dataset.action==='mitm-clear'){if(sim.status==='running')return;net.mitm.logs=[];render();return;}
     if(b.dataset.gmailAction){
       const d=ui.mailComposer[ui.monitorDevice],c=net.phishing.clients[ui.monitorDevice],action=b.dataset.gmailAction;
-      if(action==='compose'){if(sim.status==='running'&&sim.action?.type==='mail-send'&&sim.clientId()===ui.monitorDevice)return;Object.assign(d,{composeOpen:true,justSent:false});}
+      if(action==='compose'){if(sim.status==='running'&&sim.action?.type==='mail-send'&&sim.clientId()===ui.monitorDevice)return;Object.assign(d,{composeOpen:true});}
       if(action==='close-compose')clearMailComposer();
       if(action==='back'){d.sentId=null;c.opened=false;}
-      if(action==='reply'){if(sim.status==='running'||!c.inbox||!globalThis.InternetLab.PHISH_CLIENTS.includes(c.inbox.source)||fixedMailRecipient(ui.monitorDevice)&&c.inbox.source!==fixedMailRecipient(ui.monitorDevice))return;if(d.composeOpen&&(d.subject||d.body)){d.composeOpen=true;notify('Nejprve dokonči nebo zavři rozepsanou zprávu.');render();return;}Object.assign(d,{target:c.inbox.source,subject:(/^Re:/i.test(c.inbox.subject)?c.inbox.subject:'Re: '+c.inbox.subject).slice(0,100),body:'',composeOpen:true,justSent:false});}
+      if(action==='reply'){if(sim.status==='running'||!c.inbox||!globalThis.InternetLab.PHISH_CLIENTS.includes(c.inbox.source)||fixedMailRecipient(ui.monitorDevice)&&c.inbox.source!==fixedMailRecipient(ui.monitorDevice))return;if(d.composeOpen&&(d.subject||d.body)){d.composeOpen=true;notify('Nejprve dokonči nebo zavři rozepsanou zprávu.');render();return;}Object.assign(d,{target:c.inbox.source,subject:(/^Re:/i.test(c.inbox.subject)?c.inbox.subject:'Re: '+c.inbox.subject).slice(0,100),body:'',composeOpen:true});}
       render();if(['compose','reply'].includes(action))$('[data-mail-field="subject"]')?.focus({preventScroll:true});return;
     }
     if(b.dataset.gmailSent){ui.mailComposer[ui.monitorDevice].sentId=b.dataset.gmailSent;render();return;}

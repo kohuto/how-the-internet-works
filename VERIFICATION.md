@@ -2,6 +2,12 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Zjednodušení Gmailu a tlačítko nastavení — 19. listopadu 2026, v117
+
+Z horní lišty Gmailu odstraněn počet zpráv a související pomocná funkce i styly. Běžná spodní stavová lišta včetně Zpráva odeslána se již nezobrazuje; chyby zůstávají viditelné jako upozornění. Odstraněn nepotřebný příznak justSent. Vyhledávací pole zůstává zobrazené, ale je pouze pro čtení a mimo pořadí tabulátoru. Počítadla poštovních složek v levém panelu zůstávají. Tlačítko nastavení při otevřeném monitoru nebo detailu zmizí a po zavření se znovu zobrazí na stejném místě mapy. Dokumentace a prostředky v117.
+
+Syntaxe app.js a mail-ui.js bez chyb, všech pět testů rozhraní pošty prošlo. V prohlížeči při 806 × 743 px odeslaná zpráva zůstala v seznamu, horní lišta obsahovala pouze Odeslané a běžná stavová lišta chyběla. Skutečný stisk klávesy nezměnil hodnotu viditelného vyhledávacího pole. Při vypnutém serveru zůstal důvod neúspěchu viditelný s rolí alert. Nastavení mělo před otevřením zařízení, během detailu i monitoru a po jejich zavření shodné souřadnice; při otevřených oknech bylo skryté a po zavření šlo znovu otevřít. Konzole bez chyb a varování.
+
 ## Schránky serveru bez odkazů na zařízení — 19. listopadu 2026, v116
 
 Ze všech schránek v detailu serveru Gmailu odstraněn odkaz Otevřít Gmail v zařízení. Prostředky v116. Ověřena syntaxe mail-ui.js, testy rozhraní pošty a v prohlížeči nepřítomnost odkazů při zachování adres a přehledu zpráv.
