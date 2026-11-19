@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Zjednodušení rozhraní chatbota · 19. listopadu 2026
+
+Odstraněn štítek Výuková ukázka v záhlaví, nápověda Enter / Shift + Enter pod polem zprávy a celá rozbalovací položka Průběh přenosu včetně nepoužitých stylů a pomocných údajů. Odstraněn také odkaz `aria-describedby` na zrušenou nápovědu. Odesílání, historie, stav čekání a serverový přenos se nemění. Detail serveru je dostupný z mapy.
+
+Ověřeno 11 stávajících testů chatbota, syntaxe skriptu a prohlížeč při 1074 × 858 a 320 × 568 px. Všechny tři prvky chybí, obsah nepřetéká; Enter dál spustí přenos a odpověď se zobrazí až po doručení. Cache prostředků `v=126`.
+
+
 ## Rozhraní chatbota · 19. listopadu 2026
 
 Chatbot má nové rozhraní konverzace: uživatelské bubliny, odpovědi s ikonou, samostatně posuvnou historii, úvodní obrazovku a pole zprávy ukotvené dole. Křížek vrací na plochu. Enter odesílá přes dosavadní formulář, Shift + Enter vloží nový řádek; odesílání respektuje probíhající přenos i skládání textu pomocí IME. Technické fáze, počty doručených bajtů a odkaz na server jsou ve výchozím stavu sbalené v položce Průběh přenosu. Text čekání odpovídá skutečnému odesílání, výpočtu či návratu odpovědi. Model sítě a pevná serverová odpověď se nemění.
