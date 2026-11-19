@@ -80,6 +80,42 @@ test('Phone Wi-Fi and mobile access only offer enabled connections',()=>{
   const mobile=network(['mobile']);assert.equal(mobile.access.phone.mode,'cellular');assert(mobile.accessReady('phone'));
   for(const net of [wifi,mobile]){const sim=new Simulation(net);sim.start('web',{device:'phone',address:'https://knihovna.test/'});finish(sim);assert(net.phoneBrowser.content);}
 });
+test('One household Wi-Fi option gates all three access points without enabling hidden homes',()=>{
+  for(const enabled of [false,true]){
+    const net=network(['friend','satellite','cafe',...(enabled?['wifi']:[])]);
+    for(const [device,ap] of [['laptop','ap'],['friend','friend-ap'],['cabin','cabin-ap']]){
+      assert.equal(net.nodeAvailable(ap),enabled,ap);
+      assert.equal(net.accessModeAvailable(device,'wifi'),enabled,device);
+      assert(net.accessReady(device),`${device} starts with a working connection`);
+      net.setAccess(device,'cable');
+      assert.equal(net.setAccess(device,'wifi'),enabled);
+      assert(net.accessReady(device),`${device} retains a working connection`);
+      if(!enabled){
+        assert.equal(net.access[device].mode,'cable');
+        assert(!net.visibleLinks().some(l=>l.a===ap||l.b===ap));
+      }
+    }
+    assert(net.nodeAvailable('cafe-ap'));assert(net.accessReady('cafe'));
+  }
+  const onlyWifi=network(['wifi']);
+  assert(onlyWifi.nodeAvailable('ap'));
+  for(const id of ['friend','friend-ap','cabin','cabin-ap'])assert(!onlyWifi.nodeAvailable(id),id);
+  const mobile=network(['mobile','friend','satellite']);
+  assert.equal(mobile.access.phone.mode,'cellular');assert(mobile.accessReady('phone'));
+  for(const ap of ['ap','friend-ap','cabin-ap'])assert(!mobile.nodeAvailable(ap),ap);
+});
+test('Home, Matej and cabin load the web over cable or optional Wi-Fi; cafe stays independent',()=>{
+  for(const wifi of [false,true])for(const device of ['laptop','friend','cabin','cafe']){
+    const net=network(['friend','satellite','cafe',...(wifi?['wifi']:[])]),sim=new Simulation(net);
+    if(wifi&&device!=='cafe')net.setAccess(device,'wifi');
+    assert(sim.start('web',{device,address:'http://knihovna.test/'}));
+    const events=finish(sim),firstHop=events.find(e=>e.kind==='hop'&&e.from===device);
+    assert(firstHop);
+    assert.equal(net.links[firstHop.link].medium,device==='cafe'||wifi?'wifi':'cable');
+    assert.equal(net.browserFor(device).content,net.server.title);
+    if(device==='cabin')assert(events.some(e=>e.link==='sat-uplink'));
+  }
+});
 test('Satellite, Instagram, printing and two-provider mail work as individual additions',()=>{
   for(const [features,type,payload] of [
     [['satellite'],'web',{device:'cabin',address:'https://knihovna.test/'}],

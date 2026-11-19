@@ -2,6 +2,14 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Společná volba Wi-Fi v domácnostech — 19. listopadu 2026, v118
+
+Volba Wi-Fi v domácnostech řídí přístupové body na Lipové, u Matěje a na chatě. Matějův a chatový bod vyžadují současně svou zapnutou oblast. Bez této volby zůstávají domácí notebooky připojené kabelem; chata nově volí kabel také při vytvoření modelu. Kavárna si ponechává vlastní Wi-Fi nezávisle. Dokumentace a prostředky v118.
+
+Prošlo všech 306 automatických testů a kontrola syntaxe obou změněných skriptů. Dva nové regresní testy ověřují skryté body a jejich spoje, odmítnutí nedostupné Wi-Fi, funkční výchozí přístup, samostatnou volbu Wi-Fi bez skrytých domácností, mobilní síť a načtení webu ze všech tří domácností přes kabel i Wi-Fi i nezávisle z kavárny. Přenos z chaty v obou případech prochází satelitem.
+
+V prohlížeči při 806 × 743 px se po přidání Matěje, chaty a kavárny bez Wi-Fi zobrazil pouze bod kavárny. Zapnutí Wi-Fi přidalo tři domácí body a všechny domácí notebooky nabízely funkční bezdrátové připojení se správnou sítí a adresou. Opětovné vypnutí odstranilo domácí body i možnost Wi-Fi; všechny tři notebooky byly připojené kabelem. Samotná Wi-Fi přidala pouze bod na Lipové. Konzole bez chyb a varování.
+
 ## Zjednodušení Gmailu a tlačítko nastavení — 19. listopadu 2026, v117
 
 Z horní lišty Gmailu odstraněn počet zpráv a související pomocná funkce i styly. Běžná spodní stavová lišta včetně Zpráva odeslána se již nezobrazuje; chyby zůstávají viditelné jako upozornění. Odstraněn nepotřebný příznak justSent. Vyhledávací pole zůstává zobrazené, ale je pouze pro čtení a mimo pořadí tabulátoru. Počítadla poštovních složek v levém panelu zůstávají. Tlačítko nastavení při otevřeném monitoru nebo detailu zmizí a po zavření se znovu zobrazí na stejném místě mapy. Dokumentace a prostředky v117.
