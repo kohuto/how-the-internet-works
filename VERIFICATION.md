@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Sjednocené informace serverů · 19. listopadu 2026
+
+Ostatní servery přebírají zjednodušení webového serveru knihovny: vlastní IP a MAC adresa ani seznam připojených fyzických portů se v jejich detailu neopakují. IP zůstávají v mapě, síťový model a adresy v paketech se nemění. Služby chatbota, Instagramu a cloudu, SMTP/IMAP na Gmailu, výchozí brána DNS a technické údaje VPN jsou dostupné pouze při zapnutí IP a TCP hlavička. Web knihovny používá stejný společný způsob zobrazení služeb jako ostatní služby. Stav VPN už neopakuje její vlastní IP.
+
+Zachovány DNS záznamy včetně odpovědí, serverové soubory a práva, uložené schránky a zprávy, dotaz a odpověď chatbota, stav tunelů, certifikáty, údaje o přijatých požadavcích a ovládací prvky scénářů. Tiskárna a síťová zařízení nejsou touto úpravou dotčena.
+
+Ověření: **312 testů prošlo**, syntaxe obou skriptů i kontrola změn bez chyb. V prohlížeči zkontrolováno všech 14 serverů při 1074 × 858 px s podrobnostmi vypnutými a pouze hlavičkami zapnutými; navíc DNS a Gmail s úplnou sestavou. Ve všech režimech chybí vlastní IP/MAC a fyzické porty, služby se přepínají podle hlaviček a IP popisky zůstávají v mapě. Při 320 × 844 px ověřeny všechny základní náhledy bez vodorovného přetékání. Skutečný přenos chatbota zachoval dotaz a odpověď na serveru i doručení do zařízení; po 150 krocích SMTP lze na serveru rozbalit nově doručenou zprávu ve správné schránce i bez zobrazení SMTP/IMAP karet. Cache prostředků `v=128`.
+
+
 ## Další zjednodušení chatbota · 19. listopadu 2026
 
 Z chatbota odstraněna lišta Čekání na dokončení přenosu / Sledovat v mapě a její vlastní styly. Z detailu serveru odstraněno tlačítko Otevřít Chatbot na notebooku. Ověřena syntaxe obou skriptů a prohlížeč při 1074 × 858 px: po odeslání lišta chybí, čekání v konverzaci i blokování odesílání funguje, po 37 krocích dorazí celá odpověď. V detailu serveru tlačítko chybí a ovládání napájení je dostupné. Cache prostředků `v=127`.
