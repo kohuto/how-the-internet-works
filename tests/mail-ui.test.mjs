@@ -1,6 +1,6 @@
 import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/mail-ui.js';
 import test from 'node:test';import assert from 'node:assert/strict';
-const {Network,LabSettings,Simulation,mailApp}=globalThis.InternetLab;
+const {Network,LabSettings,Simulation,mailApp,mailServerDetail}=globalThis.InternetLab;
 const create=()=>new Simulation(new Network(new LabSettings({features:['mail']})));
 const state=(device,extra={})=>({mailComposer:{[device]:{tab:'inbox',target:device==='friend'?'laptop':'friend',subject:'',body:'',...extra}}});
 function finish(s){for(let i=0;i<2000&&s.status==='running';i++)s.advanceFrame();assert.equal(s.status,'success',s.current?.description);}
@@ -51,4 +51,31 @@ test('Reply is offered only when the notebook can send back to that sender',()=>
     assert(mailApp(s.net,s,state(device),device).includes('data-gmail-action="reply"'));
     c.inbox.source='phone';assert(!mailApp(s.net,s,state(device),device).includes('data-gmail-action="reply"'));
   }
+});
+test('Server mailboxes expose stored messages before client fetch without changing unread or transfer state',()=>{
+  const s=create(),render=()=>mailServerDetail(s.net,s,s.net.nodes.mail);
+  const empty=render();assert(empty.includes('SCHRÁNKY NA SERVERU'));assert(empty.includes('Schránka je prázdná.'));
+  assert(!empty.includes('POHLED SPRÁVCE'));assert(!empty.includes('PŘIJATÉ ZPRÁVY · POHLED SERVERU'));
+  s.net.toggleNode('friend');
+  assert(s.start('mail-send',{device:'laptop',target:'friend',subject:'Přímo na serveru',body:'Obsah před načtením do vypnutého počítače.'}));
+  assert(!render().includes('Přímo na serveru'));
+  for(let i=0;i<2000&&!s.mail.entry?.accepted;i++)s.advanceFrame();assert(s.mail.entry.accepted);
+  const boxes=structuredClone(s.net.mail.boxes),items=structuredClone(s.net.phishing.clients.friend.items),current=s.current,packets=s.packets.size,dialogue=s.net.mail.dialogue.length;
+  const html=render();assert(html.includes('Přímo na serveru'));assert(html.includes('Obsah před načtením do vypnutého počítače.'));
+  assert(html.includes('data-detail-key="mailbox-friend-message-1"'));assert(html.includes('Nepřečtená'));
+  assert.deepEqual(s.net.mail.boxes,boxes);assert.deepEqual(s.net.phishing.clients.friend.items,items);
+  assert.equal(items.length,0);assert.strictEqual(s.current,current);assert.equal(s.packets.size,packets);assert.equal(s.net.mail.dialogue.length,dialogue);
+  finish(s);
+});
+test('Server message previews keep each mailbox separate and escape content and phishing URLs',()=>{
+  const s=create();send(s,'Předmět <script>test()</script>','První řádek\n<img src=x onerror=alert(1)>');
+  assert(s.start('mail-send',{device:'friend',target:'laptop',subject:'Odpověď',body:'Druhá schránka'}));finish(s);
+  const message=s.net.mail.boxes.friend[0];message.linkLabel='<svg onload=alert(1)>';message.link='https://knihovna-podpora.test/" onclick="alert(1)';
+  const html=mailServerDetail(s.net,s,s.net.nodes.mail);
+  for(const key of ['mailbox-laptop-message-1','mailbox-friend-message-1'])assert(html.includes(`data-detail-key="${key}"`));
+  assert.equal((html.match(/class="mail-server-message"/g)||[]).length,2);
+  assert(html.includes('Předmět &lt;script&gt;'));assert(html.includes('První řádek\n&lt;img'));
+  assert(html.includes('&lt;svg onload='));assert(html.includes('&quot; onclick=&quot;'));
+  assert(!html.includes('<script>'));assert(!html.includes('<img'));assert(!html.includes('data-action="phish-open"'));assert(!html.includes('<a '));
+  assert(!s.net.mail.boxes.friend[0].seen);assert(!s.net.mail.boxes.laptop[0].seen);
 });
