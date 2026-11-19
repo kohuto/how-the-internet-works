@@ -11,7 +11,7 @@
     {id:'dns',group:'services',label:'DNS server',description:'Překlad názvů webů na IP adresy. Bez rozšíření se tento krok vynechá.',nodes:['dns']},
     {id:'tls',group:'services',label:'TLS / HTTPS',description:'Zabezpečení webu, ověření certifikátu a šifrovaný přenos. Bez rozšíření se používá HTTP.'},
     {id:'cookies',group:'services',label:'Cookies',description:'Rozpoznání prohlížeče, záznamy návštěv a cookies přihlašovacích relací.'},
-    {id:'wifi',group:'services',label:'Wi-Fi v bytě na Lipové',description:'Bezdrátové připojení notebooku a telefonu.',nodes:['ap']},
+    {id:'wifi',group:'services',label:'Wi-Fi v domácnostech',description:'Bezdrátové připojení na Lipové, u Matěje a na chatě. Platí pro zapnuté domácnosti.',nodes:['ap','friend-ap','cabin-ap']},
     {id:'phone',group:'services',label:'Telefon',description:'Telefon s prohlížečem a dalšími zapnutými aplikacemi.',requires:['wifi'],nodes:['phone']},
     {id:'mail',group:'services',label:'E-mail',description:'Společná poštovní služba pro tebe a Matěje. Odesílání zpráv a schránky uložené na serveru.',requires:['friend'],nodes:['mail']},
     {id:'instagram',group:'services',label:'Instagram',description:'Zprávy mezi tebou a Matějem přes vzdálený server.',requires:['friend'],regions:['instagram']},
@@ -53,6 +53,7 @@
     }
     sameNetwork(other) {return FEATURES.every(f=>this.has(f.id)===other.has(f.id));}
     nodeEnabled(node) {
+      if(['ap','friend-ap','cabin-ap'].includes(node.id)&&!this.has('wifi'))return false;
       if(node.enabledBy)return !node.enabledBy.length||node.enabledBy.some(id=>this.has(id));
       if(node.id==='peer')return ['friend','instagram','replica','vpn','hacker','phishing','shop','news','ads'].some(id=>this.has(id));
       if(['partners-router','partners-switch'].includes(node.id))return ['shop','news','ads'].some(id=>this.has(id));
