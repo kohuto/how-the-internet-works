@@ -2,6 +2,10 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Schránky serveru bez odkazů na zařízení — 19. listopadu 2026, v116
+
+Ze všech schránek v detailu serveru Gmailu odstraněn odkaz Otevřít Gmail v zařízení. Prostředky v116. Ověřena syntaxe mail-ui.js, testy rozhraní pošty a v prohlížeči nepřítomnost odkazů při zachování adres a přehledu zpráv.
+
 ## Pevní příjemci, křížky aplikací a životnost značek paketů — 19. listopadu 2026, v115
 
 Notebook na Lipové má pevného příjemce matej@gmail.com a Matějův notebook ty@gmail.com. Adresa je zobrazená jako needitovatelný text, odeslání v aplikaci ji odvozuje ze zařízení a model odmítá jiného příjemce. Odpovědět se nabízí pouze na zprávu od povoleného protějšku. Ostatní klienti si ponechávají výběr příjemce a phishingový scénář se nemění. Z detailu serveru Gmailu odstraněn řádek s portem a připojenou chytrou křižovatkou. Gmail má vlastní křížek, prohlížeč i obecná záhlaví aplikací používají křížek místo minimalizace a Instagram má křížek vpravo v záhlaví konverzace. Zavření vrací na plochu a neruší probíhající přenos. Odstraněno spodní tlačítko Prozkoumat paket, jeho obsluhy a styly; ovladače přehrávání zůstávají vpravo. Náhled nadále otevírá kliknutí na paket v mapě. Paket nemá obrys při zaměření. Dřívější výběr paketu jej již nepřidržuje na mapě po doručení. Aktualizována dokumentace a prostředky v115.
