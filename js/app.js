@@ -297,8 +297,8 @@
     const computerDetails=fullComputerKey===computerViewKey?[...document.querySelectorAll('.computer-app-body details[open]')].map(d=>d.dataset.detailKey||d.querySelector('summary')?.textContent):[];
     const computerScroll=fullComputerKey===computerViewKey?$('.computer-app-body')?.scrollTop||0:0;
     const mailScroll=fullComputerKey===computerViewKey?$('.gmail-scroll')?.scrollTop||0:0;
-    const oldChat=$('.ig-conversation');
-    const chatScroll=fullComputerKey===computerViewKey&&oldChat?{top:oldChat.scrollTop,bottom:oldChat.scrollHeight-oldChat.scrollTop-oldChat.clientHeight<24}:null;
+    const oldChat=$('.ig-conversation, .chatbot-conversation');
+    const chatScroll=fullComputerKey===computerViewKey&&oldChat?{top:oldChat.scrollTop,turns:oldChat.dataset.turnCount,bottom:oldChat.scrollHeight-oldChat.scrollTop-oldChat.clientHeight<24}:null;
     computerViewKey=fullComputerKey;
     const infoOpen=ui.deviceOpen||ui.linkOpen||ui.packetOpen;
     const deviceKey=infoOpen?`${ui.selection.kind}:${ui.selection.id}`:'',sameDevice=deviceKey!==''&&deviceKey===deviceViewKey;
@@ -313,7 +313,7 @@
     if($('.real-browser'))$('.real-browser').style.setProperty('--browser-panel-height',`${Math.max(80,$('.computer-app-body').clientHeight-$('.browser-chrome').offsetHeight-12)}px`);
     if($('.computer-app-body'))$('.computer-app-body').scrollTop=computerScroll;
     if($('.gmail-scroll'))$('.gmail-scroll').scrollTop=mailScroll;
-    const chat=$('.ig-conversation');if(chat)chat.scrollTop=!chatScroll||chatScroll.bottom?chat.scrollHeight:chatScroll.top;
+    const chat=$('.ig-conversation, .chatbot-conversation');if(chat)chat.scrollTop=chat.dataset.turnCount==='0'?0:!chatScroll||chatScroll.bottom||chat.dataset.turnCount!==chatScroll.turns?chat.scrollHeight:chatScroll.top;
     document.querySelectorAll('#monitor-content video').forEach((video,i)=>{const key=video.closest('[data-instagram-message]')?.dataset.instagramMessage||`index:${i}`,state=videoStates.find(v=>v.key===key&&v.device===ui.monitorDevice&&v.src===video.querySelector('source')?.getAttribute('src'));if(state){const restore=()=>{video.currentTime=state.time;if(!state.paused)video.play().catch(()=>{});};if(video.readyState)restore();else video.addEventListener('loadedmetadata',restore,{once:true});}});
     $('#device-overlay').hidden=!infoOpen;
     $('#device-content').classList.toggle('packet-window',ui.packetOpen);
@@ -552,7 +552,7 @@
       if(e.key==='Escape'&&draft.composeOpen){e.preventDefault();clearMailComposer();render();$('[data-gmail-action="compose"]')?.focus({preventScroll:true});return;}
       if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&e.target.closest('.gmail-compose-form')){e.preventDefault();const form=e.target.closest('form');if(!form.querySelector('[type="submit"]').disabled)form.requestSubmit();return;}
     }
-    if(ui.monitorOpen&&e.target.matches?.('.ig-compose textarea')&&e.key==='Enter'&&!e.shiftKey&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.isComposing) {
+    if(ui.monitorOpen&&e.target.matches?.('.ig-compose textarea, .chatbot-compose textarea')&&e.key==='Enter'&&!e.shiftKey&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.isComposing) {
       e.preventDefault();if(!e.target.form.querySelector('[type="submit"]').disabled)e.target.form.requestSubmit();return;
     }
     if(ui.monitorOpen&&$('.browser-application')) {

@@ -5,6 +5,7 @@ import '../js/web.js';
 import '../js/vpn.js';
 import '../js/phishing.js';
 import '../js/mitm.js';import '../js/mail.js';import '../js/privacy.js';import '../js/auth.js';import '../js/ads.js';import '../js/simulation.js';
+import '../js/map.js';import '../js/computer.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 const {Simulation,CHATBOT_REPLY,MSS}=globalThis.InternetLab;
@@ -114,4 +115,31 @@ test('Changing client access or repeating during compute closes the pending turn
   assert(sim.repeat());until(sim,()=>turn(sim).state==='processing');const abandoned=turn(sim);
   sim.status='stopped';assert(sim.repeat());assert.equal(abandoned.state,'error');finish(sim);
   assert.equal(turn(sim).answer,CHATBOT_REPLY);assert.equal(sim.net.chatbot.clients.laptop.turns.length,3);
+});
+
+
+const chatUI=(device='laptop',draft='')=>({monitorDevice:device,tab:'chatbot',friendTab:'chatbot',phoneTab:'chatbot',cabinTab:'chatbot',chatbot:{[device]:draft}});
+const chatView=(sim,device='laptop',draft='')=>globalThis.InternetLab.computerView(sim.net,sim,chatUI(device,draft));
+
+test('The chat interface reveals only the delivered answer, including while a completed server answer is returning',()=>{
+  const sim=new Simulation();assert(sim.start('chatbot',{prompt:'Kdy se objeví odpověď?'}));
+  assert(chatView(sim).includes('Odesílání zprávy…'));assert(!chatView(sim).includes(CHATBOT_REPLY));
+  until(sim,()=>turn(sim).state==='processing');
+  assert(chatView(sim).includes('Přemýšlím…'));assert(!chatView(sim).includes(CHATBOT_REPLY));
+  until(sim,()=>turn(sim).state==='receiving');
+  assert.equal(sim.net.chatbot.server.answer,CHATBOT_REPLY);
+  assert(chatView(sim).includes('Přijímání odpovědi…'));assert(!chatView(sim).includes(CHATBOT_REPLY));
+  finish(sim);
+  const before=JSON.stringify(sim.net.chatbot),packets=sim.packets.size,view=chatView(sim);
+  assert(view.includes(CHATBOT_REPLY));assert(!view.includes('chatbot-pending'));assert.equal(sim.packets.size,packets);assert.equal(JSON.stringify(sim.net.chatbot),before);
+});
+
+test('Chat history and drafts remain private to each device, escaped and visible after an unsuccessful attempt',()=>{
+  const sim=new Simulation(),unsafe='<img src=x onerror="alert(1)">';
+  run(sim,unsafe);sim.net.toggleNode('chatbot');assert(sim.start('chatbot',{prompt:'Druhý dotaz'}));finish(sim);
+  const view=chatView(sim,'laptop','</textarea><script>alert(1)</script>');
+  assert(view.includes('&lt;img src=x'));assert(!view.includes(unsafe));assert(view.includes(CHATBOT_REPLY));
+  assert(view.includes('Druhý dotaz'));assert(view.includes('Odpověď nebyla doručena.'));assert(!view.includes('<script>'));
+  assert(view.includes('&lt;/textarea&gt;&lt;script&gt;'));assert(!chatView(sim,'friend').includes('Druhý dotaz'));
+  assert(!chatView(sim,'friend').includes(CHATBOT_REPLY));
 });

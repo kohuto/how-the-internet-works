@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Rozhraní chatbota · 19. listopadu 2026
+
+Chatbot má nové rozhraní konverzace: uživatelské bubliny, odpovědi s ikonou, samostatně posuvnou historii, úvodní obrazovku a pole zprávy ukotvené dole. Křížek vrací na plochu. Enter odesílá přes dosavadní formulář, Shift + Enter vloží nový řádek; odesílání respektuje probíhající přenos i skládání textu pomocí IME. Technické fáze, počty doručených bajtů a odkaz na server jsou ve výchozím stavu sbalené v položce Průběh přenosu. Text čekání odpovídá skutečnému odesílání, výpočtu či návratu odpovědi. Model sítě a pevná serverová odpověď se nemění.
+
+Ověření: všech **312 automatických testů** prošlo, včetně dvou nových kontrol vykreslení chatbota. Ty ověřují skrytí odpovědi až do úplného doručení, nezměněný stav při vykreslování, oddělené historie zařízení, escapování dotazu a rozepsaného textu i zachování dřívější odpovědi po výpadku. Syntaxe obou upravených skriptů prošla.
+
+V prohlížeči ověřeno při 1074 × 858, 390 × 844 a 320 × 568 px: skutečný průchod dotazu přes síť, tři serverové kroky, návrat odpovědi, blokování dalšího odeslání během přenosu, Enter / Shift + Enter, rozbalení průběhu během krokování, dlouhá historie, zachování pozice při čtení, rozepsaného textu a kurzoru. Zavření křížkem a opětovné otevření zachovává konverzaci. Na telefonu ověřena doručená odpověď i výpadek serveru bez ztráty předchozí odpovědi. Obsah nepřetéká vodorovně a psaní zůstává dostupné pod historií. Cache prostředků zvýšena na `v=125`.
+
+
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
 ## Rozbalovací schránky a celé zprávy na serveru — 19. listopadu 2026, v124
