@@ -130,7 +130,7 @@
     body.append(help);
   }
   function portList(n) {
-    return `<div class="port-list">${Object.values(n.interfaces).filter(i=>net.linkAvailable(net.links[i.link])).map(i=> {const l=net.links[i.link],peer=net.nodes[net.peer(l,n.id)];return `<div class="port-item ${net.isActive(l)?'':'off'}"><i class="port-led"></i><code>${i.port}</code><span>${esc(net.displayName(peer))}</span>${n.id==='web'||['switch','router','terminal','bts'].includes(n.type)?'':`<button data-select-link="${l.id}" aria-label="Otevřít spoj ${esc(net.displayLinkName(l))}">↗</button>`}</div>`;}).join('')}</div>`;
+    return `<div class="port-list">${Object.values(n.interfaces).filter(i=>net.linkAvailable(net.links[i.link])).map(i=> {const l=net.links[i.link],peer=net.nodes[net.peer(l,n.id)];return `<div class="port-item ${net.isActive(l)?'':'off'}"><i class="port-led"></i><code>${i.port}</code><span>${esc(net.displayName(peer))}</span>${['switch','router','terminal','bts'].includes(n.type)?'':`<button data-select-link="${l.id}" aria-label="Otevřít spoj ${esc(net.displayLinkName(l))}">↗</button>`}</div>`;}).join('')}</div>`;
   }
   function natEndpoint(ip,port) {
     return `${ip}<wbr><span class="nat-port">:${port}</span>`;
@@ -218,7 +218,7 @@
       html+=serverStorage(site,site.host)+`<dl class="dl">${definition('IP adresa',n.ip)}${definition('MAC adresa',n.mac)}</dl>${portList(n)}`;
     } else if(n.id==='web') {
       html+=serverStorage();
-      html+=`<dl class="dl">${definition('IP adresa',n.ip)}${definition('Služby',net.featureEnabled('tls')?'HTTP · TCP/80 a HTTPS · TLS nad TCP/443':'HTTP · TCP/80')}${definition('Pravidlo HTTP cache','Cache-Control: no-store')}${definition('MAC adresa',n.mac)}</dl>${portList(n)}`;
+      html+=`<dl class="dl">${definition('IP adresa',n.ip)}${definition('Služby',net.featureEnabled('tls')?'HTTP · TCP/80 a HTTPS · TLS nad TCP/443':'HTTP · TCP/80')}${definition('Pravidlo HTTP cache','Cache-Control: no-store')}${definition('MAC adresa',n.mac)}</dl>`;
       if(net.featureEnabled('tls')&&net.featureEnabled('cookies')){html+=globalThis.InternetLab.authServer(net,sim);html+=globalThis.InternetLab.privacyServer(net,sim);}
       if(net.featureEnabled('cookies'))html+=cookieServer();
       const cert=net.server.certificate,last=net.server.lastRequest;

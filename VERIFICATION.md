@@ -2,6 +2,12 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Detail webového serveru bez seznamu portů — 19. listopadu 2026, v119
+
+Z detailu serveru knihovny odstraněn seznam portů s řádkem eth0 a názvem připojeného zařízení. Odstraněna také nepotřebná výjimka pro tento server ve společném vykreslování portů. IP a MAC adresy, služby, pravidlo HTTP cache, uložená stránka a poslední zpracovaný požadavek zůstávají dostupné. Prostředky v119.
+
+Ověřena syntaxe js/app.js a skutečný detail v prohlížeči při 806 × 743 px před přenosem i po něm. Web se načetl za 34 kroků, detail zobrazil přijatý GET a adresy, seznam portů chyběl v obou stavech. Konzole bez chyb a varování.
+
 ## Společná volba Wi-Fi v domácnostech — 19. listopadu 2026, v118
 
 Volba Wi-Fi v domácnostech řídí přístupové body na Lipové, u Matěje a na chatě. Matějův a chatový bod vyžadují současně svou zapnutou oblast. Bez této volby zůstávají domácí notebooky připojené kabelem; chata nově volí kabel také při vytvoření modelu. Kavárna si ponechává vlastní Wi-Fi nezávisle. Dokumentace a prostředky v118.
