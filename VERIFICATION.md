@@ -2,6 +2,12 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Skryté pravidlo HTTP cache v detailu serveru — 19. listopadu 2026, v122
+
+Z detailu serveru knihovny skryt řádek Pravidlo HTTP cache. Cache-Control: no-store zůstává v modelových odpovědích a jejich textu, protože načtení webu vždy probíhá přes síť. Prostředky v122.
+
+Ověřena syntaxe js/app.js a rozhraní při 1074 × 858 px v základní a úplné sestavě. Detail neukazuje řádky IP, MAC ani HTTP cache; uložená stránka, služby a rozšířené ovládání HTTPS zůstávají. IP pod serverem v mapě je zachovaná. Web se úspěšně načetl za 34 kroků a jeho skutečná modelová odpověď nadále obsahovala cacheControl no-store i hlavičku Cache-Control: no-store. Konzole bez chyb a varování.
+
 ## Detail webového serveru bez IP a MAC adres — 19. listopadu 2026, v121
 
 Z detailu serveru knihovny odstraněn řádek IP adresa a skryt řádek MAC adresa. Úložiště, služby a pravidlo HTTP cache zůstávají zobrazené. IP pod názvem serveru v mapě a adresy používané přenosy zůstávají zachované. Prostředky v121.
