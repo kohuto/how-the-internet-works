@@ -17,6 +17,17 @@ test('One shared Gmail server holds every account; the second provider is remove
  for(const p of [draft('hacker'),draft('laptop','web'),draft('laptop','friend',{subject:''}),draft('laptop','friend',{body:'x'.repeat(1201)})])assert(!s.start('mail-send',p));
  assert(!s.start('mail-retry',{messageId:'missing'}));assert(!s.start('mail-seen',{device:'friend',messageId:'missing'}));
 });
+test('The two notebooks can send only to each other; other clients keep their recipients',()=>{
+ const s=new Simulation();
+ for(const device of ['laptop','friend'])for(const target of ['laptop','friend','phone','cabin','cafe']){
+   const expected=device==='laptop'?'friend':'laptop';
+   assert.equal(s.mail.validate('mail-send',draft(device,target)),target===expected,`${device} → ${target}`);
+   if(target!==expected)assert(!s.start('mail-send',draft(device,target)));
+ }
+ assert.equal(s.net.mail.deliveries.size,0);assert.equal(s.net.mail.serial,0);
+ assert(s.mail.validate('mail-send',draft('phone','cafe')));
+ assert(s.mail.validate('phish-send',{device:'hacker',target:'laptop'}));
+});
 test('SMTP submits once to Gmail on port 465 and stores directly without DNS MX or server relay',()=>{
  const s=new Simulation(),events=send(s);assert.equal(s.status,'success');
  assert.deepEqual(outgoing(s,'laptop','submission').map(r=>r.wire.split(/[ :\r]/)[0]),['MAIL','RCPT','DATA','Message-ID']);
@@ -38,7 +49,7 @@ test('A powered-off recipient receives server mail and can fetch it later with t
  s.net.toggleNode('friend');check(s);assert.equal(s.status,'success');assert.equal(s.net.phishing.clients.friend.inbox.body,draft().body);
 });
 test('Both directions and additional devices use separate mailboxes on the same Gmail server',()=>{
- const s=new Simulation();send(s,'laptop','phone');assert.equal(s.status,'success');assert.equal(s.net.mail.boxes.phone.length,1);
+ const s=new Simulation();send(s,'cafe','phone');assert.equal(s.status,'success');assert.equal(s.net.mail.boxes.phone.length,1);
  send(s,'laptop','friend');assert.equal(s.status,'success');send(s,'friend','laptop');assert.equal(s.status,'success');
  assert.equal(s.net.mail.boxes.laptop[0].from,'matej@gmail.com');assert.equal(s.net.mail.boxes.friend[0].from,'ty@gmail.com');
  assert.equal(s.net.mail.boxes.friend.length,1);assert.equal(s.net.mail.boxes.phone.length,1);
@@ -57,9 +68,9 @@ test('An outage of the common server blocks new sending and fetching; restore pe
  s.net.toggleNode('mail');assert(s.repeat());finish(s);assert.equal(s.status,'success');assert.equal(s.net.mail.boxes.friend.length,1);
 });
 test('A lost submission acknowledgement retains accepted mail and explicit repeat does not duplicate this model ID',()=>{
- const s=new Simulation();assert(s.start('mail-send',draft('laptop','phone')));until(s,()=>s.mail.entry?.accepted);s.net.clearNat('home');finish(s);assert.equal(s.status,'failed');assert.equal(s.net.mail.boxes.phone.length,1);
+ const s=new Simulation();assert(s.start('mail-send',draft()));until(s,()=>s.mail.entry?.accepted);s.net.clearNat('home');finish(s);assert.equal(s.status,'failed');assert.equal(s.net.mail.boxes.friend.length,1);
  assert.equal(s.net.phishing.clients.laptop.sent.length,0,'A stored server message is not yet a confirmed local sent copy');
- assert(s.repeat());finish(s);assert.equal(s.status,'success');assert.equal(s.net.mail.boxes.phone.length,1);assert.equal(s.net.mail.deliveries.size,1);
+ assert(s.repeat());finish(s);assert.equal(s.status,'success');assert.equal(s.net.mail.boxes.friend.length,1);assert.equal(s.net.mail.deliveries.size,1);
  assert.equal(s.net.phishing.clients.laptop.sent.length,1);assert.equal(s.net.phishing.clients.laptop.sent[0].body,draft().body);
 });
 test('IMAP SELECT precedes FETCH, with no local update until all response bytes arrive',()=>{

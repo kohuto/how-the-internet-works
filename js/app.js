@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const {Network,Simulation,NetworkMap,DEFAULT_MESSAGE,formatPackets,messagePreview,requestText,esc,computerView}=globalThis.InternetLab;
+  const {Network,Simulation,NetworkMap,DEFAULT_MESSAGE,formatPackets,messagePreview,requestText,esc,computerView,fixedMailRecipient}=globalThis.InternetLab;
   const ANIMATION_DELAY=650;
   const $=s=>document.querySelector(s),encoder=new TextEncoder();
   let net=new Network(new globalThis.InternetLab.LabSettings()),sim=new Simulation(net),timer=null,playing=false,toastTimer=null;
@@ -11,7 +11,7 @@
     const ui={selection:{kind:'node',id:'laptop'},tab:'desktop',hackerTab:'desktop',attackTarget:'laptop',friendTab:'desktop',friendAddress:'knihovna.test',cabinTab:'desktop',cabinAddress:'knihovna.test',cabinMessage:DEFAULT_MESSAGE,cabinMessageType:'text',phoneTab:'desktop',phoneAddress:'knihovna.test',phoneMessage:DEFAULT_MESSAGE,phoneMessageType:'text',messageType:'text',monitorDevice:'laptop',monitorOpen:false,deviceOpen:false,linkOpen:false,packetOpen:false,packetResume:false,address:'knihovna.test',document:'Poznámky k projektu.pdf',message:DEFAULT_MESSAGE,scene:'home'};
     ui.friendMessage='';ui.friendMessageType='text';
     ui.cafeTab='desktop';ui.cafeAttackerTab='desktop';ui.cafeAddress='http://knihovna.test';
-    ui.mailComposer=Object.fromEntries(globalThis.InternetLab.PHISH_CLIENTS.map(id=>[id,{tab:'inbox',target:id!=='friend'&&net.nodeAvailable('friend')&&net.nodeAvailable('mail')?'friend':'laptop',subject:'',body:'',search:'',composeOpen:false,sentId:null}]));
+    ui.mailComposer=Object.fromEntries(globalThis.InternetLab.PHISH_CLIENTS.map(id=>[id,{tab:'inbox',target:fixedMailRecipient(id)||(net.nodeAvailable('friend')&&net.nodeAvailable('mail')?'friend':'laptop'),subject:'',body:'',search:'',composeOpen:false,sentId:null}]));
     ui.connectionDrafts={};
     ui.authDraft=Object.fromEntries(Object.keys(globalThis.InternetLab.PRIVACY_OWNERS).map(device=>[device,{mode:'login',username:device==='friend'?'matej':device==='cafe'?'host':'alex',email:'novy@knihovna.test',password:'KNIHOVNA-DEMO'}]));
     ui.privacyOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
@@ -61,7 +61,7 @@
     const resume=ui.packetOpen&&ui.packetResume;
     ui.deviceOpen=false;ui.linkOpen=false;ui.packetOpen=false;ui.packetResume=false;render();
     const source=ui.selection.kind==='link'?net.links[ui.selection.id]?.a:null;
-    ($(`#network-map [data-map-kind="${ui.selection.kind}"][data-id="${ui.selection.id}"]`)||(source&&$(`#network-map [data-map-kind="node"][data-id="${source}"]`))||$('#packet-detail')).focus({preventScroll:true});
+    ($(`#network-map [data-map-kind="${ui.selection.kind}"][data-id="${ui.selection.id}"]`)||(source&&$(`#network-map [data-map-kind="node"][data-id="${source}"]`))||$('#open-settings')).focus({preventScroll:true});
     if(resume)resumePlayback();
   }
   function openComputerApp(app) {
@@ -337,8 +337,6 @@
     $('#run-dot').className=`status-dot ${sim.status}`;
     $('#play').disabled=ui.packetOpen||sim.status!=='running';$('#play').innerHTML=playing?'Ⅱ <span>Pauza</span>':'▶ <span>Přehrát</span>';$('#play').setAttribute('aria-label',playing?'Pozastavit přenos':'Přehrát přenos');
     $('#step').disabled=ui.packetOpen||sim.status!=='running'||sim.auth.working;$('#repeat').disabled=ui.packetOpen||!sim.lastAction;
-    const activePacket=ui.selection.kind==='packet'?ui.selection.id:current?.packet?.id;
-    $('#packet-detail').disabled=ui.packetOpen||!activePacket;
     $('#signal-coverage-control').hidden=!net.visibleNodes().some(n=>['ap','bts','satellite'].includes(n.type));
     map.render(current,ui.selection,ui.selection.kind==='packet'?ui.selection.id:null,animate,ANIMATION_DELAY,sim.packets,sim.frame);
   }
@@ -397,7 +395,7 @@
       return;
     }
     if(form==='auth'){const d=ui.authDraft[ui.monitorDevice],address='https://knihovna.test';ui[addressKey(ui.monitorDevice)]=address;if(!sim.auth.validate({...d,device:ui.monitorDevice,address,authOp:d.mode})){notify('Použij jméno o 3–24 znacích (a–z, číslice, _ nebo -), heslo o 4–80 znacích a fiktivní e-mail končící .test.');return;}startAction('web',{address,authOp:d.mode,username:d.username,password:d.password,...(d.mode==='register'?{email:d.email}:{})});return;}
-    if(form==='mail-send'){const {target,subject,body}=ui.mailComposer[ui.monitorDevice];startMail('mail-send',{target,subject,body});return;}
+    if(form==='mail-send'){const {target,subject,body}=ui.mailComposer[ui.monitorDevice];startMail('mail-send',{target:fixedMailRecipient(ui.monitorDevice)||target,subject,body});return;}
     if(form==='phish-login'){const b=net.browserFor(ui.monitorDevice);ui[addressKey(ui.monitorDevice)]=`${b.loadedSecure?'https':'http'}://knihovna-podpora.test/overeni${b.loadedMessageId?'?zprava='+b.loadedMessageId:''}`;startAction('web',{method:'POST',phishLogin:true});
     }else if(form==='web-message') {
       const device=ui.monitorDevice,b=net.browserFor(device),address=b.loadedSecure?'https://knihovna.test':'http://knihovna.test';
@@ -457,7 +455,7 @@
       if(action==='compose'){if(sim.status==='running'&&sim.action?.type==='mail-send'&&sim.clientId()===ui.monitorDevice)return;Object.assign(d,{composeOpen:true,justSent:false});}
       if(action==='close-compose')clearMailComposer();
       if(action==='back'){d.sentId=null;c.opened=false;}
-      if(action==='reply'){if(sim.status==='running'||!c.inbox||!globalThis.InternetLab.PHISH_CLIENTS.includes(c.inbox.source))return;if(d.composeOpen&&(d.subject||d.body)){d.composeOpen=true;notify('Nejprve dokonči nebo zavři rozepsanou zprávu.');render();return;}Object.assign(d,{target:c.inbox.source,subject:(/^Re:/i.test(c.inbox.subject)?c.inbox.subject:'Re: '+c.inbox.subject).slice(0,100),body:'',composeOpen:true,justSent:false});}
+      if(action==='reply'){if(sim.status==='running'||!c.inbox||!globalThis.InternetLab.PHISH_CLIENTS.includes(c.inbox.source)||fixedMailRecipient(ui.monitorDevice)&&c.inbox.source!==fixedMailRecipient(ui.monitorDevice))return;if(d.composeOpen&&(d.subject||d.body)){d.composeOpen=true;notify('Nejprve dokonči nebo zavři rozepsanou zprávu.');render();return;}Object.assign(d,{target:c.inbox.source,subject:(/^Re:/i.test(c.inbox.subject)?c.inbox.subject:'Re: '+c.inbox.subject).slice(0,100),body:'',composeOpen:true,justSent:false});}
       render();if(['compose','reply'].includes(action))$('[data-mail-field="subject"]')?.focus({preventScroll:true});return;
     }
     if(b.dataset.gmailSent){ui.mailComposer[ui.monitorDevice].sentId=b.dataset.gmailSent;render();return;}
@@ -535,7 +533,6 @@
   $('#zoom-in').addEventListener('click',()=>map.zoom(.78));$('#zoom-out').addEventListener('click',()=>map.zoom(1.28));
   $('#labels').addEventListener('change',e=>{map.labels=e.target.checked;map.render();});
   $('#signal-coverage').addEventListener('change',e=>{map.signalCoverage=e.target.checked;map.render();});
-  $('#packet-detail').addEventListener('click',()=>{const p=ui.selection.kind==='packet'?ui.selection.id:sim.current?.packet?.id;if(p)select('packet',p);});
   $('#step').addEventListener('click',()=>{stop();advance();});
   $('#play').addEventListener('click',()=> {
     if(playing){stop();render();}

@@ -5,6 +5,7 @@
   const {ModelTLS,PHISH_CLIENTS,emailFor,mailTemplate}=globalThis.InternetLab;
   const encoder=new TextEncoder(),decoder=new TextDecoder(),CHUNK=192;
   const serverFor=()=>'mail';
+  const fixedMailRecipient=device=>device==='laptop'?'friend':device==='friend'?'laptop':null;
   const domainOf=address=>address.split('@')[1];
   const mailWire=m=>`Message-ID: <${m.id}@${domainOf(m.from)}>\r\nFrom: ${m.from}\r\nTo: ${m.to}\r\nSubject: ${m.subject}\r\n\r\n${m.body.replace(/\r?\n/g,'\r\n').replace(/^\./gm,'..')}\r\n.\r\n`;
   class MailScenario {
@@ -19,7 +20,7 @@
     validate(type,p){
       if(type==='phish-send')return p.device==='hacker'&&PHISH_CLIENTS.includes(p.target);
       if(!PHISH_CLIENTS.includes(p.device))return false;
-      if(type==='mail-send')return PHISH_CLIENTS.includes(p.target)&&typeof p.subject==='string'&&p.subject.trim().length>0&&p.subject.length<=100&&typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200;
+      if(type==='mail-send')return PHISH_CLIENTS.includes(p.target)&&(!fixedMailRecipient(p.device)||p.target===fixedMailRecipient(p.device))&&typeof p.subject==='string'&&p.subject.trim().length>0&&p.subject.length<=100&&typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200;
       if(type==='mail-seen')return this.net.phishing.clients[p.device].items.some(m=>String(m.id)===String(p.messageId));
       return type==='mail-check';
     }
@@ -169,5 +170,5 @@
       if(s.action.type==='phish-send')Object.assign(this.net.phishing.hacker,{state:'error',notice:reason+' Pokud server zprávu už převzal, zůstává u něj.'});return false;
     }
   }
-  Object.assign(globalThis.InternetLab,{MailScenario,mailServerFor:serverFor,mailWire});
+  Object.assign(globalThis.InternetLab,{MailScenario,mailServerFor:serverFor,mailWire,fixedMailRecipient});
 })();

@@ -12,9 +12,9 @@
 .browser-tab-select span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .browser-tab-close{display:grid;place-items:center;width:24px;height:26px;padding:4px;border:0;border-radius:5px;background:none;flex-shrink:0}
 .browser-tab-close svg{width:13px;height:13px}
-.browser-tab-close:hover,.browser-icon:hover,.browser-minimize:hover{background:#dce6d8}
+.browser-tab-close:hover,.browser-icon:hover,.browser-close:hover{background:#dce6d8}
 .browser-icon{display:inline-grid;place-items:center;width:30px;height:30px;padding:5px;flex-shrink:0;border:0;border-radius:6px;background:none}
-.browser-minimize{margin-left:auto;align-self:start;width:29px;height:28px;border:0;border-radius:5px;background:none;font-size:19px;flex-shrink:0}
+.browser-close{display:grid;place-items:center;padding:4px;margin-left:auto;align-self:start;width:29px;height:28px;border:0;border-radius:5px;background:none;font-size:19px;flex-shrink:0}
 .browser-toolbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:5px;padding:6px 7px}
 .browser-history{display:flex;gap:1px}
 .browser-address{display:flex;align-items:center;gap:3px;min-width:0;border:1px solid #d3ded0;border-radius:22px;background:#fffef9;padding:2px 5px;margin:0}

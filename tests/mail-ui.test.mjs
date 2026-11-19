@@ -32,3 +32,23 @@ test('Search filters local messages and all displayed subjects, content and comp
   Object.assign(ui.mailComposer.friend,{composeOpen:true,subject:'" onfocus="alert(1)',body:'</textarea><script>alert(1)</script>'});
   const compose=mailApp(s.net,s,ui,'friend');assert(compose.includes('&quot; onfocus=&quot;'));assert(compose.includes('&lt;/textarea&gt;'));assert(!compose.includes('<script>'));
 });
+
+test('Notebook composers display a fixed recipient, including when the destination is switched off',()=>{
+  const s=create();
+  for(const [device,target,address] of [['laptop','friend','matej@gmail.com'],['friend','laptop','ty@gmail.com']]){
+    s.net.toggleNode(target);
+    const html=mailApp(s.net,s,state(device,{composeOpen:true,target:'phone'}),device);
+    assert(html.includes(`<span class="gmail-recipient">${address}</span>`));
+    assert(!html.includes('data-mail-field="target"'));assert(!html.includes('<select'));
+    s.net.toggleNode(target);
+  }
+});
+test('Reply is offered only when the notebook can send back to that sender',()=>{
+  const s=create();
+  for(const [device,source] of [['laptop','friend'],['friend','laptop']]){
+    const c=s.net.phishing.clients[device];c.opened=true;
+    c.inbox={subject:'Pozdrav',body:'Ahoj',fromName:'Odesílatel',from:'ukazka@gmail.com',to:'prijemce@gmail.com',seen:true,source};
+    assert(mailApp(s.net,s,state(device),device).includes('data-gmail-action="reply"'));
+    c.inbox.source='phone';assert(!mailApp(s.net,s,state(device),device).includes('data-gmail-action="reply"'));
+  }
+});

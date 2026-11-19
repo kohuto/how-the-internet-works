@@ -232,7 +232,8 @@
         return `<g transform="translate(${n.x},${n.y})" data-map-kind="node" data-id="${n.id}" tabindex="0" role="button" aria-label="${esc(name)} · ${n.on?'zapnuto':'vypnuto'}" class="map-node node-${displayType} node-${n.id} ${n.on?'':'off'} ${n.type==='terminal'&&!this.net.satellite.clearView?'obstructed':''} ${chosen?'selected':''} ${n.id==='chatbot'&&this.net.chatbot.server.state==='processing'&&n.on?'computing':''}"><title>${esc(name)} · otevřít zařízení</title><circle class="node-halo" r="43"/><g class="device-icon">${icon}</g>${!n.on?'<g class="power-off"><circle cx="25" cy="-25" r="10"/><path d="m21-29 8 8m0-8-8 8"/></g>':''}<g class="node-label"><text class="device-name" text-anchor="middle" y="${below}">${esc(name)}</text></g>${n.id==='laptop'?'<circle class="you-dot" cx="29" cy="-22" r="5"/>':''}</g>`;
       }).join('');
       const layer=this.svg.querySelector('#packet-layer'),visible=new Map();
-      for(const p of packets.values())if(p.state==='transit'||(p.state==='lost'&&event?.packet?.id===p.id)||selectedPacket===p.id) {
+      // Inspecting a packet must not keep its marker after delivery.
+      for(const p of packets.values())if(p.state==='transit'||(p.state==='lost'&&event?.packet?.id===p.id)) {
         visible.set(p.id,{p,visual:p.visual||{kind:'origin',node:p.location}});
       }
       // A switch can send an extra copy to a different port while forwarding the same packet.
