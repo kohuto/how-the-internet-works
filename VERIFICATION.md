@@ -2,6 +2,14 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Rozbalovací schránky a celé zprávy na serveru — 19. listopadu 2026, v124
+
+Detail Gmailu používá nativní rozbalovací schránky s adresou účtu a počtem zpráv. Po rozbalení se zobrazí zprávy s předmětem a odesílatelem; každá se rozbaluje na adresáty, serverový stav přečtení a celý text se zachovanými řádky. Případný odkaz se vypíše bezpečně jako text. Schránky i zprávy začínají sbalené. Stabilní klíče podle schránky a UID zachovávají otevřené položky při překreslení. Nadpis je Schránky na serveru a odstraněn duplicitní souhrn přijatých zpráv. Prohlížení přímo čte uložené schránky, nevytváří přenosy, nenačítá klientskou kopii a nemění přečtení. Prostředky v124.
+
+Prošlo všech 310 automatických testů, včetně 22 cílených testů poštovního modelu a rozhraní. Dva nové testy ověřují serverový obsah až po přijetí SMTP, zobrazení před načtením do vypnutého klienta, zachování příznaků i probíhajícího přenosu, oddělené klíče zpráv různých schránek a bezpečné escapování předmětu, těla i odkazu. Syntaxe js/mail-ui.js bez chyb.
+
+V prohlížeči při 1074 × 858 px ověřeny dvě výchozí sbalené schránky a rozbalení prázdné schránky. Skutečný e-mail byl dostupný k otevření na serveru po 132 krocích ještě za běžícího SMTP, přičemž místní schránka příjemce zůstala prázdná. Kliknutí na schránku a zprávu zachovalo počet paketů, záznamů, pokus i příznak nepřečtení. Otevření přežilo další kroky, dokončení přenosu i vypnutí serveru. Při doručení druhé zprávy se stejným předmětem zůstala první otevřená a nová byla samostatně sbalená; Enter otevřel druhou, obě zůstaly nepřečtené. Při 320 × 844 px ověřeno všech pět schránek a otevřená připravená dlouhá zpráva s dlouhou URL, bez vodorovného přetékání stránky i detailu. Konzole bez chyb a varování.
+
 ## Volitelné služby webu a detail Gmailu bez adres — 19. listopadu 2026, v123
 
 Řádek Služby v detailu webového serveru je v základním zobrazení skrytý. Zobrazuje se až při zapnutí podrobnosti IP a TCP hlavička; obsah dál odpovídá zapnutí TLS / HTTPS. Z detailu poštovního serveru Gmail odstraněn řádek IP adresa a skryt řádek MAC adresa; IP v mapě a adresy přenosů zůstávají. Prostředky v123.
