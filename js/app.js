@@ -12,7 +12,6 @@
     ui.friendMessage='';ui.friendMessageType='text';
     ui.cafeTab='desktop';ui.cafeAttackerTab='desktop';ui.cafeAddress='http://knihovna.test';
     ui.mailComposer=Object.fromEntries(globalThis.InternetLab.PHISH_CLIENTS.map(id=>[id,{tab:'inbox',target:id!=='friend'&&net.nodeAvailable('friend')&&net.nodeAvailable('mail')?'friend':'laptop',subject:'',body:'',search:'',composeOpen:false,sentId:null}]));
-    ui.mailDialogue={};
     ui.connectionDrafts={};
     ui.authDraft=Object.fromEntries(Object.keys(globalThis.InternetLab.PRIVACY_OWNERS).map(device=>[device,{mode:'login',username:device==='friend'?'matej':device==='cafe'?'host':'alex',email:'novy@knihovna.test',password:'KNIHOVNA-DEMO'}]));
     ui.privacyOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
@@ -457,7 +456,6 @@
       const d=ui.mailComposer[ui.monitorDevice],c=net.phishing.clients[ui.monitorDevice],action=b.dataset.gmailAction;
       if(action==='compose'){if(sim.status==='running'&&sim.action?.type==='mail-send'&&sim.clientId()===ui.monitorDevice)return;Object.assign(d,{composeOpen:true,justSent:false});}
       if(action==='close-compose')clearMailComposer();
-      if(action==='details')d.details=!d.details;
       if(action==='back'){d.sentId=null;c.opened=false;}
       if(action==='reply'){if(sim.status==='running'||!c.inbox||!globalThis.InternetLab.PHISH_CLIENTS.includes(c.inbox.source))return;if(d.composeOpen&&(d.subject||d.body)){d.composeOpen=true;notify('Nejprve dokonči nebo zavři rozepsanou zprávu.');render();return;}Object.assign(d,{target:c.inbox.source,subject:(/^Re:/i.test(c.inbox.subject)?c.inbox.subject:'Re: '+c.inbox.subject).slice(0,100),body:'',composeOpen:true,justSent:false});}
       render();if(['compose','reply'].includes(action))$('[data-mail-field="subject"]')?.focus({preventScroll:true});return;
@@ -515,7 +513,6 @@
   }
   for(const root of [$('#monitor-overlay'),$('#device-overlay')]) {
     root.addEventListener('input',handleInput);
-    root.addEventListener('toggle',e=>{if(e.target.dataset.mailDialogue)ui.mailDialogue[e.target.dataset.mailDialogue]=e.target.open;},true);
     root.addEventListener('change',e=>{
       if(e.target.hasAttribute('data-mitm-active')||e.target.hasAttribute('data-mitm-mode')){if(sim.status==='running')return;sim.mitm.configure(e.target.hasAttribute('data-mitm-active')?e.target.checked:net.mitm.active,e.target.hasAttribute('data-mitm-mode')?e.target.value:net.mitm.mode);render();return;}
       if(e.target.hasAttribute('data-attack-target')){ui.attackTarget=e.target.value;render();return;}
@@ -556,7 +553,6 @@
     if(ui.monitorOpen&&$('.gmail-application')){
       const draft=ui.mailComposer[ui.monitorDevice];
       if(e.key==='Escape'&&draft.composeOpen){e.preventDefault();clearMailComposer();render();$('[data-gmail-action="compose"]')?.focus({preventScroll:true});return;}
-      if(e.key==='Escape'&&draft.details){e.preventDefault();draft.details=false;render();$('[data-gmail-action="details"]')?.focus({preventScroll:true});return;}
       if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&e.target.closest('.gmail-compose-form')){e.preventDefault();const form=e.target.closest('form');if(!form.querySelector('[type="submit"]').disabled)form.requestSubmit();return;}
     }
     if(ui.monitorOpen&&e.target.matches?.('.ig-compose textarea')&&e.key==='Enter'&&!e.shiftKey&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.isComposing) {

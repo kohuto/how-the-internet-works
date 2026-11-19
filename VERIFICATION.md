@@ -1,6 +1,12 @@
 # Záznam ověření
 
-Poslední ověření 18. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
+Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
+
+## Drobné úpravy Gmailu a nastavení — 19. listopadu 2026, v114
+
+Rozšíření E-mail (Gmail) přejmenováno na E-mail. Z postranního panelu klienta odstraněna adresa účtu a z horní lišty tlačítko Podrobnosti přenosu včetně jeho panelu, souvisejících obsluh a nepoužívaných stylů. Předmět a text nové zprávy již při zaměření nemají modré ohraničení. Aktualizována dokumentace a verze prostředků v114.
+
+Ověřena syntaxe settings.js, mail-ui.js a app.js a všechny tři existující testy rozhraní pošty (viditelnost až po IMAP načtení, Odeslané až po SMTP potvrzení, místní hledání a escapování obsahu). V prohlížeči potvrzen název E-mail, chybějící adresa v postranním panelu i tlačítko a panel podrobností. Při 857 × 743 px obě textová pole i ve stavu focus-visible mají outline-style none, nulový okraj a žádný box-shadow; stránka nepřetéká vodorovně. Konzole bez chyb a varování.
 
 ## Gmail bez konceptů — 18. listopadu 2026, v113
 

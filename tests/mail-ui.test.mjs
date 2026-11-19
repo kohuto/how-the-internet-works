@@ -2,7 +2,7 @@ import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';imp
 import test from 'node:test';import assert from 'node:assert/strict';
 const {Network,LabSettings,Simulation,mailApp}=globalThis.InternetLab;
 const create=()=>new Simulation(new Network(new LabSettings({features:['mail']})));
-const state=(device,extra={})=>({mailComposer:{[device]:{tab:'inbox',target:device==='friend'?'laptop':'friend',subject:'',body:'',...extra}},mailDialogue:{}});
+const state=(device,extra={})=>({mailComposer:{[device]:{tab:'inbox',target:device==='friend'?'laptop':'friend',subject:'',body:'',...extra}}});
 function finish(s){for(let i=0;i<2000&&s.status==='running';i++)s.advanceFrame();assert.equal(s.status,'success',s.current?.description);}
 function send(s,subject,body){assert(s.start('mail-send',{device:'laptop',target:'friend',subject,body}));finish(s);}
 

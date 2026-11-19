@@ -13,7 +13,7 @@
     {id:'cookies',group:'services',label:'Cookies',description:'Rozpoznání prohlížeče, záznamy návštěv a cookies přihlašovacích relací.'},
     {id:'wifi',group:'services',label:'Wi-Fi v bytě na Lipové',description:'Bezdrátové připojení notebooku a telefonu.',nodes:['ap']},
     {id:'phone',group:'services',label:'Telefon',description:'Telefon s prohlížečem a dalšími zapnutými aplikacemi.',requires:['wifi'],nodes:['phone']},
-    {id:'mail',group:'services',label:'E-mail (Gmail)',description:'Společná poštovní služba pro tebe a Matěje. Odesílání zpráv a schránky uložené na serveru.',requires:['friend'],nodes:['mail']},
+    {id:'mail',group:'services',label:'E-mail',description:'Společná poštovní služba pro tebe a Matěje. Odesílání zpráv a schránky uložené na serveru.',requires:['friend'],nodes:['mail']},
     {id:'instagram',group:'services',label:'Instagram',description:'Zprávy mezi tebou a Matějem přes vzdálený server.',requires:['friend'],regions:['instagram']},
     {id:'cloud',group:'services',label:'Cloud',description:'Ukládání, stahování a sdílení souborů.',regions:['cloud']},
     {id:'replica',group:'services',label:'Záložní cloud',description:'Druhé datové centrum a kopírování souborů mezi centry.',requires:['cloud'],regions:['replica']},
