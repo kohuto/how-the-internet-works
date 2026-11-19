@@ -27,7 +27,7 @@
   const wirelessMedia=new Set(Object.values(signalStyles).map(s=>s.medium));
   const {MAP_LAYOUT}=globalThis.InternetLab;
   const bounds=(regions,nodes=[])=>{
-    const boxes=[...regions.map(id=>MAP_LAYOUT.bounds[id]),...nodes.map(n=>[n.x-65,n.y-55,130,125])],x=Math.min(...boxes.map(b=>b[0])),y=Math.min(...boxes.map(b=>b[1]));
+    const boxes=[...regions.map(id=>{const [x,y,w,h]=MAP_LAYOUT.bounds[id];return [x,y,w,h+32];}),...nodes.map(n=>[n.x-65,n.y-55,130,155])],x=Math.min(...boxes.map(b=>b[0])),y=Math.min(...boxes.map(b=>b[1]));
     return [x,y,Math.max(...boxes.map(b=>b[0]+b[2]))-x,Math.max(...boxes.map(b=>b[1]+b[3]))-y];
   };
   const presets={home:[35,270,465,440],city:[480,100,1720,1140],all:bounds(Object.keys(MAP_LAYOUT.bounds)),ads:bounds(['partners']),mail:bounds(['dc']),dc:bounds(['dc']),friend:bounds(['friend']),mobile:bounds(['home','mobile']),cafe:bounds(['cafe']),vpn:bounds(['vpn']),hacker:bounds(['hacker']),satellite:bounds(['cabin','satellite'])};
@@ -225,11 +225,11 @@
         return `<g class="map-link medium-${l.medium} ${active?'':'offline'} ${unused?'unused':''} ${selected?.kind==='link'&&selected.id===l.id?'selected':''} ${active&&vpnLinks.has(l.id)?'vpn-route':''} ${active&&['cafe-twin','cafe-relay'].includes(l.id)?'mitm-route':''}" data-map-kind="link" data-id="${l.id}" role="button" aria-label="${esc(this.net.displayLinkName(l))} · ${unused?'nevybrané připojení':active?'spojeno':'nedostupné'}" tabindex="0"><title>${esc(this.net.displayLinkName(l))} · otevřít detail</title><path class="link-hit" d="M${a.x},${a.y}L${b.x},${b.y}"/><path class="link-line" d="M${a.x},${a.y}L${b.x},${b.y}"/>${label}${!active&&!unused?`<g transform="translate(${x},${y})" class="cut-mark"><circle r="10"/><path d="m-4-4 8 8m0-8-8 8"/></g>`:''}</g>`;
       }).join('');
       this.svg.querySelector('#nodes-layer').innerHTML=this.net.visibleNodes().map(n=> {
-        const displayType=this.net.displayType(n),name=this.net.displayName(n);
+        const displayType=this.net.displayType(n),name=this.net.displayName(n),ip=this.net.displayIp(n);
         const icon=displayType==='junction'?icons.junction:icons[n.id]||icons[n.type]||icons.server;
         const chosen=selected?.kind==='node'&&selected.id===n.id;
         const below=n.id==='friend-home'?72:n.id==='printer'?49:n.id==='dns'||n.id==='web'||n.id==='chatbot'||n.id==='instagram'?53:48;
-        return `<g transform="translate(${n.x},${n.y})" data-map-kind="node" data-id="${n.id}" tabindex="0" role="button" aria-label="${esc(name)} · ${n.on?'zapnuto':'vypnuto'}" class="map-node node-${displayType} node-${n.id} ${n.on?'':'off'} ${n.type==='terminal'&&!this.net.satellite.clearView?'obstructed':''} ${chosen?'selected':''} ${n.id==='chatbot'&&this.net.chatbot.server.state==='processing'&&n.on?'computing':''}"><title>${esc(name)} · otevřít zařízení</title><circle class="node-halo" r="43"/><g class="device-icon">${icon}</g>${!n.on?'<g class="power-off"><circle cx="25" cy="-25" r="10"/><path d="m21-29 8 8m0-8-8 8"/></g>':''}<g class="node-label"><text class="device-name" text-anchor="middle" y="${below}">${esc(name)}</text></g>${n.id==='laptop'?'<circle class="you-dot" cx="29" cy="-22" r="5"/>':''}</g>`;
+        return `<g transform="translate(${n.x},${n.y})" data-map-kind="node" data-id="${n.id}" tabindex="0" role="button" aria-label="${esc(name)}${ip?` · ${esc(ip)}`:''} · ${n.on?'zapnuto':'vypnuto'}" class="map-node node-${displayType} node-${n.id} ${n.on?'':'off'} ${n.type==='terminal'&&!this.net.satellite.clearView?'obstructed':''} ${chosen?'selected':''} ${n.id==='chatbot'&&this.net.chatbot.server.state==='processing'&&n.on?'computing':''}"><title>${esc(name)}${ip?` · ${esc(ip)}`:''} · otevřít zařízení</title><circle class="node-halo" r="43"/><g class="device-icon">${icon}</g>${!n.on?'<g class="power-off"><circle cx="25" cy="-25" r="10"/><path d="m21-29 8 8m0-8-8 8"/></g>':''}<g class="node-label"><text class="device-name" text-anchor="middle" y="${below}">${esc(name)}</text>${ip?`<text class="device-ip" text-anchor="middle" y="${below+16}">${esc(ip)}</text>`:''}</g>${n.id==='laptop'?'<circle class="you-dot" cx="29" cy="-22" r="5"/>':''}</g>`;
       }).join('');
       const layer=this.svg.querySelector('#packet-layer'),visible=new Map();
       // Inspecting a packet must not keep its marker after delivery.

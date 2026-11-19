@@ -75,9 +75,9 @@ test('No connection needs a long stretch across the map',()=>{
   assert.deepEqual(long.map(l=>l.id),[]);
 });
 
-test('The full, base and individual extension camera bounds contain every visible device',()=>{
+test('The full, base and individual extension camera bounds contain devices and their two-line labels',()=>{
   for(const settings of [new LabSettings(),LabSettings.full(),...LAB_FEATURES.map(f=>new LabSettings({features:[f.id]}))]){
     const net=new Network(settings),[x,y,w,h]=NetworkMap.prototype.networkBounds.call({net});
-    for(const n of net.visibleNodes())assert(n.x-43>=x&&n.x+43<=x+w&&n.y-43>=y&&n.y+43<=y+h,`${n.id} must remain in the fitted view`);
+    for(const n of net.visibleNodes())assert(n.x-43>=x&&n.x+43<=x+w&&n.y-43>=y&&n.y+96<=y+h,`${n.id} and its label must remain in the fitted view`);
   }
 });

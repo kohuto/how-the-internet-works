@@ -2,6 +2,14 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## IP adresy pod názvy zařízení v mapě — 19. listopadu 2026, v120
+
+Pod názvy koncových zařízení a routerů přidán menší, méně výrazný řádek s jednou IPv4 adresou. Router přednostně ukazuje svou připravenou adresu, jinak adresu jednoho rozhraní do zapnuté části sítě. Adresa zůstává zobrazená při vypnutí zařízení či odpojení spoje. Chytré křižovatky představující switche dostávají odlišné schematické adresy ze své LAN s vynecháním již použitých adres; tyto adresy se nestávají IP rozhraními switchů. Zapnutí Routery a switche je u switchů skryje. IP koncových zařízení sleduje aktuální kabelové, Wi-Fi či mobilní připojení. Wi-Fi body, BTS, anténa a satelit vlastní adresu v modelu nemají. Popisky skrývají jméno i IP společně; adresa je také v přístupném názvu zařízení. Rozšířeny okraje výřezů pro druhý řádek. Prostředky v120.
+
+Prošlo všech 308 automatických testů. Dva nové testy ověřují platné odlišné adresy v základní, úplné a každé samostatné volitelné sestavě, skutečné adresy rozhraní routerů, skrytí u switchů, aktualizaci klientů, stabilitu při výpadcích a zachování původních IP rozhraní switchů. Po úpravě okrajů znovu prošlo všech 22 testů prezentace křižovatek, mapy, gest a paketů; geometrický test nově zahrnuje prostor pro oba řádky. Syntaxe obou změněných skriptů bez chyb.
+
+V prohlížeči při 1053 × 858 px ověřeny menší IP v základu, všech 75 adres v úplné zjednodušené mapě bez duplicit a bez chybějící adresy křižovatky; po rozlišení zařízení bez IP u switchů a s adresou u každého routeru. Přechod notebooku na Wi-Fi aktualizoval popisek na 192.168.10.11. Přepnutí podrobností během webového přenosu zachovalo stejné objekty modelu, paketů i aktuální události; přenos úspěšně doběhl za dalších 137 kroků. Vypnutý router ponechal svou adresu. Popisky skryly a obnovily oba řádky. V detailním výřezu hostingu se dolní popisky Gmailu a serveru cykloservisu vešly celé. Při 320 × 844 px názvy i IP tří domácích zařízení uvnitř mapy, bez vodorovného přetékání. Konzole bez chyb a varování.
+
 ## Detail webového serveru bez seznamu portů — 19. listopadu 2026, v119
 
 Z detailu serveru knihovny odstraněn seznam portů s řádkem eth0 a názvem připojeného zařízení. Odstraněna také nepotřebná výjimka pro tento server ve společném vykreslování portů. IP a MAC adresy, služby, pravidlo HTTP cache, uložená stránka a poslední zpracovaný požadavek zůstávají dostupné. Prostředky v119.
