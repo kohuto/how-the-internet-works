@@ -79,8 +79,9 @@
 .gmail-compose-form label{display:flex;align-items:center;min-width:0;margin:0;color:#6e747c;font-size:11px}
 .gmail-compose-form input,.gmail-compose-form select,.gmail-compose-form textarea{width:100%;min-width:0;border:0;border-radius:0;padding:10px 0;background:#fff;color:#202124;box-shadow:none;font-size:12px}
 .gmail-compose-form input:focus,.gmail-compose-form textarea:focus{outline:none}
-.gmail-to{gap:13px;min-height:37px;border-bottom:1px solid #edf0f3}
+.gmail-to{display:flex;align-items:center;color:#6e747c;font-size:11px;gap:13px;min-height:37px;border-bottom:1px solid #edf0f3}
 .gmail-to select{flex:1;font-size:11px}
+.gmail-recipient{flex:1;min-width:0;padding:10px 0;color:#202124;overflow-wrap:anywhere}
 .gmail-subject{flex-shrink:0;min-height:39px;border-bottom:1px solid #edf0f3}
 .gmail-compose-form .gmail-message{align-items:stretch;flex:1;min-height:70px;padding-top:6px}
 .gmail-compose-form textarea{height:100%;min-height:60px;resize:none;font-size:12px;line-height:1.7}

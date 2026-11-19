@@ -24,6 +24,7 @@
 .ig-avatar.large{width:64px;height:64px;font-size:25px;outline-color:#eee}
 .ig-main{display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;overflow:hidden}
 .ig-contact{display:flex;align-items:center;gap:9px;position:relative;flex-shrink:0;min-height:62px;padding:10px 16px;border-bottom:1px solid var(--ig-line);background:#fff;z-index:3}
+.ig-contact .ig-close{margin-left:auto}
 .ig-contact-name{display:flex;flex-direction:column;gap:4px;min-width:0}
 .ig-contact-name strong{font-size:12px;font-weight:600}
 .ig-contact-name small{font-size:10px;color:var(--ig-muted)}
@@ -96,7 +97,6 @@
   .ig-contact .ig-avatar{width:29px;height:29px;font-size:11px}
   .ig-contact-name strong{font-size:11px}
   .ig-contact-name small{font-size:9px}
-  .instagram-app .ig-home{width:22px;padding:2px}
   .ig-conversation{padding:10px 11px}
   .ig-chat-intro>.ig-avatar.large{width:48px;height:48px;font-size:20px}
   .ig-chat-intro strong{font-size:14px}

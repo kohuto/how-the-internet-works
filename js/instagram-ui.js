@@ -4,7 +4,6 @@
   const {esc,MESSAGE_TYPES,formatBytes,messagePreview}=globalThis.InternetLab;
   const encoder=new TextEncoder();
   const paths={
-    back:'<path d="m14 5-7 7 7 7"/>',
     text:'<path d="M4 5h16M12 5v15m-4 0h8"/>',
     image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 6-6 4 4 3-3 5 5"/>',
     video:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/>',
@@ -19,7 +18,7 @@
 
   function contact(friend) {
     const name=friend?'Ty':'Matěj',handle=friend?'ty.na.lipove':'matej';
-    return `<header class="ig-contact"><button type="button" class="ig-icon-button ig-home" data-action="computer-home" aria-label="Zpět na plochu" title="Zpět na plochu">${icon('back')}</button>${avatar(friend)}<div class="ig-contact-name"><strong>${name}</strong><small>@${handle}</small></div></header>`;
+    return `<header class="ig-contact">${avatar(friend)}<div class="ig-contact-name"><strong>${name}</strong><small>@${handle}</small></div><button type="button" class="ig-icon-button ig-close" data-action="computer-home" aria-label="Zavřít Instagram" title="Zavřít Instagram">${icon('close')}</button></header>`;
   }
   function sidebar(net,friend,device) {
     const latest=visibleMessages(net,device).at(-1),preview=latest?.content.type==='text'?latest.text:latest?.content.name;

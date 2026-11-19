@@ -2,6 +2,12 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Pevní příjemci, křížky aplikací a životnost značek paketů — 19. listopadu 2026, v115
+
+Notebook na Lipové má pevného příjemce matej@gmail.com a Matějův notebook ty@gmail.com. Adresa je zobrazená jako needitovatelný text, odeslání v aplikaci ji odvozuje ze zařízení a model odmítá jiného příjemce. Odpovědět se nabízí pouze na zprávu od povoleného protějšku. Ostatní klienti si ponechávají výběr příjemce a phishingový scénář se nemění. Z detailu serveru Gmailu odstraněn řádek s portem a připojenou chytrou křižovatkou. Gmail má vlastní křížek, prohlížeč i obecná záhlaví aplikací používají křížek místo minimalizace a Instagram má křížek vpravo v záhlaví konverzace. Zavření vrací na plochu a neruší probíhající přenos. Odstraněno spodní tlačítko Prozkoumat paket, jeho obsluhy a styly; ovladače přehrávání zůstávají vpravo. Náhled nadále otevírá kliknutí na paket v mapě. Paket nemá obrys při zaměření. Dřívější výběr paketu jej již nepřidržuje na mapě po doručení. Aktualizována dokumentace a prostředky v115.
+
+Syntaxe upravených skriptů bez chyb, všech 304 testů prošlo. Přibyly testy omezení příjemců, statické adresy i při vypnutém příjemci, odpovídání a regrese vykreslování doručeného vybraného paketu. Poslední test před opravou reprodukoval chybu a po opravě prošel. Dřívější testy jiných zařízení i ztraceného SMTP potvrzení zachovávají pokrytí s povolenými adresami. V prohlížeči ověřeny obě pevné adresy, skutečné odeslání, načtení přes IMAP a příprava odpovědi; zpráva se doručila i po zavření Gmailu. Všech sedm aplikací na notebooku a Gmail či příslušná aplikace ostatních šesti zařízení se zavřely viditelným křížkem. V emulaci 320 × 844 px křížek Gmailu dostupný a pevný příjemce i okno zprávy bez vodorovného přetékání. Kliknutí na paket otevřelo náhled bez obrysu; po zavření náhledu a doručení vybraný paket okamžitě zmizel, na konci přenosu zůstala mapa bez značek paketů. Konzole bez chyb a varování.
+
 ## Drobné úpravy Gmailu a nastavení — 19. listopadu 2026, v114
 
 Rozšíření E-mail (Gmail) přejmenováno na E-mail. Z postranního panelu klienta odstraněna adresa účtu a z horní lišty tlačítko Podrobnosti přenosu včetně jeho panelu, souvisejících obsluh a nepoužívaných stylů. Předmět a text nové zprávy již při zaměření nemají modré ohraničení. Aktualizována dokumentace a verze prostředků v114.
