@@ -2,6 +2,14 @@
 
 Poslední ověření 19. listopadu 2026. Použité podmínky: lokální statické HTTP, prohlížeč v náhledu Codex a Node.js pro testy samotného modelu. Aplikace pro používání Node.js nepotřebuje.
 
+## Volitelné služby webu a detail Gmailu bez adres — 19. listopadu 2026, v123
+
+Řádek Služby v detailu webového serveru je v základním zobrazení skrytý. Zobrazuje se až při zapnutí podrobnosti IP a TCP hlavička; obsah dál odpovídá zapnutí TLS / HTTPS. Z detailu poštovního serveru Gmail odstraněn řádek IP adresa a skryt řádek MAC adresa; IP v mapě a adresy přenosů zůstávají. Prostředky v123.
+
+Ověřena syntaxe js/app.js a všechny čtyři kombinace TLS a zobrazení hlaviček v prohlížeči při 1074 × 858 px. Bez hlaviček chybí řádek služeb i při zapnutém TLS, s hlavičkami ukazuje HTTP na TCP/80 a po zapnutí TLS také HTTPS na TCP/443. Úložiště stránky, ovládání certifikátu a IP v mapě zůstávají dostupné podle příslušných voleb. Konzole bez chyb a varování.
+
+V prohlížeči při stejném rozlišení ověřen Gmail se samotným rozšířením E-mail i v úplné sestavě: v detailu chybí oba řádky adres, IP v mapě zůstává 203.0.113.40. Obě schránky, SMTP a IMAP jsou nadále dostupné. Syntaxe js/app.js a konzole bez chyb.
+
 ## Skryté pravidlo HTTP cache v detailu serveru — 19. listopadu 2026, v122
 
 Z detailu serveru knihovny skryt řádek Pravidlo HTTP cache. Cache-Control: no-store zůstává v modelových odpovědích a jejich textu, protože načtení webu vždy probíhá přes síť. Prostředky v122.
