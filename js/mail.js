@@ -1,5 +1,5 @@
-/* Local Gmail model: prepared TLS sessions, a short SMTP dialogue,
-   IMAP snapshots and flags. No real mail, sockets or credentials are used. */
+/* Local Gmail model: one protected request/reply per SMTP submission or IMAP
+   operation. No real mail, sockets or credentials are used. */
 (() => {
   'use strict';
   const {ModelTLS,PHISH_CLIENTS,MAIL_CLIENTS,emailFor,mailTemplate}=globalThis.InternetLab;
@@ -45,22 +45,23 @@
     }
     session(from,to,protocol,phase){
       const id=`mail-${this.sim.run}-${++this.#sessionSerial}`,tls=new ModelTLS(this.sim.run*100+this.#sessionSerial,from);tls.ready=true;
-      const session={id,from,to,protocol,phase,tls,index:0,requestSeq:1001,responseSeq:8001,lastRequest:null};this.#sessions.set(id,session);return session;
+      const session={id,from,to,protocol,phase,tls,requestSeq:1001,responseSeq:8001,lastRequest:null};this.#sessions.set(id,session);return session;
     }
     send(session,value,response=false){
       const s=this.sim,bytes=encoder.encode(JSON.stringify(value)),transfer=++this.#transfer,from=response?session.to:session.from,to=response?session.from:session.to;
       if(!this.net.nodes[from].on)return s.failure(`${this.net.nodes[from].name} je vypnutý.`,null,from);
       this.log(from,session,'out',value);
       const sequence=response?'responseSeq':'requestSeq',firstSeq=session[sequence],events=[];
+      const purpose=session.protocol==='SMTP'?(response?'potvrzení přijetí':'e-mail'):this.sim.action.type==='mail-seen'?(response?'potvrzení přečtení':'označení přečtení'):(response?'zprávy ze schránky':'žádost o zprávy');
       for(let position=0;position<bytes.length;position+=CHUNK){
         const data={transfer,length:bytes.length,bytes:Array.from(bytes.slice(position,position+CHUNK))},record=session.tls.seal('mail-chunk',data,to);
         const payload={record,mailSession:session.id};
         const kind=`${session.protocol.toLowerCase()}-${response?'response':'request'}`;
         const p=response?s.replyPacket(kind,session.lastRequest,payload):s.createPacket(kind,from,to,payload,{sport:session.protocol==='SMTP'?51006:51007,dport:session.protocol==='SMTP'?465:993});
-        p.connection=session.protocol.toLowerCase();p.label=`${session.protocol} · ${response?'odpověď':'požadavek'}${bytes.length>CHUNK?' '+(Math.floor(position/CHUNK)+1)+'/'+Math.ceil(bytes.length/CHUNK):''}`;
+        p.connection=session.protocol.toLowerCase();p.label=`${session.protocol} · ${purpose}${bytes.length>CHUNK?' '+(Math.floor(position/CHUNK)+1)+'/'+Math.ceil(bytes.length/CHUNK):''}`;
         p.seq=session[sequence];session[sequence]=(session[sequence]+record.data.length)>>>0;
         p.mailMeta={protocol:session.protocol,phase:session.phase,session:session.id,seq:p.seq,total:bytes.length,partBytes:data.bytes.length};
-        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+Math.floor(position/CHUNK)*s.packetGap(from,to),title:`${session.protocol} · příprava části ${Math.floor(position/CHUNK)+1} / ${Math.ceil(bytes.length/CHUNK)}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes společný server Gmailu.'}`});
+        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+Math.floor(position/CHUNK)*s.packetGap(from,to),title:`${session.protocol} · ${purpose}${bytes.length>CHUNK?` · část ${Math.floor(position/CHUNK)+1} / ${Math.ceil(bytes.length/CHUNK)}`:''}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes společný server Gmailu.'}`});
       }
       this.#buffers.set(session.id+':'+transfer,{length:bytes.length,stream:new globalThis.InternetLab.TCPReceiveStream(firstSeq,(session[sequence]-firstSeq)>>>0),chunks:new Map()});
       s.next(events);
@@ -71,21 +72,16 @@
       this.smtpCommand(session);
     }
     smtpCommand(session){
-      const m=this.entry.message,from=m.from;
-      const commands=[
-        {cmd:'MAIL',wire:`MAIL FROM:<${from}>`,say:'Chci odeslat e-mail. Toto je odesílatel.'},
-        {cmd:'RCPT',wire:`RCPT TO:<${m.to}>`,say:'Zpráva je pro tuto adresu.'},
-        {cmd:'DATA',wire:'DATA',say:'Mohu poslat obsah zprávy?'},
-        {cmd:'CONTENT',wire:mailWire(m),say:'Tady je hlavička a obsah e-mailu.',message:structuredClone(m)}
-      ];this.send(session,commands[session.index]);
+      const m=this.entry.message;
+      this.send(session,{cmd:'CONTENT',wire:mailWire(m),say:'Odesílám e-mail s adresou odesílatele, příjemce a obsahem zprávy.',message:structuredClone(m)});
     }
     imapCommand(session){
       const id=this.sim.clientId(),a=this.sim.action;
-      if(a.type==='mail-seen'&&session.index>0){
+      if(a.type==='mail-seen'){
         const m=this.state.boxes[id].find(m=>String(m.id)===String(a.payload.messageId));
-        return this.send(session,{cmd:'STORE',wire:`A2 UID STORE ${m?.uid||0} +FLAGS (\\Seen)`,say:'Ulož příznak přečtení této zprávy.',messageId:a.payload.messageId});
+        return this.send(session,{cmd:'STORE',wire:`A1 UID STORE ${m?.uid||0} +FLAGS (\\Seen)`,say:'Označ tuto zprávu jako přečtenou.',messageId:a.payload.messageId});
       }
-      this.send(session,session.index===0?{cmd:'SELECT',wire:'A1 SELECT INBOX',say:'Otevři mou doručenou schránku.'}:{cmd:'FETCH',wire:'A2 UID FETCH 1:* (FLAGS BODY.PEEK[])',say:'Pošli obsah a příznaky zpráv. Samotné načtení je neoznačí jako přečtené.'});
+      this.send(session,{cmd:'FETCH',wire:'A1 UID FETCH 1:* (FLAGS BODY.PEEK[])',say:'Pošli mi obsah doručené schránky.'});
     }
     storeInbox(){
       const e=this.entry,m=e.message,box=this.state.boxes[m.target];
@@ -95,34 +91,28 @@
     serverCommand(session,value,e){
       const s=this.sim;let reply;
       if(session.protocol==='SMTP'){
-        const expected=['MAIL','RCPT','DATA','CONTENT'][session.index];if(value.cmd!==expected)throw new Error('SMTP: příkaz neodpovídá stavu rozhovoru.');
-        if(value.cmd==='CONTENT'){
-          const entry=this.entry;
-          if(!value.message||value.message.id!==entry.message.id||value.message.target!==entry.message.target)throw new Error('SMTP: obsah nepatří této obálce.');
-          entry.message=structuredClone(value.message);const m=entry.message;
-          if(!entry.accepted){entry.accepted=true;this.state.deliveries.set(String(m.id),entry);this.net.phishing.messages.set(m.id,structuredClone(m));this.net.phishing.requests.set(m.id,true);}
-          this.storeInbox();entry.state='delivered';
-          reply={cmd:'OK',wire:'250 2.0.0 Zpráva přijata',say:'Zpráva je uložená ve schránce na společném serveru Gmailu.'};
-        }else reply={cmd:'OK',wire:value.cmd==='DATA'?'354 Pošli obsah, ukonči jej tečkou':'250 2.1.0 OK',say:value.cmd==='MAIL'?'Odesílatele přijímám.':value.cmd==='RCPT'?'Adresu příjemce přijímám.':'Pošli hlavičku a obsah e-mailu.'};
+        const entry=this.entry;
+        if(value.cmd!=='CONTENT'||!value.message||value.message.id!==entry.message.id||value.message.target!==entry.message.target)throw new Error('SMTP: zpráva neodpovídá připravenému odeslání.');
+        entry.message=structuredClone(value.message);const m=entry.message;
+        if(!entry.accepted){entry.accepted=true;this.state.deliveries.set(String(m.id),entry);this.net.phishing.messages.set(m.id,structuredClone(m));this.net.phishing.requests.set(m.id,true);}
+        this.storeInbox();entry.state='delivered';
+        reply={cmd:'OK',wire:'250 2.0.0 Zpráva přijata',say:'E-mail je uložený ve schránce příjemce.'};
       }else{
         const client=s.clientId(),box=this.state.boxes[client];
         if(session.to!==serverFor(client))throw new Error('IMAP účet nepatří tomuto serveru.');
-        if(value.cmd==='SELECT')reply={cmd:'OK',wire:`* ${box.length} EXISTS\r\nA1 OK Schránka otevřena`,say:`Počet zpráv ve schránce: ${box.length}.`};
-        else if(value.cmd==='FETCH')reply={cmd:'OK',wire:box.map((m,i)=>`* ${i+1} FETCH (UID ${m.uid} FLAGS (${m.seen?'\\Seen':''}) BODY[] {${encoder.encode(mailWire(m)).length}})`).join('\r\n')+'\r\nA2 OK Obsah zpráv odeslán',say:'Tady jsou zprávy uložené na serveru. Obsah e-mailů je součástí odpovědi; výpis ukazuje jejich UID, příznaky a délku.',items:structuredClone(box)};
-        else if(value.cmd==='STORE'){
+        if(value.cmd==='FETCH'&&s.action.type==='mail-check')reply={cmd:'OK',wire:box.map((m,i)=>`* ${i+1} FETCH (UID ${m.uid} FLAGS (${m.seen?'\\Seen':''}) BODY[] {${encoder.encode(mailWire(m)).length}})`).join('\r\n')+'\r\nA1 OK Obsah zpráv odeslán',say:'Posílám zprávy uložené ve tvé schránce.',items:structuredClone(box)};
+        else if(value.cmd==='STORE'&&s.action.type==='mail-seen'){
           const m=box.find(m=>String(m.id)===String(value.messageId));if(!m)throw new Error('IMAP: zpráva už ve schránce není.');m.seen=true;
-          reply={cmd:'OK',wire:`* ${box.indexOf(m)+1} FETCH (UID ${m.uid} FLAGS (\\Seen))\r\nA2 OK Příznak \\Seen uložen`,say:'Příznak přečtení je uložen na serveru.',messageId:m.id};
+          reply={cmd:'OK',wire:`* ${box.indexOf(m)+1} FETCH (UID ${m.uid} FLAGS (\\Seen))\r\nA1 OK Příznak \\Seen uložen`,say:'Příznak přečtení je uložen na serveru.',messageId:m.id};
         }else throw new Error('IMAP: neznámý příkaz.');
       }
-      e.title=`${session.protocol} · server zpracoval příkaz`;e.description=reply.say;this.send(session,reply,true);
+      e.title=session.protocol==='SMTP'?'SMTP · e-mail uložen do schránky':s.action.type==='mail-seen'?'IMAP · zpráva označena jako přečtená':'IMAP · server odesílá zprávy';e.description=reply.say;this.send(session,reply,true);
     }
     clientReply(session,value){
       const s=this.sim,c=this.net.phishing.clients[s.clientId()];
       if(session.protocol==='SMTP'){
-        if(++session.index<4)return this.smtpCommand(session);
         this.entry.clientAccepted=true;return this.completeSend();
-      }else if(session.index++===0)this.imapCommand(session);
-      else if(s.action.type==='mail-seen'){
+      }else if(s.action.type==='mail-seen'){
         for(const m of c.items)if(m.id===value.messageId)m.seen=true;if(c.inbox?.id===value.messageId)c.inbox.seen=true;
         Object.assign(c,{state:'ready',notice:'IMAP uložilo příznak přečtení na serveru.'});s.finish('IMAP · příznak přečtení uložen','Příznak schránky není automatické potvrzení odesílateli.',s.clientId());
       }else{

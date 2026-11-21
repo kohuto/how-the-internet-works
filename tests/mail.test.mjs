@@ -8,6 +8,12 @@ const send=(s,device='laptop',target='friend',extra={})=>run(s,'mail-send',draft
 const check=(s,device='friend')=>run(s,'mail-check',{device});
 function until(s,condition){for(let i=0;i<20000&&s.status==='running'&&!condition();i++)s.advance();assert(condition());}
 const outgoing=(s,node,phase)=>s.net.mail.dialogue.filter(r=>r.node===node&&r.direction==='out'&&(!phase||r.phase===phase));
+function singleExchange(s,client,protocol){
+ const rows=s.net.mail.dialogue.filter(r=>r.run===s.run);
+ assert.deepEqual(rows.map(r=>[r.node,r.direction]),[[client,'out'],['mail','in'],['mail','out'],[client,'in']]);
+ assert(rows.every(r=>r.protocol===protocol));assert.equal(new Set(rows.map(r=>r.session)).size,1);
+}
+
 
 test('One shared Gmail server holds every account; the second provider is removed',()=>{
  const s=new Simulation(),n=s.net;
@@ -30,15 +36,19 @@ test('The two notebooks can send only to each other; other clients keep their re
 });
 test('SMTP submits once to Gmail on port 465 and stores directly without DNS MX or server relay',()=>{
  const s=new Simulation(),events=send(s);assert.equal(s.status,'success');
- assert.deepEqual(outgoing(s,'laptop','submission').map(r=>r.wire.split(/[ :\r]/)[0]),['MAIL','RCPT','DATA','Message-ID']);
- assert.deepEqual(outgoing(s,'mail','submission').map(r=>r.wire.slice(0,3)),['250','250','354','250']);
+ singleExchange(s,'laptop','SMTP');assert(outgoing(s,'laptop','submission')[0].wire.startsWith('Message-ID:'));
+ assert(outgoing(s,'laptop','submission')[0].wire.includes('From: ty@gmail.com\r\nTo: matej@gmail.com'));
+ assert.deepEqual(outgoing(s,'mail','submission').map(r=>r.wire.slice(0,3)),['250']);
  const requests=[...s.packets.values()].filter(p=>p.kind==='smtp-request');assert(requests.length>0);
  assert(requests.every(p=>p.source==='laptop'&&p.destination==='mail'&&p.initialHeader.dport===465&&p.mailMeta.phase==='submission'));
  assert(!events.some(e=>e.packet?.kind.startsWith('dns-')||e.packet?.mailMeta?.phase==='relay'));
  assert.equal(s.net.mail.deliveries.get('mail-1').state,'delivered');assert.equal(s.net.mail.boxes.friend[0].body,draft().body);assert.equal(s.net.phishing.clients.friend.inbox,null);
 });
-test('Server storage precedes the SMTP acknowledgement and does not update the recipient local inbox',()=>{
- const s=new Simulation();assert(s.start('mail-send',draft()));until(s,()=>s.mail.entry?.accepted);
+test('The complete SMTP message must arrive before server storage, and sent mail waits for acknowledgement',()=>{
+ const s=new Simulation();assert(s.start('mail-send',draft()));
+ until(s,()=>[...s.packets.values()].some(p=>p.kind==='smtp-request'&&p.state==='delivered'));
+ assert(!s.mail.entry.accepted);assert.equal(s.net.mail.boxes.friend.length,0);assert.equal(s.net.phishing.clients.laptop.sent.length,0);
+ until(s,()=>s.mail.entry?.accepted);
  assert.equal(s.net.mail.boxes.friend.length,1);assert.equal(s.net.mail.deliveries.get('mail-1').state,'delivered');assert(!s.mail.entry.clientAccepted);
  assert.equal(s.net.phishing.clients.friend.items.length,0);finish(s);assert.equal(s.status,'success');assert(s.mail.entry.clientAccepted);
  check(s);assert.equal(s.net.phishing.clients.friend.items.length,1);
@@ -73,26 +83,34 @@ test('A lost submission acknowledgement retains accepted mail and explicit repea
  assert(s.repeat());finish(s);assert.equal(s.status,'success');assert.equal(s.net.mail.boxes.friend.length,1);assert.equal(s.net.mail.deliveries.size,1);
  assert.equal(s.net.phishing.clients.laptop.sent.length,1);assert.equal(s.net.phishing.clients.laptop.sent[0].body,draft().body);
 });
-test('IMAP SELECT precedes FETCH, with no local update until all response bytes arrive',()=>{
- const s=new Simulation();send(s);assert(s.start('mail-check',{device:'friend'}));until(s,()=>outgoing(s,'mail','access').some(r=>r.wire.includes('A2 OK')));assert.equal(s.net.phishing.clients.friend.items.length,0);finish(s);
- const c=s.net.phishing.clients.friend;assert.equal(c.items.length,1);assert.equal(c.inbox.body,draft().body);assert(!c.inbox.seen);assert(!s.net.mail.boxes.friend[0].seen);assert.deepEqual(outgoing(s,'friend','access').map(r=>r.wire.split(' ').slice(0,2).join(' ')),['A1 SELECT','A2 UID']);
+test('One IMAP request fetches the mailbox, with no local update after only part of the response arrives',()=>{
+ const s=new Simulation();send(s);assert(s.start('mail-check',{device:'friend'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='imap-response'&&p.state==='delivered'));assert.equal(s.status,'running');assert.equal(s.net.phishing.clients.friend.items.length,0);finish(s);
+ const c=s.net.phishing.clients.friend;assert.equal(c.items.length,1);assert.equal(c.inbox.body,draft().body);assert(!c.inbox.seen);assert(!s.net.mail.boxes.friend[0].seen);singleExchange(s,'friend','IMAP');assert.equal(outgoing(s,'friend','access')[0].wire,'A1 UID FETCH 1:* (FLAGS BODY.PEEK[])');
  assert(c.checked);assert.equal(s.net.phishing.clients.laptop.checked,false);assert.equal(c.sent.length,0);
 });
 test('Multiple messages retain immutable UID; opening uses IMAP STORE, no receipt to the sender',()=>{
  const s=new Simulation();send(s);send(s,'laptop','friend',{subject:'Druhá zpráva',body:'Další obsah'});check(s);const c=s.net.phishing.clients.friend;assert.deepEqual(c.items.map(m=>m.uid),[1,2]);assert.equal(c.inbox.id,'mail-2');assert(s.mail.open('friend','mail-1'));
- assert(s.start('mail-seen',{device:'friend',messageId:'mail-1'}));until(s,()=>s.net.mail.boxes.friend[0].seen);assert(!c.inbox.seen);assert(!c.items[1].seen);finish(s);assert(c.inbox.seen);assert.equal(s.status,'success');
- assert(outgoing(s,'friend','access').some(r=>r.wire==='A2 UID STORE 1 +FLAGS (\\Seen)'));assert(![...s.packets.values()].some(p=>p.destination==='laptop'));check(s);assert.deepEqual(c.items.map(m=>m.seen),[true,false]);
+ assert(s.start('mail-seen',{device:'friend',messageId:'mail-1'}));until(s,()=>s.net.mail.boxes.friend[0].seen);assert(!c.inbox.seen);assert(!c.items[1].seen);finish(s);assert(c.inbox.seen);assert.equal(s.status,'success');singleExchange(s,'friend','IMAP');
+ assert(outgoing(s,'friend','access').some(r=>r.wire==='A1 UID STORE 1 +FLAGS (\\Seen)'));assert(![...s.packets.values()].some(p=>p.destination==='laptop'));check(s);assert.deepEqual(c.items.map(m=>m.seen),[true,false]);
+});
+test('A lost read-flag confirmation preserves server state and retries as one request/reply',()=>{
+ const s=new Simulation();send(s);check(s);const c=s.net.phishing.clients.friend,id=c.inbox.id;
+ assert(s.start('mail-seen',{device:'friend',messageId:id}));until(s,()=>s.net.mail.boxes.friend[0].seen);
+ assert(!c.inbox.seen);s.net.clearNat('friend-home');finish(s);assert.equal(s.status,'failed');
+ assert(s.net.mail.boxes.friend[0].seen);assert(!c.inbox.seen);
+ assert(s.repeat());finish(s);assert.equal(s.status,'success');assert(c.inbox.seen);singleExchange(s,'friend','IMAP');
+ assert(![...s.packets.values()].some(p=>p.destination==='laptop'));
 });
 test('An interrupted IMAP response preserves the previously fetched local snapshot',()=>{
- const s=new Simulation();send(s);check(s);send(s,'laptop','friend',{body:'Nový e-mail'});assert(s.start('mail-check',{device:'friend'}));until(s,()=>outgoing(s,'mail','access').some(r=>r.run===s.run&&r.wire.includes('A2 OK')));s.net.clearNat('friend-home');finish(s);assert.equal(s.status,'failed');assert.equal(s.net.phishing.clients.friend.items.length,1);assert.equal(s.net.mail.boxes.friend.length,2);
+ const s=new Simulation();send(s);check(s);send(s,'laptop','friend',{body:'Nový e-mail'});assert(s.start('mail-check',{device:'friend'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='imap-response'&&p.state==='delivered'));s.net.clearNat('friend-home');finish(s);assert.equal(s.status,'failed');assert.equal(s.net.phishing.clients.friend.items.length,1);assert.equal(s.net.mail.boxes.friend.length,2);
  check(s);assert.equal(s.status,'success');assert.equal(s.net.phishing.clients.friend.items.length,2);
 });
-test('UTF-8 mail reassembles across many staggered protected chunks below MTU with contiguous SEQ',()=>{
- const s=new Simulation(),body='Žluťoučký 🐎🐳\n.'.repeat(45),events=send(s,'laptop','friend',{body});assert.equal(s.status,'success');check(s);assert.equal(s.net.phishing.clients.friend.inbox.body,body);
- const packets=events.filter(e=>e.kind==='create'&&e.packet?.connection==='smtp').map(e=>e.packet);
- const all=packets.length?packets:events.filter(e=>e.kind==='hop'&&e.packet?.connection==='smtp').map(e=>e.packet);assert(all.length>10);
+test('SMTP and IMAP reassemble UTF-8 mail across staggered protected chunks below MTU with contiguous SEQ',()=>{
+ const s=new Simulation(),body='Žluťoučký 🐎🐳\n.'.repeat(45),events=send(s,'laptop','friend',{body});assert.equal(s.status,'success');events.push(...check(s));assert.equal(s.net.phishing.clients.friend.inbox.body,body);
+ const packets=events.filter(e=>e.kind==='create'&&['smtp','imap'].includes(e.packet?.connection)).map(e=>e.packet);
+ const all=packets.length?packets:events.filter(e=>e.kind==='hop'&&['smtp','imap'].includes(e.packet?.connection)).map(e=>e.packet);assert(all.length>10);
  const unique=[...new Map(all.map(p=>[p.id,p])).values()];for(const p of unique){assert(p.payload.record.data.length+40<=1500);assert(p.mailMeta.partBytes<=192);assert(!JSON.stringify(p.payload).includes('Žluťoučký'));}
- for(const id of new Set(unique.map(p=>p.mailMeta.session)))for(const kind of ['smtp-request','smtp-response']){const group=unique.filter(p=>p.mailMeta.session===id&&p.kind===kind).sort((a,b)=>a.seq-b.seq);for(let i=1;i<group.length;i++)assert.equal(group[i].seq,group[i-1].seq+group[i-1].payload.record.data.length);}
+ for(const id of new Set(unique.map(p=>p.mailMeta.session)))for(const kind of ['smtp-request','smtp-response','imap-request','imap-response']){const group=unique.filter(p=>p.mailMeta.session===id&&p.kind===kind).sort((a,b)=>a.seq-b.seq);for(let i=1;i<group.length;i++)assert.equal(group[i].seq,group[i-1].seq+group[i-1].payload.record.data.length);}
  assert(events.some((e,i)=>e.kind==='hop'&&events.slice(i+1,i+8).some(x=>x.kind==='hop'&&x.packet.id!==e.packet.id)));
 });
 test('Client SMTP and IMAP reach the shared provider across Wi-Fi, cellular, satellite and VPN',()=>{

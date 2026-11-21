@@ -15,7 +15,7 @@ test('The attacker has separate Gmail and site management apps, with a fixed mai
   const admin=phishingApp(s.net,s,ui);assert(admin.includes(mail.link));assert(admin.includes('data-action="phish-compose"'));assert(!admin.includes('data-form="phish-mail"'));
   assert(s.start('phish-send',{device:'hacker',target:'laptop'}));finish(s);
   const submitted=s.net.mail.boxes.laptop[0];assert.equal(submitted.link,mail.link);assert.equal(submitted.from,emailFor('hacker'));
-  assert(mailWire(submitted).includes(mail.link));assert(s.net.mail.dialogue.some(r=>r.node==='hacker'&&r.wire===`MAIL FROM:<${emailFor('hacker')}>`));
+  assert(mailWire(submitted).includes(mail.link));const request=s.net.mail.dialogue.filter(r=>r.node==='hacker'&&r.direction==='out');assert.equal(request.length,1);assert(request[0].wire.includes(`From: ${emailFor('hacker')}`));assert(request[0].wire.includes(mail.link));
 });
 
 test('Attacker sent mail appears only after SMTP acknowledgement, remains independent of server storage, and cannot open the lure as a victim',()=>{

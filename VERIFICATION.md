@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Jediný požadavek a odpověď pro SMTP a IMAP · 21. listopadu 2026
+
+Odesílání běžných i phishingových e-mailů zkráceno na přenos celé zprávy a potvrzení jejího uložení. Samostatné výměny MAIL FROM, RCPT TO a DATA odstraněny; odesílatel, příjemce a obsah jsou zahrnuty v odeslané zprávě. Načtení schránky tvoří jediná žádost a odpověď s celým snímkem, uložení příznaku přečtení jediný požadavek a potvrzení. Přípravný SELECT se neposílá. Stavový index vícekrokového rozhovoru odstraněn a popisky paketů rozlišují e-mail, potvrzení, žádost o zprávy, obsah schránky a příznak přečtení. Model TLS, TCP SEQ, chráněné části do 192 B, časování a skutečná cesta sítí zůstávají. Server ukládá až úplný e-mail, místní Odeslané čekají na potvrzení, Přijaté na celé doručení snímku a místní přečtení na potvrzení serveru. README popisuje zjednodušení, prostředky `v=155`.
+
+Prošla celá sada **341 testů**, včetně **40 souvisejících testů pošty a phishingu**, a kontrola syntaxe obou upravených skriptů i obou testovacích souborů. Testy nyní ověřují jedinou výměnu požadavku a odpovědi na skutečných koncích spojení, nemožnost přijetí SMTP nebo zveřejnění IMAP po pouhé části dat, celé UTF-8 zprávy přes chráněné části obou protokolů, souvislá SEQ a MTU. Nový test ztráty potvrzení přečtení kontroluje zachování serverového příznaku, nezměněnou místní kopii a úspěšné opakování. Zachovány kontroly ztráty SMTP potvrzení bez duplikace, přerušeného IMAP se starším snímkem, offline příjemce, integrity TLS, phishingu, Wi-Fi, mobilního, satelitního i VPN přístupu.
+
+V prohlížeči při 763 × 743 px odeslán vlastní e-mail s diakritikou a emoji. Před potvrzením byla zpráva uložená na serveru, ale Odeslané zůstaly prázdné; po potvrzení obsahovaly jedinou zprávu. Matějův Gmail ji ukázal až po samostatném Obnovit poštu. Otevření uložilo přečtení a serverový přehled ukázal přesně dva záznamy pro každý úkon: požadavek a odpověď, bez přípravných výměn. Při 320 × 568 px odeslána delší UTF-8 zpráva z telefonu přes mobilní data a VPN. Z doupěte doručen předpřipravený phishingový e-mail do telefonu a přes VPN načten i označen jako přečtený. Adresa odesílatele a odkaz zůstaly správné, žádný obsah se neobjevil před načtením a serverový výpis stále obsahoval jedinou výměnu pro každý úkon. Gmail a detail serveru bez vodorovného přetékání; konzole bez chyb a varování.
+
+
 ## Odstranění doprovodné věty před prvním VPN přenosem · 21. listopadu 2026
 
 Ze stavu připravené VPN odstraněna věta Při příštím internetovém přenosu se naváže šifrovaný tunel. Odstavec se v tomto stavu nevykresluje, takže po něm nezůstává prázdné místo. Prostředky `v=154`.
