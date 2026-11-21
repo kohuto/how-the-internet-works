@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Volitelné rozšíření Šířka pásma a Latence · 21. listopadu 2026
+
+Nastavení obsahuje jedinou volbu **Šířka pásma a Latence** v části Zařízení a služby. Zpočátku je vypnutá a ovládání obou vlastností se v aplikaci Připojení nevykresluje. Zapnutí zpřístupní stávající volby všem dostupným klientům, bez přidání zařízení nebo spojů. Model odmítne změnu profilu bez rozšíření; vypnutí při změně sestavy obnoví výchozí Nižší / Nižší. Dosavadní časování, oddělené profily zařízení a zachování hodnot běžícího přenosu se nemění. Nastavení má 20 rozšíření; prostředky `v=142`.
+
+Prošlo všech **336 testů** i kontrola syntaxe tří upravených skriptů a testu. Nový integrační test ověřuje blokování změn bez rozšíření, totožnou topologii, změnu rozestupů a zdržení po zapnutí při zachování obsahu, obnovení výchozího profilu po vypnutí i zapnutí přes kompletní sestavu.
+
+V prohlížeči při 1047 × 858 px ověřena jediná zpočátku vypnutá volba, zachování základních 14 zařízení při samostatném zapnutí, uložení obou hodnot, skrytí po vypnutí a návrat Nižší / Nižší po opětovném zapnutí. V úplné sestavě ověřeno společné zapnutí i skrytí na notebooku na Lipové, u Matěje, na chatě, telefonu, počítači útočníka a notebooku hosta kavárny. Při 320 × 568 px se volba i oba ovladače vejdou bez vodorovného přetékání; uložení na telefonu funguje a po vypnutí rozšíření telefon zůstává dostupný s připojením Wi-Fi. Konzole obou náhledů bez chyb a varování.
+
+
 ## Ruční připojení hosta k Wi-Fi a pojmenovatelný hotspot · 21. listopadu 2026
 
 Host kavárny nyní začíná odpojený. V Připojení vidí pouze vysílající přístupové body podle názvu a zabezpečení. Kavárna nabízí síť Kavarna_hoste s ukázkovým heslem kava1234, dostupným v rozbalovací kartě Heslo od obsluhy. Chybné či chybějící heslo připojení nezmění; obecný přepínač přístupu kontrolu neobchází. Útočník může zadat vlastní název hotspotu o 1–32 znacích a zapnout vysílání. Jeho otevřená síť se hostovi objeví teprve po zapnutí. Útočník už nemůže hosta připojit tlačítkem za něj. Vypnutí, přejmenování či vypnutí zařízení s vybraným přístupovým bodem hosta odpojí; nedojde k přepnutí na jinou síť ani k automatickému opětovnému připojení. Viditelnost Wi-Fi zůstává oddělená od dostupnosti internetové přípojky. Prostředky `v=141`.

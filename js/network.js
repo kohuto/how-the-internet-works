@@ -351,7 +351,7 @@
     accessReady(id) {return this.isActive(this.accessLink(id));}
     setConnectionProfile(id,profile) {
       const current=this.connectionProfiles[id];
-      if(!this.nodeAvailable(id)||!current||!profile||!['low','high'].includes(profile.bandwidth)||!['low','high'].includes(profile.latency))return false;
+      if(!this.featureEnabled('connection-timing')||!this.nodeAvailable(id)||!current||!profile||!['low','high'].includes(profile.bandwidth)||!['low','high'].includes(profile.latency))return false;
       if(current.bandwidth===profile.bandwidth&&current.latency===profile.latency)return false;
       this.connectionProfiles[id]={bandwidth:profile.bandwidth,latency:profile.latency};return true;
     }
