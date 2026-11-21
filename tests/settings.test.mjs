@@ -67,9 +67,9 @@ test('One Cloud extension enables both centers, synchronization and reading the 
   for(const id of ['cloud','cloud-router','cloud-switch','cloud-backup','replica-router','replica-switch'])assert(net.nodeAvailable(id),id);
   assert(net.appAvailable('cloud','laptop'));
   const content='Jeden Cloud, dvě datová centra. 🙂';
-  assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Kopie.txt',content}}));finish(sim);
+  assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Kopie.txt',content}}));const events=finish(sim);
   const file=[...net.cloud.files.values()].at(-1);
-  assert(sim.start('replicate'));const events=finish(sim);
+  assert(net.cloud.replicaCurrent());
   assert(events.some(e=>e.kind==='hop'&&e.link==='cloud-uplink'));
   assert(events.some(e=>e.kind==='hop'&&e.link==='replica-uplink'));
   net.toggleNode('cloud');

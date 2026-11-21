@@ -81,7 +81,7 @@
     net.instagram.openDevice=ui.monitorOpen&&tab==='message'&&net.nodes[ui.monitorDevice].on?ui.monitorDevice:null;
     if(net.instagram.openDevice)sim.markRead(net.instagram.openDevice);
   }
-  function resumeMessage() {if(sim.resumePending()){stop();advance();return true;}return false;}
+  function resumeMessage() {if(sim.resumePending()||sim.resumeReplication()){stop();advance();return true;}return false;}
   function loadLocal(device,id) {
     const file=net.cloud.local[device].find(f=>f.id===id);if(!file)return;
     Object.assign(ui.cloud[device],{localId:id,cloudName:file.name,cloudContent:file.content,tab:'local',view:'editor',editorKey:(ui.cloud[device].editorKey||0)+1});
@@ -107,9 +107,6 @@
     syncReader();notify(`${net.nodes[id].name}: ${mode==='wifi'?'Wi-Fi':mode==='cellular'?'mobilní data':mode==='cable'?'kabel':'odpojeno'}.`);
     if(!resumeMessage())render();
     $(focusTower?'#cell-tower':'#monitor-content [data-access-mode][aria-pressed="true"]')?.focus({preventScroll:true});
-  }
-  function heading(n) {
-    return `<div class="device-heading"><h2 id="device-title">${esc(net.displayName(n))}</h2></div><div class="power-row"><button class="toggle-button ${n.on?'danger':''}" data-action="toggle-node" data-id="${n.id}">${n.on?'Vypnout zařízení':'Zapnout zařízení'}</button></div>`;
   }
   function organizeDeviceHelp(body) {
     const notes=[...body.querySelectorAll('[data-device-help]')];
@@ -177,7 +174,7 @@
   }
   function deviceDetail(n) {
     const junction=net.displayType(n)==='junction';
-    let html=heading(n)+(junction?'':centerInfo(n));
+    let html=junction?'':centerInfo(n);
     if(junction) {
       html+='<p class="hint" data-device-help="Jak zařízení funguje">Přijímá pakety a předává je dál směrem k cíli. Když zařízení vypneš, cesty vedoucí přes něj se přeruší.</p>';
       if(['cabin-router','sat-gateway'].includes(n.id))html+=satelliteInfo(n);
@@ -236,7 +233,7 @@
       html+=`<div class="status-box ${ig.state==='failed'?'error':''}"><strong>${state}</strong>${sim.instagramName(ig.senderDevice)} → Instagram: ${ig.receivedBytes} / ${ig.totalBytes} B<br>Instagram → ${sim.instagramName(ig.recipientDevice)}: ${net.friend.receivedBytes} / ${ig.totalBytes} B</div>${ig.text?`<div class="endpoint-result"><strong>Zpráva uchovaná na serveru</strong>${ig.content?.type!=='text'?messagePreview(ig.content):esc(ig.text)}</div>`:''}${ig.readKnown?`<div class="status-box"><strong>Instagram přijal potvrzení přečtení</strong>${ig.readNotified?'Potvrzení už dorazilo do zařízení odesílatele.':'Čeká na doručení do zařízení odesílatele.'}</div>`:''}<div class="action-row"><button class="secondary-button" data-select-node="${ig.senderDevice}" data-open-tab="message">${esc(net.nodes[ig.senderDevice].name)} ↗</button><button class="secondary-button" data-select-node="${ig.recipientDevice}" data-open-tab="message">${esc(net.nodes[ig.recipientDevice].name)} ↗</button></div>${ig.state==='queued'?'<button class="inline-link" data-action="resume-message">Zkusit doručit znovu ↗</button>':''}${serverServices('Modelové spojení Instagramu · TCP / 443')}<dl class="dl">${definition('Příjemce zprávy',ig.recipientDevice==='friend'?'Účet @matej':'Účet @ty.na.lipove')}</dl><div class="note-card" data-device-help="Instagram">Na obou stranách služby jsou samostatná spojení. Pro druhé spojení vznikají nové pakety s vlastními IP adresami, TCP SEQ a rozdělením dat. Přijatá zpráva může na serveru počkat.</div>`;
     } else if(n.id==='cloud'||n.id==='cloud-backup') {
       const storage=net.cloud,backup=n.id==='cloud-backup',files=backup?storage.replica.files:storage.files;
-      html+=`<div class="center-notice ${storage.replicaCurrent()?'':'stale'}"><strong>${storage.replicaCurrent()?'Kopie v centru B je aktuální':'Kopie v centru B čeká na synchronizaci'}</strong><br>Stav dat A: ${storage.revision} · kopie B: ${storage.replica.revision}<br>${esc(storage.replica.message)}</div><button class="secondary-button wide" data-action="cloud-sync" ${sim.status==='running'?'disabled':''}>Synchronizovat centra A → B</button><p class="hint" data-device-help="Jak zařízení funguje">Přenos kopíruje soubory i práva po síti. Centrum B poskytne čtení pouze z aktuální kopie; změny se ukládají do A.</p>`;
+      html+=`<p class="hint" data-device-help="Jak zařízení funguje">Změny souborů i práv se automaticky kopírují po síti do centra B. Při výpadku zůstává poslední úplná kopie a synchronizace pokračuje po obnovení spojení.</p>`;
       html+=`<p class="hint" data-device-help="Jak zařízení funguje">Cloud ukládá soubory na vzdáleném serveru. Každý požadavek kontroluje podle přihlášeného uživatele a práv souboru. IP adresa slouží k doručení; totožnost představuje připravené přihlášení v aplikaci.</p><div class="section-label">SOUBORY NA SERVERU</div>${[...files.values()].map(f=>`<div class="note-card"><strong>${esc(f.name)}</strong>${esc(f.id)} · verze ${f.version} · vlastník ${f.owner==='ty'?'Ty':'Matěj'}<br>${Object.entries(f.permissions).filter(([,v])=>v!=='none').map(([id,role])=>`${id==='ty'?'Ty':'Matěj'}: ${role==='write'?'čtení a úpravy':'čtení'}`).join(', ')||'Soukromý soubor'}</div>`).join('')}${net.nodeAvailable('friend')?`<div class="action-row" style="margin-top:16px"><button class="secondary-button" data-select-node="friend" data-cloud-server="${n.id}" data-open-tab="cloud">Matějův cloud ↗</button></div>`:''}${serverServices('Modelové spojení cloudu · TCP / 443')}<div class="note-card" data-device-help="Cloud">Správcovský přehled ukazuje globální stav simulace. V noteboocích se seznam i obsah souborů zobrazí až po přijetí odpovědi serveru. Stažená místní kopie zůstává i po odebrání přístupu.</div>`;
     } else if(n.id==='printer') {
       html+=net.printer.count?`<div class="endpoint-result"><strong>Vytištěné dokumenty · ${net.printer.count}</strong>${esc(net.printer.document)}</div>`:'<div class="doc-preview"><p>Tiskárna čeká na dokument.</p></div>';
@@ -245,9 +242,9 @@
     }
     return html;
   }
+  function linkTitle(link) {return {cable:'Kabelové spojení','satellite-access':'Kabelové spojení',backhaul:'Kabelové spojení',wifi:'Bezdrátové spojení – Wi-Fi',cellular:'Bezdrátové spojení – mobilní síť',satellite:'Bezdrátové spojení – satelit'}[link.medium];}
   function linkDetail(id) {
     const l=net.links[id],a=net.nodes[l.a],b=net.nodes[l.b],medium={'satellite-access':'Kabel do satelitního terminálu','satellite':'Satelitní rádio · obousměrný přenos',cable:'Kabel · Ethernet',wifi:'Wi-Fi · rádio',cellular:'Mobilní data · rádio',backhaul:'Přípojka BTS · přenos do mobilního jádra'}[l.medium];
-    const title={cable:'Kabelové spojení','satellite-access':'Kabelové spojení',backhaul:'Kabelové spojení',wifi:'Bezdrátové spojení – Wi-Fi',cellular:'Bezdrátové spojení – mobilní síť',satellite:'Bezdrátové spojení – satelit'}[l.medium];
     const detailed=net.detailEnabled('mac')||net.detailEnabled('routes');
     let problem='';
     if(!l.on)problem='Spoj je odpojený.';
@@ -255,7 +252,7 @@
     else if(l.requiresView&&!net.satellite.clearView)problem='Spoj nefunguje, protože je zakrytý výhled satelitní antény.';
     else if(!net.selectedAccess(l))problem='Spoj se nyní nepoužívá. Zařízení má vybrané jiné připojení.';
     const status=problem?`<div class="status-box ${!l.on||!a.on||!b.on||l.requiresView&&!net.satellite.clearView?'error':''}" role="status">${esc(problem)}</div>`:'';
-    return `<h2 id="link-title">${esc(title)}</h2>${status}${button('toggle-link',l.on?'Odpojit spoj':'Obnovit spoj',l.on?'toggle-button danger wide':'primary-button wide',`data-id="${id}"`)}${detailed?`${['wifi','satellite','backhaul'].includes(l.medium)?`<div class="note-card"><strong>${medium}</strong>${l.medium==='satellite'?'Rádiová část satelitního přístupu spojuje uživatelskou anténu, satelit LEO a pozemní stanici. Ta předává pakety do pozemního internetu. Let je zpomalený do tří modelových kroků.':l.medium==='wifi'?'Rádiový úsek vede pouze k přístupovému bodu. Dál data pokračují domácí sítí.':'Telefon komunikuje přes BTS a síť operátora. Domácí Wi-Fi ani přípojku bytu tato cesta nepoužívá.'}</div>`:''}<dl class="dl" style="margin-top:24px">${definition('První konec',`${net.displayName(a)} · ${l.pa}`)}${definition('Druhý konec',`${net.displayName(b)} · ${l.pb}`)}${definition('Připojená síť',l.prefix)}</dl>`:''}`;
+    return `${status}${detailed?`${['wifi','satellite','backhaul'].includes(l.medium)?`<div class="note-card"><strong>${medium}</strong>${l.medium==='satellite'?'Rádiová část satelitního přístupu spojuje uživatelskou anténu, satelit LEO a pozemní stanici. Ta předává pakety do pozemního internetu. Let je zpomalený do tří modelových kroků.':l.medium==='wifi'?'Rádiový úsek vede pouze k přístupovému bodu. Dál data pokračují domácí sítí.':'Telefon komunikuje přes BTS a síť operátora. Domácí Wi-Fi ani přípojku bytu tato cesta nepoužívá.'}</div>`:''}<dl class="dl" style="margin-top:24px">${definition('První konec',`${net.displayName(a)} · ${l.pa}`)}${definition('Druhý konec',`${net.displayName(b)} · ${l.pb}`)}${definition('Připojená síť',l.prefix)}</dl>`:''}`;
   }
   function packetDetail(id) {
     const p=sim.packets.get(id);
@@ -305,7 +302,7 @@
     const deviceKey=infoOpen?`${ui.selection.kind}:${ui.selection.id}`:'',sameDevice=deviceKey!==''&&deviceKey===deviceViewKey;
     const deviceScroll=sameDevice?$('#device-body').scrollTop:0;
     const expanded=sameDevice?[...document.querySelectorAll('#device-body details[open]')].map(d=>d.dataset.detailKey||d.querySelector('summary')?.textContent):[];
-    const deviceToggleFocused=sameDevice&&focused?.matches('#device-body [data-action="toggle-node"], #device-body [data-action="toggle-link"]');
+    const deviceToggleFocused=sameDevice&&focused?.matches('#device-content [data-action="toggle-node"], #device-content [data-action="toggle-link"]')?{action:focused.dataset.action,id:focused.dataset.id}:null;
     deviceViewKey=deviceKey;
     $('#monitor-overlay').hidden=!ui.monitorOpen;
     $('#monitor-content').classList.toggle('phone-window',ui.monitorDevice==='phone');
@@ -322,13 +319,18 @@
     $('#device-content').classList.toggle('link-window',ui.linkOpen);
     $('#device-content').setAttribute('aria-labelledby',ui.packetOpen?'packet-title':ui.linkOpen?'link-title':'device-title');
     $('#device-content .device-close').setAttribute('aria-label',`Zavřít informace o ${ui.packetOpen?'paketu':ui.linkOpen?'spoji':'zařízení'} a vrátit se k mapě`);
+    const selectedNode=ui.deviceOpen?net.nodes[ui.selection.id]:null,selectedLink=ui.linkOpen?net.links[ui.selection.id]:null;
+    const windowTitle=$('.device-window-title');windowTitle.id=ui.linkOpen?'link-title':'device-title';windowTitle.hidden=!infoOpen||ui.packetOpen;
+    windowTitle.textContent=selectedNode?net.displayName(selectedNode):selectedLink?linkTitle(selectedLink):'';
+    const controls=$('#device-controls');controls.hidden=!selectedNode&&!selectedLink;
+    controls.innerHTML=selectedNode?button('toggle-node',selectedNode.on?'Vypnout zařízení':'Zapnout zařízení',`toggle-button device-control-button ${selectedNode.on?'danger':''}`,`data-id="${selectedNode.id}"`):selectedLink?button('toggle-link',selectedLink.on?'Odpojit spoj':'Obnovit spoj',`toggle-button device-control-button ${selectedLink.on?'danger':''}`,`data-id="${selectedLink.id}"`):'';
     $('#device-body').innerHTML=ui.packetOpen?packetDetail(ui.selection.id):ui.linkOpen?linkDetail(ui.selection.id):ui.deviceOpen?deviceDetail(net.nodes[ui.selection.id]):'';
     if(ui.deviceOpen)organizeDeviceHelp($('#device-body'));
     pruneUnavailable($('#device-body'));pruneUnavailable($('#monitor-content'));
     if(infoOpen) {
       document.querySelectorAll('#device-body details').forEach(d=>{d.open=expanded.includes(d.dataset.detailKey||d.querySelector('summary')?.textContent);});
       $('#device-body').scrollTop=deviceScroll;
-      if(deviceToggleFocused)$('#device-body [data-action="toggle-node"], #device-body [data-action="toggle-link"]').focus({preventScroll:true});
+      if(deviceToggleFocused)$(`#device-content [data-action="${deviceToggleFocused.action}"][data-id="${deviceToggleFocused.id}"]`)?.focus({preventScroll:true});
     }
     if(browserFocus&&!field&&!authField)$(`[data-browser-focus="${browserFocus}"]`)?.focus({preventScroll:true});
     if(authField){const el=$(`[data-auth-field="${authField}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number'&&el.type!=='email')el.setSelectionRange(start,end);}}
@@ -482,7 +484,6 @@
     if(b.dataset.messageType){const key=messageKey(ui.monitorDevice,'messageType');ui[key]=b.dataset.messageType;render();$(`[data-message-type="${ui[key]}"]`).focus({preventScroll:true});return;}
     if(b.dataset.action==='satellite-view'){net.setSatelliteView(!net.satellite.clearView);notify(net.satellite.clearView?'Anténa má opět volný výhled.':'Výhled antény je zakrytý. Satelitní spoj je nedostupný.');if(!resumeMessage())render();return;}
     if(b.dataset.action==='close-device'){closeDevice();return;}
-    if(b.dataset.action==='cloud-sync'){if(ui.packetOpen||sim.status==='running')return;stop();if(sim.start('replicate')){setScene('dc');advance();}return;}
     if(b.dataset.action==='clear-nat'){net.clearNat(b.dataset.id);notify('Tabulka NAT je prázdná. Příchozí odpovědi bez záznamu se nedoručí.');render();$('#device-content').focus({preventScroll:true});return;}
     if(b.dataset.cloudTab){
       const device=ui.monitorDevice,draft=ui.cloud[device],tab=b.dataset.cloudTab;

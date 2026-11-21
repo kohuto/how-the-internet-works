@@ -47,7 +47,7 @@ test('Cloud upload commits only after all request bytes arrive; the client waits
   assert(requests.length>2&&replies.length>0);
   const request=JSON.parse(decoder.decode(Uint8Array.from(requests.flatMap(p=>[...p.payload.bytes]))));
   assert.equal(request.content,text);
-  for(const p of packets){assert(p.payload.bytes.length<=CLOUD_MSS);assert.equal(p.connection,'cloud');assert.equal(p.protocol,'TCP');assert(p.payload.bytes.length+40<1500);}
+  for(const p of [...requests,...replies]){assert(p.payload.bytes.length<=CLOUD_MSS);assert.equal(p.connection,'cloud');assert.equal(p.protocol,'TCP');assert(p.payload.bytes.length+40<1500);}
   assert.equal(requests[0].dst,'203.0.113.140');assert.equal(requests[0].dport,443);
   assert.equal(replies[0].src,'203.0.113.140');assert.equal(replies[0].sport,443);
 });

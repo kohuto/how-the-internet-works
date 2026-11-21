@@ -40,7 +40,7 @@
       if(!this.user(device))return {status:403,message:'Tento účet nemá přístup do cloudu.'};
       if(server==='cloud-backup') {
         if(!['list','download'].includes(request.op))return {status:405,message:'Centrum B poskytuje kopii ke čtení. Změny ulož v centru A.'};
-        if(!this.replicaCurrent())return {status:503,message:'Kopie v centru B není aktuální. Nejprve synchronizuj centra, aby platil obsah i přístupová práva.'};
+        if(!this.replicaCurrent())return {status:503,message:'Kopie v centru B není aktuální. Automatická synchronizace čeká na dokončení přenosu mezi centry.'};
       }
       const files=server==='cloud-backup'?this.replica.files:this.files;
       const mutating=['upload','permissions'].includes(request.op),key=`${this.user(device).id}:${request.requestId}`;

@@ -1,5 +1,18 @@
 # Záznam ověření
 
+## Automatická replikace, společné záhlaví náhledů a jednodušší nastavení · 21. listopadu 2026
+
+Cloud po změně souborů nebo práv automaticky naváže přenosem úplného snímku A → B. Kopie se zpřístupní až po přijetí všech částí. Při nedostupné cestě čeká, po obnovení spojení se připraví nový pokus. Ztracené potvrzení klientovi nezruší zápis ani následnou kopii; výpadek kopírování nezmění úspěšné uložení v A. Opakování během kopírování bezpečně obnoví původní požadavek bez duplicit. Tlačítko Synchronizovat centra i panel s čísly verzí a stavem kopie odstraněny. Síťový přenos dál postupuje přehráváním/krokováním, nikoli nezávislými hodinami na pozadí.
+
+Názvy informačních oken zařízení a spojnic jsou v horní zelené liště vedle křížku. Vypnutí nebo odpojení je samostatné menší tlačítko vpravo pod lištou (32 px na počítači, 40 px na telefonu); lišta i ovládání zůstávají dostupné při posouvání obsahu. Zachovány přístupné názvy dialogů a obnovení zaměření konkrétního ovládacího prvku. Poznámka pod Zobrazované podrobnosti v nastavení i její nepoužitý styl odstraněny. Prostředky `v=135`.
+
+Prošlo všech **324 testů**. Upravené testy ověřují automatický přenos úplného obsahu a práv, nepřístupnost zastaralé kopie, zachování posledního úplného snímku při výpadku a automatický nový pokus. Čtyři nové kontroly pokrývají ztracené potvrzení s offline klientem, novější změnu během přenosu, vynechání zbytečných kopií při čtení a opakování hotového zápisu a bezpečné opakování uprostřed kopírování. Syntaxe všech čtyř změněných skriptů prošla.
+
+V prohlížeči při 1074 × 858 a 320 × 568 px otevřeno všech 77 informačních náhledů zařízení a 90 zakreslených spojnic úplné sestavy: název v liště, ovládání pod ní, bez překrytí a bez vodorovného přetékání stránky. Navíc ověřeno Wi-Fi spojení, vypnutí/zapnutí webu, odpojení/obnovení kabelu, zachování zaměření tlačítka, pevné záhlaví při posouvání a nezměněné otevření i zavření náhledu paketu.
+
+Cloudový dokument se po nahrání objevil v B bez dalšího tlačítka. Při odpojeném kabelu do B nová kopie nevznikla; obnovení kabelu samo připravilo přenos a dokument poté dorazil. Na telefonu ověřeno automatické kopírování i opakování během kopie bez zdvojení souboru. Oba cloudové servery neobsahují zrušené tlačítko ani stavový panel. Poznámka v nastavení chybí. Konzole obou náhledů bez chyb a varování.
+
+
 ## Cloudový server bez souhrnu posledního požadavku · 21. listopadu 2026
 
 Z detailu hlavního i záložního cloudu odstraněn diagnostický blok Poslední požadavek s výsledkem operace a odkazem na paket. Výsledky nadále zpracovává a zobrazuje klientská aplikace; seznam uložených souborů, oprávnění a synchronizace zůstávají.

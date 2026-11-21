@@ -7,41 +7,41 @@
   <meta name="description" content="Prozkoumej, jak funguje internet. Česká interaktivní síťová laboratoř: web, místní tisk, pakety a náhradní cesta.">
   <title>Jak funguje internet · Síť pod lupou</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./assets/style.css?v=134">
-  <link rel="stylesheet" href="./assets/computer.css?v=134">
-  <link rel="stylesheet" href="./assets/browser.css?v=134">
-  <link rel="stylesheet" href="./assets/instagram.css?v=134">
-  <link rel="stylesheet" href="./assets/gmail.css?v=134">
-  <link rel="stylesheet" href="./assets/cloud.css?v=134">
-  <link rel="stylesheet" href="./assets/settings.css?v=134">
-  <script src="./js/network.js?v=134" defer></script>
-  <script src="./js/settings.js?v=134" defer></script>
-  <script src="./js/cloud.js?v=134" defer></script>
-  <script src="./js/media.js?v=134" defer></script>
-  <script src="./js/web.js?v=134" defer></script>
-  <script src="./js/privacy.js?v=134" defer></script>
-  <script src="./js/auth.js?v=134" defer></script>
-  <script src="./js/vpn.js?v=134" defer></script>
-  <script src="./js/phishing.js?v=134" defer></script>
-  <script src="./js/mitm.js?v=134" defer></script>
-  <script src="./js/mail.js?v=134" defer></script>
-  <script src="./js/ads.js?v=134" defer></script>
-  <script src="./js/simulation.js?v=134" defer></script>
-  <script src="./js/map.js?v=134" defer></script>
-  <script src="./js/settings-ui.js?v=134" defer></script>
-  <script src="./js/browser-navigation.js?v=134" defer></script>
-  <script src="./js/instagram-ui.js?v=134" defer></script>
-  <script src="./js/cloud-ui.js?v=134" defer></script>
-  <script src="./js/computer.js?v=134" defer></script>
-  <script src="./js/browser-ui.js?v=134" defer></script>
-  <script src="./js/phishing-ui.js?v=134" defer></script>
-  <script src="./js/mitm-ui.js?v=134" defer></script>
-  <script src="./js/mail-ui.js?v=134" defer></script>
-  <script src="./js/privacy-ui.js?v=134" defer></script>
-  <script src="./js/auth-ui.js?v=134" defer></script>
-  <script src="./js/ads-ui.js?v=134" defer></script>
-  <script src="./js/packet-ui.js?v=134" defer></script>
-  <script src="./js/app.js?v=134" defer></script>
+  <link rel="stylesheet" href="./assets/style.css?v=135">
+  <link rel="stylesheet" href="./assets/computer.css?v=135">
+  <link rel="stylesheet" href="./assets/browser.css?v=135">
+  <link rel="stylesheet" href="./assets/instagram.css?v=135">
+  <link rel="stylesheet" href="./assets/gmail.css?v=135">
+  <link rel="stylesheet" href="./assets/cloud.css?v=135">
+  <link rel="stylesheet" href="./assets/settings.css?v=135">
+  <script src="./js/network.js?v=135" defer></script>
+  <script src="./js/settings.js?v=135" defer></script>
+  <script src="./js/cloud.js?v=135" defer></script>
+  <script src="./js/media.js?v=135" defer></script>
+  <script src="./js/web.js?v=135" defer></script>
+  <script src="./js/privacy.js?v=135" defer></script>
+  <script src="./js/auth.js?v=135" defer></script>
+  <script src="./js/vpn.js?v=135" defer></script>
+  <script src="./js/phishing.js?v=135" defer></script>
+  <script src="./js/mitm.js?v=135" defer></script>
+  <script src="./js/mail.js?v=135" defer></script>
+  <script src="./js/ads.js?v=135" defer></script>
+  <script src="./js/simulation.js?v=135" defer></script>
+  <script src="./js/map.js?v=135" defer></script>
+  <script src="./js/settings-ui.js?v=135" defer></script>
+  <script src="./js/browser-navigation.js?v=135" defer></script>
+  <script src="./js/instagram-ui.js?v=135" defer></script>
+  <script src="./js/cloud-ui.js?v=135" defer></script>
+  <script src="./js/computer.js?v=135" defer></script>
+  <script src="./js/browser-ui.js?v=135" defer></script>
+  <script src="./js/phishing-ui.js?v=135" defer></script>
+  <script src="./js/mitm-ui.js?v=135" defer></script>
+  <script src="./js/mail-ui.js?v=135" defer></script>
+  <script src="./js/privacy-ui.js?v=135" defer></script>
+  <script src="./js/auth-ui.js?v=135" defer></script>
+  <script src="./js/ads-ui.js?v=135" defer></script>
+  <script src="./js/packet-ui.js?v=135" defer></script>
+  <script src="./js/app.js?v=135" defer></script>
 </head>
 <body>
   <main class="workspace">
@@ -60,8 +60,10 @@
         <div class="device-overlay" id="device-overlay" hidden>
           <section class="device-window" id="device-content" role="dialog" aria-modal="false" aria-labelledby="device-title" tabindex="-1">
             <div class="device-window-bar">
+              <h2 class="device-window-title" id="device-title"></h2>
               <button class="device-close" data-action="close-device" aria-label="Zavřít informace o zařízení a vrátit se k mapě"><span aria-hidden="true">×</span></button>
             </div>
+            <div class="device-controls" id="device-controls" hidden></div>
             <div class="device-body" id="device-body"></div>
           </section>
         </div>

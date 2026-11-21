@@ -15,6 +15,7 @@ function finish(sim) {
   assert.notEqual(sim.status,'running');return events;
 }
 function run(sim,type,payload={}) {assert(sim.start(type,payload));return finish(sim);}
+function until(sim,predicate) {for(let i=0;!predicate()&&sim.status==='running'&&i<4000;i++)sim.advanceFrame();assert(predicate());}
 function cloud(sim,op='list',server='cloud',device='laptop',extra={}) {
   return run(sim,'cloud',{device,server,request:{op,...extra}});
 }
@@ -69,21 +70,23 @@ test('Hosting customers share a switch but keep separate stored pages and server
   assert.deepEqual(net.hostedSites,stored,'A library request or power change does not overwrite another customer’s files');
 });
 
-test('Replication transports a complete UTF-8 snapshot and ACLs between independent centers before publishing it',()=> {
+test('Automatic replication transports a complete UTF-8 snapshot and ACLs before publishing it',()=> {
   const sim=new Simulation(),text='Žluťoučký kůň 🙂 '.repeat(40),file=upload(sim,text),storage=sim.net.cloud;
-  cloud(sim,'permissions','cloud','laptop',{fileId:file.id,permission:'read',aclVersion:file.aclVersion});
-  assert(!storage.replicaCurrent());assert(!storage.replica.files.has(file.id));
-  assert(sim.start('replicate'));let partial=false;const events=[];
+  assert(sim.start('cloud',{device:'laptop',request:{op:'permissions',fileId:file.id,permission:'read',aclVersion:file.aclVersion}}));
+  until(sim,()=>!!sim.replicaResult);
+  assert.equal(storage.clients.laptop.state,'ready');assert(!storage.replicaCurrent());
+  assert.equal(storage.replica.files.get(file.id).permissions.matej,undefined);
+  let partial=false;const events=[];
   for(let i=0;sim.status==='running'&&i<4000;i++) {
     sim.advanceFrame();events.push(...structuredClone(sim.frame));
-    const delivered=[...sim.packets.values()].filter(p=>p.state==='delivered');
-    if(delivered.length&&delivered.length<sim.packets.size){partial=true;assert(!storage.replica.files.has(file.id));}
+    const packets=[...sim.packets.values()].filter(p=>p.kind==='cloud-replica'),delivered=packets.filter(p=>p.state==='delivered');
+    if(delivered.length&&delivered.length<packets.length){partial=true;assert.equal(storage.replica.files.get(file.id).permissions.matej,undefined);}
   }
   assert.equal(sim.status,'success');assert(partial);assert(storage.replicaCurrent());
   assert.deepEqual(storage.replica.files.get(file.id),file);assert.notEqual(storage.replica.files.get(file.id),file);
   assert(events.some(e=>e.kind==='hop'&&e.link==='cloud-uplink'));
   assert(events.some(e=>e.kind==='hop'&&e.link==='replica-uplink'));
-  const packets=[...sim.packets.values()];assert(packets.length>1);
+  const packets=[...sim.packets.values()].filter(p=>p.kind==='cloud-replica');assert(packets.length>1);
   assert(packets.every(p=>p.kind==='cloud-replica'&&p.src==='203.0.113.140'&&p.dst==='203.0.113.204'&&p.natHistory.length===0));
   const snapshot=new Uint8Array(packets[0].payload.totalBytes);
   for(const p of packets)snapshot.set(p.payload.bytes,p.seq-1001);
@@ -93,7 +96,7 @@ test('Replication transports a complete UTF-8 snapshot and ACLs between independ
 test('The second center serves current copies with exact permissions even while the primary is offline',()=> {
   const sim=new Simulation(),file=upload(sim);
   cloud(sim,'permissions','cloud','laptop',{fileId:file.id,permission:'read',aclVersion:file.aclVersion});
-  run(sim,'replicate');sim.net.toggleLink('cloud-uplink');
+  sim.net.toggleLink('cloud-uplink');
   const events=cloud(sim,'download','cloud-backup','friend',{fileId:file.id});
   assert.equal(sim.status,'success');assert.equal(sim.net.cloud.local.friend.at(-1).content,file.content);
   assert(events.some(e=>e.kind==='deliver'&&e.node==='cloud-backup'));
@@ -106,18 +109,64 @@ test('The second center serves current copies with exact permissions even while 
 
 test('A stale copy cannot bypass a revoked ACL; synchronization applies the new rights',()=> {
   const sim=new Simulation(),file=upload(sim),storage=sim.net.cloud;
-  cloud(sim,'permissions','cloud','laptop',{fileId:file.id,permission:'read',aclVersion:file.aclVersion});run(sim,'replicate');
-  cloud(sim,'permissions','cloud','laptop',{fileId:file.id,permission:'none',aclVersion:file.aclVersion});
+  cloud(sim,'permissions','cloud','laptop',{fileId:file.id,permission:'read',aclVersion:file.aclVersion});
+  assert(sim.start('cloud',{device:'laptop',request:{op:'permissions',fileId:file.id,permission:'none',aclVersion:file.aclVersion}}));
+  until(sim,()=>file.permissions.matej==='none');sim.net.toggleNode('cloud');finish(sim);
   cloud(sim,'download','cloud-backup','friend',{fileId:file.id});assert.equal(sim.status,'failed');assert.match(storage.clients.friend.message,/503/);
-  run(sim,'replicate');cloud(sim,'download','cloud-backup','friend',{fileId:file.id});assert.equal(sim.status,'failed');assert.match(storage.clients.friend.message,/403/);
+  sim.net.toggleNode('cloud');sim.advanceFrame();finish(sim);assert(storage.replicaCurrent());
+  cloud(sim,'download','cloud-backup','friend',{fileId:file.id});assert.equal(sim.status,'failed');assert.match(storage.clients.friend.message,/403/);
   assert(!storage.local.friend.some(f=>f.cloudId===file.id));
 });
 
-test('Interrupted synchronization preserves the last complete copy and can be repeated without partial data',()=> {
-  const sim=new Simulation(),storage=sim.net.cloud;upload(sim);const before=structuredClone(storage.replica.files);
-  assert(sim.start('replicate'));
-  for(let i=0;![...sim.packets.values()].some(p=>p.state==='delivered')&&i<1000;i++)sim.advanceFrame();
-  sim.net.toggleLink('replica-server');finish(sim);assert.equal(sim.status,'failed');assert.deepEqual(storage.replica.files,before);
-  assert(!storage.replicaCurrent());sim.net.toggleLink('replica-server');assert(sim.repeat());finish(sim);
+test('Interrupted automatic synchronization preserves the complete copy and retries after recovery',()=> {
+  const sim=new Simulation(),storage=sim.net.cloud,before=structuredClone(storage.replica.files);
+  assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Přerušená kopie.txt',content:'Celý text '.repeat(100)}}));
+  until(sim,()=>[...sim.packets.values()].some(p=>p.kind==='cloud-replica'&&p.state==='delivered'));
+  sim.net.toggleLink('replica-server');finish(sim);assert.equal(sim.status,'success');assert.equal(storage.clients.laptop.state,'ready');assert.deepEqual(storage.replica.files,before);
+  assert(!storage.replicaCurrent());assert.equal(storage.replica.state,'pending');
+  for(let i=0;i<5;i++)assert.equal(sim.advanceFrame(),null);
+  sim.net.toggleLink('replica-server');sim.advanceFrame();assert.equal(sim.status,'running');finish(sim);
   assert.equal(sim.status,'success');assert(storage.replicaCurrent());assert.deepEqual(storage.replica.files,storage.files);
+});
+
+test('A lost acknowledgement and an offline client do not cancel automatic replication of a committed write',()=>{
+  const sim=new Simulation(),storage=sim.net.cloud,initial=storage.files.size;
+  assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Bez potvrzení.txt',content:'Data už převzal server.'}}));
+  until(sim,()=>storage.files.size>initial);
+  sim.net.setAccess('laptop','offline');sim.connectionChanged('laptop');sim.advanceFrame();finish(sim);
+  assert.equal(sim.status,'failed');assert.equal(storage.clients.laptop.state,'error');
+  assert(storage.replicaCurrent());assert.deepEqual(storage.replica.files,storage.files);
+  assert([...sim.packets.values()].some(p=>p.kind==='cloud-replica'&&p.state==='delivered'));
+});
+
+test('A newer server change during automatic replication triggers another complete snapshot',()=>{
+  const sim=new Simulation(),storage=sim.net.cloud;
+  assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Souběžná změna.txt',content:'První verze'}}));
+  until(sim,()=>[...sim.packets.values()].some(p=>p.kind==='cloud-replica'&&p.state==='delivered'));
+  const file=[...storage.files.values()].at(-1);
+  const result=storage.handle('laptop',{op:'upload',fileId:file.id,version:file.version,name:file.name,content:'Novější verze 🙂'});
+  assert.equal(result.status,200);finish(sim);
+  assert(storage.replicaCurrent());assert.equal(storage.replica.files.get(file.id).content,'Novější verze 🙂');
+  assert.equal(storage.replica.files.get(file.id).version,2);
+});
+
+test('Reads, rejected writes and repeating a confirmed write do not cause redundant replication',()=>{
+  const sim=new Simulation(),storage=sim.net.cloud,file=upload(sim),revision=storage.revision,count=storage.files.size;
+  assert.equal(sim.lastAction.type,'cloud');assert(sim.repeat());finish(sim);
+  assert.equal(storage.revision,revision);assert.equal(storage.files.size,count);
+  assert(![...sim.packets.values()].some(p=>p.kind==='cloud-replica'));
+  cloud(sim,'list');assert(![...sim.packets.values()].some(p=>p.kind==='cloud-replica'));
+  cloud(sim,'download','cloud','friend',{fileId:file.id});assert.equal(sim.status,'failed');
+  assert(![...sim.packets.values()].some(p=>p.kind==='cloud-replica'));assert(storage.replicaCurrent());
+});
+
+test('Repeating during automatic replication restarts the original request and never publishes a partial copy',()=>{
+  const sim=new Simulation(),storage=sim.net.cloud,before=structuredClone(storage.replica.files);
+  assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Opakování.txt',content:'Snímek, který se nesmí zveřejnit napůl. '.repeat(20)}}));
+  until(sim,()=>[...sim.packets.values()].some(p=>p.kind==='cloud-replica'&&p.state==='delivered'));
+  assert.deepEqual(storage.replica.files,before);
+  const revision=storage.revision,count=storage.files.size;
+  sim.status='stopped';assert(sim.repeat());finish(sim);
+  assert.equal(sim.status,'success');assert.equal(storage.revision,revision);assert.equal(storage.files.size,count);
+  assert.equal(storage.clients.laptop.state,'ready');assert(storage.replicaCurrent());assert.deepEqual(storage.replica.files,storage.files);
 });

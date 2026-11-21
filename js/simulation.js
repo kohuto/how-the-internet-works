@@ -33,6 +33,7 @@
       this.net=network;this.queue=[];this.packets=new Map();this.current=null;this.status='idle';this.lastAction=null;this.action=null;this.run=0;this.serial=0;this.steps=0;this.tcpStream=null;this.totalBytes=0;this.packetOrders=new Map();
       this.time=0;this.order=0;this.linkReady=new Map();this.frame=[];this.phase='upload';this.vpn=new VPNTransport(this);this.phishing=new PhishingScenario(this);this.mitm=new MITMScenario(this);this.mail=new MailScenario(this);this.privacy=new PrivacyService(this.net);this.auth=new AuthService(this);this.ads=new AdsScenario(this);
       this.connectionProfiles=structuredClone(this.net.connectionProfiles);
+      this.replicaResult=null;this.replicaAttempt=null;
     }
     clientId() {return this.action?.payload.device||'laptop';}
     clientName() {return this.net.nodes[this.clientId()].name;}
@@ -42,6 +43,7 @@
     instagramStatus(status,extra={}) {const entry=this.instagramEntry();if(entry)Object.assign(entry,{status},extra);}
     browser() {return this.net.browserFor(this.clientId());}
     connectionChanged(id) {
+      if(this.replicaResult)return; // A client disconnect does not interrupt server-to-server replication.
       if(this.status!=='running')return;
       const p=[...this.packets.values()].find(p=>['waiting','transit'].includes(p.state)&&(p.source===id||p.destination===id));
       if(p||((!this.packets.size||(['chatbot','web','phish-results'].includes(this.action?.type)||this.mail.accepts(this.action?.type)))&&this.clientId()===id))this.failure(`${this.net.nodes[id].name} změnil připojení. Původní přenos je ukončený; spusť akci znovu.`,p,id);
@@ -104,6 +106,8 @@
         Object.assign(this.chatTurn(),{state:'error',error:'Původní pokus byl ukončen. Odešli dotaz znovu.'});
         if(this.net.chatbot.server.state==='processing')this.net.chatbot.server.state='interrupted';
       }
+      if(this.replicaResult)Object.assign(this.net.cloud.replica,{state:'pending',message:'Přerušená automatická synchronizace se znovu připraví po dokončení požadavku.'});
+      this.replicaResult=null;this.replicaAttempt=null;
       this.auth.cancel();this.ads.reset();this.mitm.reset();this.vpn.reset();for(const c of Object.values(this.net.vpn.clients))c.path=[];
       this.run++;this.serial=0;this.steps=0;this.packets.clear();this.packetOrders.clear();this.queue=[];this.tcpStream=null;this.current=null;this.totalBytes=0;
       this.time=0;this.order=0;this.linkReady.clear();this.frame=[];
@@ -153,6 +157,28 @@
         this.net.instagram.state='queued';this.wait('Zpráva čeká na Instagramu','Pro doručení musí být dostupné připojení příjemce.','instagram');return this.resumePending();
       }
       return this.start(this.lastAction.type,this.lastAction.payload);
+    }
+    resumeReplication() {
+      const storage=this.net.cloud;
+      if(this.status==='running'||this.status==='waiting'||this.replicaResult||!this.net.featureEnabled('cloud')||storage.replicaCurrent())return false;
+      if(!this.net.nodeAvailable('cloud')||!this.net.nodeAvailable('cloud-backup'))return false;
+      if(!this.net.physicalCanReach('cloud','cloud-backup')) {
+        Object.assign(storage.replica,{state:'pending',message:'Automatická synchronizace čeká na obnovení spojení mezi centry.'});return false;
+      }
+      const attempt=`${storage.revision}:${this.net.version}`;
+      if(this.replicaAttempt===attempt)return false;
+      this.replicaAttempt=attempt;this.replicaResult={status:this.status,current:this.current};
+      this.action??={type:'replicate',payload:{automatic:true}};
+      this.queue=[];this.tcpStream=null;this.linkReady.clear();this.status='running';
+      Object.assign(storage.replica,{state:'sending',message:'Cloud automaticky připravuje kopii souborů a práv pro centrum B.'});
+      const event={kind:'replica-prepare',node:'cloud',title:'Cloud automaticky synchronizuje centrum B',description:'Změněné soubory a přístupová práva se přenesou po síti.'};
+      this.current={...event,at:this.time};this.next([event]);return true;
+    }
+    completeReplication(success,reason='') {
+      const result=this.replicaResult;this.replicaResult=null;this.tcpStream=null;this.queue=[];
+      this.status=result.status==='failed'?'failed':'success';
+      this.current=result.status==='failed'?result.current:{kind:'complete',at:this.time,node:'cloud-backup',title:success?'Cloudová data se automaticky zkopírovala do centra B':'Automatická synchronizace čeká na obnovení spojení',description:success?'Celé soubory, verze i přístupová práva dorazily do druhého centra.':`${reason} Uložení v hlavním centru zůstává zachované.`};
+      return this.current;
     }
     wait(title,description,node='instagram') {
       for(const p of this.packets.values())if(p.state==='transit'||p.state==='waiting')p.state='stopped';
@@ -280,6 +306,7 @@
       if(contiguous!==p.payload.totalBytes)return;
       const bytes=stream.bytes;
       this.net.cloud.applyReplica(JSON.parse(decoder.decode(bytes)));this.tcpStream=null;
+      if(this.replicaResult){this.completeReplication(true);return;}
       this.finish('Kopie dorazila do cloudového centra B','Soubory, verze i přístupová práva jsou zkopírované. Centrum B je může poskytovat ke čtení.','cloud-backup');
     }
     webTarget() {return this.ads.address()?.server||'web';}
@@ -402,6 +429,10 @@
     failure(reason,packet,node) {
       if(packet) {packet.state='lost';packet.location=node||packet.location;packet.visual={kind:'failure',node:packet.location};}
       for(const p of this.packets.values())if(p.state==='waiting'||p.state==='transit')p.state='stopped';
+      if(this.replicaResult) {
+        Object.assign(this.net.cloud.replica,{state:'pending',message:`${reason} Automatická synchronizace se obnoví po opravě spojení.`});
+        return this.completeReplication(false,reason);
+      }
       this.status='failed';this.queue=[];
       if(this.mail.accepts(this.action.type)&&this.mail.failure(reason))return this.current;
       if(this.phishing.accepts(this.action.type))this.phishing.failure(reason);
@@ -427,15 +458,17 @@
     }
     finish(title,description,node) {this.status='success';this.queue=[];this.current={kind:'complete',at:this.time,title,description,node,packet:this.current?.packet};return this.current;}
     advanceFrame() {
+      this.resumeReplication();
       if(this.status!=='running'||!this.queue.length)return null;
       const at=this.queue[0].at,events=[];
       do {events.push(this.advance());}while(this.status==='running'&&this.queue[0]?.at===at);
       this.frame=events;
-      if(events.length>1&&this.status==='running'&&this.action.type==='message') {
+      if(events.length>1&&this.status==='running'&&!this.replicaResult&&this.action.type==='message') {
         const connecting=this.phase.startsWith('connect-'),kind=connecting?'ig-connect':this.phase==='upload'?'message':this.phase==='delivery'?'ig-delivery':'ig-read';
         const packets=[...this.packets.values()].filter(p=>this.vpn.logical(p).kind===kind&&p.state!=='stopped'&&p.state!=='lost'),count=p=>p.payload.packetCount||1,active=packets.filter(p=>p.state==='transit').reduce((n,p)=>n+count(p),0),delivered=packets.filter(p=>p.state==='delivered').reduce((n,p)=>n+count(p),0),total=packets.reduce((n,p)=>n+count(p),0);
         this.current={...events.at(-1),kind:'parallel',title:`${connecting?'Otevření spojení k Instagramu':this.phase==='upload'?`${this.instagramName(this.net.instagram.senderDevice)} → Instagram`:this.phase==='delivery'?`Instagram → ${this.instagramName(this.instagramRecipient())}`:'Potvrzení přečtení'} · na cestě ${active} z ${total}`,description:`Doručeno ${delivered} / ${total}. ${events.at(-1).title}`};
       }
+      this.resumeReplication();
       return this.current;
     }
     advance() {
