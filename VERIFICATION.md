@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Jediný scénář Útočník v kavárně · 21. listopadu 2026
+
+Volby Kavárna a Útočník v kavárně sloučeny do jediné volby Útočník v kavárně v části Části sítě. Zahrnuje celou kavárnu: notebook hosta, veřejný přístupový bod, útočníkův hotspot, router a potřebné páteřní přípojky. Vypnutí odstraní celou oblast; společný router R zůstává, pokud jej potřebuje zapnutý Cloud nebo VPN. Scénář nevyžaduje domácí Wi-Fi, e-mail ani TLS. Host dál začíná na běžné Wi-Fi; zapnutí a použití napodobeného hotspotu zůstává ovládáním uvnitř scénáře. Nastavení má 19 rozšíření. README a prostředky aktualizovány na `v=140`.
+
+Prošlo **62 souvisejících testů** nastavení, útoku v kavárně, páteřní sítě, geometrie mapy a chytrých křižovatek. Nový integrační test zapne jediný scénář bez dalších závislostí, ověří HTTP přes útočníka, návrat na běžnou Wi-Fi, vypnutí celé oblasti při zachování Cloudu a pošty i neplatnost staré samostatné volby. Úplná sestava stále obsahuje 84 zařízení a 101 spojů. Syntaxe obou změněných skriptů prošla.
+
+V prohlížeči při 1047 × 858 px dostupná jediná volba, která zapne všechna čtyři zařízení kavárny. Přes napodobený hotspot prošel HTTP přenos a změněný nadpis dorazil k hostovi; přehled útočníka ukázal skutečný zásah do odpovědi. Návrat na veřejnou Wi-Fi byl dostupný. Vypnutí scénáře skrylo kavárnu i její vyhrazené páteřní uzly, přičemž zapnutý Cloud, jeho záloha a společný router zůstaly. Při 320 × 568 px jedna volba bez přetékání, zapnutí přidá všechna čtyři zařízení a vypnutí vrátí základních 14. Konzole obou náhledů bez chyb a varování.
+
+
 ## Odstranění tří doprovodných textů Správy webu · 21. listopadu 2026
 
 Ze Správy webu odstraněna doména pod názvem aplikace, vysvětlení Načti údaje uložené na podvodném serveru a poznámka Používají se pouze předpřipravené ukázkové údaje. Jejich nepoužívané styly odstraněny; adresa odkazu v kartě Falešná knihovna zůstává. Prostředky `v=139`.

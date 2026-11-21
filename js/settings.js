@@ -5,7 +5,7 @@
     {id:'friend',group:'areas',label:'Matějův byt',description:'Druhý notebook s vlastní domácí sítí.',regions:['friend']},
     {id:'satellite',group:'areas',label:'Chata se satelitem',description:'Notebook na chatě, anténa, satelit LEO a pozemní stanice.',regions:['cabin','satellite']},
     {id:'mobile',group:'areas',label:'Mobilní síť a BTS',description:'Dvě základnové stanice a síť mobilního operátora.',requires:['phone'],regions:['mobile']},
-    {id:'cafe',group:'areas',label:'Kavárna',description:'Notebook hosta a veřejná Wi-Fi s vlastní přípojkou.',nodes:['cafe','cafe-ap','cafe-router']},
+    {id:'mitm',group:'areas',label:'Útočník v kavárně',description:'Kavárna s notebookem hosta, veřejnou Wi-Fi a útočníkovým hotspotem. Porovnání HTTP a HTTPS.',regions:['cafe']},
     {id:'hacker',group:'areas',label:'Hackerské doupě',description:'Počítač útočníka, podvodný e-mail a server s falešnou knihovnou.',requires:['mail'],regions:['hacker','phish']},
     {id:'printer',group:'services',label:'Tiskárna',description:'Místní tisk z dokumentu na notebooku.',nodes:['printer']},
     {id:'dns',group:'services',label:'DNS server',description:'Překlad názvů webů na IP adresy. Bez rozšíření se tento krok vynechá.',nodes:['dns']},
@@ -18,7 +18,6 @@
     {id:'cloud',group:'services',label:'Cloud',description:'Ukládání, stahování a sdílení souborů. Hlavní i záložní datové centrum a kopírování mezi nimi.',regions:['cloud','replica']},
     {id:'vpn',group:'services',label:'VPN',description:'VPN server a volba šifrovaného tunelu v připojení.',regions:['vpn']},
     {id:'chatbot',group:'services',label:'Chatbot',description:'Dotaz a odpověď zpracovaná na vzdáleném serveru.',nodes:['chatbot']},
-    {id:'mitm',group:'services',label:'Útočník v kavárně',description:'Napodobený hotspot a porovnání HTTP a HTTPS.',requires:['cafe'],nodes:['cafe-attacker']},
     {id:'shop',group:'services',label:'E-shop',description:'Ukázkový web obchod.test.',nodes:['shop']},
     {id:'news',group:'services',label:'Zprávy',description:'Ukázkový web zpravy.test.',nodes:['news']},
     {id:'ads',group:'services',label:'Reklamní partner',description:'Společná reklama dvou webů. Tento pokus používá HTTPS a zabezpečenou cookie.',requires:['shop','news','tls','cookies'],nodes:['ads']}

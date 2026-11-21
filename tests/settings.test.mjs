@@ -111,6 +111,29 @@ test('One Cloud extension enables both centers, synchronization and reading the 
   assert(!disabled.start('replicate'));
   for(const server of ['cloud','cloud-backup'])assert(!disabled.start('cloud',{device:'laptop',server,request:{op:'list'}}));
 });
+test('One cafe attacker extension supplies both Wi-Fi paths and removes the whole cafe as a unit',()=>{
+  assert(!LAB_FEATURES.some(f=>f.id==='cafe'));
+  const settings=new LabSettings({features:['mitm']}),net=new Network(settings),sim=new Simulation(net);
+  assert.deepEqual(settings.toJSON().features,['mitm']);
+  for(const id of ['wifi','mail','tls'])assert(!settings.has(id),id);
+  const cafe=['cafe','cafe-ap','cafe-router','cafe-attacker'];
+  for(const id of [...cafe,'transit-r','transit-s','transit-t','transit-u'])assert(net.nodeAvailable(id),id);
+  assert(net.appAvailable('mitm','cafe-attacker'));assert(net.accessReady('cafe'));
+  assert.equal(net.access.cafe.hotspot,'trusted');assert.equal(net.mitm.active,false);
+  sim.mitm.configure(true,'http');assert(net.setCafeHotspot('rogue'));
+  assert(sim.start('web',{device:'cafe',address:'http://knihovna.test/'}));
+  const events=finish(sim);assert.equal(net.cafeBrowser.content,globalThis.InternetLab.MITM_TITLE);
+  for(const link of ['cafe-twin','cafe-relay','cafe-uplink'])assert(events.some(e=>e.kind==='hop'&&e.link===link),link);
+  assert(net.setCafeHotspot('trusted'));assert(sim.start('web',{device:'cafe',address:'http://knihovna.test/'}));
+  const direct=finish(sim);assert.equal(net.cafeBrowser.content,net.server.title);assert(!direct.some(e=>e.kind==='mitm'));
+  const disabled=new Simulation(new Network(new LabSettings({features:['mitm','cloud','mail']}).toggle('mitm',false)));
+  for(const id of [...cafe,'transit-s','transit-t','transit-u'])assert(!disabled.net.nodeAvailable(id),id);
+  for(const id of ['cloud','cloud-backup','transit-r','mail','friend'])assert(disabled.net.nodeAvailable(id),id);
+  assert(!disabled.net.appAvailable('mitm','cafe-attacker'));assert(!disabled.net.setCafeHotspot('rogue'));
+  assert(!disabled.start('web',{device:'cafe',address:'http://knihovna.test/'}));
+  const removed=new Network(new LabSettings({features:['cafe']}));
+  for(const id of cafe)assert(!removed.nodeAvailable(id),id);
+});
 test('Every optional area can stand alone with its dependencies; all restores the complete map',()=>{
   for(const f of LAB_FEATURES){
     const net=network([f.id]);
@@ -133,7 +156,7 @@ test('Phone Wi-Fi and mobile access only offer enabled connections',()=>{
 });
 test('One household Wi-Fi option gates all three access points without enabling hidden homes',()=>{
   for(const enabled of [false,true]){
-    const net=network(['friend','satellite','cafe',...(enabled?['wifi']:[])]);
+    const net=network(['friend','satellite','mitm',...(enabled?['wifi']:[])]);
     for(const [device,ap] of [['laptop','ap'],['friend','friend-ap'],['cabin','cabin-ap']]){
       assert.equal(net.nodeAvailable(ap),enabled,ap);
       assert.equal(net.accessModeAvailable(device,'wifi'),enabled,device);
@@ -155,9 +178,9 @@ test('One household Wi-Fi option gates all three access points without enabling 
   assert.equal(mobile.access.phone.mode,'cellular');assert(mobile.accessReady('phone'));
   for(const ap of ['ap','friend-ap','cabin-ap'])assert(!mobile.nodeAvailable(ap),ap);
 });
-test('Home, Matej and cabin load the web over cable or optional Wi-Fi; cafe stays independent',()=>{
+test('Home, Matej and cabin load the web over cable or optional Wi-Fi; the cafe scenario keeps its own Wi-Fi',()=>{
   for(const wifi of [false,true])for(const device of ['laptop','friend','cabin','cafe']){
-    const net=network(['friend','satellite','cafe',...(wifi?['wifi']:[])]),sim=new Simulation(net);
+    const net=network(['friend','satellite','mitm',...(wifi?['wifi']:[])]),sim=new Simulation(net);
     if(wifi&&device!=='cafe')net.setAccess(device,'wifi');
     assert(sim.start('web',{device,address:'http://knihovna.test/'}));
     const events=finish(sim),firstHop=events.find(e=>e.kind==='hop'&&e.from===device);
