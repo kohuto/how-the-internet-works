@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Jednodušší aplikace Phishing · 21. listopadu 2026
+
+Z aplikace v počítači útočníka odstraněn podtitulek Počítač útočníka · připravený scénář, celý čtyřbodový přehled postupu a pomocná tlačítka Otevřít Poštu u příjemce a Sledovat přenos v mapě. Nepoužívaná pomocná funkce a styly přehledu kroků odstraněny. Název, výběr příjemce, náhled e-mailu, skutečné odesílání a načítání záznamů ze serveru zachovány. Prostředky `v=137`.
+
+Prošlo všech **14 testů phishingu** a kontrola syntaxe změněného skriptu. V prohlížeči při 1047 × 858 px ověřena nepřítomnost všech označených prvků a celý scénář: odeslání e-mailu, otevření Gmailu přes mapu, načtení zprávy, falešná knihovna, odeslání pevného ukázkového přihlášení a získání správného záznamu počítačem útočníka. Při 320 × 568 px bez vodorovného přetékání stránky i aplikace; zbývající tlačítka jsou dostupná posouváním a tlačítko načtení má výšku 40 px. Konzole obou náhledů bez chyb a varování.
+
+
 ## Podvodný web jako součást Hackerského doupěte · 21. listopadu 2026
 
 Samostatné rozšíření Podvodný web odstraněno z katalogu nastavení. Hackerské doupě nyní přímo zahrnuje také oblast cizího hostingu, její router, switch a podvodný server; potřebná pošta a Matějův byt se přidávají stejně jako dříve. Závislosti páteřní sítě upraveny podle nové společné volby. Ostatní současné scénáře podvodný hosting samostatně nevyžadují; Útočník v kavárně zůstává nezávislý. Nastavení má 20 rozšíření, README a prostředky aktualizovány na `v=136`.
