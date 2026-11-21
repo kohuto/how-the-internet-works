@@ -260,8 +260,8 @@
     return p?globalThis.InternetLab.packetView(net,p):'<h2 id="packet-title">Paket už není součástí tohoto pokusu.</h2><p class="hint">Vyber paket z právě probíhajícího přenosu.</p>';
   }
   function pruneUnavailable(root) {
-    root.querySelectorAll('[data-select-node], [data-select-link], [data-ads-open], [data-ads-launch]').forEach(el=>{
-      if((el.dataset.adsOpen&&el.dataset.adsOpen!=='library'&&!net.nodeAvailable(el.dataset.adsOpen))||(el.dataset.adsLaunch&&!net.nodeAvailable(el.dataset.adsLaunch))||el.dataset.selectNode&&!net.nodeAvailable(el.dataset.selectNode)||el.dataset.selectLink&&!net.linkAvailable(net.links[el.dataset.selectLink]))el.remove();
+    root.querySelectorAll('[data-select-node], [data-select-link], [data-ads-open]').forEach(el=>{
+      if((el.dataset.adsOpen&&el.dataset.adsOpen!=='library'&&!net.nodeAvailable(el.dataset.adsOpen))||el.dataset.selectNode&&!net.nodeAvailable(el.dataset.selectNode)||el.dataset.selectLink&&!net.linkAvailable(net.links[el.dataset.selectLink]))el.remove();
     });
   }
   function applySettings(next) {
@@ -487,7 +487,6 @@
     if(b.dataset.action==='phish-report'){if(sim.status==='running')return;sim.phishing.report(ui.monitorDevice);notify('Zpráva je označená jako phishing. Odkaz a přihlášení tohoto pokusu jsou zablokované.');render();return;}
     if(b.dataset.action==='phish-open'){const m=net.phishing.clients[ui.monitorDevice].inbox;if(!m||sim.phishing.blocked(ui.monitorDevice,m.id))return;ui[addressKey(ui.monitorDevice)]=m.link;openComputerApp('web');startAction('web');return;}
     if(b.dataset.action==='phish-legit'){ui[addressKey(ui.monitorDevice)]='https://knihovna.test';openComputerApp('web');startAction('web');return;}
-    if(b.dataset.adsLaunch){if(sim.status==='running')return;ui.monitorDevice='laptop';ui.tab='web';select('node','laptop');const address=b.dataset.adsLaunch==='shop'?'https://obchod.test':'https://zpravy.test';ui.address=address;startAction('web',{address});return;}
     if(b.dataset.adsOpen||b.dataset.adsTopic){const address=b.dataset.adsTopic?'https://obchod.test/?tema='+b.dataset.adsTopic:b.dataset.adsOpen==='shop'?'https://obchod.test':b.dataset.adsOpen==='news'?'https://zpravy.test':'https://knihovna.test';ui[addressKey(ui.monitorDevice)]=address;startAction('web',{address});return;}
     if(b.dataset.action==='ads-clear'){if(sim.ads.clear(ui.monitorDevice))render();return;}
     if(b.dataset.authMode){ui.authDraft[ui.monitorDevice].mode=b.dataset.authMode;render();return;}

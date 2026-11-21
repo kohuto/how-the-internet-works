@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Odstranění otevíracích tlačítek z detailů reklamního scénáře · 21. listopadu 2026
+
+Z detailů e-shopu a Zpráv odstraněno tlačítko Otevřít web na notebooku. Ze společného reklamního serveru odstraněna obě tlačítka Otevřít e-shop na notebooku a Otevřít zprávy na notebooku včetně jejich prázdného obalu. Odstraněna také nepoužívaná obsluha těchto zkratek a jejich filtrování; weby se otevírají prostřednictvím prohlížeče. Prostředky `v=149`.
+
+Prošlo všech **16 testů** reklamního scénáře a kontrola syntaxe obou upravených skriptů. V prohlížeči při 763 × 743 a 320 × 568 px ověřeny detaily všech tří serverů bez odstraněných tlačítek, se zachovanou doménou, nápovědou a ovládáním napájení. Na úzké obrazovce obsah nepřetéká. Načtení e-shopu přes záložku v prohlížeči včetně přijetí reklamy uspělo. Konzole obou náhledů bez chyb a varování.
+
+
 ## Jediný scénář Personalizovaná reklama · 21. listopadu 2026
 
 Samostatné volby E-shop, Zprávy a Reklamní partner sloučeny do jediné volby **Personalizovaná reklama**. Zapíná oba weby, společný reklamní server, router, switch a potřebné páteřní přípojky. Automaticky vyžaduje TLS / HTTPS a Cookies. Vypnutí odebere celou větev, připravené adresy i nabídky obou webů; společné páteřní uzly zůstávají při zapnutém hackerském doupěti. Dostupnost záložek, zkratek a přechodů mezi weby i otevření ze serverů se řídí dostupností zařízení. Odstraněné samostatné volby už nelze vybrat. Nastavení obsahuje 18 rozšíření, úplná sestava dál 84 zařízení a 101 spojů. README aktualizováno, prostředky `v=148`.
