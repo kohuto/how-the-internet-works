@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Odstranění odkazu na mapu z partnerských webů · 21. listopadu 2026
+
+Ze společné šablony e-shopu a Zpráv odstraněno tlačítko Sledovat požadavky v mapě. Ostatní navigace, kategorie a reklamní přenosy zůstávají; prostředky `v=147`.
+
+Prošlo všech **16 testů** reklamního scénáře a kontrola syntaxe upraveného skriptu. V prohlížeči při 1047 × 858 px ověřeno samostatné rozšíření E-shop přes HTTP, načtení stránky, změna kategorie na Hudbu a absence odkazu. Při 320 × 568 px ověřen e-shop se zapnutým reklamním partnerem přes HTTPS, přijetí reklamy, přechod na Zprávy a načtení reklamy i tam. Oba weby postrádají odstraněný odkaz a nepřetékají vodorovně. Konzole obou náhledů bez chyb a varování.
+
+
 ## Odstranění vnitřního nadpisu MITM · 21. listopadu 2026
 
 Z aplikace odstraněn blok s ikonou a nadpisem MITM v kavárně. Obsah začíná kartou Hotspot bez prázdného místa po nadpisu; název MITM v horní liště aplikace zůstává. Odstraněn nepoužívaný styl ikony, prostředky `v=146`.
