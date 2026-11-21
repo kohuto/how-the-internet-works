@@ -65,10 +65,10 @@
   }
   function openComputerApp(app) {
     if(!net.appAvailable(app,ui.monitorDevice))return;
-    if(!['desktop','web','print','message','cloud','chatbot','network','mail','attack','mitm'].includes(app))return;
+    if(!['desktop','web','print','message','cloud','chatbot','network','vpn','mail','attack','mitm'].includes(app))return;
     if(app!=='mail')clearMailComposer();
-    if(ui.monitorDevice==='cafe-attacker'){if(!['desktop','mitm'].includes(app))return;ui.cafeAttackerTab=app;}else if(ui.monitorDevice==='cafe'){if(!['desktop','web','network','mail'].includes(app))return;ui.cafeTab=app;}else if(ui.monitorDevice==='hacker'){if(!['desktop','mail','attack','network'].includes(app))return;ui.hackerTab=app;}else if(ui.monitorDevice==='cabin'){if(app==='print')return;ui.cabinTab=app;}else if(ui.monitorDevice==='friend'){if(!['desktop','web','message','cloud','chatbot','network','mail'].includes(app))return;ui.friendTab=app;}else if(ui.monitorDevice==='phone'){if(app==='print')return;ui.phoneTab=app;}else ui.tab=app;syncReader();render();
-    const input=app==='cloud'?$('.drive-scroll'):$('#monitor-content [data-field]');
+    if(ui.monitorDevice==='cafe-attacker'){if(!['desktop','mitm'].includes(app))return;ui.cafeAttackerTab=app;}else if(ui.monitorDevice==='cafe'){if(!['desktop','web','network','vpn','mail'].includes(app))return;ui.cafeTab=app;}else if(ui.monitorDevice==='hacker'){if(!['desktop','mail','attack','network','vpn'].includes(app))return;ui.hackerTab=app;}else if(ui.monitorDevice==='cabin'){if(app==='print')return;ui.cabinTab=app;}else if(ui.monitorDevice==='friend'){if(!['desktop','web','message','cloud','chatbot','network','vpn','mail'].includes(app))return;ui.friendTab=app;}else if(ui.monitorDevice==='phone'){if(app==='print')return;ui.phoneTab=app;}else ui.tab=app;syncReader();render();
+    const input=app==='cloud'?$('.drive-scroll'):app==='vpn'?$('#monitor-content [data-action="vpn-toggle"]'):$('#monitor-content [data-field]');
     (input||$('#monitor-content')).focus({preventScroll:true});
     if(app==='cloud'&&ui.cloud[ui.monitorDevice].tab==='remote'&&!net.cloud.clients[ui.monitorDevice].listed&&net.cloud.clients[ui.monitorDevice].state==='idle'&&sim.status!=='running')startCloud({op:'list'});
   }
@@ -293,6 +293,7 @@
     const fullComputerKey=key+':'+browserKey;
     const computerDetails=fullComputerKey===computerViewKey?[...document.querySelectorAll('.computer-app-body details[open]')].map(d=>d.dataset.detailKey||d.querySelector('summary')?.textContent):[];
     const computerScroll=fullComputerKey===computerViewKey?$('.computer-app-body')?.scrollTop||0:0;
+    const taskbarScroll=fullComputerKey===computerViewKey?$('.computer-taskbar')?.scrollLeft||0:0;
     const mailScroll=fullComputerKey===computerViewKey?$('.gmail-scroll')?.scrollTop||0:0;
     const oldDrive=$('.drive-scroll'),driveScroll=fullComputerKey===computerViewKey&&oldDrive?{key:oldDrive.dataset.viewKey,top:oldDrive.scrollTop}:null;
     const cloudTextScroll=field==='cloudContent'?focused.scrollTop:null;
@@ -311,6 +312,12 @@
     document.querySelectorAll('.computer-app-body details').forEach(d=>{if(computerDetails.includes(d.dataset.detailKey||d.querySelector('summary')?.textContent))d.open=true;});
     if($('.real-browser'))$('.real-browser').style.setProperty('--browser-panel-height',`${Math.max(80,$('.computer-app-body').clientHeight-$('.browser-chrome').offsetHeight-12)}px`);
     if($('.computer-app-body'))$('.computer-app-body').scrollTop=computerScroll;
+    const taskbar=$('.computer-taskbar'),activeApp=taskbar?.querySelector('.taskbar-app.active');
+    if(taskbar) {
+      taskbar.scrollLeft=taskbarScroll;
+      if(activeApp&&activeApp.offsetLeft<taskbar.scrollLeft)taskbar.scrollLeft=activeApp.offsetLeft;
+      else if(activeApp&&activeApp.offsetLeft+activeApp.offsetWidth>taskbar.scrollLeft+taskbar.clientWidth)taskbar.scrollLeft=activeApp.offsetLeft+activeApp.offsetWidth-taskbar.clientWidth+10;
+    }
     if($('.gmail-scroll'))$('.gmail-scroll').scrollTop=mailScroll;
     const drive=$('.drive-scroll');if(drive&&driveScroll?.key===drive.dataset.viewKey)drive.scrollTop=driveScroll.top;
     const chat=$('.ig-conversation, .chatbot-conversation');if(chat)chat.scrollTop=chat.dataset.turnCount==='0'?0:!chatScroll||chatScroll.bottom||chat.dataset.turnCount!==chatScroll.turns?chat.scrollHeight:chatScroll.top;
@@ -527,6 +534,17 @@
       const file=saveLocal();if(!file)return;
       startCloud({op:'upload',name:file.name,content:file.content,...(b.dataset.replace?{fileId:file.cloudId,version:file.cloudVersion}:{})},file.id);return;
     }
+    if(b.dataset.action==='vpn-toggle') {
+      const id=b.dataset.id;
+      if(id!==ui.monitorDevice||!net.appAvailable('vpn',id))return;
+      if(net.setVPN(id,!net.vpn.clients[id].enabled)) {
+        sim.connectionChanged(id);if(sim.status!=='running')stop();syncReader();
+        notify(`VPN ${net.vpn.clients[id].enabled?'zapnutá':'vypnutá'} pro ${net.nodes[id].name}.`);
+        if(!resumeMessage())render();
+        $(`#monitor-content [data-action="vpn-toggle"][data-id="${id}"]`)?.focus({preventScroll:true});
+      }
+      return;
+    }
     if(b.dataset.accessMode){changeAccess(b.dataset.id,b.dataset.accessMode);return;}
     if(b.dataset.computerApp){openComputerApp(b.dataset.computerApp);return;}
     if(b.dataset.action==='close-monitor'||b.dataset.action==='show-map'){closeMonitor();return;}
@@ -553,7 +571,6 @@
       if(e.target.dataset.privacyHold){if(sim.status==='running')return;sim.privacy.setHold(e.target.dataset.privacyHold,e.target.checked);render();$(`[data-privacy-hold="${e.target.dataset.privacyHold}"]`)?.focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-cookie-allowed')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.browserFor(ui.monitorDevice).cookies.allowed=e.target.checked;render();$('[data-cookie-allowed]')?.focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-cookie-secure')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.server.cookies.secureOnly=e.target.checked;render();$('[data-cookie-secure]')?.focus({preventScroll:true});return;}
-      if(e.target.dataset.vpn){const id=e.target.dataset.vpn;if(net.setVPN(id,e.target.checked)){sim.connectionChanged(id);if(sim.status!=='running')stop();syncReader();notify(`VPN ${net.vpn.clients[id].enabled?'zapnutá':'vypnutá'} pro ${net.nodes[id].name}.`);if(!resumeMessage())render();$(`#monitor-content [data-vpn="${id}"]`)?.focus({preventScroll:true});}return;}
       if(e.target.hasAttribute('data-web-certificate')){const value=e.target.value;Object.assign(net.server.certificate,{name:value==='wrong-name'?'jiny-web.test':'knihovna.test',valid:value!=='expired',trusted:value!=='untrusted'});render();$('#web-certificate').focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-cloud-center')){const device=ui.monitorDevice,draft=ui.cloud[device];draft.server=e.target.value;draft.permissions={};draft.view='files';Object.assign(net.cloud.clients[device],{state:'idle',catalog:[],listed:false,preview:null});if(draft.tab==='remote'&&sim.status!=='running')startCloud({op:'list'});else render();return;}
       if(e.target.dataset.cloudAccess){ui.cloud[ui.monitorDevice].permissions[e.target.dataset.cloudAccess]=e.target.value;return;}

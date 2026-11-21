@@ -35,12 +35,12 @@
 .app-web{background:linear-gradient(145deg,#e7f5e8,#b8dfc9);color:#397b64}
 .app-print{background:linear-gradient(145deg,#fff7e5,#ecd5ae);color:#a37b48}
 .app-message{background:linear-gradient(145deg,#e8f3fb,#b4d4e5);color:#467998}
-.computer-taskbar{position:absolute;inset:auto 0 0;height:46px;display:flex;align-items:center;gap:5px;padding:6px 10px;background:#edf6efeF;border-top:1px solid #ffffff70;backdrop-filter:blur(15px);z-index:2}
-.computer-taskbar button{display:flex;align-items:center;justify-content:center;gap:7px;height:33px;min-width:35px;padding:6px 9px;border:1px solid transparent;border-radius:7px;background:none;color:#638276;font-size:10px}
+.computer-taskbar{overflow-x:auto;scrollbar-width:thin;position:absolute;inset:auto 0 0;height:46px;display:flex;align-items:center;gap:5px;padding:6px 10px;background:#edf6efeF;border-top:1px solid #ffffff70;backdrop-filter:blur(15px);z-index:2}
+.computer-taskbar button{flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:7px;height:33px;min-width:35px;padding:6px 9px;border:1px solid transparent;border-radius:7px;background:none;color:#638276;font-size:10px}
 .computer-taskbar button svg{height:18px;width:18px}
 .computer-taskbar button:hover{background:#ffffffa0}
 .computer-taskbar button.active{background:#fffef5;border-color:#d0e2d1;color:#2e6f55;box-shadow:0 1px 3px #26473209}
-.taskbar-divider{height:19px;border-right:1px solid #cfdfd1;margin:0 4px}
+.taskbar-divider{flex-shrink:0;height:19px;border-right:1px solid #cfdfd1;margin:0 4px}
 .computer-connection{margin-left:auto;color:#557c69;display:grid;place-items:center;padding:7px}
 .computer-connection svg{height:17px;width:17px}
 .computer-connection.disconnected{color:#bb8267}
@@ -224,11 +224,31 @@
 @media(max-width:700px){.web-protocol-options{padding:8px;gap:5px}.web-protocol-options button{flex-wrap:wrap;gap:5px;padding:7px 6px;font-size:9px}.web-protocol-options button>span:last-child{flex-basis:100%;font-size:9px}.web-security-status{padding:9px 11px}.web-message-form>div{align-items:flex-end}.web-message-form textarea{font-size:16px}.web-message-form>div>span{max-width:100px}.computer-browser .computer-library .library-title{font-size:24px}}
 .phone-window .web-protocol-options{padding:8px;gap:5px}.phone-window .web-protocol-options button{flex-wrap:wrap;gap:5px;padding:7px 6px}.phone-window .web-protocol-options button>span:last-child{flex-basis:100%}.phone-window .web-message-form>div>span{max-width:100px}.phone-window .web-message-form>div{align-items:flex-end}
 
-/* VPN sits above the selected physical access. */
-.vpn-settings{margin:20px 0 17px;padding:16px;border:1px solid #d8cfe5;border-radius:12px;background:#f5f2f9;color:#665879}.vpn-toggle{display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer}.vpn-toggle>span{display:flex;flex-direction:column;gap:4px}.vpn-toggle strong{font-size:15px;letter-spacing:.4px}.vpn-toggle small{font-size:10px;color:#8a7d98}.vpn-toggle input{appearance:none;flex-shrink:0;width:38px;height:23px;position:relative;margin:0;background:#d7cfdf;border:1px solid #c8bdd3;border-radius:20px;cursor:pointer}.vpn-toggle input::after{content:'';position:absolute;left:3px;top:3px;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #65547030;transition:transform .15s}.vpn-toggle input:checked{background:#8770a2;border-color:#8770a2}.vpn-toggle input:checked::after{transform:translateX(15px)}
-.vpn-setting-state{display:flex;align-items:center;gap:6px;font-size:10px;line-height:1.5;margin-top:14px}.vpn-setting-state i{width:5px;height:5px;border-radius:50%;background:#b1a9ba;flex-shrink:0}.vpn-setting-state.enabled i{background:#8c72a6}.vpn-setting-state.unavailable{color:#a16254}.vpn-setting-state.unavailable i{background:#bf8971}.vpn-settings>p{font-size:10px;line-height:1.7;color:#8a7e95;margin:10px 0}.vpn-settings .inline-link{font-size:10px;margin:0}.vpn-addresses{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;font-size:10px;margin:14px 0;line-height:1.5}.vpn-addresses dt{color:#93869f}.vpn-addresses dd{margin:0;color:#6c597d;font-family:ui-monospace,monospace}.vpn-settings p.vpn-no-fallback{font-size:9px;color:#8a7c98}
+/* The VPN client is a separate desktop app above any physical access. */
+.app-vpn{background:linear-gradient(145deg,#eee6f6,#cec0e0);color:#70558b}
+.vpn-app{max-width:440px;margin:auto;padding:30px 24px 24px;text-align:center;color:#665879}
+.vpn-emblem{display:grid;place-items:center;width:76px;height:76px;margin:0 auto 18px;border-radius:24px;background:#eee8f4;color:#8a749f}
+.vpn-emblem svg{width:43px;height:43px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.vpn-status h3{font-size:24px;line-height:1.25;margin:0 0 10px;color:#51465f}
+.vpn-status>span{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:#8a7d98}
+.vpn-status i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.vpn-app .vpn-connect{display:block;width:100%;min-height:44px;margin:23px 0 15px;border-color:#806497;background:#806497;color:#fff;font-size:13px}
+.vpn-app .vpn-connect:hover{background:#705587;border-color:#705587}
+.vpn-connect[aria-pressed=true]{background:#fffefb;color:#705587}
+.vpn-connect[aria-pressed=true]:hover{background:#f0eaf6;color:#705587}
+.vpn-hint{min-height:36px;margin:0;font-size:12px;line-height:1.65;color:#8a7d98}
+.vpn-connected .vpn-emblem{background:#e8f1e4;color:#5b8856}
+.vpn-connected .vpn-status>span{color:#5b8856}
+.vpn-ready .vpn-status>span{color:#806497}
+.vpn-unavailable .vpn-emblem{background:#fbefdb;color:#b08646}
+.vpn-unavailable .vpn-status>span,.vpn-unavailable .vpn-hint{color:#a67d3e}
+.vpn-details{margin-top:22px;border-top:1px solid #e4dcea;padding-top:14px;text-align:left;font-size:11px}
+.vpn-details summary{cursor:pointer;color:#806497}
+.vpn-addresses{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;font-size:11px;margin:14px 0 0;line-height:1.5}
+.vpn-addresses dt{color:#93869f}.vpn-addresses dd{margin:0;color:#6c597d;font-family:ui-monospace,monospace}
+@media(max-width:700px){.vpn-app{padding:19px 18px}.vpn-emblem{width:52px;height:52px;border-radius:17px;margin-bottom:13px}.vpn-emblem svg{width:31px;height:31px}.vpn-status h3{font-size:21px}.vpn-app .vpn-connect{margin-top:18px}.vpn-addresses{grid-template-columns:1fr;gap:4px}.vpn-addresses dd{margin-bottom:5px}}
 .web-vpn-route{display:flex;align-items:center;gap:9px;padding:8px 13px;background:#f0eaf6;border-bottom:1px solid #ddd2e8;color:#7c6496;font-size:9px;line-height:1.4}.web-vpn-route>strong{white-space:nowrap}.web-vpn-route>span{flex:1;min-width:0}.web-vpn-route button{background:none;border:0;color:#7e639b;min-width:24px;min-height:22px;font-size:16px}
-@media(max-width:700px){.vpn-settings{padding:13px;margin-top:16px}.vpn-addresses{grid-template-columns:1fr;gap:4px}.vpn-addresses dd{margin-bottom:5px}.web-vpn-route{gap:7px;padding:7px 10px;font-size:9px}}
+@media(max-width:700px){.web-vpn-route{gap:7px;padding:7px 10px;font-size:9px}}
 
 /* Browser cookie tools show endpoint state alongside the server's response. */
 .cookie-toolbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #dce5df;background:#f5f7f1}.cookie-toolbar>.secondary-button{font-size:10px;min-height:30px;padding:6px 10px;white-space:nowrap}.cookie-toolbar>span{font-size:10px;color:#778677}.cookie-toolbar button>span{display:inline-grid;place-items:center;min-width:17px;margin:0 4px;background:#e4ebdb;border-radius:9px}.cookie-panel{padding:18px;background:#fbfcf7;border-bottom:1px solid #dce5df}.cookie-panel h3{font-size:15px;margin:0 0 5px}.cookie-panel header p{font-size:10px;color:#7a8774;margin:0 0 13px}.cookie-flow{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:12px 8px;margin-bottom:15px;background:#edf2e6;border-radius:9px;text-align:center;font-size:9px;line-height:1.7;color:#7a8c68}.cookie-flow strong{color:#536c46;font-size:10px}.cookie-flow>b{font-weight:400;color:#a0b38d}.cookie-toggle{display:flex;align-items:center;gap:8px;font-size:11px;line-height:1.5;color:#526c49;cursor:pointer}.cookie-toggle input{width:15px;height:15px;accent-color:#608050;flex-shrink:0}.cookie-policy-note{font-size:10px;line-height:1.65;color:#7d8d76;margin:9px 0 14px}.cookie-entry{padding:13px;background:#eff4e7;border:1px solid #d7e2c9;border-radius:9px;margin:12px 0}.cookie-entry>div{display:flex;justify-content:space-between;gap:10px;align-items:center}.cookie-entry strong{font-size:12px}.cookie-entry code{padding:4px 8px;background:#dfe9d1;border-radius:5px;color:#4e6b3d;font-size:13px}.cookie-entry dl{display:grid;grid-template-columns:75px minmax(0,1fr);gap:7px 8px;font-size:10px;margin:13px 0 0;line-height:1.6}.cookie-entry dt{color:#7e8f70}.cookie-entry dd{margin:0;overflow-wrap:anywhere;color:#5a724c}.cookie-empty{padding:15px 12px;margin:12px 0;border:1px dashed #d3ddc7;border-radius:8px;font-size:11px;color:#849273}.cookie-actions{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0}.cookie-actions button{font-size:10px;min-height:32px;padding:7px 10px}.cookie-clock{font-size:9px;line-height:1.7;color:#87957c;margin:8px 0 15px}.cookie-wire{padding:13px 14px;background:#f0f3eb;border:1px solid #dce4d3;border-radius:9px}.cookie-wire>strong{display:block;font-size:10px;color:#60784f;margin:3px 0 7px}.cookie-wire code{display:block;font-size:10px;line-height:1.7;color:#688254;overflow-wrap:anywhere;white-space:normal}.cookie-wire p{font-size:10px;color:#87957c;margin:7px 0 15px;line-height:1.6}.cookie-wire p:last-child{margin-bottom:0}.cookie-welcome{padding:13px 15px;margin:15px 0 22px;background:#edf2e3;border:1px solid #d9e3cb;border-radius:10px;text-align:left}.cookie-welcome strong{display:block;font-size:12px;line-height:1.6;color:#5b734b}.cookie-welcome span{display:block;font-size:11px;margin:8px 0;color:#718660}.cookie-welcome code{font-size:12px;font-weight:700}.cookie-welcome small{display:block;font-size:9px;line-height:1.6;color:#8a987e}
