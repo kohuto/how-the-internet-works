@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Odstranění doprovodné věty při vypnuté VPN · 21. listopadu 2026
+
+Z vypnutého stavu aplikace VPN odstraněna věta Internet používá běžné připojení. Nevytváří se ani prázdný odstavec po textu. Prostředky `v=152`.
+
+Prošly všechny **4 integrační testy rozhraní VPN** a kontrola syntaxe upraveného skriptu. V prohlížeči při 763 × 743 a 320 × 568 px ověřena absence věty i jejího odstavce před zapnutím a po opětovném vypnutí VPN; tlačítko zůstává funkční a na telefonu je viditelné bez vodorovného přetékání. Ostatní stavové texty se při zapnutí zobrazují. Konzole bez chyb a varování.
+
+
 ## Samostatná aplikace VPN · 21. listopadu 2026
 
 Ovládání VPN přesunuto z Připojení do samostatné aplikace s ikonou štítu na ploše a v hlavním panelu. Jedno tlačítko Připojit / Odpojit mění stávající stav VPN klienta. Rozhraní rozlišuje vypnutí, připravenou VPN před prvním přenosem, skutečně navázaný tunel a nedostupnou cestu/server. Podrobnosti spojení jsou rozbalovací. Aplikace se řídí rozšířením VPN a je dostupná na šesti skutečných klientských zařízeních; notebook útočníka v kavárně zůstává pouze hotspotem. Připojení obsahuje fyzický přístup a případné volitelné vlastnosti přípojky. Původní model tunelu, ověřování protějšku a zastavení přenosu při změně VPN zůstávají. Hlavní panel lze vodorovně posunout, takže při úplné sestavě zůstávají všechny aplikace dosažitelné i na telefonu; aktivní aplikace se po vykreslení udrží v dohledu. Aktualizována nabídka rozšíření a README, prostředky `v=151`.
