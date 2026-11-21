@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Podvodný web jako součást Hackerského doupěte · 21. listopadu 2026
+
+Samostatné rozšíření Podvodný web odstraněno z katalogu nastavení. Hackerské doupě nyní přímo zahrnuje také oblast cizího hostingu, její router, switch a podvodný server; potřebná pošta a Matějův byt se přidávají stejně jako dříve. Závislosti páteřní sítě upraveny podle nové společné volby. Ostatní současné scénáře podvodný hosting samostatně nevyžadují; Útočník v kavárně zůstává nezávislý. Nastavení má 20 rozšíření, README a prostředky aktualizovány na `v=136`.
+
+Prošlo **83 souvisejících testů** nastavení, phishingu, útoku v kavárně, páteřní sítě, mapy, chytrých křižovatek a navigace prohlížeče. Dva nové testy ověřují, že žádné jiné samostatné rozšíření falešný hosting nepřidá, vypnutí doupěte zachová nezávisle zvolenou poštu, obchod i kavárnu a celý phishingový scénář funguje ve všech čtyřech kombinacích DNS a TLS. Falešný server dál odpovídá i při vypnutém počítači útočníka. Syntaxe obou změněných skriptů bez chyb.
+
+V prohlížeči při 1074 × 858 px zapnuto pouze Hackerské doupě: objevila se jeho síť i falešný hosting, doručil se podvodný e-mail, příjemce jej načetl přes IMAP, otevřel falešnou knihovnu a odeslal pevné ukázkové přihlášení. Počítač útočníka si následně načetl správný záznam samostatným přenosem. Bez doupěte podvodný server chybí, zatímco samostatně zvolená pošta, obchod a útočník v kavárně zůstávají dostupní. Při 320 × 568 px stará volba chybí, popis doupěte se vejde bez vodorovného přetékání a zapnutí/vypnutí přidá/odebere falešný hosting. Konzole obou náhledů bez chyb a varování.
+
+
 ## Automatická replikace, společné záhlaví náhledů a jednodušší nastavení · 21. listopadu 2026
 
 Cloud po změně souborů nebo práv automaticky naváže přenosem úplného snímku A → B. Kopie se zpřístupní až po přijetí všech částí. Při nedostupné cestě čeká, po obnovení spojení se připraví nový pokus. Ztracené potvrzení klientovi nezruší zápis ani následnou kopii; výpadek kopírování nezmění úspěšné uložení v A. Opakování během kopírování bezpečně obnoví původní požadavek bez duplicit. Tlačítko Synchronizovat centra i panel s čísly verzí a stavem kopie odstraněny. Síťový přenos dál postupuje přehráváním/krokováním, nikoli nezávislými hodinami na pozadí.

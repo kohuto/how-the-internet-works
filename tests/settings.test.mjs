@@ -45,7 +45,7 @@ test('The base is a usable web network without optional hosts or DNS transfers',
 });
 test('Dependencies are added transitively and stay enabled until their dependents are removed',()=>{
   let settings=new LabSettings({features:['mobile','instagram','hacker','cloud','ads']});
-  for(const id of ['phone','friend','mail','phishing','shop','news','tls','cookies'])assert(settings.has(id),id);
+  for(const id of ['phone','friend','mail','shop','news','tls','cookies'])assert(settings.has(id),id);
   assert(!settings.has('wifi'),'Mobile-only phone does not require home Wi-Fi');
   assert.deepEqual(new LabSettings({features:['phone']}).requiredBy('wifi').map(f=>f.id),['phone']);
   settings=settings.toggle('mobile',false);
@@ -59,6 +59,36 @@ test('Explicit selections survive removal of the feature that also required them
   let settings=new LabSettings({features:['wifi','phone']});
   settings=settings.toggle('phone',false);
   assert(settings.has('wifi'));assert(!settings.has('phone'));
+});
+test('Fake hosting belongs to the lair scenario and cannot be enabled as a standalone extension',()=>{
+  assert(!LAB_FEATURES.some(f=>f.id==='phishing'));
+  for(const feature of LAB_FEATURES){
+    const net=network([feature.id]);
+    for(const id of ['phish-router','phish-switch','phish-web'])assert.equal(net.nodeAvailable(id),feature.id==='hacker',`${feature.id}: ${id}`);
+  }
+  const selected=new LabSettings({features:['hacker','mail','shop','mitm']});
+  assert(!selected.toJSON().features.includes('phishing'));assert(selected.has('mail'));assert(selected.has('friend'));
+  const net=new Network(selected.toggle('hacker',false));
+  for(const id of ['hacker','hacker-router','hacker-switch','phish-router','phish-switch','phish-web'])assert(!net.nodeAvailable(id),id);
+  for(const id of ['mail','friend','shop','cafe','cafe-attacker'])assert(net.nodeAvailable(id),id);
+  assert(!Object.values(net.dnsRecords).includes(net.nodes['phish-web'].ip));
+  assert(!new Network(new LabSettings({features:['phishing']})).nodeAvailable('phish-web'));
+});
+test('The lair alone supplies fake hosting for the complete mail and credential scenario, with optional DNS and TLS',()=>{
+  for(const dns of [false,true])for(const tls of [false,true]){
+    const net=network(['hacker',...(dns?['dns']:[]),...(tls?['tls']:[])]),sim=new Simulation(net);
+    assert(sim.start('phish-send',{device:'hacker',target:'laptop'}));finish(sim);
+    assert(sim.start('mail-check',{device:'laptop'}));finish(sim);
+    const address=net.phishing.clients.laptop.inbox.link;
+    net.toggleNode('hacker');assert(net.nodeAvailable('phish-web'));
+    assert(sim.start('web',{device:'laptop',address}));finish(sim);
+    assert.equal(net.browser.pageType,'phishing');assert.equal(net.browser.loadedSecure,tls);
+    assert(sim.start('web',{device:'laptop',address,method:'POST',phishLogin:true}));finish(sim);
+    assert.equal(net.phishing.captures.size,1);assert(net.browser.submitted);
+    net.toggleNode('hacker');assert(sim.start('phish-results',{device:'hacker'}));finish(sim);
+    assert.equal(net.phishing.hacker.results.length,1);
+    assert.equal(net.phishing.hacker.results[0].password,globalThis.InternetLab.DEMO_LOGIN.password);
+  }
 });
 test('One Cloud extension enables both centers, synchronization and reading the backup while the primary is offline',()=>{
   assert.equal(LAB_FEATURES.filter(f=>f.id==='cloud').length,1);assert(!LAB_FEATURES.some(f=>f.id==='replica'));
@@ -245,7 +275,7 @@ test('Certificate rejection is restored by TLS, while disabled TLS delivers read
 });
 test('Browser history and repeat use the effective protocol for all optional websites',()=>{
   for(const tls of [false,true]){
-    const net=network(['shop','news','phishing',...(tls?['tls']:[])]),sim=new Simulation(net),nav=new BrowserNavigation(net);
+    const net=network(['shop','news','hacker',...(tls?['tls']:[])]),sim=new Simulation(net),nav=new BrowserNavigation(net);
     for(const url of ['https://knihovna.test/','https://obchod.test/?tema=hudba','https://zpravy.test/','https://knihovna-podpora.test/overeni?zprava=1']){
       assert(sim.start('web',{address:url}));nav.sync(sim);finish(sim);nav.sync(sim);
       const effective=tls?url:url.replace('https:','http:');

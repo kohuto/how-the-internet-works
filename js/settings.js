@@ -6,7 +6,7 @@
     {id:'satellite',group:'areas',label:'Chata se satelitem',description:'Notebook na chatě, anténa, satelit LEO a pozemní stanice.',regions:['cabin','satellite']},
     {id:'mobile',group:'areas',label:'Mobilní síť a BTS',description:'Dvě základnové stanice a síť mobilního operátora.',requires:['phone'],regions:['mobile']},
     {id:'cafe',group:'areas',label:'Kavárna',description:'Notebook hosta a veřejná Wi-Fi s vlastní přípojkou.',nodes:['cafe','cafe-ap','cafe-router']},
-    {id:'hacker',group:'areas',label:'Hackerské doupě',description:'Počítač útočníka pro pokus s podvodným e-mailem.',requires:['mail','phishing'],regions:['hacker']},
+    {id:'hacker',group:'areas',label:'Hackerské doupě',description:'Počítač útočníka, podvodný e-mail a server s falešnou knihovnou.',requires:['mail'],regions:['hacker','phish']},
     {id:'printer',group:'services',label:'Tiskárna',description:'Místní tisk z dokumentu na notebooku.',nodes:['printer']},
     {id:'dns',group:'services',label:'DNS server',description:'Překlad názvů webů na IP adresy. Bez rozšíření se tento krok vynechá.',nodes:['dns']},
     {id:'tls',group:'services',label:'TLS / HTTPS',description:'Zabezpečení webu, ověření certifikátu a šifrovaný přenos. Bez rozšíření se používá HTTP.'},
@@ -18,7 +18,6 @@
     {id:'cloud',group:'services',label:'Cloud',description:'Ukládání, stahování a sdílení souborů. Hlavní i záložní datové centrum a kopírování mezi nimi.',regions:['cloud','replica']},
     {id:'vpn',group:'services',label:'VPN',description:'VPN server a volba šifrovaného tunelu v připojení.',regions:['vpn']},
     {id:'chatbot',group:'services',label:'Chatbot',description:'Dotaz a odpověď zpracovaná na vzdáleném serveru.',nodes:['chatbot']},
-    {id:'phishing',group:'services',label:'Podvodný web',description:'Napodobená knihovna v samostatném hostingu.',regions:['phish']},
     {id:'mitm',group:'services',label:'Útočník v kavárně',description:'Napodobený hotspot a porovnání HTTP a HTTPS.',requires:['cafe'],nodes:['cafe-attacker']},
     {id:'shop',group:'services',label:'E-shop',description:'Ukázkový web obchod.test.',nodes:['shop']},
     {id:'news',group:'services',label:'Zprávy',description:'Ukázkový web zpravy.test.',nodes:['news']},
@@ -54,7 +53,7 @@
     nodeEnabled(node) {
       if(['ap','friend-ap','cabin-ap'].includes(node.id)&&!this.has('wifi'))return false;
       if(node.enabledBy)return !node.enabledBy.length||node.enabledBy.some(id=>this.has(id));
-      if(node.id==='peer')return ['friend','instagram','cloud','vpn','hacker','phishing','shop','news','ads'].some(id=>this.has(id));
+      if(node.id==='peer')return ['friend','instagram','cloud','vpn','hacker','shop','news','ads'].some(id=>this.has(id));
       if(['partners-router','partners-switch'].includes(node.id))return ['shop','news','ads'].some(id=>this.has(id));
       const feature=FEATURES.find(f=>f.nodes?.includes(node.id)||f.regions?.includes(node.region));
       return feature?this.has(feature.id):true;
