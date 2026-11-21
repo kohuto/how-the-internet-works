@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Stručnější zachycené zprávy MITM · 21. listopadu 2026
+
+Ze všech karet zachycených zpráv odstraněn doprovodný komentář výsledku a údaj o směru s číslem paketu v pravém horním rohu. Změna platí společně pro HTTP, DNS, TLS i VPN. Typ zprávy, adresy a porty, stav ochrany, obsah a případná změna zůstávají dostupné; modelové záznamy se nemění. Nepoužívané styly odstraněny, prostředky `v=145`.
+
+Prošlo všech **19 souvisejících testů** MITM a připojování v kavárně i kontrola syntaxe upraveného skriptu. V prohlížeči při 1047 × 858 px úspěšně doručeno HTTP s DNS i následné HTTPS přes hotspot; všech devět zachycených záznamů postrádalo oba odstraněné prvky a ponechalo původní obsah i ochranu. Při 320 × 568 px ověřen skutečný HTTP přenos, obě karty bez komentáře a údaje o směru/čísle, čitelný obsah a žádné vodorovné přetékání. Konzole obou náhledů bez chyb a varování.
+
+
 ## Společná karta Hotspot v aplikaci MITM · 21. listopadu 2026
 
 Nastavení názvu sítě a zapnutí / vypnutí sloučeno do jediné karty **Hotspot**. Obsahuje aktuální stav, přepínač, název Wi-Fi a tlačítko Uložit název. Přepínač má přístupnou roli switch a po změně si zachová fokus; totéž platí pro výběr režimu MITM. Pojmenování Napodobený hotspot odstraněno z této aplikace i jejího stavového pokynu. Z přehledu odstraněna poznámka o nejvýše 20 paketech a tlačítko Vymazat přehled včetně jeho nepoužívané obsluhy a stylů. Zachytávání a uchovávání paketů se nemění. README aktualizováno, prostředky `v=144`.
