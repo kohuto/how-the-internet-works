@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Odstranění tří doprovodných textů Správy webu · 21. listopadu 2026
+
+Ze Správy webu odstraněna doména pod názvem aplikace, vysvětlení Načti údaje uložené na podvodném serveru a poznámka Používají se pouze předpřipravené ukázkové údaje. Jejich nepoužívané styly odstraněny; adresa odkazu v kartě Falešná knihovna zůstává. Prostředky `v=139`.
+
+Prošly všechny tři stávající testy odděleného Gmailu a Správy webu i kontrola syntaxe. V prohlížeči při 1047 × 858 a 320 × 568 px označené texty chybí, tlačítka zůstávají dostupná a obsah nepřetéká vodorovně. Na počítači ověřeno vložení správného odkazu do předpřipravené zprávy v Gmailu i skutečné načtení prázdného výsledku ze serveru. Konzole bez chyb a varování.
+
+
 ## Gmail útočníka a samostatná Správa webu · 21. listopadu 2026
 
 Původní aplikace Phishing rozdělena na Gmail a Správu webu. Správa zobrazuje odkaz na již připravenou falešnou knihovnu a tlačítkem Vložit odkaz do e-mailu otevře předpřipravenou zprávu v Gmailu. Stejnou zprávu lze otevřít tlačítkem Napsat; vybrat lze pouze dostupné modelové příjemce. Odesílatel i SMTP obálka používají `podpora@knihovna-podpora.test`, předmět, obsah a odkaz jsou pevné. Odkaz je nyní i v textovém SMTP výpisu obsahu. Gmail má vlastní stav, schránku a potvrzené odeslané kopie; návštěvní ovládání phishingové zprávy se v Odeslaných nenabízí. Správa webu má oddělený stav a nadále zobrazuje pouze poslední přijatý snímek záznamů po skutečném přenosu ze serveru. Poštovní provoz nemění výsledek správcovského načtení. Prostředky `v=138`.

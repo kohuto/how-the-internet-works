@@ -5,11 +5,10 @@
   function phishingApp(net,sim) {
     const h=net.phishing.hacker,link=mailTemplate('laptop',net.phishing.serial+1).link;
     return `<div class="attack-app">
-      <header class="attack-brand"><span aria-hidden="true">⌁</span><div><h3>Správa webu</h3><p>${PHISH_HOST}</p></div></header>
+      <header class="attack-brand"><span aria-hidden="true">⌁</span><div><h3>Správa webu</h3></div></header>
       <section class="attack-site" aria-label="Podvodná stránka"><h4>Falešná knihovna</h4><p>Odkaz na přihlašovací stránku</p><code>${esc(link)}</code><button type="button" class="secondary-button" data-action="phish-compose" ${busy(sim)}>Vložit odkaz do e-mailu</button></section>
-      <section class="attack-results"><h3>Zachycená přihlášení</h3><p>Načti údaje uložené na podvodném serveru.</p><button type="button" class="primary-button wide" data-action="phish-results" ${busy(sim)}>Načíst ze serveru</button><div class="attack-state ${h.state==='error'?'error':''}" role="status">${esc(h.notice)}</div>
+      <section class="attack-results"><h3>Zachycená přihlášení</h3><button type="button" class="primary-button wide" data-action="phish-results" ${busy(sim)}>Načíst ze serveru</button><div class="attack-state ${h.state==='error'?'error':''}" role="status">${esc(h.notice)}</div>
       ${h.fetched?`<p class="hint">Načtené záznamy: ${h.total}. Zobrazené jsou nejvýše čtyři poslední.</p>${h.results.length?h.results.map(c=>`<article class="captured-record"><strong>Ukázkové přihlášení · zpráva ${c.messageId||'přímý odkaz'}</strong><dl><dt>Jméno</dt><dd>${esc(c.username)}</dd><dt>Heslo</dt><dd>${esc(c.password)}</dd><dt>Zdroj viděný serverem</dt><dd>${esc(c.sourceIp)}</dd><dt>Přenos k serveru</dt><dd>${c.secure?'HTTPS · dešifrováno na serveru':'HTTP · čitelné cestou'}</dd></dl></article>`).join(''):'<div class="mail-empty">Server při tomto načtení neměl žádné přihlašovací údaje.</div>'}`:''}</section>
-      <p class="attack-model-note">Používají se pouze předpřipravené ukázkové údaje.</p>
     </div>`;
   }
   function phishingPage(net,sim,device,b) {
