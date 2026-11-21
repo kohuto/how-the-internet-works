@@ -19,9 +19,7 @@
     {id:'cloud',group:'services',label:'Cloud',description:'Ukládání, stahování a sdílení souborů. Hlavní i záložní datové centrum a kopírování mezi nimi.',regions:['cloud','replica']},
     {id:'vpn',group:'services',label:'VPN',description:'VPN server a volba šifrovaného tunelu v připojení.',regions:['vpn']},
     {id:'chatbot',group:'services',label:'Chatbot',description:'Dotaz a odpověď zpracovaná na vzdáleném serveru.',nodes:['chatbot']},
-    {id:'shop',group:'services',label:'E-shop',description:'Ukázkový web obchod.test.',nodes:['shop']},
-    {id:'news',group:'services',label:'Zprávy',description:'Ukázkový web zpravy.test.',nodes:['news']},
-    {id:'ads',group:'services',label:'Reklamní partner',description:'Společná reklama dvou webů. Tento pokus používá HTTPS a zabezpečenou cookie.',requires:['shop','news','tls','cookies'],nodes:['ads']}
+    {id:'ads',group:'services',label:'Personalizovaná reklama',description:'E-shop a Zprávy se společným reklamním serverem. Ukáže, jak prohlížení na jednom webu ovlivní reklamu na druhém.',requires:['tls','cookies'],nodes:['shop','news','ads']}
   ];
   const DETAILS=[
     {id:'devices',label:'Routery a switche',description:'Rozliší chytré křižovatky na routery a switche a zobrazí jejich původní názvy a ikony.'},
@@ -53,8 +51,8 @@
     nodeEnabled(node) {
       if(['ap','friend-ap','cabin-ap'].includes(node.id)&&!this.has('wifi'))return false;
       if(node.enabledBy)return !node.enabledBy.length||node.enabledBy.some(id=>this.has(id));
-      if(node.id==='peer')return ['friend','instagram','cloud','vpn','hacker','shop','news','ads'].some(id=>this.has(id));
-      if(['partners-router','partners-switch'].includes(node.id))return ['shop','news','ads'].some(id=>this.has(id));
+      if(node.id==='peer')return ['friend','instagram','cloud','vpn','hacker','ads'].some(id=>this.has(id));
+      if(['partners-router','partners-switch'].includes(node.id))return this.has('ads');
       const feature=FEATURES.find(f=>f.nodes?.includes(node.id)||f.regions?.includes(node.region));
       return feature?this.has(feature.id):true;
     }

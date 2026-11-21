@@ -45,7 +45,7 @@ test('The base is a usable web network without optional hosts or DNS transfers',
 });
 test('Dependencies are added transitively and stay enabled until their dependents are removed',()=>{
   let settings=new LabSettings({features:['mobile','instagram','hacker','cloud','ads']});
-  for(const id of ['phone','friend','mail','shop','news','tls','cookies'])assert(settings.has(id),id);
+  for(const id of ['phone','friend','mail','tls','cookies'])assert(settings.has(id),id);
   assert(!settings.has('wifi'),'Mobile-only phone does not require home Wi-Fi');
   assert.deepEqual(new LabSettings({features:['phone']}).requiredBy('wifi').map(f=>f.id),['phone']);
   settings=settings.toggle('mobile',false);
@@ -66,7 +66,7 @@ test('Fake hosting belongs to the lair scenario and cannot be enabled as a stand
     const net=network([feature.id]);
     for(const id of ['phish-router','phish-switch','phish-web'])assert.equal(net.nodeAvailable(id),feature.id==='hacker',`${feature.id}: ${id}`);
   }
-  const selected=new LabSettings({features:['hacker','mail','shop','mitm']});
+  const selected=new LabSettings({features:['hacker','mail','ads','mitm']});
   assert(!selected.toJSON().features.includes('phishing'));assert(selected.has('mail'));assert(selected.has('friend'));
   const net=new Network(selected.toggle('hacker',false));
   for(const id of ['hacker','hacker-router','hacker-switch','phish-router','phish-switch','phish-web'])assert(!net.nodeAvailable(id),id);
@@ -204,11 +204,33 @@ test('Hidden services cannot be started through simulation controls',()=>{
   assert.equal(sim.net.setVPN('laptop',true),false);
   assert.equal(sim.net.toggleNode('hacker'),false);
 });
-test('An independent partner website loads without making hidden advertising requests',()=>{
-  const sim=new Simulation(network(['shop']));sim.start('web',{address:'https://obchod.test/'});const events=finish(sim);
-  assert.equal(sim.net.browser.pageType,'shop');assert.equal(sim.net.browser.adPage.state,'disabled');
-  assert.equal(sim.net.ads.requests,0);
-  assert(!events.some(e=>e.packet?.destination==='ads'));
+test('One advertising scenario enables both websites and their partner, then removes the entire branch together',()=>{
+  assert(!LAB_FEATURES.some(f=>['shop','news'].includes(f.id)));
+  const settings=new LabSettings().toggle('ads',true),net=new Network(settings),sim=new Simulation(net);
+  assert.deepEqual(settings.toJSON().features,['ads']);
+  for(const id of ['tls','cookies'])assert(settings.has(id),id);
+  const nodes=['shop','news','ads','partners-router','partners-switch'];
+  for(const id of nodes)assert(net.nodeAvailable(id),id);
+  for(const address of ['https://obchod.test/?tema=hudba','https://zpravy.test/']){
+    assert(sim.start('web',{address}));const events=finish(sim);
+    assert(events.some(e=>e.kind==='hop'&&e.link==='partners-uplink'));
+    assert([...sim.packets.values()].some(p=>p.destination==='ads'));
+  }
+  assert.equal(net.browser.adPage.ad.topic,'hudba');assert(net.browser.adPage.ad.personalized);
+  assert.equal(net.ads.profiles.size,1);assert.equal(net.ads.requests,2);
+  const disabled=new Simulation(new Network(settings.toggle('ads',false)));
+  for(const id of [...nodes,'peer','transit-i','transit-j','transit-z'])assert(!disabled.net.nodeAvailable(id),id);
+  for(const host of ['obchod.test','zpravy.test','reklamy.test'])assert(!disabled.net.dnsRecords[host],host);
+  for(const address of ['https://obchod.test/','https://zpravy.test/']){
+    assert(disabled.start('web',{address}));finish(disabled,'failed');
+  }
+  assert.equal(disabled.net.ads.requests,0);
+  for(const id of ['shop','news']){
+    const removed=network([id]);assert(!removed.nodeAvailable(id));assert.deepEqual(removed.settings.toJSON().features,[]);
+  }
+  const shared=new Network(new LabSettings({features:['ads','hacker']}).toggle('ads',false));
+  for(const id of nodes)assert(!shared.nodeAvailable(id),id);
+  for(const id of ['hacker','phish-web','peer','transit-i','transit-j','transit-z'])assert(shared.nodeAvailable(id),id);
 });
 test('Showing details changes no forwarding, data delivery or address translation',()=>{
   const settings=new LabSettings(),net=new Network(settings),sim=new Simulation(net);
@@ -296,10 +318,11 @@ test('Certificate rejection is restored by TLS, while disabled TLS delivers read
     else assert.equal(net.browser.receipt,'Pokus s certifikátem');
   }
 });
-test('Browser history and repeat use the effective protocol for all optional websites',()=>{
-  for(const tls of [false,true]){
-    const net=network(['shop','news','hacker',...(tls?['tls']:[])]),sim=new Simulation(net),nav=new BrowserNavigation(net);
-    for(const url of ['https://knihovna.test/','https://obchod.test/?tema=hudba','https://zpravy.test/','https://knihovna-podpora.test/overeni?zprava=1']){
+test('Browser history and repeat use the effective protocol for enabled websites and the bundled advertising scenario',()=>{
+  for(const features of [['hacker'],['hacker','tls'],['hacker','ads']]){
+    const net=network(features),sim=new Simulation(net),nav=new BrowserNavigation(net),tls=net.featureEnabled('tls');
+    const urls=['https://knihovna.test/',...(net.featureEnabled('ads')?['https://obchod.test/?tema=hudba','https://zpravy.test/']:[]),'https://knihovna-podpora.test/overeni?zprava=1'];
+    for(const url of urls){
       assert(sim.start('web',{address:url}));nav.sync(sim);finish(sim);nav.sync(sim);
       const effective=tls?url:url.replace('https:','http:');
       assert.equal(nav.active('laptop').url,effective);assert.equal(nav.active('laptop').loadedUrl,effective);
@@ -307,7 +330,7 @@ test('Browser history and repeat use the effective protocol for all optional web
       assert(sim.repeat());nav.sync(sim);finish(sim);nav.sync(sim);
       assert.equal(nav.active('laptop').history.at(-1),effective);
     }
-    assert.equal(nav.active('laptop').history.length,4);
+    assert.equal(nav.active('laptop').history.length,urls.length);
   }
 });
 test('Only the secure advertising lesson automatically requires web TLS',()=>{

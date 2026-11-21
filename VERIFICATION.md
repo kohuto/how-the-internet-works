@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Jediný scénář Personalizovaná reklama · 21. listopadu 2026
+
+Samostatné volby E-shop, Zprávy a Reklamní partner sloučeny do jediné volby **Personalizovaná reklama**. Zapíná oba weby, společný reklamní server, router, switch a potřebné páteřní přípojky. Automaticky vyžaduje TLS / HTTPS a Cookies. Vypnutí odebere celou větev, připravené adresy i nabídky obou webů; společné páteřní uzly zůstávají při zapnutém hackerském doupěti. Dostupnost záložek, zkratek a přechodů mezi weby i otevření ze serverů se řídí dostupností zařízení. Odstraněné samostatné volby už nelze vybrat. Nastavení obsahuje 18 rozšíření, úplná sestava dál 84 zařízení a 101 spojů. README aktualizováno, prostředky `v=148`.
+
+Prošla celá sada **336 testů** i kontrola syntaxe čtyř upravených skriptů a testu. Integrační test zapíná jediné rozšíření, načte Hudbu v e-shopu a Zprávy, ověří společný profil a odpovídající personalizovanou reklamu. Po vypnutí kontroluje skrytí celé větve a jejích DNS záznamů, selhání přímého načtení obou skrytých webů, neplatnost starých voleb a zachování společné páteře pro hackerské doupě. Test historie a opakování pokrývá knihovnu a podvodný web s TLS i bez něj a oba weby nového scénáře s automatickým TLS.
+
+V prohlížeči při 1047 × 858 px ověřena jediná volba, automatické závislosti, zapnutí všech pěti zařízení oblasti, záložky i zkratky obou webů, přechod z e-shopu na Zprávy a reklama podle uloženého zájmu. Reklamní server ukázal společný profil a ponechal funkční nabídky otevření obou webů. Vypnutí obnovilo základních 14 zařízení a jedinou záložku Knihovna. Při 320 × 568 px se jediná volba vejde bez přetékání; v telefonu po zapnutí fungují oba weby i přenos personalizované reklamy. Po vypnutí zůstal telefon se svou Wi-Fi dostupný, oba weby i reklamní server zmizely a prohlížeč nabízel jen knihovnu. Konzole obou náhledů bez chyb a varování.
+
+
 ## Odstranění odkazu na mapu z partnerských webů · 21. listopadu 2026
 
 Ze společné šablony e-shopu a Zpráv odstraněno tlačítko Sledovat požadavky v mapě. Ostatní navigace, kategorie a reklamní přenosy zůstávají; prostředky `v=147`.

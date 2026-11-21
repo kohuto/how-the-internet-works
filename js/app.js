@@ -261,7 +261,7 @@
   }
   function pruneUnavailable(root) {
     root.querySelectorAll('[data-select-node], [data-select-link], [data-ads-open], [data-ads-launch]').forEach(el=>{
-      if((el.dataset.adsOpen&&el.dataset.adsOpen!=='library'&&!net.featureEnabled(el.dataset.adsOpen))||(el.dataset.adsLaunch&&!net.featureEnabled(el.dataset.adsLaunch))||el.dataset.selectNode&&!net.nodeAvailable(el.dataset.selectNode)||el.dataset.selectLink&&!net.linkAvailable(net.links[el.dataset.selectLink]))el.remove();
+      if((el.dataset.adsOpen&&el.dataset.adsOpen!=='library'&&!net.nodeAvailable(el.dataset.adsOpen))||(el.dataset.adsLaunch&&!net.nodeAvailable(el.dataset.adsLaunch))||el.dataset.selectNode&&!net.nodeAvailable(el.dataset.selectNode)||el.dataset.selectLink&&!net.linkAvailable(net.links[el.dataset.selectLink]))el.remove();
     });
   }
   function applySettings(next) {

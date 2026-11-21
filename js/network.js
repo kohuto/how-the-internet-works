@@ -88,13 +88,13 @@
   ];
   // Real forwarding nodes; their coordinates are absolute and optional branches
   // appear only while at least one of their downstream lessons is enabled.
-  const peerFeatures=['friend','instagram','cloud','vpn','hacker','shop','news','ads'];
+  const peerFeatures=['friend','instagram','cloud','vpn','hacker','ads'];
   const backboneRouters=[
     ['f',960,775,'city',[]],
     ['g',1700,550,'peer',peerFeatures],
     ['h',2040,150,'peer',peerFeatures],
-    ['i',2040,-150,'peer',['hacker','shop','news','ads']],
-    ['j',2040,-350,'peer',['hacker','shop','news','ads']],
+    ['i',2040,-150,'peer',['hacker','ads']],
+    ['j',2040,-350,'peer',['hacker','ads']],
     ['k',2000,950,'peer',peerFeatures],
     ['l',2000,1350,'peer',['cloud','vpn']],
     ['m',2000,1690,'peer',['cloud','vpn']],
@@ -110,7 +110,7 @@
     ['w',2300,450,'peer',peerFeatures],
     ['x',1740,260,'peer',peerFeatures],
     ['y',1910,200,'peer',peerFeatures],
-    ['z',1910,-250,'peer',['hacker','shop','news','ads']],
+    ['z',1910,-250,'peer',['hacker','ads']],
     ['aa',2500,1010,'peer',['hacker']],
     ['ab',1910,1150,'peer',['cloud','vpn']],
     ['ac',1910,1500,'peer',['cloud','vpn']]
