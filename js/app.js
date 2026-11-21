@@ -338,7 +338,7 @@
     if(mailField){const el=$(`[data-mail-field="${mailField}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number'&&['text','search','textarea'].includes(el.type))el.setSelectionRange(start,end);}}
     if(field) {const el=$(`[data-field="${field}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number')el.setSelectionRange(start,end);if(cloudTextScroll!==null)el.scrollTop=cloudTextScroll;}}
     const current=sim.current;
-    $('#event-title').textContent=net.displayText(current?.title||'')||'Síť čeká na tvůj první přenos';$('#event-description').textContent=net.displayText(current?.description||'')||(ui.monitorOpen?(ui.monitorDevice==='cafe-attacker'?'Otevři MITM a nastav napodobený hotspot.':ui.monitorDevice==='cafe'?(net.accessReady('cafe')?'Otevři Prohlížeč a načti web.':'V Připojení nejprve vyber Wi-Fi.'):ui.monitorDevice==='hacker'?'Otevři Správu webu nebo Gmail.':ui.monitorDevice==='cabin'?'Otevři některou z dostupných aplikací na chatě.':ui.monitorDevice==='friend'?'Otevři některou z dostupných aplikací u Matěje.':ui.monitorDevice==='phone'?'Otevři některou z dostupných aplikací v telefonu.':'Na ploše otevři některou z dostupných aplikací.'):'Klikni na notebook v mapě a otevři jeho plochu.');
+    $('#event-title').textContent=net.displayText(current?.title||'')||'Síť čeká na tvůj první přenos';$('#event-description').textContent=net.displayText(current?.description||'')||(ui.monitorOpen?(ui.monitorDevice==='cafe-attacker'?'Otevři MITM a nastav hotspot.':ui.monitorDevice==='cafe'?(net.accessReady('cafe')?'Otevři Prohlížeč a načti web.':'V Připojení nejprve vyber Wi-Fi.'):ui.monitorDevice==='hacker'?'Otevři Správu webu nebo Gmail.':ui.monitorDevice==='cabin'?'Otevři některou z dostupných aplikací na chatě.':ui.monitorDevice==='friend'?'Otevři některou z dostupných aplikací u Matěje.':ui.monitorDevice==='phone'?'Otevři některou z dostupných aplikací v telefonu.':'Na ploše otevři některou z dostupných aplikací.'):'Klikni na notebook v mapě a otevři jeho plochu.');
     $('#run-dot').className=`status-dot ${sim.status}`;
     $('#play').disabled=ui.packetOpen||sim.status!=='running';$('#play').innerHTML=playing?'Ⅱ <span>Pauza</span>':'▶ <span>Přehrát</span>';$('#play').setAttribute('aria-label',playing?'Pozastavit přenos':'Přehrát přenos');
     $('#step').disabled=ui.packetOpen||sim.status!=='running'||sim.auth.working;$('#repeat').disabled=ui.packetOpen||!sim.lastAction;
@@ -469,7 +469,6 @@
       else {if(net.setCafeHotspot('rogue'))sim.connectionChanged('cafe');ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();}return;
     }
     if(b.dataset.action==='cafe-wifi-cancel'){ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();return;}
-    if(b.dataset.action==='mitm-clear'){if(sim.status==='running')return;net.mitm.logs=[];render();return;}
     if(b.dataset.gmailAction){
       const d=ui.mailComposer[ui.monitorDevice],c=net.phishing.clients[ui.monitorDevice],action=b.dataset.gmailAction;
       if(action==='compose'){if(sim.status==='running'&&['mail-send','phish-send'].includes(sim.action?.type)&&sim.clientId()===ui.monitorDevice)return;Object.assign(d,{composeOpen:true});}
@@ -550,7 +549,7 @@
   for(const root of [$('#monitor-overlay'),$('#device-overlay')]) {
     root.addEventListener('input',handleInput);
     root.addEventListener('change',e=>{
-      if(e.target.hasAttribute('data-mitm-active')||e.target.hasAttribute('data-mitm-mode')){if(sim.status==='running')return;sim.mitm.configure(e.target.hasAttribute('data-mitm-active')?e.target.checked:net.mitm.active,e.target.hasAttribute('data-mitm-mode')?e.target.value:net.mitm.mode,e.target.hasAttribute('data-mitm-active')&&e.target.checked?ui.mitmSsid:net.mitm.ssid);ui.mitmSsid=net.mitm.ssid;render();return;}
+      if(e.target.hasAttribute('data-mitm-active')||e.target.hasAttribute('data-mitm-mode')){if(sim.status==='running')return;sim.mitm.configure(e.target.hasAttribute('data-mitm-active')?e.target.checked:net.mitm.active,e.target.hasAttribute('data-mitm-mode')?e.target.value:net.mitm.mode,e.target.hasAttribute('data-mitm-active')&&e.target.checked?ui.mitmSsid:net.mitm.ssid);ui.mitmSsid=net.mitm.ssid;render();$(e.target.hasAttribute('data-mitm-active')?'[data-mitm-active]':'[data-mitm-mode]')?.focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-ads-allowed')){if(sim.ads.setAllowed(ui.monitorDevice,e.target.checked)){render();$('[data-ads-allowed]')?.focus({preventScroll:true});}return;}
       if(e.target.dataset.privacyHold){if(sim.status==='running')return;sim.privacy.setHold(e.target.dataset.privacyHold,e.target.checked);render();$(`[data-privacy-hold="${e.target.dataset.privacyHold}"]`)?.focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-cookie-allowed')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.browserFor(ui.monitorDevice).cookies.allowed=e.target.checked;render();$('[data-cookie-allowed]')?.focus({preventScroll:true});return;}

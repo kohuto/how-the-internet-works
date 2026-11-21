@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Společná karta Hotspot v aplikaci MITM · 21. listopadu 2026
+
+Nastavení názvu sítě a zapnutí / vypnutí sloučeno do jediné karty **Hotspot**. Obsahuje aktuální stav, přepínač, název Wi-Fi a tlačítko Uložit název. Přepínač má přístupnou roli switch a po změně si zachová fokus; totéž platí pro výběr režimu MITM. Pojmenování Napodobený hotspot odstraněno z této aplikace i jejího stavového pokynu. Z přehledu odstraněna poznámka o nejvýše 20 paketech a tlačítko Vymazat přehled včetně jeho nepoužívané obsluhy a stylů. Zachytávání a uchovávání paketů se nemění. README aktualizováno, prostředky `v=144`.
+
+Prošlo všech **19 testů** připojování v kavárně a MITM i kontrola syntaxe obou upravených skriptů. V prohlížeči při 1047 × 858 px ověřeno uložení vlastního názvu, společné umístění přepínače a názvu, oba stavy, dostupnost sítě u hosta, ruční připojení a odpojení po vypnutí hotspotu. HTTP přenos z hostova prohlížeče uspěl a v přehledu se zobrazil požadavek i odpověď bez odstraněné poznámky a tlačítka. Přepnutí mezerníkem změnilo stav a zachovalo fokus. Při 320 × 568 px ověřeno zapnutí s rozepsaným názvem a následné uložení jiného názvu; karta, tlačítko i přehled nepřetékají vodorovně. Konzole obou náhledů bez chyb a varování.
+
+
 ## Zjednodušení MITM a přesun hesla Wi-Fi kavárny · 21. listopadu 2026
 
 Z aplikace MITM odstraněn podtitulek pod názvem, doprovodné vysvětlení jednotlivých režimů, stav přenosové cesty, tři odkazy na hosta/server/mapu, poznámka o přemosťování a tlačítka spouštějící web u hosta. Přenos se otevírá přímo v hostově Prohlížeči. Odstraněny také nepoužívané styly a obsluha těchto tlačítek; nastavení hotspotu, režimy zásahu a přehled zachycených paketů zůstávají. Na notebooku hosta odstraněna karta Heslo od obsluhy a textová trasa připojení. Detail přístupového bodu **Wi-Fi kavárny** nově uvádí skutečný název sítě Kavarna_hoste a Heslo k Wi-Fi; původní nesprávný název U Mateje se zde už nezobrazuje. README aktualizováno, prostředky `v=143`.
