@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Odstranění odkazu Tvůj cloud · 21. listopadu 2026
+
+Z detailu hlavního i záložního cloudového serveru odstraněno tlačítko Tvůj cloud. Pokud není dostupný Matějův notebook, nevzniká prázdný řádek tlačítek. Seznam souborů, práva a synchronizace se nemění.
+
+Ověřena syntaxe skriptu a prohlížeč při 1047 × 858 px: bez Matěje chybí tlačítko i prázdný řádek, uložený soubor a napájení jsou dostupné, obsah nepřetéká. S Matějem a záložním cloudem chybí Tvůj cloud na obou serverech; tlačítko synchronizace je dostupné a zbývající odkaz do Matějova cloudu otevře správné centrum. Cache prostředků `v=130`.
+
+
 ## Odstranění přepínače měřítka mapy · 19. listopadu 2026
 
 Z mapy odstraněna navigace Byt / Město / Celá síť včetně jejího obslužného kódu a nepoužívaných stylů. Zachována tlačítka +/−, posouvání a gesta i automatické přizpůsobení výřezu při změně nastavení a zahájení přenosů. Nápověda v README upravena podle současného ovládání.
