@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Aktivní tunely na VPN serveru a odstranění místní IP z Připojení · 21. listopadu 2026
+
+Detail VPN serveru nově uvádí pouze dostupné klienty s platným navázaným tunelem podle stávající kontroly VPN protějšku. Zapnutá VPN bez prvního přenosu se za aktivní spojení nepovažuje. Sekce Aktivní VPN spojení ukazuje zařízení, vnitřní IP tunelu a počty paketů do internetu a zpět; bez platných tunelů uvádí Žádné aktivní VPN spojení. Odstraněny odkazy do klientského nastavení a jejich nepoužívaný styl. Nastavení VPN zůstává v aplikaci Připojení zařízení, provozní statistiky a serverové záznamy zůstávají. Z Připojení odstraněn údaj místní IP klienta, včetně hosta kavárny; nevznikají prázdné seznamy údajů. Název Wi-Fi a volitelné informace NAT zůstávají dostupné. README aktualizováno, prostředky `v=150`.
+
+Prošlo všech **24 souvisejících testů** VPN, připojování v kavárně a časování přípojek i kontrola syntaxe tří upravených skriptů. Model tunelů, předávání dat a IP adresace se nemění.
+
+V prohlížeči při 763 × 743 px ověřen prázdný server před zapnutím VPN i po zapnutí bez přenosu, skutečné načtení webu přes VPN a následný záznam notebooku s jedním paketem v obou směrech. Po vypnutí VPN se zobrazil prázdný stav; po opětovném navázání a odpojení přístupu také. Odkazy do nastavení klientů chybí. V úplné sestavě ověřeno odstranění místní IP u notebooku na Lipové, u Matěje, na chatě, telefonu, útočníka i připojeného hosta kavárny; názvy Wi-Fi a volitelné NAT údaje zůstávají. Při 320 × 568 px ověřeno Připojení telefonu bez místní IP, úspěšné načtení webu přes VPN a aktivní tunel telefonu s počty paketů bez vodorovného přetékání. Konzole obou náhledů bez chyb a varování.
+
+
 ## Odstranění otevíracích tlačítek z detailů reklamního scénáře · 21. listopadu 2026
 
 Z detailů e-shopu a Zpráv odstraněno tlačítko Otevřít web na notebooku. Ze společného reklamního serveru odstraněna obě tlačítka Otevřít e-shop na notebooku a Otevřít zprávy na notebooku včetně jejich prázdného obalu. Odstraněna také nepoužívaná obsluha těchto zkratek a jejich filtrování; weby se otevírají prostřednictvím prohlížeče. Prostředky `v=149`.
