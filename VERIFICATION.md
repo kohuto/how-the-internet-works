@@ -1,5 +1,10 @@
 # Záznam ověření
 
+## Nadpis souborů cloudového serveru · 21. listopadu 2026
+
+Z nadpisu hlavního i záložního cloudu odstraněn dodatek „· POHLED SPRÁVCE“. Zůstává pouze „SOUBORY NA SERVERU“. Ověřena syntaxe skriptu a oba detaily v prohlížeči: správný nadpis, zachovaný seznam souborů, napájení i synchronizace; konzole bez chyb a varování. Prostředky `v=133`.
+
+
 ## Jediné rozšíření Cloud pro obě datová centra · 21. listopadu 2026
 
 Volby Cloud a Záložní cloud sloučeny do jediného rozšíření **Cloud**. Zapíná obě lokality, jejich přípojky a potřebné páteřní uzly, aplikaci Cloud, výběr hlavního/záložního úložiště i synchronizaci A → B. Samostatná volba zálohy a její závislost odstraněny; nastavení má 21 rozšíření. Vypnutí Cloudu skryje obě centra i aplikaci a znemožní oba typy přenosu. Data a pravidla replikace se nemění. README a cache prostředků aktualizovány na `v=132`.
