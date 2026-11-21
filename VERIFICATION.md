@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Stručnější detail VPN serveru · 21. listopadu 2026
+
+Z detailu odstraněn souhrnný čítač Provoz VPN serveru, pole s vysvětlením rozbaleného paketu a směru přenosu i odkaz Prozkoumat tento paket. Odstranění pole platí také pro variantu HTTPS a odpověď pro zařízení. Nepoužívané styly vpn-layer-note odstraněny; sdílené styly stavových polí a obsluha prohlížení paketů používaná jinde zůstávají. Přehled aktivních spojení s počty paketů, obsah posledního paketu, volitelné NAT údaje a model přenosů zůstávají. Prostředky `v=153`.
+
+Prošlo všech **16 testů VPN a jejího rozhraní** i kontrola syntaxe upraveného skriptu. V prohlížeči při 763 × 743 px ověřen prázdný server, skutečný HTTP požadavek během běžícího přenosu i jeho úspěšné dokončení a zobrazení HTTP odpovědi. Odstraněné bloky chybí, aktivní spojení a náhled paketu zůstávají. Při 320 × 568 px úspěšně doručeno HTTPS přes VPN; detail ukazuje aktivní spojení a chráněný obsah posledního paketu bez odstraněných bloků a bez vodorovného přetékání. Konzole bez chyb a varování.
+
+
 ## Odstranění doprovodné věty při vypnuté VPN · 21. listopadu 2026
 
 Z vypnutého stavu aplikace VPN odstraněna věta Internet používá běžné připojení. Nevytváří se ani prázdný odstavec po textu. Prostředky `v=152`.
