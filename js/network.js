@@ -244,8 +244,8 @@
         const offset=n.enabledBy?[0,0]:MAP_LAYOUT.offsets[n.region]||[0,0];n.x+=offset[0];n.y+=offset[1];
         if(MAP_LAYOUT.positions[n.id])[n.x,n.y]=MAP_LAYOUT.positions[n.id];
       }
-      this.satellite={clearView:true};this.mitm={active:false,mode:'observe',logs:[],serial:0};
-      this.access={cafe:{mode:'wifi',hotspot:'trusted'},hacker:{mode:'cable'},cabin:{mode:'wifi'},laptop:{mode:'cable'},friend:{mode:'cable'},phone:{mode:'cellular',tower:'bts-lipova'}};
+      this.satellite={clearView:true};this.mitm={active:false,ssid:'Kavarna_free',mode:'observe',logs:[],serial:0};this.cafeWifi={ssid:'Kavarna_hoste',password:'kava1234'};
+      this.access={cafe:{mode:'offline',hotspot:null},hacker:{mode:'cable'},cabin:{mode:'wifi'},laptop:{mode:'cable'},friend:{mode:'cable'},phone:{mode:'cellular',tower:'bts-lipova'}};
       this.connectionProfiles=Object.fromEntries(Object.keys(this.access).map(id=>[id,{bandwidth:'low',latency:'low'}]));
       this.links = Object.fromEntries(linkDefinitions.map(([id,a,b,pa,pb,name,addresses,options={}],i)=> {
         if(id==='laptop-switch')options={...options,device:'laptop',mode:'cable'};
@@ -366,13 +366,20 @@
       }
     }
     setAccess(id,mode,tower=this.access[id]?.tower) {
-      const allowed=id==='cafe'?['wifi','offline']:id==='hacker'?['cable','offline']:id==='phone'?['wifi','cellular','offline']:['cable','wifi','offline'];
+      const allowed=id==='cafe'?['offline']:id==='hacker'?['cable','offline']:id==='phone'?['wifi','cellular','offline']:['cable','wifi','offline'];
       if(!this.nodeAvailable(id)||!this.access[id]||!allowed.includes(mode)||!this.accessModeAvailable(id,mode)||(id==='phone'&&!['bts-lipova','bts-park'].includes(tower)))return false;
       if(this.access[id].mode===mode&&this.access[id].tower===tower)return false;
       this.access[id]={mode,...(id==='phone'?{tower}:id==='cafe'?{hotspot:this.access.cafe.hotspot}:{})};this.applyAccess(id);this.changed();return true;
     }
-    setCafeHotspot(hotspot) {
-      if(!this.nodeAvailable('cafe')||hotspot==='rogue'&&!this.featureEnabled('mitm')||!['trusted','rogue'].includes(hotspot)||this.access.cafe.mode==='wifi'&&this.access.cafe.hotspot===hotspot)return false;
+    cafeNetworks() {
+      if(!this.nodeAvailable('cafe'))return [];
+      const networks=[];
+      if(this.nodeAvailable('cafe-ap')&&this.nodes['cafe-ap'].on)networks.push({id:'trusted',ssid:this.cafeWifi.ssid,secured:true});
+      if(this.featureEnabled('mitm')&&this.nodeAvailable('cafe-attacker')&&this.nodes['cafe-attacker'].on&&this.mitm.active)networks.push({id:'rogue',ssid:this.mitm.ssid,secured:false});
+      return networks;
+    }
+    setCafeHotspot(hotspot,password='') {
+      if(!this.cafeNetworks().some(n=>n.id===hotspot)||hotspot==='trusted'&&password!==this.cafeWifi.password||this.access.cafe.mode==='wifi'&&this.access.cafe.hotspot===hotspot)return false;
       this.access.cafe={mode:'wifi',hotspot};this.applyAccess('cafe');this.changed();return true;
     }
     adjacent(id) {return this.visibleLinks().filter(l=>l.a===id||l.b===id);}
@@ -424,7 +431,12 @@
     setSatelliteView(clear) {if(this.satellite.clearView===clear)return false;this.satellite.clearView=clear;this.changed();return true;}
     natRouterFor(id) {return id==='cafe'?'cafe-router':id==='hacker'?'hacker-router':id==='cabin'?'cabin-router':id==='friend'?'friend-home':id==='phone'&&this.access.phone.mode==='cellular'?null:'home';}
     toggleLink(id) {if(!this.linkAvailable(this.links[id]))return false;this.links[id].on=!this.links[id].on;this.changed();return this.links[id].on;}
-    toggleNode(id) {if(!this.nodeAvailable(id))return false;this.nodes[id].on=!this.nodes[id].on;this.changed();return this.nodes[id].on;}
+    toggleNode(id) {
+      if(!this.nodeAvailable(id))return false;
+      this.nodes[id].on=!this.nodes[id].on;
+      if(!this.nodes[id].on&&((id==='cafe-ap'&&this.access.cafe.hotspot==='trusted')||(id==='cafe-attacker'&&this.access.cafe.hotspot==='rogue')))this.access.cafe.mode='offline';
+      this.changed();return this.nodes[id].on;
+    }
     packetHeader(p) {return {protocol:p.protocol,src:p.src,sport:p.sport,dst:p.dst,dport:p.dport};}
     natAddress(id) {return this.iface(id,this.links[this.nat[id].wanLink]).ip;}
     clearNat(id) {if(this.nat[id]){this.nat[id].rows=[];this.version++;}}

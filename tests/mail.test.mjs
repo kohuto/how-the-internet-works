@@ -49,7 +49,7 @@ test('A powered-off recipient receives server mail and can fetch it later with t
  s.net.toggleNode('friend');check(s);assert.equal(s.status,'success');assert.equal(s.net.phishing.clients.friend.inbox.body,draft().body);
 });
 test('Both directions and additional devices use separate mailboxes on the same Gmail server',()=>{
- const s=new Simulation();send(s,'cafe','phone');assert.equal(s.status,'success');assert.equal(s.net.mail.boxes.phone.length,1);
+ const s=new Simulation();assert(s.net.setCafeHotspot('trusted',s.net.cafeWifi.password));send(s,'cafe','phone');assert.equal(s.status,'success');assert.equal(s.net.mail.boxes.phone.length,1);
  send(s,'laptop','friend');assert.equal(s.status,'success');send(s,'friend','laptop');assert.equal(s.status,'success');
  assert.equal(s.net.mail.boxes.laptop[0].from,'matej@gmail.com');assert.equal(s.net.mail.boxes.friend[0].from,'ty@gmail.com');
  assert.equal(s.net.mail.boxes.friend.length,1);assert.equal(s.net.mail.boxes.phone.length,1);

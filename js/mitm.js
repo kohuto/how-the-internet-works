@@ -10,10 +10,14 @@
     #forged=new Map();
     constructor(sim){this.sim=sim;this.net=sim.net;}
     reset(){this.#seen.clear();this.#forged.clear();}
-    configure(active,mode=this.net.mitm.mode){
-      if(!Object.hasOwn(MITM_MODES,mode))return false;
-      const changed=this.net.mitm.active!==active||this.net.mitm.mode!==mode;
-      Object.assign(this.net.mitm,{active,mode});if(changed)this.net.changed();return changed;
+    configure(active,mode=this.net.mitm.mode,ssid=this.net.mitm.ssid){
+      if(!this.net.featureEnabled('mitm')||!this.net.nodeAvailable('cafe-attacker')||typeof active!=='boolean'||!Object.hasOwn(MITM_MODES,mode)||typeof ssid!=='string')return false;
+      ssid=ssid.trim();if(!ssid||ssid.length>32||/[\u0000-\u001f\u007f]/.test(ssid))return false;
+      const m=this.net.mitm,changed=m.active!==active||m.mode!==mode||m.ssid!==ssid;
+      const disconnect=this.net.access.cafe.mode==='wifi'&&this.net.access.cafe.hotspot==='rogue'&&(!active||m.ssid!==ssid);
+      Object.assign(m,{active,mode,ssid});
+      if(disconnect){this.net.access.cafe.mode='offline';this.sim.connectionChanged('cafe');}
+      if(changed)this.net.changed();return changed;
     }
     certificateFor(p){const session=this.#forged.get(p.id);return session?session.open(p.payload.record,'cafe','handshake'):null;}
     inspect(e){

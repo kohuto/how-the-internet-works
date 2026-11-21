@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Ruční připojení hosta k Wi-Fi a pojmenovatelný hotspot · 21. listopadu 2026
+
+Host kavárny nyní začíná odpojený. V Připojení vidí pouze vysílající přístupové body podle názvu a zabezpečení. Kavárna nabízí síť Kavarna_hoste s ukázkovým heslem kava1234, dostupným v rozbalovací kartě Heslo od obsluhy. Chybné či chybějící heslo připojení nezmění; obecný přepínač přístupu kontrolu neobchází. Útočník může zadat vlastní název hotspotu o 1–32 znacích a zapnout vysílání. Jeho otevřená síť se hostovi objeví teprve po zapnutí. Útočník už nemůže hosta připojit tlačítkem za něj. Vypnutí, přejmenování či vypnutí zařízení s vybraným přístupovým bodem hosta odpojí; nedojde k přepnutí na jinou síť ani k automatickému opětovnému připojení. Viditelnost Wi-Fi zůstává oddělená od dostupnosti internetové přípojky. Prostředky `v=141`.
+
+Prošlo všech **335 automatických testů** a kontrola syntaxe pěti změněných skriptů. Pět nových testů ověřuje počáteční odpojení, správné i chybné heslo, nemožnost připojit se k vypnutému hotspotu, dynamický seznam a vlastní názvy, shodné názvy různých sítí, skutečný HTTP průchod přes útočníka, odpojení a ukončení přenosu při přejmenování, žádný automatický návrat po zapnutí, bezpečné vykreslení textu a výpadek internetové přípojky při dál vysílající Wi-Fi. Starší scénáře se připojují výslovně ve svých testovacích přípravách; TLS, VPN, pošta, soukromí a ostatní přenosy prošly celou sadou.
+
+V prohlížeči při 1047 × 858 px host začal bez připojení s jedinou zabezpečenou sítí. Chybné heslo vyvolalo chybu, správné připojilo k Wi-Fi kavárny. Zapnutí stejně pojmenovaného hotspotu přidalo druhou otevřenou síť a ponechalo původní připojení. Host ji ručně vybral a změněný HTTP nadpis dorazil přes útočníka. Přejmenování odpojilo hosta a nabídlo nové jméno; vypnutí po opětovném připojení odstranilo hotspot ze seznamu a host zůstal odpojený. Při 320 × 568 px ověřeno zadání hesla, připojení ke kavárně, pojmenování hotspotu, zapnutí přímo s rozepsaným názvem a ruční přechod hosta na novou otevřenou síť. Pole i tlačítka se vejdou bez vodorovného přetékání. Konzole obou náhledů bez chyb a varování.
+
+
 ## Jediný scénář Útočník v kavárně · 21. listopadu 2026
 
 Volby Kavárna a Útočník v kavárně sloučeny do jediné volby Útočník v kavárně v části Části sítě. Zahrnuje celou kavárnu: notebook hosta, veřejný přístupový bod, útočníkův hotspot, router a potřebné páteřní přípojky. Vypnutí odstraní celou oblast; společný router R zůstává, pokud jej potřebuje zapnutý Cloud nebo VPN. Scénář nevyžaduje domácí Wi-Fi, e-mail ani TLS. Host dál začíná na běžné Wi-Fi; zapnutí a použití napodobeného hotspotu zůstává ovládáním uvnitř scénáře. Nastavení má 19 rozšíření. README a prostředky aktualizovány na `v=140`.

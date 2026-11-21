@@ -12,6 +12,7 @@
     ui.friendMessage='';ui.friendMessageType='text';
     ui.cafeTab='desktop';ui.cafeAttackerTab='desktop';ui.cafeAddress='http://knihovna.test';
     ui.mailComposer=Object.fromEntries(globalThis.InternetLab.MAIL_CLIENTS.map(id=>[id,{tab:'inbox',target:id==='hacker'?'laptop':fixedMailRecipient(id)||(net.nodeAvailable('friend')&&net.nodeAvailable('mail')?'friend':'laptop'),subject:'',body:'',search:'',composeOpen:false,sentId:null}]));
+    ui.mitmSsid=net.mitm.ssid;ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';
     ui.connectionDrafts={};
     ui.authDraft=Object.fromEntries(Object.keys(globalThis.InternetLab.PRIVACY_OWNERS).map(device=>[device,{mode:'login',username:device==='friend'?'matej':device==='cafe'?'host':'alex',email:'novy@knihovna.test',password:'KNIHOVNA-DEMO'}]));
     ui.privacyOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
@@ -337,7 +338,7 @@
     if(mailField){const el=$(`[data-mail-field="${mailField}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number'&&['text','search','textarea'].includes(el.type))el.setSelectionRange(start,end);}}
     if(field) {const el=$(`[data-field="${field}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number')el.setSelectionRange(start,end);if(cloudTextScroll!==null)el.scrollTop=cloudTextScroll;}}
     const current=sim.current;
-    $('#event-title').textContent=net.displayText(current?.title||'')||'Síť čeká na tvůj první přenos';$('#event-description').textContent=net.displayText(current?.description||'')||(ui.monitorOpen?(ui.monitorDevice==='cafe-attacker'?'Otevři MITM a nastav napodobený hotspot.':ui.monitorDevice==='cafe'?'Porovnej HTTP a HTTPS přes Wi-Fi kavárny.':ui.monitorDevice==='hacker'?'Otevři Správu webu nebo Gmail.':ui.monitorDevice==='cabin'?'Otevři některou z dostupných aplikací na chatě.':ui.monitorDevice==='friend'?'Otevři některou z dostupných aplikací u Matěje.':ui.monitorDevice==='phone'?'Otevři některou z dostupných aplikací v telefonu.':'Na ploše otevři některou z dostupných aplikací.'):'Klikni na notebook v mapě a otevři jeho plochu.');
+    $('#event-title').textContent=net.displayText(current?.title||'')||'Síť čeká na tvůj první přenos';$('#event-description').textContent=net.displayText(current?.description||'')||(ui.monitorOpen?(ui.monitorDevice==='cafe-attacker'?'Otevři MITM a nastav napodobený hotspot.':ui.monitorDevice==='cafe'?(net.accessReady('cafe')?'Otevři Prohlížeč a načti web.':'V Připojení nejprve vyber Wi-Fi.'):ui.monitorDevice==='hacker'?'Otevři Správu webu nebo Gmail.':ui.monitorDevice==='cabin'?'Otevři některou z dostupných aplikací na chatě.':ui.monitorDevice==='friend'?'Otevři některou z dostupných aplikací u Matěje.':ui.monitorDevice==='phone'?'Otevři některou z dostupných aplikací v telefonu.':'Na ploše otevři některou z dostupných aplikací.'):'Klikni na notebook v mapě a otevři jeho plochu.');
     $('#run-dot').className=`status-dot ${sim.status}`;
     $('#play').disabled=ui.packetOpen||sim.status!=='running';$('#play').innerHTML=playing?'Ⅱ <span>Pauza</span>':'▶ <span>Přehrát</span>';$('#play').setAttribute('aria-label',playing?'Pozastavit přenos':'Přehrát přenos');
     $('#step').disabled=ui.packetOpen||sim.status!=='running'||sim.auth.working;$('#repeat').disabled=ui.packetOpen||!sim.lastAction;
@@ -393,6 +394,17 @@
   }
   function handleSubmit(e) {
     e.preventDefault();const form=e.target.dataset.form;
+    if(form==='cafe-wifi'){
+      if(ui.monitorDevice!=='cafe'||sim.status==='running')return;
+      if(net.setCafeHotspot('trusted',ui.cafePassword)){sim.connectionChanged('cafe');ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';}
+      else ui.cafeWifiError='Připojení se nezdařilo. Zkontroluj heslo a dostupnost sítě.';
+      render();return;
+    }
+    if(form==='mitm-hotspot'){
+      if(ui.monitorDevice!=='cafe-attacker'||sim.status==='running')return;
+      const ssid=ui.mitmSsid.trim();if(!ssid||ssid.length>32){notify('Zadej název Wi-Fi o 1–32 znacích.');return;}
+      sim.mitm.configure(net.mitm.active,net.mitm.mode,ssid);ui.mitmSsid=net.mitm.ssid;render();return;
+    }
     if(form==='connection-profile'){
       const id=e.target.dataset.device,values=new FormData(e.target),profile={bandwidth:values.get('bandwidth'),latency:values.get('latency')};
       if(net.setConnectionProfile(id,profile)){delete ui.connectionDrafts[id];notify('Vlastnosti připojení jsou nastavené pro další přenos.');render();$(`#monitor-content [data-form="connection-profile"] button`).focus({preventScroll:true});}
@@ -451,8 +463,12 @@
       if(b.dataset.browserNav==='network'&&state.networkOpen)$('.browser-network')?.scrollIntoView({block:'nearest'});
       return;
     }
-    if(b.dataset.cafeHotspot){if(sim.status==='running')return;if(net.setCafeHotspot(b.dataset.cafeHotspot))sim.connectionChanged('cafe');render();return;}
-    if(b.dataset.action==='cafe-connect-rogue'){if(sim.status==='running'||!net.mitm.active)return;net.setCafeHotspot('rogue');sim.connectionChanged('cafe');notify('Host v modelu vybral napodobený hotspot. Jeho pakety nyní půjdou přes útočníka.');render();return;}
+    if(b.dataset.cafeHotspot){
+      if(sim.status==='running'||ui.monitorDevice!=='cafe')return;
+      if(b.dataset.cafeHotspot==='trusted'){if(net.access.cafe.mode==='wifi'&&net.access.cafe.hotspot==='trusted')return;ui.cafeWifiChoice='trusted';ui.cafeWifiError='';render();$('#cafe-wifi-password')?.focus({preventScroll:true});}
+      else {if(net.setCafeHotspot('rogue'))sim.connectionChanged('cafe');ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();}return;
+    }
+    if(b.dataset.action==='cafe-wifi-cancel'){ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();return;}
     if(b.dataset.cafeTest){if(sim.status==='running')return;ui.cafeTab='web';ui.cafeAddress=`${b.dataset.cafeTest}://knihovna.test`;select('node','cafe');startAction('web');return;}
     if(b.dataset.action==='mitm-clear'){if(sim.status==='running')return;net.mitm.logs=[];render();return;}
     if(b.dataset.gmailAction){
@@ -535,7 +551,7 @@
   for(const root of [$('#monitor-overlay'),$('#device-overlay')]) {
     root.addEventListener('input',handleInput);
     root.addEventListener('change',e=>{
-      if(e.target.hasAttribute('data-mitm-active')||e.target.hasAttribute('data-mitm-mode')){if(sim.status==='running')return;sim.mitm.configure(e.target.hasAttribute('data-mitm-active')?e.target.checked:net.mitm.active,e.target.hasAttribute('data-mitm-mode')?e.target.value:net.mitm.mode);render();return;}
+      if(e.target.hasAttribute('data-mitm-active')||e.target.hasAttribute('data-mitm-mode')){if(sim.status==='running')return;sim.mitm.configure(e.target.hasAttribute('data-mitm-active')?e.target.checked:net.mitm.active,e.target.hasAttribute('data-mitm-mode')?e.target.value:net.mitm.mode,e.target.hasAttribute('data-mitm-active')&&e.target.checked?ui.mitmSsid:net.mitm.ssid);ui.mitmSsid=net.mitm.ssid;render();return;}
       if(e.target.hasAttribute('data-ads-allowed')){if(sim.ads.setAllowed(ui.monitorDevice,e.target.checked)){render();$('[data-ads-allowed]')?.focus({preventScroll:true});}return;}
       if(e.target.dataset.privacyHold){if(sim.status==='running')return;sim.privacy.setHold(e.target.dataset.privacyHold,e.target.checked);render();$(`[data-privacy-hold="${e.target.dataset.privacyHold}"]`)?.focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-cookie-allowed')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.browserFor(ui.monitorDevice).cookies.allowed=e.target.checked;render();$('[data-cookie-allowed]')?.focus({preventScroll:true});return;}

@@ -295,3 +295,11 @@
 .attack-site code{display:block;overflow-wrap:anywhere;padding:12px;border-radius:7px;background:#f0eaf4;color:#79578d;font-size:11px;line-height:1.8}
 .attack-site button{margin-top:14px;font-size:11px}
 @media(max-width:700px){.attack-site{padding:14px}.attack-site code{padding:10px;font-size:10px}.attack-site button{width:100%;min-height:40px}}
+
+.cafe-wifi-login,.mitm-hotspot-settings{padding:16px;border:1px solid #d8c8d3;border-radius:10px;background:#fffdfd;margin:16px 0}
+.cafe-wifi-login label,.mitm-hotspot-settings label{display:block;font-size:12px;line-height:1.6;font-weight:600;margin-bottom:8px}
+.cafe-wifi-login input,.mitm-hotspot-settings input{display:block;width:100%;min-width:0;box-sizing:border-box;padding:11px 12px;font-size:13px;border:1px solid #d8c8d3;border-radius:7px;background:#fff}
+.cafe-wifi-login>div{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.mitm-hotspot-settings button{margin-top:12px}
+.cafe-password-card{font-size:12px;line-height:1.8;border:1px solid #dcd2c0;border-radius:9px;padding:12px 14px;margin:16px 0;overflow-wrap:anywhere}.cafe-password-card summary{cursor:pointer}.cafe-password-card p{margin:12px 0 0}.cafe-password-card code{font-size:13px}
+.cafe-wifi-error{font-size:12px;line-height:1.7;color:#a43838;margin:10px 0 0}
+@media(max-width:700px){.cafe-wifi-login,.mitm-hotspot-settings{padding:13px}.cafe-wifi-login input,.mitm-hotspot-settings input{font-size:16px}.cafe-wifi-login button,.mitm-hotspot-settings button,.cafe-hotspots button{min-height:40px}}

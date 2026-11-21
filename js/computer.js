@@ -38,7 +38,7 @@
   }
   function connectionView(net,id,sim,ui) {
     const performance=connectionPerformance(net,id,ui);
-    if(id==='cafe')return globalThis.InternetLab.cafeConnection(net,sim,performance+vpnSettings(net,id));
+    if(id==='cafe')return globalThis.InternetLab.cafeConnection(net,sim,performance+vpnSettings(net,id),ui);
     const access=net.access[id],phone=id==='phone',ready=net.accessReady(id),ssid=id==='cabin'?'Chata':id==='friend'?'U Mateje':'Lipova',natRouter=net.natRouterFor(id);
     const modes=(id==='hacker'?[['cable','Kabel'],['offline','Odpojit']]:phone?[['wifi','Wi-Fi'],['cellular','Mobilní data'],['offline','Odpojit']]:[['cable','Kabel'],['wifi','Wi-Fi'],['offline','Odpojit']]).filter(([mode])=>net.accessModeAvailable(id,mode));
     const name=access.mode==='wifi'?`Wi-Fi · ${ssid}`:access.mode==='cellular'?`Mobilní data · ${net.nodes[access.tower].name}`:access.mode==='cable'?'Síťový kabel':'Bez připojení';

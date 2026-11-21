@@ -118,13 +118,13 @@ test('One cafe attacker extension supplies both Wi-Fi paths and removes the whol
   for(const id of ['wifi','mail','tls'])assert(!settings.has(id),id);
   const cafe=['cafe','cafe-ap','cafe-router','cafe-attacker'];
   for(const id of [...cafe,'transit-r','transit-s','transit-t','transit-u'])assert(net.nodeAvailable(id),id);
-  assert(net.appAvailable('mitm','cafe-attacker'));assert(net.accessReady('cafe'));
-  assert.equal(net.access.cafe.hotspot,'trusted');assert.equal(net.mitm.active,false);
+  assert(net.appAvailable('mitm','cafe-attacker'));assert(!net.accessReady('cafe'));
+  assert.equal(net.access.cafe.mode,'offline');assert.equal(net.mitm.active,false);
   sim.mitm.configure(true,'http');assert(net.setCafeHotspot('rogue'));
   assert(sim.start('web',{device:'cafe',address:'http://knihovna.test/'}));
   const events=finish(sim);assert.equal(net.cafeBrowser.content,globalThis.InternetLab.MITM_TITLE);
   for(const link of ['cafe-twin','cafe-relay','cafe-uplink'])assert(events.some(e=>e.kind==='hop'&&e.link===link),link);
-  assert(net.setCafeHotspot('trusted'));assert(sim.start('web',{device:'cafe',address:'http://knihovna.test/'}));
+  assert(net.setCafeHotspot('trusted',net.cafeWifi.password));assert(sim.start('web',{device:'cafe',address:'http://knihovna.test/'}));
   const direct=finish(sim);assert.equal(net.cafeBrowser.content,net.server.title);assert(!direct.some(e=>e.kind==='mitm'));
   const disabled=new Simulation(new Network(new LabSettings({features:['mitm','cloud','mail']}).toggle('mitm',false)));
   for(const id of [...cafe,'transit-s','transit-t','transit-u'])assert(!disabled.net.nodeAvailable(id),id);
@@ -169,7 +169,7 @@ test('One household Wi-Fi option gates all three access points without enabling 
         assert(!net.visibleLinks().some(l=>l.a===ap||l.b===ap));
       }
     }
-    assert(net.nodeAvailable('cafe-ap'));assert(net.accessReady('cafe'));
+    assert(net.nodeAvailable('cafe-ap'));assert(!net.accessReady('cafe'));assert(net.setCafeHotspot('trusted',net.cafeWifi.password));assert(net.accessReady('cafe'));
   }
   const onlyWifi=network(['wifi']);
   assert(onlyWifi.nodeAvailable('ap'));
@@ -181,7 +181,7 @@ test('One household Wi-Fi option gates all three access points without enabling 
 test('Home, Matej and cabin load the web over cable or optional Wi-Fi; the cafe scenario keeps its own Wi-Fi',()=>{
   for(const wifi of [false,true])for(const device of ['laptop','friend','cabin','cafe']){
     const net=network(['friend','satellite','mitm',...(wifi?['wifi']:[])]),sim=new Simulation(net);
-    if(wifi&&device!=='cafe')net.setAccess(device,'wifi');
+    if(wifi&&device!=='cafe')net.setAccess(device,'wifi');if(device==='cafe')assert(net.setCafeHotspot('trusted',net.cafeWifi.password));
     assert(sim.start('web',{device,address:'http://knihovna.test/'}));
     const events=finish(sim),firstHop=events.find(e=>e.kind==='hop'&&e.from===device);
     assert(firstHop);

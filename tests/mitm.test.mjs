@@ -8,12 +8,12 @@ function until(s,condition){for(let i=0;i<6000&&s.status==='running'&&!condition
 
 test('The cafe has a private LAN, NAT and an independent routed uplink, with one selected Wi-Fi',()=>{
  const s=new Simulation(),n=s.net;assert.equal(n.natAddress('cafe-router'),'192.0.2.69');assert.equal(n.nodes.cafe.ip,'192.168.50.10');assert(!n.nodes.south.routes.some(r=>r.prefix==='192.168.50.0/24'));
- assert(n.isActive(n.links['cafe-wifi']));assert(!n.isActive(n.links['cafe-twin']));assert(!n.setAccess('cafe','cable'));assert.notEqual(n.browserFor('cafe'),n.browser);assert(n.phishing.clients.cafe);
+ assert(!n.isActive(n.links['cafe-wifi']));assert.equal(n.access.cafe.mode,'offline');assert(n.setCafeHotspot('trusted',n.cafeWifi.password));assert(n.isActive(n.links['cafe-wifi']));assert(!n.isActive(n.links['cafe-twin']));assert(!n.setAccess('cafe','cable'));assert.notEqual(n.browserFor('cafe'),n.browser);assert(n.phishing.clients.cafe);
  const events=web(s);assert.equal(s.status,'success');assert.equal(n.server.lastRequest.sourceIp,'192.0.2.69');assert(events.some(e=>e.kind==='hop'&&e.link==='cafe-uplink'));assert.equal(n.mitm.logs.length,0);
 });
 
 test('Switching on a nearby evil twin alone does not reveal traffic, including flooded wrong-destination copies',()=>{
- const s=new Simulation();s.mitm.configure(true,'http');const events=web(s);assert.equal(s.status,'success');assert.equal(s.net.browserFor('cafe').content,s.net.server.title);assert.equal(s.net.mitm.logs.length,0);
+ const s=new Simulation();s.mitm.configure(true,'http');assert(s.net.setCafeHotspot('trusted',s.net.cafeWifi.password));const events=web(s);assert.equal(s.status,'success');assert.equal(s.net.browserFor('cafe').content,s.net.server.title);assert.equal(s.net.mitm.logs.length,0);
  assert(events.some(e=>e.kind==='hop'&&e.to==='cafe-attacker'&&e.copy));assert(!events.some(e=>e.kind==='mitm'));
 });
 
@@ -21,7 +21,7 @@ test('An evil-twin connection carries both directions through the attacker witho
  const s=attack(),events=web(s);assert.equal(s.status,'success');const records=s.net.mitm.logs;assert.equal(records.length,4);assert.equal(new Set(records.map(r=>r.packetId)).size,4);
  assert(records.some(r=>r.direction==='out'&&r.header.src==='192.168.50.10'));assert(records.some(r=>r.direction==='in'&&r.header.dst==='192.168.50.10'));
  assert(events.some(e=>e.kind==='hop'&&e.link==='cafe-relay'));assert(events.some(e=>e.kind==='mitm'&&e.packet.visual.node==='cafe-attacker'));
- const plain=new Simulation();web(plain);const inbound=s.net.mitm.logs.find(r=>r.kind==='http-response');const p=s.packets.get(inbound.packetId),q=[...plain.packets.values()].find(p=>p.kind==='http-response');assert.equal(p.ttl,q.ttl);
+ const plain=new Simulation();assert(plain.net.setCafeHotspot('trusted',plain.net.cafeWifi.password));web(plain);const inbound=s.net.mitm.logs.find(r=>r.kind==='http-response');const p=s.packets.get(inbound.packetId),q=[...plain.packets.values()].find(p=>p.kind==='http-response');assert.equal(p.ttl,q.ttl);
 });
 
 test('HTTP response is changed only at the attacker; server stays original and client waits for delivery',()=>{
@@ -59,8 +59,8 @@ test('VPN hides inner HTTP, DNS and TLS from every cafe attack mode without a di
 });
 
 test('A dead rogue hotspot never silently falls back; trusted Wi-Fi restores service with the attacker off',()=>{
- const s=attack();s.mitm.configure(false);assert(!s.net.accessReady('cafe'));web(s);assert.equal(s.status,'failed');assert.equal(s.net.access.cafe.hotspot,'rogue');s.net.setCafeHotspot('trusted');web(s);assert.equal(s.status,'success');
- s.mitm.configure(true);s.net.setCafeHotspot('rogue');s.net.toggleNode('cafe-attacker');web(s);assert.equal(s.status,'failed');s.net.setCafeHotspot('trusted');web(s);assert.equal(s.status,'success');
+ const s=attack();s.mitm.configure(false);assert(!s.net.accessReady('cafe'));web(s);assert.equal(s.status,'failed');assert.equal(s.net.access.cafe.hotspot,'rogue');s.net.setCafeHotspot('trusted',s.net.cafeWifi.password);web(s);assert.equal(s.status,'success');
+ s.mitm.configure(true);s.net.setCafeHotspot('rogue');s.net.toggleNode('cafe-attacker');web(s);assert.equal(s.status,'failed');s.net.setCafeHotspot('trusted',s.net.cafeWifi.password);web(s);assert.equal(s.status,'success');
 });
 
 test('Other households are unaffected and the cafe sees no traffic that took another path',()=>{
@@ -69,7 +69,7 @@ test('Other households are unaffected and the cafe sees no traffic that took ano
 });
 
 test('Switching Wi-Fi during a transfer stops it; next transfer keeps cookies but bypasses the attacker',()=>{
- const s=attack();web(s);const cookie=structuredClone(s.net.browserFor('cafe').cookies.items);assert(s.start('web',{device:'cafe',address:'https://knihovna.test'}));until(s,()=>[...s.packets.values()].some(p=>p.state==='transit'));s.net.setCafeHotspot('trusted');s.connectionChanged('cafe');assert.equal(s.status,'failed');const count=s.net.mitm.logs.length;web(s);assert.equal(s.status,'success');assert.equal(s.net.mitm.logs.length,count);assert.deepEqual(s.net.browserFor('cafe').cookies.items,cookie);
+ const s=attack();web(s);const cookie=structuredClone(s.net.browserFor('cafe').cookies.items);assert(s.start('web',{device:'cafe',address:'https://knihovna.test'}));until(s,()=>[...s.packets.values()].some(p=>p.state==='transit'));s.net.setCafeHotspot('trusted',s.net.cafeWifi.password);s.connectionChanged('cafe');assert.equal(s.status,'failed');const count=s.net.mitm.logs.length;web(s);assert.equal(s.status,'success');assert.equal(s.net.mitm.logs.length,count);assert.deepEqual(s.net.browserFor('cafe').cookies.items,cookie);
 });
 
 test('Losing a relay after interception fails rather than inventing client delivery; retry and log bounds work',()=>{
