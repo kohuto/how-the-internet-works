@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Cloudový server bez souhrnu posledního požadavku · 21. listopadu 2026
+
+Z detailu hlavního i záložního cloudu odstraněn diagnostický blok Poslední požadavek s výsledkem operace a odkazem na paket. Výsledky nadále zpracovává a zobrazuje klientská aplikace; seznam uložených souborů, oprávnění a synchronizace zůstávají.
+
+Prošlo 16 stávajících testů cloudového modelu a rozhraní a kontrola syntaxe skriptu. V prohlížeči ověřeno nahrání dokumentu a synchronizace: oba servery zobrazují uložený soubor pod nadpisem SOUBORY NA SERVERU bez diagnostického bloku; napájení a synchronizace jsou dostupné. Pokus Matěje stáhnout soukromý soubor dál zobrazí zamítnutí přístupu v aplikaci. Konzole bez chyb a varování. Prostředky `v=134`.
+
+
 ## Nadpis souborů cloudového serveru · 21. listopadu 2026
 
 Z nadpisu hlavního i záložního cloudu odstraněn dodatek „· POHLED SPRÁVCE“. Zůstává pouze „SOUBORY NA SERVERU“. Ověřena syntaxe skriptu a oba detaily v prohlížeči: správný nadpis, zachovaný seznam souborů, napájení i synchronizace; konzole bez chyb a varování. Prostředky `v=133`.
