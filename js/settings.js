@@ -15,8 +15,7 @@
     {id:'phone',group:'services',label:'Telefon',description:'Telefon s prohlížečem a dalšími zapnutými aplikacemi.',requires:['wifi'],nodes:['phone']},
     {id:'mail',group:'services',label:'E-mail',description:'Společná poštovní služba pro tebe a Matěje. Odesílání zpráv a schránky uložené na serveru.',requires:['friend'],nodes:['mail']},
     {id:'instagram',group:'services',label:'Instagram',description:'Zprávy mezi tebou a Matějem přes vzdálený server.',requires:['friend'],regions:['instagram']},
-    {id:'cloud',group:'services',label:'Cloud',description:'Ukládání, stahování a sdílení souborů.',regions:['cloud']},
-    {id:'replica',group:'services',label:'Záložní cloud',description:'Druhé datové centrum a kopírování souborů mezi centry.',requires:['cloud'],regions:['replica']},
+    {id:'cloud',group:'services',label:'Cloud',description:'Ukládání, stahování a sdílení souborů. Hlavní i záložní datové centrum a kopírování mezi nimi.',regions:['cloud','replica']},
     {id:'vpn',group:'services',label:'VPN',description:'VPN server a volba šifrovaného tunelu v připojení.',regions:['vpn']},
     {id:'chatbot',group:'services',label:'Chatbot',description:'Dotaz a odpověď zpracovaná na vzdáleném serveru.',nodes:['chatbot']},
     {id:'phishing',group:'services',label:'Podvodný web',description:'Napodobená knihovna v samostatném hostingu.',regions:['phish']},
@@ -55,7 +54,7 @@
     nodeEnabled(node) {
       if(['ap','friend-ap','cabin-ap'].includes(node.id)&&!this.has('wifi'))return false;
       if(node.enabledBy)return !node.enabledBy.length||node.enabledBy.some(id=>this.has(id));
-      if(node.id==='peer')return ['friend','instagram','replica','vpn','hacker','phishing','shop','news','ads'].some(id=>this.has(id));
+      if(node.id==='peer')return ['friend','instagram','cloud','vpn','hacker','phishing','shop','news','ads'].some(id=>this.has(id));
       if(['partners-router','partners-switch'].includes(node.id))return ['shop','news','ads'].some(id=>this.has(id));
       const feature=FEATURES.find(f=>f.nodes?.includes(node.id)||f.regions?.includes(node.region));
       return feature?this.has(feature.id):true;

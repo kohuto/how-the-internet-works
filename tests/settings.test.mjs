@@ -44,13 +44,13 @@ test('The base is a usable web network without optional hosts or DNS transfers',
   assert(Object.values(net.settings.details).every(v=>!v));
 });
 test('Dependencies are added transitively and stay enabled until their dependents are removed',()=>{
-  let settings=new LabSettings({features:['mobile','instagram','hacker','replica','ads']});
-  for(const id of ['phone','friend','mail','phishing','cloud','shop','news','tls','cookies'])assert(settings.has(id),id);
+  let settings=new LabSettings({features:['mobile','instagram','hacker','cloud','ads']});
+  for(const id of ['phone','friend','mail','phishing','shop','news','tls','cookies'])assert(settings.has(id),id);
   assert(!settings.has('wifi'),'Mobile-only phone does not require home Wi-Fi');
   assert.deepEqual(new LabSettings({features:['phone']}).requiredBy('wifi').map(f=>f.id),['phone']);
   settings=settings.toggle('mobile',false);
   assert(!settings.has('phone'));assert(!settings.has('wifi'));
-  settings=settings.toggle('replica',false);assert(!settings.has('cloud'));
+  settings=settings.toggle('cloud',false);assert(!settings.has('cloud'));
   const restored=new LabSettings(settings.toJSON());
   assert.deepEqual([...restored.enabled].sort(),[...settings.enabled].sort());
   assert.equal(new LabSettings().enabled.size,0,'A fresh session always starts from base');
@@ -59,6 +59,27 @@ test('Explicit selections survive removal of the feature that also required them
   let settings=new LabSettings({features:['wifi','phone']});
   settings=settings.toggle('phone',false);
   assert(settings.has('wifi'));assert(!settings.has('phone'));
+});
+test('One Cloud extension enables both centers, synchronization and reading the backup while the primary is offline',()=>{
+  assert.equal(LAB_FEATURES.filter(f=>f.id==='cloud').length,1);assert(!LAB_FEATURES.some(f=>f.id==='replica'));
+  const settings=new LabSettings().toggle('cloud',true),net=new Network(settings),sim=new Simulation(net);
+  assert.deepEqual(settings.toJSON().features,['cloud']);
+  for(const id of ['cloud','cloud-router','cloud-switch','cloud-backup','replica-router','replica-switch'])assert(net.nodeAvailable(id),id);
+  assert(net.appAvailable('cloud','laptop'));
+  const content='Jeden Cloud, dvě datová centra. 🙂';
+  assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Kopie.txt',content}}));finish(sim);
+  const file=[...net.cloud.files.values()].at(-1);
+  assert(sim.start('replicate'));const events=finish(sim);
+  assert(events.some(e=>e.kind==='hop'&&e.link==='cloud-uplink'));
+  assert(events.some(e=>e.kind==='hop'&&e.link==='replica-uplink'));
+  net.toggleNode('cloud');
+  assert(sim.start('cloud',{device:'laptop',server:'cloud-backup',request:{op:'download',fileId:file.id}}));finish(sim);
+  assert.equal(net.cloud.local.laptop.at(-1).content,content);
+  const disabled=new Simulation(new Network(settings.toggle('cloud',false)));
+  for(const id of ['cloud','cloud-router','cloud-switch','cloud-backup','replica-router','replica-switch'])assert(!disabled.net.nodeAvailable(id),id);
+  assert(!disabled.net.appAvailable('cloud','laptop'));
+  assert(!disabled.start('replicate'));
+  for(const server of ['cloud','cloud-backup'])assert(!disabled.start('cloud',{device:'laptop',server,request:{op:'list'}}));
 });
 test('Every optional area can stand alone with its dependencies; all restores the complete map',()=>{
   for(const f of LAB_FEATURES){

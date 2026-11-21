@@ -88,7 +88,7 @@
   ];
   // Real forwarding nodes; their coordinates are absolute and optional branches
   // appear only while at least one of their downstream lessons is enabled.
-  const peerFeatures=['friend','instagram','replica','vpn','hacker','phishing','shop','news','ads'];
+  const peerFeatures=['friend','instagram','cloud','vpn','hacker','phishing','shop','news','ads'];
   const backboneRouters=[
     ['f',960,775,'city',[]],
     ['g',1700,550,'peer',peerFeatures],
@@ -96,13 +96,13 @@
     ['i',2040,-150,'peer',['phishing','shop','news','ads']],
     ['j',2040,-350,'peer',['phishing','shop','news','ads']],
     ['k',2000,950,'peer',peerFeatures],
-    ['l',2000,1350,'peer',['replica','vpn']],
-    ['m',2000,1690,'peer',['replica','vpn']],
+    ['l',2000,1350,'peer',['cloud','vpn']],
+    ['m',2000,1690,'peer',['cloud','vpn']],
     ['n',2300,700,'peer',peerFeatures],
     ['o',2300,200,'peer',peerFeatures],
     ['p',2300,1000,'peer',peerFeatures],
     ['q',2700,1200,'peer',['hacker']],
-    ['r',1450,1000,'city',['cloud','cafe','replica','vpn']],
+    ['r',1450,1000,'city',['cloud','cafe','vpn']],
     ['s',1240,1350,'city',['cafe']],
     ['t',1100,1680,'city',['cafe']],
     ['u',1070,1275,'city',['cafe']],
@@ -112,8 +112,8 @@
     ['y',1910,200,'peer',peerFeatures],
     ['z',1910,-250,'peer',['phishing','shop','news','ads']],
     ['aa',2500,1010,'peer',['hacker']],
-    ['ab',1910,1150,'peer',['replica','vpn']],
-    ['ac',1910,1500,'peer',['replica','vpn']]
+    ['ab',1910,1150,'peer',['cloud','vpn']],
+    ['ac',1910,1500,'peer',['cloud','vpn']]
   ];
   for(const [letter,x,y,region,enabledBy] of backboneRouters)nodeDefinitions.push([`transit-${letter}`,`Router ${letter.toUpperCase()}`,'router',x,y,null,null,region,enabledBy]);
   const linkDefinitions = [

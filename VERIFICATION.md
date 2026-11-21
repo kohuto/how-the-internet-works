@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Jediné rozšíření Cloud pro obě datová centra · 21. listopadu 2026
+
+Volby Cloud a Záložní cloud sloučeny do jediného rozšíření **Cloud**. Zapíná obě lokality, jejich přípojky a potřebné páteřní uzly, aplikaci Cloud, výběr hlavního/záložního úložiště i synchronizaci A → B. Samostatná volba zálohy a její závislost odstraněny; nastavení má 21 rozšíření. Vypnutí Cloudu skryje obě centra i aplikaci a znemožní oba typy přenosu. Data a pravidla replikace se nemění. README a cache prostředků aktualizovány na `v=132`.
+
+Prošlo **68 souvisejících testů** nastavení, cloudu, datových center, páteřní sítě, rozložení mapy a IP popisků. Nový test zapne pouze Cloud, nahraje dokument, přenese kopii po obou přípojkách a stáhne ji ze zálohy při vypnutém hlavním serveru; po vypnutí rozšíření ověřuje skrytí obou center a blokování operací. Syntaxe pěti upravených skriptů bez chyb.
+
+V prohlížeči při 1074 × 858 px jediná zaškrtnutá volba Cloud ukázala obě centra a obě možnosti v aplikaci. Dokument úspěšně nahrán, synchronizován a po vypnutí hlavního serveru otevřen i stažen ze zálohy se stejným textem. Při 320 × 568 px nastavení obsahuje jedinou volbu Cloud, popis se vejde bez přetékání; zapnutí ukáže obě centra, vypnutí vrátí základních 14 zařízení a odebere aplikaci. Konzole bez chyb a varování.
+
+
 ## Cloud jako jednoduché úložiště souborů · 21. listopadu 2026
 
 Aplikace Cloud má společné rozhraní pro notebooky i telefon: seznam Na cloudu, samostatné místní soubory V počítači / V telefonu, tlačítko Nový dokument, textový editor a náhled jednoho souboru. Otevření vzdáleného dokumentu načte celý obsah po síti bez vytvoření místního souboru; samostatné stažení vytvoří místní kopii a otevře ji v editoru. Nahrání, aktualizace, sdílení i výběr záložního úložiště zachovávají původní serverové operace a kontroly práv a verzí. Telefon sdílí účet Ty s notebookem a chatou, má však oddělené místní soubory. Technické možnosti jsou v nabídce tří teček; sdílení je sbalené v náhledu vlastního dokumentu.
