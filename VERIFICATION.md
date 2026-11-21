@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Gmail útočníka a samostatná Správa webu · 21. listopadu 2026
+
+Původní aplikace Phishing rozdělena na Gmail a Správu webu. Správa zobrazuje odkaz na již připravenou falešnou knihovnu a tlačítkem Vložit odkaz do e-mailu otevře předpřipravenou zprávu v Gmailu. Stejnou zprávu lze otevřít tlačítkem Napsat; vybrat lze pouze dostupné modelové příjemce. Odesílatel i SMTP obálka používají `podpora@knihovna-podpora.test`, předmět, obsah a odkaz jsou pevné. Odkaz je nyní i v textovém SMTP výpisu obsahu. Gmail má vlastní stav, schránku a potvrzené odeslané kopie; návštěvní ovládání phishingové zprávy se v Odeslaných nenabízí. Správa webu má oddělený stav a nadále zobrazuje pouze poslední přijatý snímek záznamů po skutečném přenosu ze serveru. Poštovní provoz nemění výsledek správcovského načtení. Prostředky `v=138`.
+
+Prošlo všech **329 automatických testů** a kontrola syntaxe všech sedmi změněných skriptů. Tři nové testy ověřují propojení odkazu a pevného účtu s odesílanou zprávou, odeslané kopie až po SMTP potvrzení a jejich oddělení od serverového obsahu, samostatné načtení zachycených údajů, zachování staré kopie při výpadku a bezpečné zobrazení obsahu. Stávající testy přizpůsobeny samostatnému poštovnímu stavu útočníka; ostatní scénáře prošly beze změn.
+
+V prohlížeči při 1047 × 858 px otevřeny obě aplikace z plochy i hlavního panelu. Odkaz z webové správy se shoduje s odkazem ve zprávě i u příjemce. Před potvrzením odeslání nejsou v Odeslaných žádné nové zprávy; po potvrzení lze otevřít nezávislou kopii. Příjemce načetl e-mail, otevřel falešnou stránku a odeslal pevné ukázkové údaje. Správa je nezobrazila před načtením; po samostatném přenosu dorazil správný záznam. Při vypnutém podvodném serveru načtení selhalo a zachovalo předchozí záznam; Gmail dál úspěšně odeslal další návnadu, včetně výběru Matěje. Při 320 × 568 px ověřeno vložení odkazu, čitelnost celé zprávy posouváním, dostupné Odeslat, odeslání Matějovi a načtení prázdného výsledku ve Správě webu. Stránka ani aplikace nepřetékají vodorovně. Konzole obou náhledů bez chyb a varování.
+
+
 ## Jednodušší aplikace Phishing · 21. listopadu 2026
 
 Z aplikace v počítači útočníka odstraněn podtitulek Počítač útočníka · připravený scénář, celý čtyřbodový přehled postupu a pomocná tlačítka Otevřít Poštu u příjemce a Sledovat přenos v mapě. Nepoužívaná pomocná funkce a styly přehledu kroků odstraněny. Název, výběr příjemce, náhled e-mailu, skutečné odesílání a načítání záznamů ze serveru zachovány. Prostředky `v=137`.

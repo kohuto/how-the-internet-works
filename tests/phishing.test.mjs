@@ -14,12 +14,12 @@ function capture(s,device='laptop'){send(s,device);fetch(s,device);visit(s,devic
 test('The lair has an independent private LAN/NAT and the fake hosting and mail servers have real routed endpoints',()=>{
  const s=new Simulation(),n=s.net;assert.equal(n.nodes.hacker.type,'host');assert.equal(n.natAddress('hacker-router'),'192.0.2.62');assert.equal(n.nodes.mail.ip,'203.0.113.40');assert.equal(n.nodes['phish-web'].ip,'192.0.2.170');
  assert(!n.nodes.peer.routes.some(r=>r.prefix==='192.168.40.0/24'));assert(n.route('peer','192.0.2.170'));assert(n.physicalCanReach('hacker','mail'));assert(n.physicalCanReach('hacker','phish-web'));
- assert(!s.start('phish-send',{device:'laptop',target:'friend'}));assert(!s.start('phish-results',{device:'phone'}));assert(!s.start('mail-check',{device:'hacker'}));
+ assert(!s.start('phish-send',{device:'laptop',target:'friend'}));assert(!s.start('phish-results',{device:'phone'}));assert(s.mail.validate('mail-check',{device:'hacker'}));
 });
 
 test('Mail is stored only when the request arrives; the recipient sees it only after its own fetch response',()=>{
  const s=new Simulation();assert(s.start('phish-send',{device:'hacker',target:'laptop'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='smtp-request'));assert.equal(s.net.phishing.messages.size,0);
- until(s,()=>s.net.phishing.messages.size===1);assert.equal(s.net.phishing.clients.laptop.inbox,null);assert.equal(s.net.phishing.hacker.state,'sending');finish(s);assert.equal(s.net.phishing.hacker.state,'ready');
+ until(s,()=>s.net.phishing.messages.size===1);assert.equal(s.net.phishing.clients.laptop.inbox,null);assert.equal(s.net.phishing.clients.hacker.state,'sending');finish(s);assert.equal(s.net.phishing.clients.hacker.state,'ready');
  assert(s.start('mail-check',{device:'laptop'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='imap-response'));assert.equal(s.net.phishing.clients.laptop.inbox,null);finish(s);
  assert.equal(s.net.phishing.clients.laptop.inbox.id,1);assert.equal(s.net.phishing.clients.phone.inbox,null);
 });
@@ -69,7 +69,7 @@ test('Cutting mail or fake hosting affects their own service and leaves the othe
 });
 
 test('A lost send confirmation does not duplicate the stored email on repeat',()=>{
- const s=new Simulation();assert(s.start('phish-send',{device:'hacker',target:'phone'}));until(s,()=>s.net.phishing.messages.size===1);s.net.clearNat('hacker-router');finish(s);assert.equal(s.status,'failed');assert.equal(s.net.phishing.hacker.state,'error');
+ const s=new Simulation();assert(s.start('phish-send',{device:'hacker',target:'phone'}));until(s,()=>s.net.phishing.messages.size===1);s.net.clearNat('hacker-router');finish(s);assert.equal(s.status,'failed');assert.equal(s.net.phishing.clients.hacker.state,'error');
  assert(s.repeat());finish(s);assert.equal(s.status,'success');assert.equal(s.net.phishing.messages.size,1);assert.equal(s.net.phishing.mailboxes.phone,1);
 });
 

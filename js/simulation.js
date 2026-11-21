@@ -89,7 +89,7 @@
       const feature={print:'printer',message:'instagram',cloud:'cloud',replicate:'cloud',chatbot:'chatbot','phish-send':'hacker','phish-results':'hacker'}[type];
       if(!this.net.nodeAvailable(payload.device||'laptop')||feature&&!this.net.featureEnabled(feature))return false;
       if(this.mail.accepts(type)&&!this.net.featureEnabled('mail'))return false;
-      if(type==='mail-send'&&(!this.net.nodeAvailable(payload.target)||!this.net.nodeAvailable(globalThis.InternetLab.mailServerFor(payload.target))))return false;
+      if(['mail-send','phish-send'].includes(type)&&(!this.net.nodeAvailable(payload.target)||!this.net.nodeAvailable(globalThis.InternetLab.mailServerFor(payload.target))))return false;
       if(!['web','print','message','cloud','replicate','chatbot'].includes(type)&&!this.phishing.accepts(type)&&!this.mail.accepts(type))return false;
       if(this.mail.accepts(type)&&!this.mail.validate(type,payload))return false;
       if(this.phishing.accepts(type)&&!this.phishing.validate(type,payload))return false;

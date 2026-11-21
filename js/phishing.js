@@ -3,16 +3,17 @@
 (() => {
   'use strict';
   const CLIENTS=['laptop','friend','phone','cabin','cafe'];
+  const MAIL_CLIENTS=[...CLIENTS,'hacker'];
   const PHISH_HOST='knihovna-podpora.test';
   const DEMO_LOGIN=Object.freeze({username:'ctenar-demo',password:'UKAZKOVE-HESLO'});
-  const emailFor=id=>({laptop:'ty@gmail.com',friend:'matej@gmail.com',phone:'telefon@gmail.com',cabin:'chata@gmail.com',cafe:'host@gmail.com'})[id];
+  const emailFor=id=>({laptop:'ty@gmail.com',friend:'matej@gmail.com',phone:'telefon@gmail.com',cabin:'chata@gmail.com',cafe:'host@gmail.com',hacker:'podpora@knihovna-podpora.test'})[id];
   function mailTemplate(target,id) {
     return {id,target,to:emailFor(target),fromName:'Podpora knihovny',from:'podpora@knihovna-podpora.test',subject:'Ověření čtenářského účtu',body:'Dobrý den, ověřte prosím svůj čtenářský účet pomocí odkazu níže. Po ověření můžete pokračovat v používání knihovny.',linkLabel:'Ověřit účet knihovny',link:`https://${PHISH_HOST}/overeni?zprava=${id}`};
   }
   class PhishingScenario {
     constructor(sim) {
       this.sim=sim;this.net=sim.net;this.tls=null;
-      this.state=this.net.phishing??={serial:0,submissionSerial:0,messages:new Map(),requests:new Map(),mailboxes:Object.fromEntries(CLIENTS.map(id=>[id,null])),clients:Object.fromEntries(CLIENTS.map(id=>[id,{inbox:null,opened:false,reported:[],state:'idle',error:'',lastVisit:null}])),hacker:{state:'idle',notice:'Připrav e-mail pro některé zařízení v mapě.',lastTarget:'laptop',results:[],fetched:false,total:0},captures:new Map(),lastWeb:null,certificate:{name:PHISH_HOST,issuer:'Výuková certifikační autorita',valid:true,trusted:true}};
+      this.state=this.net.phishing??={serial:0,submissionSerial:0,messages:new Map(),requests:new Map(),mailboxes:Object.fromEntries(CLIENTS.map(id=>[id,null])),clients:Object.fromEntries(MAIL_CLIENTS.map(id=>[id,{inbox:null,opened:false,reported:[],state:'idle',error:'',lastVisit:null}])),hacker:{state:'idle',notice:'Záznamy se zobrazí až po načtení ze serveru.',results:[],fetched:false,total:0},captures:new Map(),lastWeb:null,certificate:{name:PHISH_HOST,issuer:'Výuková certifikační autorita',valid:true,trusted:true}};
     }
     accepts(type){return type==='phish-results';}
     validate(type,payload){return type==='phish-results'&&payload.device==='hacker';}
@@ -69,5 +70,5 @@
       return result;
     }
   }
-  Object.assign(globalThis.InternetLab,{PhishingScenario,PHISH_CLIENTS:CLIENTS,PHISH_HOST,DEMO_LOGIN,mailTemplate,emailFor});
+  Object.assign(globalThis.InternetLab,{PhishingScenario,PHISH_CLIENTS:CLIENTS,MAIL_CLIENTS,PHISH_HOST,DEMO_LOGIN,mailTemplate,emailFor});
 })();

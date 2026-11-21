@@ -2,25 +2,25 @@
    IMAP snapshots and flags. No real mail, sockets or credentials are used. */
 (() => {
   'use strict';
-  const {ModelTLS,PHISH_CLIENTS,emailFor,mailTemplate}=globalThis.InternetLab;
+  const {ModelTLS,PHISH_CLIENTS,MAIL_CLIENTS,emailFor,mailTemplate}=globalThis.InternetLab;
   const encoder=new TextEncoder(),decoder=new TextDecoder(),CHUNK=192;
   const serverFor=()=>'mail';
   const fixedMailRecipient=device=>device==='laptop'?'friend':device==='friend'?'laptop':null;
   const domainOf=address=>address.split('@')[1];
-  const mailWire=m=>`Message-ID: <${m.id}@${domainOf(m.from)}>\r\nFrom: ${m.from}\r\nTo: ${m.to}\r\nSubject: ${m.subject}\r\n\r\n${m.body.replace(/\r?\n/g,'\r\n').replace(/^\./gm,'..')}\r\n.\r\n`;
+  const mailWire=m=>`Message-ID: <${m.id}@${domainOf(m.from)}>\r\nFrom: ${m.from}\r\nTo: ${m.to}\r\nSubject: ${m.subject}\r\n\r\n${(m.body+(m.link?'\n\n'+m.linkLabel+'\n'+m.link:'')).replace(/\r?\n/g,'\r\n').replace(/^\./gm,'..')}\r\n.\r\n`;
   class MailScenario {
     #sessions=new Map();#buffers=new Map();#transfer=0;#sessionSerial=0;
     constructor(sim){
       this.sim=sim;this.net=sim.net;
-      this.state=this.net.mail??={serial:0,boxes:Object.fromEntries(PHISH_CLIENTS.map(id=>[id,[]])),deliveries:new Map(),dialogue:[],current:null};
+      this.state=this.net.mail??={serial:0,boxes:Object.fromEntries(MAIL_CLIENTS.map(id=>[id,[]])),deliveries:new Map(),dialogue:[],current:null};
       for(const c of Object.values(this.net.phishing.clients)){c.items??=[];c.sent??=[];c.checked??=false;c.notice??='';}
       this.entry=null;this.phase='idle';
     }
     accepts(type){return ['mail-send','mail-check','mail-seen','phish-send'].includes(type);}
     validate(type,p){
       if(type==='phish-send')return p.device==='hacker'&&PHISH_CLIENTS.includes(p.target);
-      if(!PHISH_CLIENTS.includes(p.device))return false;
-      if(type==='mail-send')return PHISH_CLIENTS.includes(p.target)&&(!fixedMailRecipient(p.device)||p.target===fixedMailRecipient(p.device))&&typeof p.subject==='string'&&p.subject.trim().length>0&&p.subject.length<=100&&typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200;
+      if(!MAIL_CLIENTS.includes(p.device))return false;
+      if(type==='mail-send')return p.device!=='hacker'&&PHISH_CLIENTS.includes(p.target)&&(!fixedMailRecipient(p.device)||p.target===fixedMailRecipient(p.device))&&typeof p.subject==='string'&&p.subject.trim().length>0&&p.subject.length<=100&&typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200;
       if(type==='mail-seen')return this.net.phishing.clients[p.device].items.some(m=>String(m.id)===String(p.messageId));
       return type==='mail-check';
     }
@@ -35,7 +35,6 @@
         this.entry=old||{message,origin:serverFor(p.device),destination:serverFor(p.target),state:'new',accepted:false,clientAccepted:false};
         this.phase='submission';
         if(c)Object.assign(c,{state:'sending',error:'',notice:'SMTP připravuje odeslání zprávy.'});
-        else Object.assign(this.net.phishing.hacker,{state:'sending',lastTarget:p.target,notice:'SMTP připravuje podvodný e-mail.'});
       }else {this.phase='imap';Object.assign(c,{state:'loading',error:'',notice:type==='mail-check'?'IMAP načítá schránku.':'IMAP ukládá příznak přečtení.'});}
       this.state.current={run:s.run,device:s.clientId(),phase:this.phase,messageId:p.messageId||null};
       s.next([{kind:'mail-prepare',node:s.clientId(),title:this.phase==='imap'?'IMAP · přístup ke schránce':'SMTP · odesílání zprávy',description:'Přenos spusť krokováním nebo přehráním.'}]);
@@ -72,7 +71,7 @@
       this.smtpCommand(session);
     }
     smtpCommand(session){
-      const m=this.entry.message,from=m.source==='hacker'?'utocnik@gmail.com':m.from;
+      const m=this.entry.message,from=m.from;
       const commands=[
         {cmd:'MAIL',wire:`MAIL FROM:<${from}>`,say:'Chci odeslat e-mail. Toto je odesílatel.'},
         {cmd:'RCPT',wire:`RCPT TO:<${m.to}>`,say:'Zpráva je pro tuto adresu.'},
@@ -134,7 +133,6 @@
     completeSend(){
       const s=this.sim,c=this.net.phishing.clients[this.entry.message.source];
       if(c){if(!c.sent.some(m=>m.id===this.entry.message.id))c.sent.push(structuredClone(this.entry.message));Object.assign(c,{state:'ready',error:'',notice:'Zpráva je v modelu doručená do serverové schránky příjemce.'});}
-      if(this.entry.message.source==='hacker')Object.assign(this.net.phishing.hacker,{state:'ready',notice:'SMTP doručilo podvodný e-mail do schránky. Příjemce si jej načte přes IMAP.'});
       this.state.current.phase='delivered';s.finish('SMTP · zpráva dorazila do schránky','Příjemce nemusí mít zapnuté zařízení. IMAP si obsah načte samostatným přenosem.',this.entry.destination);
     }
     open(device,id){const c=this.net.phishing.clients[device],m=c.items.find(m=>String(m.id)===String(id));if(!m)return false;c.inbox=m;c.opened=true;return true;}
@@ -167,7 +165,7 @@
     failure(reason){
       const s=this.sim,c=this.net.phishing.clients[s.clientId()];
       if(c)Object.assign(c,{state:'error',error:reason});
-      if(s.action.type==='phish-send')Object.assign(this.net.phishing.hacker,{state:'error',notice:reason+' Pokud server zprávu už převzal, zůstává u něj.'});return false;
+      return false;
     }
   }
   Object.assign(globalThis.InternetLab,{MailScenario,mailServerFor:serverFor,mailWire,fixedMailRecipient});
