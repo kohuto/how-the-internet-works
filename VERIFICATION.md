@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Odstranění vnitřního nadpisu MITM · 21. listopadu 2026
+
+Z aplikace odstraněn blok s ikonou a nadpisem MITM v kavárně. Obsah začíná kartou Hotspot bez prázdného místa po nadpisu; název MITM v horní liště aplikace zůstává. Odstraněn nepoužívaný styl ikony, prostředky `v=146`.
+
+Prošlo všech **5 testů** připojování v kavárně včetně vykreslení MITM a kontrola syntaxe upraveného skriptu. V prohlížeči při 1047 × 858 a 320 × 568 px ověřena absence vnitřního nadpisu, umístění Hotspotu na začátku obsahu a žádné vodorovné přetékání. Na úzkém zobrazení ověřeno také zapnutí hotspotu. Konzole obou náhledů bez chyb a varování.
+
+
 ## Stručnější zachycené zprávy MITM · 21. listopadu 2026
 
 Ze všech karet zachycených zpráv odstraněn doprovodný komentář výsledku a údaj o směru s číslem paketu v pravém horním rohu. Změna platí společně pro HTTP, DNS, TLS i VPN. Typ zprávy, adresy a porty, stav ochrany, obsah a případná změna zůstávají dostupné; modelové záznamy se nemění. Nepoužívané styly odstraněny, prostředky `v=145`.
