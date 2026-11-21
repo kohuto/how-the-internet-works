@@ -186,7 +186,7 @@
     if(n.id==='phish-web')return html+globalThis.InternetLab.phishingServerDetail(net,sim,n);
     if(['terminal','satellite'].includes(n.type))return html+satelliteInfo(n)+decision(n)+`<div class="section-label">PŘIPOJENÍ</div>${portList(n)}`;
     if(n.type==='bts')return html+`<p class="hint" data-device-help="Jak zařízení funguje">Spojuje telefon rádiem se sítí mobilního operátora. Přijatá data předává po své přípojce dál.</p>${decision(n)}<div class="section-label">PŘIPOJENÍ</div>${portList(n)}<div class="note-card" data-device-help="Mobilní síť">BTS zajišťuje rádiový přístup. Uživatelská data pokračují sítí operátora k jeho bráně do internetu. Vnitřní IP adresy a TCP segmenty při tomto předání zůstávají stejné.</div>`;
-    if(n.type==='ap')html+=`<dl class="dl">${definition('Wi-Fi síť',n.id==='cabin-ap'?'Chata':n.id==='ap'?'Lipova':'U Mateje')}</dl><p class="hint" data-device-help="Přepínání v LAN">Přístupový bod propojuje bezdrátová zařízení ${net.detailEnabled('devices')?'se switchem':'s chytrou křižovatkou'} v domácí síti.</p>`;
+    if(n.type==='ap')html+=`<dl class="dl">${definition('Wi-Fi síť',n.id==='cafe-ap'?net.cafeWifi.ssid:n.id==='cabin-ap'?'Chata':n.id==='ap'?'Lipova':'U Mateje')}${n.id==='cafe-ap'?definition('Heslo k Wi-Fi',net.cafeWifi.password):''}</dl><p class="hint" data-device-help="Přepínání v LAN">Přístupový bod propojuje bezdrátová zařízení ${net.detailEnabled('devices')?'se switchem':'s chytrou křižovatkou'} v domácí síti.</p>`;
     if(n.type==='switch'||n.type==='ap') {
       if(!junction)html+=`<p class="hint" data-device-help="Jak zařízení funguje">${n.type==='ap'?'Přemosťuje Wi-Fi a Ethernet uvnitř jedné LAN.':'Přeposílá ethernetové rámce uvnitř jedné LAN.'} Pro rozhodování používá MAC adresy.</p>`;
       if(net.detailEnabled('mac')) {
@@ -469,7 +469,6 @@
       else {if(net.setCafeHotspot('rogue'))sim.connectionChanged('cafe');ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();}return;
     }
     if(b.dataset.action==='cafe-wifi-cancel'){ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();return;}
-    if(b.dataset.cafeTest){if(sim.status==='running')return;ui.cafeTab='web';ui.cafeAddress=`${b.dataset.cafeTest}://knihovna.test`;select('node','cafe');startAction('web');return;}
     if(b.dataset.action==='mitm-clear'){if(sim.status==='running')return;net.mitm.logs=[];render();return;}
     if(b.dataset.gmailAction){
       const d=ui.mailComposer[ui.monitorDevice],c=net.phishing.clients[ui.monitorDevice],action=b.dataset.gmailAction;

@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Zjednodušení MITM a přesun hesla Wi-Fi kavárny · 21. listopadu 2026
+
+Z aplikace MITM odstraněn podtitulek pod názvem, doprovodné vysvětlení jednotlivých režimů, stav přenosové cesty, tři odkazy na hosta/server/mapu, poznámka o přemosťování a tlačítka spouštějící web u hosta. Přenos se otevírá přímo v hostově Prohlížeči. Odstraněny také nepoužívané styly a obsluha těchto tlačítek; nastavení hotspotu, režimy zásahu a přehled zachycených paketů zůstávají. Na notebooku hosta odstraněna karta Heslo od obsluhy a textová trasa připojení. Detail přístupového bodu **Wi-Fi kavárny** nově uvádí skutečný název sítě Kavarna_hoste a Heslo k Wi-Fi; původní nesprávný název U Mateje se zde už nezobrazuje. README aktualizováno, prostředky `v=143`.
+
+Prošlo všech **19 souvisejících testů** MITM a připojování v kavárně i kontrola syntaxe obou upravených skriptů. Model útoku, připojování a kontroly hesla se nemění.
+
+V prohlížeči při 1047 × 858 px ověřen přesun hesla do detailu přístupového bodu a jeho použití pro skutečné připojení hosta k zabezpečené síti. Odstraněné prvky chybí ve všech čtyřech režimech MITM, pojmenování a zapnutí hotspotu funguje. Po ručním přepnutí hosta na hotspot a otevření HTTP v jeho Prohlížeči dorazil změněný nadpis; útočníkův přehled obsahoval požadavek i odpověď a zaznamenal zásah. Vymazání přehledu funguje. Při 320 × 568 px ověřen detail sítě a hesla, pojmenování a zapnutí hotspotu, ruční připojení hosta, absence hesla a textové trasy v jeho aplikaci Připojení a zobrazení MITM bez vodorovného přetékání. Konzole obou náhledů bez chyb a varování.
+
+
 ## Volitelné rozšíření Šířka pásma a Latence · 21. listopadu 2026
 
 Nastavení obsahuje jedinou volbu **Šířka pásma a Latence** v části Zařízení a služby. Zpočátku je vypnutá a ovládání obou vlastností se v aplikaci Připojení nevykresluje. Zapnutí zpřístupní stávající volby všem dostupným klientům, bez přidání zařízení nebo spojů. Model odmítne změnu profilu bez rozšíření; vypnutí při změně sestavy obnoví výchozí Nižší / Nižší. Dosavadní časování, oddělené profily zařízení a zachování hodnot běžícího přenosu se nemění. Nastavení má 20 rozšíření; prostředky `v=142`.
