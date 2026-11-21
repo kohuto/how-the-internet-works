@@ -133,6 +133,7 @@
         this.next([{kind:'prepare',title:'Dokument je připravený k odeslání',description:'Tiskárna má adresu ve stejné podsíti jako notebook.',node:this.clientId()}]);
       } else if(type==='cloud') {
         const client=this.net.cloud.clients[this.clientId()];
+        if(payload.preview)client.preview=null;
         Object.assign(client,{state:'sending',message:'Požadavek čeká na odeslání do cloudu.',sentBytes:0,receivedBytes:0,totalBytes:0,requestBytes:0,server:payload.server,phase:'request'});
         this.next([{kind:'cloud-prepare',title:`${this.clientName()} připravuje cloudový požadavek`,description:'Soubor i přístupová práva zpracuje vzdálený cloudový server.',node:this.clientId()}]);
       } else {
@@ -264,10 +265,10 @@
         this.net.nodes[p.destination].lastDecision={kind:'cloud',operation:value.op,user:this.net.cloud.user(this.clientId()).name,status:response.status,message:response.message,packetId:p.id};
         client.phase='response';client.message='Čekání na úplnou odpověď cloudového serveru.';client.totalBytes=this.cloudPackets('cloud-response',p.destination,this.clientId(),response,{src:p.dst,sport:p.dport,dst:p.src,dport:p.sport});
         event.title=`${this.net.nodes[p.destination].name}: ${response.status} · ${response.status<300?'požadavek přijat':'požadavek zamítnut'}`;
-        event.description=`${response.message} Výsledek teď musí dorazit zpět do notebooku.`;
+        event.description=`${response.message} Výsledek teď musí dorazit zpět do zařízení.`;
       } else {
-        this.net.cloud.receive(this.clientId(),value,this.action.payload.localId);
-        this.finish(value.status<300?'Cloudový přenos je dokončený':'Cloudový server požadavek zamítl',`${value.status} · ${value.message}`,this.clientId());
+        this.net.cloud.receive(this.clientId(),value,this.action.payload.localId,!!this.action.payload.preview);
+        this.finish(value.status<300?(this.action.payload.preview?'Dokument byl otevřen z cloudu':'Cloudový přenos je dokončený'):'Cloudový server požadavek zamítl',this.action.payload.preview&&value.status<300?'Celý obsah dokumentu dorazil do náhledu v zařízení.':`${value.status} · ${value.message}`,this.clientId());
         if(value.status>=300){this.status='failed';this.current.kind='rejected';}
       }
     }

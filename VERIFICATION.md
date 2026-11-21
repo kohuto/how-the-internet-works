@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Cloud jako jednoduché úložiště souborů · 21. listopadu 2026
+
+Aplikace Cloud má společné rozhraní pro notebooky i telefon: seznam Na cloudu, samostatné místní soubory V počítači / V telefonu, tlačítko Nový dokument, textový editor a náhled jednoho souboru. Otevření vzdáleného dokumentu načte celý obsah po síti bez vytvoření místního souboru; samostatné stažení vytvoří místní kopii a otevře ji v editoru. Nahrání, aktualizace, sdílení i výběr záložního úložiště zachovávají původní serverové operace a kontroly práv a verzí. Telefon sdílí účet Ty s notebookem a chatou, má však oddělené místní soubory. Technické možnosti jsou v nabídce tří teček; sdílení je sbalené v náhledu vlastního dokumentu.
+
+Prošlo všech **319 automatických testů**. Čtyři nové modelové kontroly ověřují náhled až po úplném doručení bez místní kopie, nové ověření práv a vymazání předchozího náhledu při odmítnutí, upload/download telefonu přes Wi-Fi i mobilní data a čtení aktuální či odmítnutí zastaralé záložní kopie. Tři nové kontroly rozhraní ověřují zobrazení pouze přijatých dat, escapování názvů a obsahu a dostupnost cloudu v telefonu. Syntaxe všech pěti upravených a nových skriptů bez chyb.
+
+V prohlížeči při 1074 × 858 px ověřeno načtení seznamu, otevření sdíleného dokumentu, stažení do místního editoru a vytvoření i nahrání nového dokumentu. Při 390 × 844 px telefon vytvořil, uložil a nahrál dokument, povolil Matějovi čtení a Matěj jej následně otevřel a stáhl do svého notebooku; editor jeho kopie nabízí uložení nového souboru. Při 320 × 568 px ověřen seznam se záložním centrem bez přetékání, dlouhý text, zachování posunu panelu i textového pole a kurzoru během uložení a krokování, aktualizace cloudové verze a odmítnutí neaktuální zálohy. Místní úpravy lze uložit a znovu otevřít i offline; zavření a otevření aplikace zachová rozepsaný dokument. Konzole telefonu bez chyb a varování. Prostředky `v=131`.
+
+
 ## Odstranění odkazu Tvůj cloud · 21. listopadu 2026
 
 Z detailu hlavního i záložního cloudového serveru odstraněno tlačítko Tvůj cloud. Pokud není dostupný Matějův notebook, nevzniká prázdný řádek tlačítek. Seznam souborů, práva a synchronizace se nemění.

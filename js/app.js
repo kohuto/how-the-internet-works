@@ -18,7 +18,7 @@
     ui.cookieOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
     ui.chatbot={laptop:'',friend:'',phone:'',cabin:''};
     ui.webMessages={cafe:'Ahoj z kavárny, prosím o prodloužení výpůjčky.',friend:'Ahoj, píše Matěj.',cabin:'Ahoj z chaty! Zpráva putuje přes satelit.',laptop:'Ahoj, prosím o prodloužení výpůjčky.',phone:'Ahoj, prosím o prodloužení výpůjčky.'};
-    ui.cloud=Object.fromEntries(['laptop','friend','cabin'].map(device=>{const f=net.cloud.local[device][0];return [device,{tab:'local',server:'cloud',localId:f.id,cloudName:f.name,cloudContent:f.content,cloudFileId:'',permissions:{},downloadSerial:0}];}));
+    ui.cloud=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>{const f=net.cloud.local[device][0];return [device,{tab:'remote',view:'files',editorKey:0,remoteId:null,server:'cloud',localId:f?.id||null,cloudName:f?.name||'',cloudContent:f?.content||'',cloudFileId:'',permissions:{},downloadSerial:0,resultSerial:0}];}));
     return ui;
   }
   const ui=createUI();
@@ -66,9 +66,10 @@
     if(!net.appAvailable(app,ui.monitorDevice))return;
     if(!['desktop','web','print','message','cloud','chatbot','network','mail','attack','mitm'].includes(app))return;
     if(app!=='mail')clearMailComposer();
-    if(ui.monitorDevice==='cafe-attacker'){if(!['desktop','mitm'].includes(app))return;ui.cafeAttackerTab=app;}else if(ui.monitorDevice==='cafe'){if(!['desktop','web','network','mail'].includes(app))return;ui.cafeTab=app;}else if(ui.monitorDevice==='hacker'){if(!['desktop','attack','network'].includes(app))return;ui.hackerTab=app;}else if(ui.monitorDevice==='cabin'){if(app==='print')return;ui.cabinTab=app;}else if(ui.monitorDevice==='friend'){if(!['desktop','web','message','cloud','chatbot','network','mail'].includes(app))return;ui.friendTab=app;}else if(ui.monitorDevice==='phone'){if(['print','cloud'].includes(app))return;ui.phoneTab=app;}else ui.tab=app;syncReader();render();
-    const input=$('#monitor-content [data-field]');
+    if(ui.monitorDevice==='cafe-attacker'){if(!['desktop','mitm'].includes(app))return;ui.cafeAttackerTab=app;}else if(ui.monitorDevice==='cafe'){if(!['desktop','web','network','mail'].includes(app))return;ui.cafeTab=app;}else if(ui.monitorDevice==='hacker'){if(!['desktop','attack','network'].includes(app))return;ui.hackerTab=app;}else if(ui.monitorDevice==='cabin'){if(app==='print')return;ui.cabinTab=app;}else if(ui.monitorDevice==='friend'){if(!['desktop','web','message','cloud','chatbot','network','mail'].includes(app))return;ui.friendTab=app;}else if(ui.monitorDevice==='phone'){if(app==='print')return;ui.phoneTab=app;}else ui.tab=app;syncReader();render();
+    const input=app==='cloud'?$('.drive-scroll'):$('#monitor-content [data-field]');
     (input||$('#monitor-content')).focus({preventScroll:true});
+    if(app==='cloud'&&ui.cloud[ui.monitorDevice].tab==='remote'&&!net.cloud.clients[ui.monitorDevice].listed&&net.cloud.clients[ui.monitorDevice].state==='idle'&&sim.status!=='running')startCloud({op:'list'});
   }
   function clearMailComposer() {
     const composer=ui.mailComposer[ui.monitorDevice];
@@ -83,7 +84,7 @@
   function resumeMessage() {if(sim.resumePending()){stop();advance();return true;}return false;}
   function loadLocal(device,id) {
     const file=net.cloud.local[device].find(f=>f.id===id);if(!file)return;
-    Object.assign(ui.cloud[device],{localId:id,cloudName:file.name,cloudContent:file.content,tab:'local'});
+    Object.assign(ui.cloud[device],{localId:id,cloudName:file.name,cloudContent:file.content,tab:'local',view:'editor',editorKey:(ui.cloud[device].editorKey||0)+1});
   }
   function saveLocal() {
     const device=ui.monitorDevice,draft=ui.cloud[device];if(!draft)return null;
@@ -91,9 +92,10 @@
     if(!file){notify('Vyplň název souboru do 70 znaků a text do 1200 znaků.');return null;}
     draft.localId=file.id;return file;
   }
-  function startCloud(request,localId) {
+  function startCloud(request,localId,preview=false) {
     const device=ui.monitorDevice;if(ui.packetOpen||sim.status==='running'||!ui.cloud[device])return;
-    stop();if(!sim.start('cloud',{device,server:ui.cloud[device].server,request,localId}))return;
+    stop();if(!sim.start('cloud',{device,server:ui.cloud[device].server,request,localId,preview}))return;
+    if(preview)Object.assign(ui.cloud[device],{view:'preview',remoteId:request.fileId});
     ui.selection={kind:'node',id:device};ui.monitorOpen=true;ui.deviceOpen=false;ui.linkOpen=false;
     if(ui.scene==='home')setScene('all');
     advance();
@@ -282,9 +284,9 @@
     for(const [device,draft] of Object.entries(ui.mailComposer))if(draft.sendingId&&net.phishing.clients[device].sent.some(m=>m.id===draft.sendingId))Object.assign(draft,{sendingId:null,subject:'',body:'',composeOpen:false});
     const webStarted=browserNavigation.sync(sim);
     if(webStarted)ui[addressKey(webStarted)]=browserNavigation.active(webStarted).draft;
-    for(const device of ['laptop','friend','cabin']) {
+    for(const device of Object.keys(net.cloud.clients)) {
       const client=net.cloud.clients[device],draft=ui.cloud[device];
-      if(draft.resultSerial!==client.resultSerial){draft.permissions={};draft.resultSerial=client.resultSerial;}
+      if(draft.resultSerial!==client.resultSerial){draft.permissions={};draft.resultSerial=client.resultSerial;if(client.state==='ready'&&sim.action?.type==='cloud'&&sim.clientId()===device&&sim.action.payload.request.op!=='list')notify(client.message.replace(/^\d+ · /,''));}
       if(draft.downloadSerial!==client.downloadSerial){loadLocal(device,client.lastDownload);draft.downloadSerial=client.downloadSerial;}
     }
     const videoStates=[...document.querySelectorAll('#monitor-content video')].map((v,i)=>({key:v.closest('[data-instagram-message]')?.dataset.instagramMessage||`index:${i}`,time:v.currentTime,paused:v.paused,device:ui.monitorDevice,src:v.querySelector('source')?.getAttribute('src')}));
@@ -295,6 +297,8 @@
     const computerDetails=fullComputerKey===computerViewKey?[...document.querySelectorAll('.computer-app-body details[open]')].map(d=>d.dataset.detailKey||d.querySelector('summary')?.textContent):[];
     const computerScroll=fullComputerKey===computerViewKey?$('.computer-app-body')?.scrollTop||0:0;
     const mailScroll=fullComputerKey===computerViewKey?$('.gmail-scroll')?.scrollTop||0:0;
+    const oldDrive=$('.drive-scroll'),driveScroll=fullComputerKey===computerViewKey&&oldDrive?{key:oldDrive.dataset.viewKey,top:oldDrive.scrollTop}:null;
+    const cloudTextScroll=field==='cloudContent'?focused.scrollTop:null;
     const oldChat=$('.ig-conversation, .chatbot-conversation');
     const chatScroll=fullComputerKey===computerViewKey&&oldChat?{top:oldChat.scrollTop,turns:oldChat.dataset.turnCount,bottom:oldChat.scrollHeight-oldChat.scrollTop-oldChat.clientHeight<24}:null;
     computerViewKey=fullComputerKey;
@@ -311,6 +315,7 @@
     if($('.real-browser'))$('.real-browser').style.setProperty('--browser-panel-height',`${Math.max(80,$('.computer-app-body').clientHeight-$('.browser-chrome').offsetHeight-12)}px`);
     if($('.computer-app-body'))$('.computer-app-body').scrollTop=computerScroll;
     if($('.gmail-scroll'))$('.gmail-scroll').scrollTop=mailScroll;
+    const drive=$('.drive-scroll');if(drive&&driveScroll?.key===drive.dataset.viewKey)drive.scrollTop=driveScroll.top;
     const chat=$('.ig-conversation, .chatbot-conversation');if(chat)chat.scrollTop=chat.dataset.turnCount==='0'?0:!chatScroll||chatScroll.bottom||chat.dataset.turnCount!==chatScroll.turns?chat.scrollHeight:chatScroll.top;
     document.querySelectorAll('#monitor-content video').forEach((video,i)=>{const key=video.closest('[data-instagram-message]')?.dataset.instagramMessage||`index:${i}`,state=videoStates.find(v=>v.key===key&&v.device===ui.monitorDevice&&v.src===video.querySelector('source')?.getAttribute('src'));if(state){const restore=()=>{video.currentTime=state.time;if(!state.paused)video.play().catch(()=>{});};if(video.readyState)restore();else video.addEventListener('loadedmetadata',restore,{once:true});}});
     $('#device-overlay').hidden=!infoOpen;
@@ -329,7 +334,7 @@
     if(browserFocus&&!field&&!authField)$(`[data-browser-focus="${browserFocus}"]`)?.focus({preventScroll:true});
     if(authField){const el=$(`[data-auth-field="${authField}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number'&&el.type!=='email')el.setSelectionRange(start,end);}}
     if(mailField){const el=$(`[data-mail-field="${mailField}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number'&&['text','search','textarea'].includes(el.type))el.setSelectionRange(start,end);}}
-    if(field) {const el=$(`[data-field="${field}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number')el.setSelectionRange(start,end);}}
+    if(field) {const el=$(`[data-field="${field}"]`);if(el){el.focus({preventScroll:true});if(typeof start==='number')el.setSelectionRange(start,end);if(cloudTextScroll!==null)el.scrollTop=cloudTextScroll;}}
     const current=sim.current;
     $('#event-title').textContent=net.displayText(current?.title||'')||'Síť čeká na tvůj první přenos';$('#event-description').textContent=net.displayText(current?.description||'')||(ui.monitorOpen?(ui.monitorDevice==='cafe-attacker'?'Otevři MITM a nastav napodobený hotspot.':ui.monitorDevice==='cafe'?'Porovnej HTTP a HTTPS přes Wi-Fi kavárny.':ui.monitorDevice==='hacker'?'Otevři Phishing a vyber příjemce e-mailu v mapě.':ui.monitorDevice==='cabin'?'Otevři některou z dostupných aplikací na chatě.':ui.monitorDevice==='friend'?'Otevři některou z dostupných aplikací u Matěje.':ui.monitorDevice==='phone'?'Otevři některou z dostupných aplikací v telefonu.':'Na ploše otevři některou z dostupných aplikací.'):'Klikni na notebook v mapě a otevři jeho plochu.');
     $('#run-dot').className=`status-dot ${sim.status}`;
@@ -401,7 +406,7 @@
       ui[addressKey(device)]=address;
       startAction('web',{address,method:'POST',message:ui.webMessages[device]});
     } else if(form==='cloud-local') {
-      if(saveLocal()){notify('Soubor je uložený v tomto notebooku.');render();}
+      if(saveLocal()){notify('Soubor je uložený v tomto zařízení.');render();}
     } else if(form==='cloud-download') {
       const fileId=ui.cloud[ui.monitorDevice].cloudFileId.trim();if(fileId)startCloud({op:'download',fileId});
     } else if(form==='cloud-permissions') {
@@ -480,10 +485,28 @@
     if(b.dataset.action==='close-device'){closeDevice();return;}
     if(b.dataset.action==='cloud-sync'){if(ui.packetOpen||sim.status==='running')return;stop();if(sim.start('replicate')){setScene('dc');advance();}return;}
     if(b.dataset.action==='clear-nat'){net.clearNat(b.dataset.id);notify('Tabulka NAT je prázdná. Příchozí odpovědi bez záznamu se nedoručí.');render();$('#device-content').focus({preventScroll:true});return;}
-    if(b.dataset.cloudTab){const tab=b.dataset.cloudTab;ui.cloud[ui.monitorDevice].tab=tab;render();$(`#monitor-content [data-cloud-tab="${tab}"]`).focus({preventScroll:true});return;}
+    if(b.dataset.cloudTab){
+      const device=ui.monitorDevice,draft=ui.cloud[device],tab=b.dataset.cloudTab;
+      if(draft.view==='editor'&&!saveLocal())return;
+      Object.assign(draft,{tab,view:'files'});
+      if(tab==='remote'&&!net.cloud.clients[device].listed&&sim.status!=='running'){startCloud({op:'list'});return;}
+      render();$(`[data-cloud-tab="${tab}"]`).focus({preventScroll:true});return;
+    }
+    if(b.dataset.cloudLocal){loadLocal(ui.monitorDevice,b.dataset.cloudLocal);render();$('#cloud-name').focus({preventScroll:true});return;}
+    if(b.dataset.cloudOpen){startCloud({op:'download',fileId:b.dataset.cloudOpen},undefined,true);return;}
+    if(b.dataset.action==='cloud-list'){
+      const draft=ui.cloud[ui.monitorDevice];if(draft.view==='editor'&&!saveLocal())return;
+      draft.view='files';render();return;
+    }
+    if(b.dataset.cloudUploadLocal){
+      if(sim.status==='running')return;
+      const f=net.cloud.local[ui.monitorDevice].find(f=>f.id===b.dataset.cloudUploadLocal);if(!f)return;
+      loadLocal(ui.monitorDevice,f.id);ui.cloud[ui.monitorDevice].view='files';ui.cloud[ui.monitorDevice].tab='remote';
+      startCloud({op:'upload',name:f.name,content:f.content},f.id);return;
+    }
     if(b.dataset.cloudDownload){startCloud({op:'download',fileId:b.dataset.cloudDownload});return;}
     if(b.dataset.action==='cloud-refresh'){startCloud({op:'list'});return;}
-    if(b.dataset.action==='cloud-new'){Object.assign(ui.cloud[ui.monitorDevice],{localId:null,cloudName:'Nový soubor.txt',cloudContent:'',tab:'local'});render();$('#cloud-name').focus({preventScroll:true});return;}
+    if(b.dataset.action==='cloud-new'){const d=ui.cloud[ui.monitorDevice];if(d.view==='editor'&&!saveLocal())return;Object.assign(d,{localId:null,cloudName:'Nový dokument.txt',cloudContent:'',tab:'local',view:'editor',editorKey:(d.editorKey||0)+1});render();$('#cloud-name').focus({preventScroll:true});$('#cloud-name').select();return;}
     if(b.dataset.action==='cloud-upload') {
       if(sim.status==='running')return;
       const file=saveLocal();if(!file)return;
@@ -495,7 +518,7 @@
     if(b.dataset.action==='computer-home'){openComputerApp('desktop');return;}
     if(b.dataset.action==='open-library'){ui[addressKey(ui.monitorDevice)]='knihovna.test';startAction('web');return;}
     if(b.dataset.action==='resume-message'){resumeMessage();return;}
-    if(b.dataset.selectNode) {if(b.dataset.cloudServer&&ui.cloud[b.dataset.selectNode]){const device=b.dataset.selectNode;ui.cloud[device].server=b.dataset.cloudServer;ui.cloud[device].permissions={};Object.assign(net.cloud.clients[device],{state:'idle',catalog:[],listed:false});}if(b.dataset.openTab){if(b.dataset.selectNode==='cafe-attacker')ui.cafeAttackerTab=b.dataset.openTab;else if(b.dataset.selectNode==='cafe')ui.cafeTab=b.dataset.openTab;else if(b.dataset.selectNode==='hacker')ui.hackerTab=b.dataset.openTab;else if(b.dataset.selectNode==='cabin')ui.cabinTab=b.dataset.openTab;else if(b.dataset.selectNode==='friend')ui.friendTab=b.dataset.openTab;else if(b.dataset.selectNode==='phone')ui.phoneTab=b.dataset.openTab;else ui.tab=b.dataset.openTab;}select('node',b.dataset.selectNode);if(b.hasAttribute('data-auth-server'))$('.auth-server')?.scrollIntoView({block:'start'});if(b.hasAttribute('data-privacy-server'))$('.privacy-server')?.scrollIntoView({block:'start'});}
+    if(b.dataset.selectNode) {if(b.dataset.cloudServer&&ui.cloud[b.dataset.selectNode]){const device=b.dataset.selectNode;Object.assign(ui.cloud[device],{server:b.dataset.cloudServer,permissions:{},tab:'remote',view:'files'});Object.assign(net.cloud.clients[device],{state:'idle',catalog:[],listed:false,preview:null});}if(b.dataset.openTab){if(b.dataset.selectNode==='cafe-attacker')ui.cafeAttackerTab=b.dataset.openTab;else if(b.dataset.selectNode==='cafe')ui.cafeTab=b.dataset.openTab;else if(b.dataset.selectNode==='hacker')ui.hackerTab=b.dataset.openTab;else if(b.dataset.selectNode==='cabin')ui.cabinTab=b.dataset.openTab;else if(b.dataset.selectNode==='friend')ui.friendTab=b.dataset.openTab;else if(b.dataset.selectNode==='phone')ui.phoneTab=b.dataset.openTab;else ui.tab=b.dataset.openTab;}select('node',b.dataset.selectNode);if(b.dataset.cloudServer&&sim.status!=='running')startCloud({op:'list'});if(b.hasAttribute('data-auth-server'))$('.auth-server')?.scrollIntoView({block:'start'});if(b.hasAttribute('data-privacy-server'))$('.privacy-server')?.scrollIntoView({block:'start'});}
     else if(b.dataset.selectLink)select('link',b.dataset.selectLink);
     else if(b.dataset.selectPacket)select('packet',b.dataset.selectPacket);
     else if(b.dataset.action==='toggle-node') {
@@ -518,8 +541,7 @@
       if(e.target.hasAttribute('data-cookie-secure')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.server.cookies.secureOnly=e.target.checked;render();$('[data-cookie-secure]')?.focus({preventScroll:true});return;}
       if(e.target.dataset.vpn){const id=e.target.dataset.vpn;if(net.setVPN(id,e.target.checked)){sim.connectionChanged(id);if(sim.status!=='running')stop();syncReader();notify(`VPN ${net.vpn.clients[id].enabled?'zapnutá':'vypnutá'} pro ${net.nodes[id].name}.`);if(!resumeMessage())render();$(`#monitor-content [data-vpn="${id}"]`)?.focus({preventScroll:true});}return;}
       if(e.target.hasAttribute('data-web-certificate')){const value=e.target.value;Object.assign(net.server.certificate,{name:value==='wrong-name'?'jiny-web.test':'knihovna.test',valid:value!=='expired',trusted:value!=='untrusted'});render();$('#web-certificate').focus({preventScroll:true});return;}
-      if(e.target.hasAttribute('data-cloud-center')){const device=ui.monitorDevice,draft=ui.cloud[device];draft.server=e.target.value;draft.permissions={};Object.assign(net.cloud.clients[device],{state:'idle',catalog:[],listed:false});render();$('#monitor-content [data-cloud-center]').focus({preventScroll:true});return;}
-      if(e.target.hasAttribute('data-cloud-local')){loadLocal(ui.monitorDevice,e.target.value);render();$('#monitor-content [data-cloud-local]').focus({preventScroll:true});return;}
+      if(e.target.hasAttribute('data-cloud-center')){const device=ui.monitorDevice,draft=ui.cloud[device];draft.server=e.target.value;draft.permissions={};draft.view='files';Object.assign(net.cloud.clients[device],{state:'idle',catalog:[],listed:false,preview:null});if(draft.tab==='remote'&&sim.status!=='running')startCloud({op:'list'});else render();return;}
       if(e.target.dataset.cloudAccess){ui.cloud[ui.monitorDevice].permissions[e.target.dataset.cloudAccess]=e.target.value;return;}
       if(e.target.dataset.tower){changeAccess('phone','cellular',e.target.value,true);return;}
       if(e.target.hasAttribute('data-receipts')){net.friend.receipts=e.target.checked;if(net.friend.read&&net.friend.receipts)sim.markRead('friend');render();}

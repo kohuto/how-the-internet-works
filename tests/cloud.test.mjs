@@ -152,3 +152,50 @@ test('Both users can own files; downloading a shared file does not change its or
   assert.equal(sim.status,'success');assert.notEqual(copy.cloudId,file.id);assert.equal(sim.net.cloud.files.get(copy.cloudId).owner,'ty');
   assert.equal(file.content,'Matějův vlastní soubor');
 });
+
+test('Opening a cloud document waits for all response bytes and does not create a downloaded local copy',()=>{
+  const sim=new Simulation(),cloud=sim.net.cloud,file=cloud.files.get('cloud-1');
+  file.content='Obsah pro náhled s diakritikou 🙂. '.repeat(30);
+  const count=cloud.local.laptop.length;
+  assert(sim.start('cloud',{device:'laptop',request:{op:'download',fileId:file.id},preview:true}));
+  until(sim,()=>cloud.clients.laptop.receivedBytes>0);
+  assert.equal(cloud.clients.laptop.preview,null);assert.equal(cloud.local.laptop.length,count);
+  finish(sim);assert.equal(sim.status,'success');
+  assert.equal(cloud.clients.laptop.preview.content,file.content);assert.equal(cloud.clients.laptop.preview.server,'cloud');
+  assert.equal(cloud.local.laptop.length,count);
+  run(sim,'laptop',{op:'download',fileId:file.id});assert.equal(cloud.local.laptop.length,count+1);
+  assert.equal(cloud.local.laptop.at(-1).content,file.content);
+});
+
+test('A fresh preview checks current access, clears the previous view and leaves local copies intact when rejected',()=>{
+  const sim=new Simulation(),cloud=sim.net.cloud,file=cloud.files.get('cloud-1'),count=cloud.local.laptop.length;
+  assert(sim.start('cloud',{device:'laptop',request:{op:'download',fileId:file.id},preview:true}));finish(sim);
+  assert(cloud.clients.laptop.preview);file.permissions.ty='none';
+  assert(sim.start('cloud',{device:'laptop',request:{op:'download',fileId:file.id},preview:true}));
+  assert.equal(cloud.clients.laptop.preview,null);finish(sim);
+  assert.equal(sim.status,'failed');assert.match(cloud.clients.laptop.message,/403/);
+  assert.equal(cloud.clients.laptop.preview,null);assert.equal(cloud.local.laptop.length,count);
+});
+
+test('The phone shares the laptop cloud account through Wi-Fi and cellular while keeping its own local files',()=>{
+  for(const mode of ['wifi','cellular']){
+    const sim=new Simulation(),cloud=sim.net.cloud;sim.net.setAccess('phone',mode);
+    const local=cloud.saveLocal('phone',{name:'Z telefonu.txt',content:'Text uložený v telefonu 🙂'});
+    assert(local);assert(!cloud.local.laptop.some(f=>f.id===local.id));
+    run(sim,'phone',{op:'upload',name:local.name,content:local.content},local.id);assert.equal(sim.status,'success');
+    const file=cloud.files.get(local.cloudId);assert.equal(file.owner,'ty');
+    run(sim,'laptop',{op:'list'});assert(cloud.clients.laptop.catalog.some(f=>f.id===file.id));
+    assert(!cloud.clients.friend.catalog.some(f=>f.id===file.id));
+    run(sim,'phone',{op:'download',fileId:'cloud-1'});assert.equal(sim.status,'success');
+    assert.equal(cloud.local.phone.at(-1).content,cloud.files.get('cloud-1').content);
+  }
+});
+
+test('Previewing a backup uses the selected server and rejects a stale replica without exposing its old content',()=>{
+  const sim=new Simulation(),cloud=sim.net.cloud;
+  assert(sim.start('cloud',{device:'laptop',server:'cloud-backup',request:{op:'download',fileId:'cloud-1'},preview:true}));finish(sim);
+  assert.equal(sim.status,'success');assert.equal(cloud.clients.laptop.preview.server,'cloud-backup');
+  cloud.revision++;
+  assert(sim.start('cloud',{device:'laptop',server:'cloud-backup',request:{op:'download',fileId:'cloud-1'},preview:true}));finish(sim);
+  assert.equal(sim.status,'failed');assert.match(cloud.clients.laptop.message,/503/);assert.equal(cloud.clients.laptop.preview,null);
+});
