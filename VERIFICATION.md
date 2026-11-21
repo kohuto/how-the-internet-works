@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Odstranění doprovodné věty před prvním VPN přenosem · 21. listopadu 2026
+
+Ze stavu připravené VPN odstraněna věta Při příštím internetovém přenosu se naváže šifrovaný tunel. Odstavec se v tomto stavu nevykresluje, takže po něm nezůstává prázdné místo. Prostředky `v=154`.
+
+Prošly všechny **4 integrační testy rozhraní VPN** a kontrola syntaxe upraveného skriptu. V prohlížeči při 763 × 743 a 320 × 568 px ověřen stav zapnuté VPN bez věty a jejího odstavce, funkční Odpojit a opětovné Připojit i absence vodorovného přetékání. Konzole bez chyb a varování.
+
+
 ## Stručnější detail VPN serveru · 21. listopadu 2026
 
 Z detailu odstraněn souhrnný čítač Provoz VPN serveru, pole s vysvětlením rozbaleného paketu a směru přenosu i odkaz Prozkoumat tento paket. Odstranění pole platí také pro variantu HTTPS a odpověď pro zařízení. Nepoužívané styly vpn-layer-note odstraněny; sdílené styly stavových polí a obsluha prohlížení paketů používaná jinde zůstávají. Přehled aktivních spojení s počty paketů, obsah posledního paketu, volitelné NAT údaje a model přenosů zůstávají. Prostředky `v=153`.
