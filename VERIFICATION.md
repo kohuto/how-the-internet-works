@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Kategorie nastavení podle obtížnosti · 22. listopadu 2026
+
+Dialog nastavení nově obsahuje tři kategorie: Základní se sedmi volbami, Rozšiřující s jedenácti a Pokročilé se sedmi zbývajícími. Pořadí prvních dvou kategorií odpovídá zadání; Routery a switche a NAT jsou mezi rozšiřujícími volbami. Zbývající možnosti se automaticky zařazují mezi pokročilé. Změna upravuje pouze rozložení existujících řádků; katalog, výchozí sestava, návaznosti, oddělené funkční a zobrazovací volby, ovládání dialogu i styly zůstávají. README aktualizováno, prostředky `v=160`.
+
+Prošlo všech **30 testů nastavení** a kontrola syntaxe upraveného skriptu. V prohlížeči při 1047 × 858 px ověřeno přesné členství a pořadí všech 25 voleb bez duplicit či vynechání, tři správné nadpisy a původní dvousloupcové karty. Zapnutí hackerského doupěte vyžadovalo E-mail v Rozšiřujících a Matějův byt v Základních; fokus zůstal na zvolené kartě. Zavření změny zahodilo. Zapnout vše vybralo všech 25 voleb a Základní sestava je opět vypnula. Použití Instagramu, NAT a hlaviček zachovalo správné funkční i zobrazovací nastavení. Dodatečné zapnutí Routerů a switchů změnilo název zařízení a zachovalo již dokončený webový přenos.
+
+Při 320 × 568 px ověřeny stejné tři kategorie s počty 7 / 11 / 7, původní jednosloupcové rozložení a dostupnost Pokročilých posunem obsahu. Karty zachovaly padding 13 px a zaoblení 10 px. Změna TLS zachovala fokus; zrušení neuložilo TLS a ponechalo již použitý NAT i hlavičky. Dialog bez vodorovného přetékání, konzole bez chyb a varování.
+
+
 ## Správné popisky poštovních paketů v mapě · 22. listopadu 2026
 
 Opraveno rozpoznání segmentovaných dat při kreslení mapy. Samotná přítomnost bajtů už nezařadí nešifrovanou poštu mezi zprávy Instagramu; číslovaný náhled vyžaduje také platné číselné údaje index a total. SMTP a IMAP používají vlastní popisek včetně označení částí a směrovou šipku. Zmizely tak texty Do IG NaN / undefined a NaN uvnitř značky paketu. Zobrazení obsahu paketu ani model přenosu se nemění. Prostředky `v=159`.

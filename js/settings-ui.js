@@ -32,7 +32,17 @@
         const required=this.draft.requiredBy(f.id),dependency=this.draft.dependencies(f.id).map(id=>LAB_FEATURES.find(f=>f.id===id).label).join(', ');
         return `<label class="settings-option ${required.length?'required':''}"><input type="checkbox" data-feature="${f.id}" ${this.draft.has(f.id)?'checked':''} ${required.length?'disabled':''}><span><strong>${esc(f.label)}</strong><small>${esc(f.description)}</small>${required.length?`<em>Zapnuto pro: ${esc(required.map(f=>f.label).join(', '))}</em>`:dependency?`<em>Zapne také: ${esc(dependency)}</em>`:''}</span></label>`;
       };
-      this.dialog.querySelector('#settings-options').innerHTML=`${[['areas','Části sítě'],['services','Zařízení a služby']].map(([group,label])=>`<fieldset><legend>${label}</legend><div class="settings-grid">${LAB_FEATURES.filter(f=>f.group===group).map(row).join('')}</div></fieldset>`).join('')}<fieldset><legend>Zobrazované podrobnosti</legend><div class="settings-grid">${LAB_DETAILS.map(d=>`<label class="settings-option"><input type="checkbox" data-detail="${d.id}" ${this.draft.details[d.id]?'checked':''}><span><strong>${d.label}</strong><small>${d.description}</small></span></label>`).join('')}</div></fieldset>`;
+      const options=new Map([
+        ...LAB_FEATURES.map(f=>[f.id,row(f)]),
+        ...LAB_DETAILS.map(d=>[d.id,`<label class="settings-option"><input type="checkbox" data-detail="${d.id}" ${this.draft.details[d.id]?'checked':''}><span><strong>${d.label}</strong><small>${d.description}</small></span></label>`])
+      ]);
+      const categories=[
+        ['Základní',['friend','satellite','mobile','wifi','phone','instagram','chatbot']],
+        ['Rozšiřující',['hacker','mitm','printer','vpn','dns','cookies','connection-timing','mail','cloud','devices','nat']]
+      ];
+      const placed=new Set(categories.flatMap(([,ids])=>ids));
+      categories.push(['Pokročilé',[...options.keys()].filter(id=>!placed.has(id))]);
+      this.dialog.querySelector('#settings-options').innerHTML=categories.map(([label,ids])=>`<fieldset><legend>${label}</legend><div class="settings-grid">${ids.map(id=>options.get(id)).join('')}</div></fieldset>`).join('');
       const current=this.getSettings(),changed=JSON.stringify(current.toJSON())!==JSON.stringify(this.draft.toJSON());
       this.dialog.querySelector('[type="submit"]').disabled=!changed;
       this.dialog.querySelector('#settings-count').textContent=`Zapnutá rozšíření: ${this.draft.enabled.size} z ${LAB_FEATURES.length}`;
