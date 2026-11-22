@@ -22,13 +22,13 @@ test('Every original router and switch has the same basic presentation, includin
   for(const n of nodes){assert.equal(net.displayType(n),n.type);assert.equal(net.displayName(n),n.name);}
   for(const l of net.visibleLinks())assert.equal(net.displayLinkName(l),l.name);
 });
-test('Every visible host, router and simplified junction has one distinct map address',()=>{
+test('Every visible host, router, simplified junction and BTS has one distinct map address',()=>{
   for(const settings of [new LabSettings(),LabSettings.full(),...LAB_FEATURES.map(f=>new LabSettings({features:[f.id]}))]){
     settings.details.devices=false;
     const net=new Network(settings),addresses=new Set();
     for(const n of net.visibleNodes()){
       const ip=net.displayIp(n);
-      if(n.type==='host'||technical(n)){
+      if(['host','bts'].includes(n.type)||technical(n)){
         assert.match(ip,/^(\d{1,3}\.){3}\d{1,3}$/,n.id);
         assert(ip.split('.').every(part=>Number(part)<256),n.id);
         assert(!addresses.has(ip),`${n.id}: duplicate ${ip}`);addresses.add(ip);

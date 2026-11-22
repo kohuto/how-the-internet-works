@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Jednotný popisek BTS a vlastní IP adresa · 22. listopadu 2026
+
+Obě základnové stanice mají společný viditelný název BTS a vlastní modelovou IP adresu: 198.51.100.2 pro stanici připojenou k routeru A a 198.51.100.3 pro stanici u routeru C. Sdílené vykreslení zařízení automaticky přidá druhý řádek s IP stejným stylem jako u ostatních zařízení. Vlastní místní názvy odstraněny také z popisků spojů; detail stanice i stav telefonu používají prostý název BTS. Vnitřní identifikátory a připojení zůstávají zachované. IP adresy BTS jsou oddělené od adresy telefonu 198.51.100.10 a neprovádějí překlad ani změnu uživatelských paketů; správa stanic přes IP není samostatně simulována. README aktualizováno, prostředky `v=163`.
+
+Prošlo všech **44 souvisejících testů** pojmenování a adres zařízení, mobilního připojení, modelu přenosů a rozložení mapy. Existující kontrola jedinečných mapových IPv4 adres zahrnuje také BTS ve všech sestavách nastavení. Nadále procházejí automatická volba a přechod na druhou BTS, obousměrné DNS/HTTP, zachování adres a TTL, Wi-Fi a vypnutí dat, přenos Instagramu i všechny kontroly umístění zařízení a jejich dvouřádkových popisků. Kontrola syntaxe upraveného skriptu a testů bez chyb.
+
+V odděleném prohlížeči při 1047 × 858 px ověřeny oba názvy přesně BTS, adresy 198.51.100.2 a 198.51.100.3 pod nimi, řádky na souřadnicích y=48 / 64 i přístupné popisky s adresou. V mapě nejsou původní názvy. Přepnutí Routerů a switchů zachovalo oba popisky a adresy. Vypnutí první BTS ponechalo její IP viditelnou; detail má nadpis BTS. Písmo i barva IP jsou shodné s adresou sousedního routeru. Při 320 × 568 px zůstaly oba celé popisky ve výřezu, bez vodorovného přetékání. Konzole bez chyb a varování, uživatelská karta nezměněna.
+
+
 ## Automatická BTS bez ručního výběru · 22. listopadu 2026
 
 Z Připojení telefonu odstraněn seznam Základnová stanice i jeho obsluha a fokus. Mobilní data se zapínají volbou Mobilní data a vypínají přes Odpojit; připojená BTS zůstává pouze ve stavovém panelu. Síť automaticky vybírá nejbližší zapnutou BTS s funkčním rádiovým spojem a přípojkou do zapnutého stávajícího routeru. Volbu přepočítá při změně sítě i zapnutí dat; podle ní se připraví návratové směrování. Při nedostupnosti obou stanic zůstávají data zapnutá, spojení se ukáže jako nedostupné a neponechává starý název BTS. Vypnutá data ani zvolenou Wi-Fi obnova BTS sama nepřepne. Odstraněn také parametr pro ruční volbu stanice v metodě setAccess. README popisuje automatický výběr a jeho výuková omezení; vzdálenost v mapě nahrazuje měření signálu, ilustrace dosahu výběr neomezuje a plynulé předání rozpracovaného přenosu se nesimuluje. Prostředky `v=162`.

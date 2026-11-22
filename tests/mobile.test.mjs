@@ -27,13 +27,13 @@ test('Mobile data choose the nearest usable BTS automatically and stay off until
 test('The connection app has data on/off controls and a passive BTS status, including no available station',()=>{
   const s=create(),n=s.net;
   const check=()=>{const html=view(s);assert(!/cell-tower|data-tower|ZÁKLADNOVÁ STANICE|undefined/.test(html));assert(html.includes('data-access-mode="cellular"'));assert(html.includes('data-access-mode="offline"'));return html;};
-  assert(check().includes('Mobilní data · BTS Lipová'));
-  n.toggleNode('bts-lipova');assert(check().includes('Mobilní data · BTS Park'));
+  assert(check().includes('Mobilní data · BTS'));
+  n.toggleNode('bts-lipova');assert(check().includes('Mobilní data · BTS'));
   n.toggleNode('bts-park');assert.equal(n.access.phone.tower,null);assert(!n.accessReady('phone'));
   const unavailable=check();assert(unavailable.includes('Mobilní síť není dostupná'));assert(!unavailable.includes('Mobilní data · BTS'));
   n.setAccess('phone','offline');assert(check().includes('Zařízení je odpojené.'));
   n.toggleNode('bts-lipova');assert.equal(n.access.phone.mode,'offline');
-  n.setAccess('phone','cellular');assert(check().includes('Mobilní data · BTS Lipová'));
+  n.setAccess('phone','cellular');assert(check().includes('Mobilní data · BTS'));
 });
 
 test('Losing the radio carrying an in-flight packet does not invent delivery; retry uses the new automatic BTS',()=>{
