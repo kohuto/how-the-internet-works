@@ -1,4 +1,16 @@
 import '../js/network.js';
+import '../js/settings.js';
+import '../js/cloud.js';
+import '../js/media.js';
+import '../js/web.js';
+import '../js/privacy.js';
+import '../js/auth.js';
+import '../js/vpn.js';
+import '../js/phishing.js';
+import '../js/mitm.js';
+import '../js/mail.js';
+import '../js/ads.js';
+import '../js/simulation.js';
 import '../js/map.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -36,4 +48,51 @@ test('An inspected packet disappears on delivery while its response continues wi
   reply.state='delivered';
   map.render({kind:'complete'},selection,request.id,false,650,packets,[]);
   assert.equal(layer.children.length,0);
+});
+
+function trace(sim,map,layer,inspect){
+  map.net.nodes=sim.net.nodes;
+  for(let i=0;sim.status==='running'&&i<8000;i++){
+    sim.advanceFrame();map.render(sim.current,null,null,false,650,sim.packets,sim.frame);
+    for(const g of layer.children){
+      const p=sim.packets.get(g.dataset.id);
+      assert(!/NaN|undefined/.test(g.innerHTML),p.label);
+      inspect(g,p);
+    }
+  }
+  assert.equal(sim.status,'success',sim.current?.description);
+}
+
+test('Actual SMTP and IMAP markers retain mail labels and arrows with and without TLS',t=>{
+  const {map,layer}=setup(t),{Network,LabSettings,Simulation}=InternetLab;
+  for(const tls of [false,true]){
+    const sim=new Simulation(new Network(new LabSettings({features:['mail',...(tls?['tls']:[])]}))),seen=new Set();
+    const inspect=(g,p)=>{
+      assert(['smtp','imap'].includes(p.connection));seen.add(p.kind);
+      assert(g.innerHTML.includes(`>${p.label}</text>`));assert(!g.innerHTML.includes('Do IG'));
+      assert(g.innerHTML.includes(`y="5">${p.direction==='response'?'↩':'→'}</text>`));
+      assert(g.attributes.get('aria-label').includes(p.label));
+    };
+    assert(sim.start('mail-send',{device:'laptop',target:'friend',subject:'Popisek pošty',body:'Dlouhá zpráva s diakritikou 🐎. '.repeat(30)}));trace(sim,map,layer,inspect);
+    assert([...sim.packets.values()].filter(p=>p.kind==='smtp-request').length>1);
+    assert(sim.start('mail-check',{device:'friend'}));trace(sim,map,layer,inspect);
+    assert(sim.start('mail-seen',{device:'friend',messageId:'mail-1'}));trace(sim,map,layer,inspect);
+    assert.deepEqual([...seen].sort(),['imap-request','imap-response','smtp-request','smtp-response']);
+    assert(sim.net.phishing.clients.friend.inbox.seen);
+  }
+});
+
+test('Actual indexed Instagram, cloud, replica and chatbot packets keep their numeric markers',t=>{
+  const {map,layer}=setup(t),{Network,LabSettings,Simulation}=InternetLab;
+  const sim=new Simulation(new Network(new LabSettings({features:['instagram','cloud','chatbot']}))),seen=new Set();
+  for(const [type,payload] of [['message',{text:'Ahoj Matěji!'}],['cloud',{device:'laptop',request:{op:'list'}}],['replicate',{}],['chatbot',{prompt:'Jak se přenášejí data?'}]]){
+    assert(sim.start(type,payload));
+    trace(sim,map,layer,(g,p)=>{
+      if(!p.payload.bytes)return;
+      const copy=g.attributes.get('class').includes('frame-copy'),prefix=copy?'Kopie':p.connection==='replica'?'A → B':p.connection==='cloud'?'Cloud':p.connection==='chatbot'?'Chatbot':p.kind==='ig-delivery'?'Matěj':'Do IG';
+      assert(g.innerHTML.includes(prefix));assert(g.innerHTML.includes(`${p.payload.index+1} / ${p.payload.total}</text>`));
+      assert(g.innerHTML.includes(`y="5">${p.payload.index+1}</text>`));seen.add(prefix);
+    });
+  }
+  for(const prefix of ['Do IG','Matěj','Cloud','A → B','Chatbot'])assert(seen.has(prefix),prefix);
 });

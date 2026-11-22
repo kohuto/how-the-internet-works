@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Správné popisky poštovních paketů v mapě · 22. listopadu 2026
+
+Opraveno rozpoznání segmentovaných dat při kreslení mapy. Samotná přítomnost bajtů už nezařadí nešifrovanou poštu mezi zprávy Instagramu; číslovaný náhled vyžaduje také platné číselné údaje index a total. SMTP a IMAP používají vlastní popisek včetně označení částí a směrovou šipku. Zmizely tak texty Do IG NaN / undefined a NaN uvnitř značky paketu. Zobrazení obsahu paketu ani model přenosu se nemění. Prostředky `v=159`.
+
+Prošlo všech **27 souvisejících testů** mapy a volitelného TLS i kontrola syntaxe upraveného skriptu a testu. Nový integrační test vykresluje skutečné SMTP a IMAP pakety při odeslání dlouhého e-mailu, načtení schránky a uložení přečtení s TLS i bez něj; kontroluje viditelný popisek, šipku, přístupný název a absenci NaN/undefined. Před opravou zachytil původní chybu. Druhý test zachovává číslované popisky a značky skutečných přenosů Instagramu, cloudu, replikace a chatbota, včetně kopií rámců. Stávající odstranění doručených značek a testy přenosu pošty dál procházejí.
+
+V prohlížeči při 1047 × 858 px ověřeno nešifrované SMTP · e-mail se šipkou, celý průběh odeslání bez chybného popisku, IMAP · žádost o zprávy i IMAP · zprávy ze schránky 1/2 a úspěšné přečtení původního textu. Při 320 × 568 px ověřen delší e-mail s TLS: popisek SMTP · e-mail 1/10 a stále chráněný obsah v detailu paketu. Bez vodorovného přetékání, konzole bez chyb a varování.
+
+
 ## Společné volitelné šifrování TLS · 22. listopadu 2026
 
 Původní volba TLS / HTTPS přejmenována na Šifrování komunikace (TLS). Zůstává samostatným rozšířením, ve výchozím stavu vypnutým, a nově řídí také SMTP, IMAP, správu podvodného webu a vložený reklamní přenos. Žádný scénář TLS automaticky nevyžaduje; Personalizovaná reklama si ponechává pouze závislost na Cookies. Web bez TLS používá HTTP, pošta čitelné SMTP na TCP/587 a IMAP na TCP/143, správa webu HTTP na TCP/80. Po zapnutí TLS zůstávají chráněné varianty na původních portech 465, 993 a 443. VPN si ponechává vlastní nezávislé šifrování.
