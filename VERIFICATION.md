@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Personalizovaná reklama v Rozšiřujících možnostech · 22. listopadu 2026
+
+Volba Personalizovaná reklama přesunuta z Pokročilých na konec kategorie Rozšiřující. Kategorie nyní obsahují 7, 12 a 6 voleb. Vzhled, chování i závislost na cookies zůstávají stejné. Aktualizován přehled kategorií v README a prostředky `v=165`.
+
+Prošlo všech **31 testů nastavení** a kontrola syntaxe settings-ui.js. V odděleném prohlížeči ověřen jediný výskyt volby pod Rozšiřujícími, stejné provedení karty, automatické zapnutí požadovaných cookies, použití nastavení a přítomnost e-shopu, zpráv i reklamního serveru v mapě. Znovuotevření nastavení zachovalo zapnutou reklamu; po vypnutí a použití všechny tři služby zmizely. Konzole bez chyb a varování, uživatelská karta nezměněna.
+
 ## Připojení v kavárně sjednocené s ostatními počítači · 22. listopadu 2026
 
 Notebook hosta používá stejnou společnou šablonu Připojení k síti jako ostatní počítače: nadpis, ikony, volby Wi-Fi / Odpojit, zelené zvýraznění a stavový panel. Odstraněna kávová značka, hnědé provedení i samostatné tlačítko odpojení. Seznam dostupných sítí a přihlašovací formulář zůstávají součástí této společné aplikace a používají její barvy. Volba Wi-Fi přesune fokus do seznamu bez automatického výběru sítě nebo obejití hesla. Po výběru zabezpečené sítě se pole pro heslo posune do viditelné části okna. Dlouhé názvy se zalamují v kartách, stavu i podrobnostech. NAT a vlastnosti připojení používají společné zobrazení. Prostředky `v=164`.

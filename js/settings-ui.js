@@ -38,7 +38,7 @@
       ]);
       const categories=[
         ['Základní',['friend','satellite','mobile','wifi','phone','instagram','chatbot']],
-        ['Rozšiřující',['hacker','mitm','printer','vpn','dns','cookies','connection-timing','mail','cloud','devices','nat']]
+        ['Rozšiřující',['hacker','mitm','printer','vpn','dns','cookies','connection-timing','mail','cloud','devices','nat','ads']]
       ];
       const placed=new Set(categories.flatMap(([,ids])=>ids));
       categories.push(['Pokročilé',[...options.keys()].filter(id=>!placed.has(id))]);
