@@ -1,5 +1,12 @@
 # Záznam ověření
 
+## Statické vyhledávání v Gmailu · 22. listopadu 2026
+
+Vyhledávací oblast v záhlaví Gmailu nově tvoří běžný blok s ikonou a textem Hledat v poště. Původní label a readonly vstup odstraněny, takže oblast neobsahuje zaměřitelné ani editovatelné pole. Dekorace je skrytá před asistivními technologiemi, nepodporuje výběr textu a používá běžný kurzor. Zachována barva, zaoblení, rozměry, ikona a typografie včetně úzkého rozložení. Odstraněny nepoužívané styly vstupu, placeholderu a focus-within. README aktualizováno, prostředky `v=156`.
+
+Prošlo všech **10 souvisejících testů Gmailu a phishingového rozhraní** i kontrola syntaxe upraveného skriptu. V prohlížeči při 1047 × 858 px ověřena statická oblast s původní výškou 42 px a barvou; kliknutí a pokus o zaměření jí nepředaly fokus ani nezměnily pozadí, stín či obrys. Při 320 × 568 px ověřena výška 31 px, zachovaný vzhled a absence vodorovného přetékání. Napsat dál otevírá nové zprávy. Také Gmail útočníka používá stejnou statickou oblast bez vstupu a fokusu. Konzole bez chyb a varování.
+
+
 ## Jediný požadavek a odpověď pro SMTP a IMAP · 21. listopadu 2026
 
 Odesílání běžných i phishingových e-mailů zkráceno na přenos celé zprávy a potvrzení jejího uložení. Samostatné výměny MAIL FROM, RCPT TO a DATA odstraněny; odesílatel, příjemce a obsah jsou zahrnuty v odeslané zprávě. Načtení schránky tvoří jediná žádost a odpověď s celým snímkem, uložení příznaku přečtení jediný požadavek a potvrzení. Přípravný SELECT se neposílá. Stavový index vícekrokového rozhovoru odstraněn a popisky paketů rozlišují e-mail, potvrzení, žádost o zprávy, obsah schránky a příznak přečtení. Model TLS, TCP SEQ, chráněné části do 192 B, časování a skutečná cesta sítí zůstávají. Server ukládá až úplný e-mail, místní Odeslané čekají na potvrzení, Přijaté na celé doručení snímku a místní přečtení na potvrzení serveru. README popisuje zjednodušení, prostředky `v=155`.

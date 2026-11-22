@@ -327,7 +327,7 @@ Postup odpovídá [dokumentaci GitHub Pages](https://docs.github.com/en/pages/ge
 - `js/mitm.js`: pozorování na skutečné cestě, HTTP zásah, připravený nedůvěryhodný TLS protějšek a poškození chráněných dat bez dešifrování.
 - `js/mitm-ui.js`: seznam dostupných Wi-Fi, připojení k zaheslované kavárně, pojmenování a zapínání hotspotu útočníka, srovnávací přenosy a přehled skutečně zachycených paketů.
 - `js/mail.js`: zkrácené požadavky a odpovědi SMTP/IMAP se společným Gmailem, uložení do samostatných schránek, potvrzené místní odeslané kopie, IMAP snímky a příznaky, chráněné části proudu a jejich složení.
-- `js/mail-ui.js` a `assets/gmail.css`: zjednodušený Gmail pěti běžných klientů a počítače útočníka, doručená a potvrzená odeslaná pošta, needitovatelné pole hledání a okno nové zprávy bez ukládání konceptů, čtení a odpovědi a detail společného serveru.
+- `js/mail-ui.js` a `assets/gmail.css`: zjednodušený Gmail pěti běžných klientů a počítače útočníka, doručená a potvrzená odeslaná pošta, statická grafická podoba vyhledávání a okno nové zprávy bez ukládání konceptů, čtení a odpovědi a detail společného serveru.
 - `tests/mail-ui.test.mjs`: ochrana zpráv dosud nenačtených ze serveru, čekání Odeslaných na SMTP potvrzení, nezávislé místní kopie, hledání a bezpečné zobrazení obsahu i vstupních polí, prohlížení serverových zpráv před načtením klientem a nezměněné příznaky, oddělené schránky a bezpečné náhledy odkazů.
 - `js/phishing.js`: pevný phishingový e-mail a formulář, místní blokování, serverové záznamy a chráněné správcovské API.
 - `js/phishing-ui.js`: samostatná Správa webu v doupěti, odkaz do nové zprávy v Gmailu, načtené záznamy, falešná knihovna a detail podvodného serveru.
