@@ -185,7 +185,7 @@
     if(n.id==='mail')return html+globalThis.InternetLab.mailServerDetail(net,sim,n);
     if(n.id==='phish-web')return html+globalThis.InternetLab.phishingServerDetail(net,sim,n);
     if(['terminal','satellite'].includes(n.type))return html+satelliteInfo(n)+decision(n)+`<div class="section-label">PŘIPOJENÍ</div>${portList(n)}`;
-    if(n.type==='bts')return html+`<p class="hint" data-device-help="Jak zařízení funguje">Spojuje telefon rádiem se sítí mobilního operátora. Přijatá data předává po své přípojce dál.</p>${decision(n)}<div class="section-label">PŘIPOJENÍ</div>${portList(n)}<div class="note-card" data-device-help="Mobilní síť">BTS zajišťuje rádiový přístup. Uživatelská data pokračují sítí operátora k jeho bráně do internetu. Vnitřní IP adresy a TCP segmenty při tomto předání zůstávají stejné.</div>`;
+    if(n.type==='bts')return html+`<p class="hint" data-device-help="Jak zařízení funguje">Spojuje telefon rádiem s připojenou sítí. Přijatá data předává po kabelové přípojce k zařízení ${esc(net.displayName(net.peer(net.adjacent(n.id).find(l=>l.medium==='backhaul'),n.id)))}.</p>${decision(n)}<div class="section-label">PŘIPOJENÍ</div>${portList(n)}<div class="note-card" data-device-help="Mobilní síť">BTS zajišťuje rádiový přístup. Dál paket pokračuje přes připojené ${net.detailEnabled('devices')?'routery':'chytré křižovatky'} k cíli. Vnitřní IP adresy a TCP segmenty při předání přes BTS zůstávají stejné.</div>`;
     if(n.type==='ap')html+=`<dl class="dl">${definition('Wi-Fi síť',n.id==='cafe-ap'?net.cafeWifi.ssid:n.id==='cabin-ap'?'Chata':n.id==='ap'?'Lipova':'U Mateje')}${n.id==='cafe-ap'?definition('Heslo k Wi-Fi',net.cafeWifi.password):''}</dl><p class="hint" data-device-help="Přepínání v LAN">Přístupový bod propojuje bezdrátová zařízení ${net.detailEnabled('devices')?'se switchem':'s chytrou křižovatkou'} v domácí síti.</p>`;
     if(n.type==='switch'||n.type==='ap') {
       if(!junction)html+=`<p class="hint" data-device-help="Jak zařízení funguje">${n.type==='ap'?'Přemosťuje Wi-Fi a Ethernet uvnitř jedné LAN.':'Přeposílá ethernetové rámce uvnitř jedné LAN.'} Pro rozhodování používá MAC adresy.</p>`;
@@ -199,7 +199,6 @@
       html+=`<div class="note-card" data-device-help="Přepínání v LAN">Všechny aktivní porty patří do jedné LAN a přeposílají. Neznámý unicast se rozesílá na ostatní aktivní porty; cílová MAC se přitom nemění. Tabulka na začátku není předvyplněná. První příchozí rámec přidá zdrojovou adresu a vstupní port.</div>`;
     } else if(n.type==='router') {
       if(!junction&&['cabin-router','sat-gateway'].includes(n.id))html+=satelliteInfo(n);
-      if(n.id==='mobile-core')html+='<div class="note-card" data-device-help="Mobilní síť"><strong>Brána mobilních dat do internetu</strong>Převezme data od BTS a směruje je dál. Návratové pakety pošle přes vybranou BTS do telefonu. Model shrnuje uživatelskou část mobilního jádra (například UPF).</div>';
       html+=`${natTable(n)}<p class="hint" data-device-help="Jak zařízení funguje">IP paket předává podle <strong>cílové IP adresy</strong>. Další spoj určuje nejpřesnější odpovídající záznam v tabulce.</p>`;
       if(net.detailEnabled('routes')) {
       html+=decision(n);
@@ -245,7 +244,7 @@
   }
   function linkTitle(link) {return {cable:'Kabelové spojení','satellite-access':'Kabelové spojení',backhaul:'Kabelové spojení',wifi:'Bezdrátové spojení – Wi-Fi',cellular:'Bezdrátové spojení – mobilní síť',satellite:'Bezdrátové spojení – satelit'}[link.medium];}
   function linkDetail(id) {
-    const l=net.links[id],a=net.nodes[l.a],b=net.nodes[l.b],medium={'satellite-access':'Kabel do satelitního terminálu','satellite':'Satelitní rádio · obousměrný přenos',cable:'Kabel · Ethernet',wifi:'Wi-Fi · rádio',cellular:'Mobilní data · rádio',backhaul:'Přípojka BTS · přenos do mobilního jádra'}[l.medium];
+    const l=net.links[id],a=net.nodes[l.a],b=net.nodes[l.b],medium={'satellite-access':'Kabel do satelitního terminálu','satellite':'Satelitní rádio · obousměrný přenos',cable:'Kabel · Ethernet',wifi:'Wi-Fi · rádio',cellular:'Mobilní data · rádio',backhaul:`Kabelová přípojka BTS k zařízení ${net.displayName(b)}`}[l.medium];
     const detailed=net.detailEnabled('mac')||net.detailEnabled('routes');
     let problem='';
     if(!l.on)problem='Spoj je odpojený.';
@@ -253,7 +252,7 @@
     else if(l.requiresView&&!net.satellite.clearView)problem='Spoj nefunguje, protože je zakrytý výhled satelitní antény.';
     else if(!net.selectedAccess(l))problem='Spoj se nyní nepoužívá. Zařízení má vybrané jiné připojení.';
     const status=problem?`<div class="status-box ${!l.on||!a.on||!b.on||l.requiresView&&!net.satellite.clearView?'error':''}" role="status">${esc(problem)}</div>`:'';
-    return `${status}${detailed?`${['wifi','satellite','backhaul'].includes(l.medium)?`<div class="note-card"><strong>${medium}</strong>${l.medium==='satellite'?'Rádiová část satelitního přístupu spojuje uživatelskou anténu, satelit LEO a pozemní stanici. Ta předává pakety do pozemního internetu. Let je zpomalený do tří modelových kroků.':l.medium==='wifi'?'Rádiový úsek vede pouze k přístupovému bodu. Dál data pokračují domácí sítí.':'Telefon komunikuje přes BTS a síť operátora. Domácí Wi-Fi ani přípojku bytu tato cesta nepoužívá.'}</div>`:''}<dl class="dl" style="margin-top:24px">${definition('První konec',`${net.displayName(a)} · ${l.pa}`)}${definition('Druhý konec',`${net.displayName(b)} · ${l.pb}`)}${definition('Připojená síť',l.prefix)}</dl>`:''}`;
+    return `${status}${detailed?`${['wifi','satellite','backhaul'].includes(l.medium)?`<div class="note-card"><strong>${esc(medium)}</strong>${l.medium==='satellite'?'Rádiová část satelitního přístupu spojuje uživatelskou anténu, satelit LEO a pozemní stanici. Ta předává pakety do pozemního internetu. Let je zpomalený do tří modelových kroků.':l.medium==='wifi'?'Rádiový úsek vede pouze k přístupovému bodu. Dál data pokračují domácí sítí.':'Telefon komunikuje rádiem s BTS, která paket předá po této přípojce dál do sítě. Domácí Wi-Fi ani přípojku bytu tato cesta nepoužívá.'}</div>`:''}<dl class="dl" style="margin-top:24px">${definition('První konec',`${net.displayName(a)} · ${l.pa}`)}${definition('Druhý konec',`${net.displayName(b)} · ${l.pb}`)}${definition('Připojená síť',l.prefix)}</dl>`:''}`;
   }
   function packetDetail(id) {
     const p=sim.packets.get(id);

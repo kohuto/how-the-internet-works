@@ -145,7 +145,7 @@ test('Every optional area can stand alone with its dependencies; all restores th
     }
   }
   const net=new Network(LabSettings.full());
-  assert.equal(net.visibleNodes().length,84);assert.equal(net.visibleLinks().length,101);
+  assert.equal(net.visibleNodes().length,83);assert.equal(net.visibleLinks().length,100);
 });
 test('Phone Wi-Fi and mobile access only offer enabled connections',()=>{
   const wifi=network(['phone']);
@@ -424,4 +424,19 @@ test('The advertising scenario automatically adds cookies and recognizes its pro
   for(const address of ['https://obchod.test/','https://zpravy.test/']){sim.start('web',{address});finish(sim);}
   assert.equal(net.ads.requests,2);assert.equal(net.ads.profiles.size,1);
   assert.equal(net.ads.profiles.get(net.ads.clients.laptop.cookie.value).events.length,2);
+});
+
+test('Mobile adds two distributed BTS on existing routers, without a separate area or mobile core',()=> {
+  const base=network([]),net=network(['mobile']);
+  const added=net.visibleNodes().filter(n=>!base.nodeAvailable(n.id));
+  assert.deepEqual(added.map(n=>n.id).sort(),['bts-lipova','bts-park','phone']);
+  assert(added.filter(n=>n.type==='bts').every(n=>n.region==='city'));
+  for(const tower of added.filter(n=>n.type==='bts')) {
+    const uplinks=net.adjacent(tower.id).filter(l=>l.medium==='backhaul');assert.equal(uplinks.length,1);
+    assert(base.nodeAvailable(net.peer(uplinks[0],tower.id)));
+    assert.equal(net.nodes[net.peer(uplinks[0],tower.id)].type,'router');
+  }
+  assert(!Object.values(net.nodes).some(n=>n.region==='mobile'));
+  assert(!net.nodes['mobile-core']);
+  assert(!base.visibleNodes().some(n=>n.type==='bts'));
 });

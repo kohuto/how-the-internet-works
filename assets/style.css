@@ -38,7 +38,7 @@
 
 @media(max-width:700px){.device-overlay{padding:8px}.device-window{border-radius:12px}.device-window-bar{padding:9px 12px;gap:7px}.device-body{padding:18px 16px 22px}.device-body .data-table{font-size:10px}}
 
-.map-link.medium-backhaul .link-line{stroke:#9b91ad}.map-link.unused{opacity:.2}.map-link.unused .link-line{stroke-dasharray:3 9}.map-link.unused .link-hit{stroke-width:12}.node-bts .node-halo,.node-mobile-core .node-halo{fill:#ede7f4;stroke:#d1c1df}.node-bts .device-icon,.node-mobile-core .device-icon{stroke:#8d73a3}.node-ap .node-halo{fill:#e9f0f3;stroke:#c6d9df}.node-ap .device-icon{stroke:#648c9b}.node-phone .node-halo{fill:#e9f0ef;stroke:#c5d9cf}
+.map-link.medium-backhaul .link-line{stroke:#9b91ad}.map-link.unused{opacity:.2}.map-link.unused .link-line{stroke-dasharray:3 9}.map-link.unused .link-hit{stroke-width:12}.node-bts .node-halo{fill:#ede7f4;stroke:#d1c1df}.node-bts .device-icon{stroke:#8d73a3}.node-ap .node-halo{fill:#e9f0f3;stroke:#c6d9df}.node-ap .device-icon{stroke:#648c9b}.node-phone .node-halo{fill:#e9f0ef;stroke:#c5d9cf}
 
 @media(max-width:700px){.map-tools{z-index:3}}
 

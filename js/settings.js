@@ -4,7 +4,7 @@
   const FEATURES=[
     {id:'friend',group:'areas',label:'Matějův byt',description:'Druhý notebook s vlastní domácí sítí.',regions:['friend']},
     {id:'satellite',group:'areas',label:'Chata se satelitem',description:'Notebook na chatě, anténa, satelit LEO a pozemní stanice.',regions:['cabin','satellite']},
-    {id:'mobile',group:'areas',label:'Mobilní síť a BTS',description:'Dvě základnové stanice a síť mobilního operátora.',requires:['phone'],regions:['mobile']},
+    {id:'mobile',group:'areas',label:'Mobilní síť a BTS',description:'Dvě základnové stanice rozmístěné po mapě, každá připojená ke stávající chytré křižovatce.',requires:['phone'],nodes:['bts-lipova','bts-park']},
     {id:'mitm',group:'areas',label:'Útočník v kavárně',description:'Kavárna s notebookem hosta, veřejnou Wi-Fi a útočníkovým hotspotem. Porovnání HTTP a HTTPS.',regions:['cafe']},
     {id:'hacker',group:'areas',label:'Hackerské doupě',description:'Počítač útočníka, podvodný e-mail a server s falešnou knihovnou.',requires:['mail'],regions:['hacker','phish']},
     {id:'printer',group:'services',label:'Tiskárna',description:'Místní tisk z dokumentu na notebooku.',nodes:['printer']},

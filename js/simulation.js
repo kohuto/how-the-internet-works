@@ -585,7 +585,7 @@
         const l=this.net.links[e.link];
         if(!this.net.isActive(l))return this.failure(`Spoj „${l.name}“ není dostupný. Tento paket se ztratil; opakuj akci po změně sítě.`,p,e.from);
         const n=this.net.nodes[e.to];if(!e.copy)this.vpn.observeHop(p,l.id);
-        const accepts=['switch','ap','bts','terminal','satellite'].includes(n.type)||(e.frame.satellite?n.type==='router':e.frame.cellular?(n.id==='mobile-core'||n.id==='phone'&&this.net.access.phone.mode==='cellular'):this.net.iface(e.to,l).mac===e.frame.dst);
+        const accepts=['switch','ap','bts','terminal','satellite'].includes(n.type)||(e.frame.satellite?n.type==='router':e.frame.cellular?(n.type==='router'&&l.medium==='backhaul'||n.id==='phone'&&this.net.access.phone.mode==='cellular'):this.net.iface(e.to,l).mac===e.frame.dst);
         if(!accepts) {
           e.discarded=true;
           e.title=`${n.name} kopii rámce nepřevezme`;
@@ -629,7 +629,7 @@
         if(!n.on||!out)return this.failure(`${n.name} nemůže předat data dál.`,p,n.id);
         p.visual={kind:'radio-relay',node:n.id};
         n.lastDecision={kind:'cellular',packetId:p.id,input:this.net.port(this.net.links[e.inLink],n.id),out:this.net.port(out,n.id),version:this.net.version};
-        e.title=`${n.name} předává mobilní data`;e.description=out.medium==='cellular'?'Ze sítě operátora rádiem do telefonu.':'Z rádiového spoje po přípojce do sítě operátora. BTS nesestavuje aplikační zprávu ani nesnižuje TTL vnitřního IP paketu.';
+        e.title=`${n.name} předává mobilní data`;e.description=out.medium==='cellular'?'Z připojené sítě rádiem do telefonu.':`Z rádiového spoje po kabelové přípojce k zařízení ${this.net.nodes[this.net.peer(out,n.id)].name}. BTS nesestavuje aplikační zprávu ani nesnižuje TTL vnitřního IP paketu.`;
         this.next([this.hop(n.id,out,p,e.frame)]);
       } else if(e.kind==='route') {
         const n=this.net.nodes[e.node];if(!n.on)return this.failure(`${n.name} je vypnutý.`,p,n.id);

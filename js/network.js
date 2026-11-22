@@ -6,9 +6,9 @@
   const PARTNERS='192.0.2.224/27';
   // Shared placement keeps devices, scenery and camera bounds together.
   const MAP_LAYOUT={
-    offsets:{dc:[500,-400],instagram:[1170,100],friend:[770,200],mobile:[0,120],cloud:[500,600],replica:[670,480],vpn:[520,700],hacker:[1070,110],phish:[420,-50],cafe:[150,250],partners:[510,-230],peer:[630,30]},
+    offsets:{dc:[500,-400],instagram:[1170,100],friend:[770,200],cloud:[500,600],replica:[670,480],vpn:[520,700],hacker:[1070,110],phish:[420,-50],cafe:[150,250],partners:[510,-230],peer:[630,30]},
     positions:{
-      edge:[680,550],north:[1030,280],south:[1240,1000],dc:[1450,550],ap:[150,590],printer:[305,355],'bts-park':[550,900],'mobile-core':[780,1100],
+      edge:[680,550],north:[1030,280],south:[1240,1000],dc:[1450,550],ap:[150,590],printer:[305,355],
       'hosting-router':[1450,-70],'dc-switch':[1600,-70],web:[1750,-70],
       'hosting-web-2':[1750,-250],'hosting-web-3':[1750,100],dns:[1600,-285],chatbot:[1440,-260],mail:[1600,100]
     },
@@ -16,7 +16,7 @@
       home:[40,270,460,430],city:[520,120,1110,1090],peer:[1820,390,320,330],
       cabin:[10,-280,470,565],satellite:[10,-565,1215,700],
       dc:[1340,-420,520,580],instagram:[2540,150,470,400],friend:[2580,570,540,470],
-      mobile:[100,850,920,370],cafe:[175,1320,865,540],
+      cafe:[175,1320,865,540],
       cloud:[1340,1270,520,430],replica:[2050,1150,500,430],vpn:[1820,1740,620,440],
       hacker:[2870,1100,540,520],phish:[2240,-320,500,410],partners:[1820,-850,1080,420]
     }
@@ -54,9 +54,8 @@
     ['ap','Wi-Fi Lipová','ap',305,355,null,null,'home'],
     ['friend-ap','Wi-Fi u Matěje','ap',1990,490,null,null,'friend'],
     ['phone','Tvůj telefon','host',390,625,'198.51.100.10',null,'home'],
-    ['bts-lipova','BTS Lipová','bts',245,880,null,null,'mobile'],
-    ['bts-park','BTS Park','bts',550,950,null,null,'mobile'],
-    ['mobile-core','Síť operátora','router',780,880,'198.51.100.1','02:00:00:00:40:01','mobile'],
+    ['bts-lipova','BTS Lipová','bts',600,350,null,null,'city'],
+    ['bts-park','BTS Park','bts',1230,790,null,null,'city'],
     ['cloud','Cloud A · hlavní','host',1230,870,'203.0.113.140','02:00:00:00:60:14','cloud'],
     ['hosting-router','Router hostingu','router',950,270,'203.0.113.1',MAC.dc,'dc'],
     ['ig-router','Router Instagramu','router',1430,270,'203.0.113.65','02:00:00:00:50:01','instagram'],
@@ -149,9 +148,8 @@
     ['friend-wifi','friend','friend-ap','wlan0','wifi1','Matějův notebook — Wi-Fi',null,{prefix:FRIEND,medium:'wifi',device:'friend',mode:'wifi'}],
     ['phone-bts-lipova','phone','bts-lipova','cell1','radio','Telefon — BTS Lipová',null,{prefix:MOBILE,medium:'cellular',device:'phone',mode:'cellular',tower:'bts-lipova'}],
     ['phone-bts-park','phone','bts-park','cell2','radio','Telefon — BTS Park',null,{prefix:MOBILE,medium:'cellular',device:'phone',mode:'cellular',tower:'bts-park'}],
-    ['bts-lipova-core','bts-lipova','mobile-core','backhaul','mobile1','BTS Lipová — síť operátora',null,{prefix:MOBILE,medium:'backhaul'}],
-    ['bts-park-core','bts-park','mobile-core','backhaul','mobile2','BTS Park — síť operátora',null,{prefix:MOBILE,medium:'backhaul'}],
-    ['mobile-uplink','mobile-core','south','wan0','eth2','Operátor — internet',['192.0.2.30','192.0.2.29','192.0.2.28/30']],
+    ['bts-lipova-uplink','bts-lipova','edge','backhaul','mobile1','BTS Lipová — Router A',null,{prefix:MOBILE,medium:'backhaul'}],
+    ['bts-park-uplink','bts-park','south','backhaul','mobile1','BTS Park — Router C',null,{prefix:MOBILE,medium:'backhaul'}],
     ['cloud-switch','cloud-switch','cloud','p2','eth0','Cloud A — server',null,{prefix:CLOUD}],
     ['hosting-lan','hosting-router','dc-switch','lan0','p1','Hosting — switch',null,{prefix:DC}],
     ['ig-uplink','transit-o','ig-router','eth1','wan0','Přípojka Instagramu',['192.0.2.37','192.0.2.38','192.0.2.36/30']],
@@ -355,7 +353,7 @@
       if(current.bandwidth===profile.bandwidth&&current.latency===profile.latency)return false;
       this.connectionProfiles[id]={bandwidth:profile.bandwidth,latency:profile.latency};return true;
     }
-    connectionLink(id) {return id==='phone'&&this.access.phone.mode==='cellular'?'mobile-uplink':this.nat[this.natRouterFor(id)]?.wanLink;}
+    connectionLink(id) {return id==='phone'&&this.access.phone.mode==='cellular'?this.adjacent(this.access.phone.tower).find(l=>l.medium==='backhaul')?.id:this.nat[this.natRouterFor(id)]?.wanLink;}
     applyAccess(id) {
       const n=this.nodes[id],mode=this.access[id].mode;
       const profiles={cafe:{wifi:['192.168.50.10','02:00:00:00:c0:10']},hacker:{cable:['192.168.40.10','02:00:00:00:a0:10']},cabin:{cable:['192.168.30.10','02:00:00:00:90:10'],wifi:['192.168.30.11','02:00:00:00:90:11']},laptop:{cable:['192.168.10.10',MAC.laptop],wifi:['192.168.10.11','02:00:00:00:10:11']},friend:{cable:['172.16.20.10',MAC.friend],wifi:['172.16.20.11','02:00:00:00:30:11']},phone:{wifi:['192.168.10.30','02:00:00:00:10:30'],cellular:['198.51.100.10',null]}};
@@ -399,7 +397,12 @@
     recomputeRoutes() {
       const domains=[{prefix:PARTNERS,router:'partners-router',link:'partners-lan'},{prefix:CAFE,router:'cafe-router',link:'cafe-lan',private:true},{prefix:'192.0.2.68/30',router:this.links['cafe-uplink'].b,link:'cafe-uplink'},{prefix:PHISH,router:'phish-router',link:'phish-lan'},{prefix:HACKER,router:'hacker-router',link:'hacker-lan',private:true},{prefix:'192.0.2.60/30',router:this.links['hacker-uplink'].a,link:'hacker-uplink'},{prefix:CABIN,router:'cabin-router',link:'cabin-lan',private:true},{prefix:SAT_WAN,router:'sat-gateway',link:'sat-downlink'},{prefix:HOME,router:'home',link:'switch-home',private:true},{prefix:DC,router:'hosting-router',link:'hosting-lan'},{prefix:IG,router:'ig-router',link:'ig-lan'},{prefix:CLOUD,router:'cloud-router',link:'cloud-lan'},{prefix:REPLICA,router:'replica-router',link:'replica-lan'},{prefix:FRIEND,router:'friend-home',link:'friend-switch-home',private:true},{prefix:VPN,router:'vpn-router',link:'vpn-lan'},
         {prefix:'192.0.2.0/30',router:'edge',link:'uplink'},{prefix:'192.0.2.24/30',router:this.links['friend-uplink'].a,link:'friend-uplink'}];
-      if(this.access.phone.mode==='cellular')domains.push({prefix:MOBILE,router:'mobile-core',link:`${this.access.phone.tower}-core`});
+      // The selected tower's existing router also represents the mobile gateway.
+      // Only this attachment advertises the phone's return path.
+      if(this.access.phone.mode==='cellular') {
+        const uplink=this.links[this.connectionLink('phone')];
+        if(uplink)domains.push({prefix:MOBILE,router:this.peer(uplink,this.access.phone.tower),link:uplink.id});
+      }
       for(const n of Object.values(this.nodes).filter(n=>n.type==='router')) {
         n.routes=[]; if(!n.on)continue;
         for(const d of domains) {
@@ -543,7 +546,7 @@
       const row=this.route(id,ip); if(!row)return null;
       const l=this.links[row.link],iface=this.iface(id,l);
       if(['satellite','satellite-access'].includes(l.medium))return {link:l,frame:{satellite:true,target:ip},row};
-      if(id==='mobile-core'&&row.prefix===MOBILE)return {link:l,frame:{cellular:true,target:ip},row};
+      if(l.medium==='backhaul')return {link:l,frame:{cellular:true,target:ip},row};
       const target=row.next?this.iface(row.next,l):l.prefix.endsWith('/30')?this.iface(this.peer(l,id),l):this.nodes[this.hostId(ip)];
       if(!target)return null;
       return {link:l,frame:{src:iface.mac,dst:target.mac},row};

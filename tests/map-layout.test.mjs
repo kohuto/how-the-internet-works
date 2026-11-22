@@ -7,6 +7,8 @@ import assert from 'node:assert/strict';
 
 const {Network,LabSettings,NetworkMap,MAP_LAYOUT,LAB_FEATURES}=globalThis.InternetLab;
 const net=new Network(LabSettings.full());
+// Radio links are intentionally hidden; packet animations may cross the map.
+const drawnLinks=Object.values(net.links).filter(l=>!['wifi','cellular','satellite'].includes(l.medium));
 const peripheral=Object.entries(MAP_LAYOUT.bounds).filter(([region])=>!['city','peer'].includes(region));
 function owns(region,ends){return ends.includes(region)||['cabin','satellite'].includes(region)&&ends.some(r=>['cabin','satellite'].includes(r));}
 function intersects(a,b,[x,y,w,h],padding=10){
@@ -20,9 +22,9 @@ function intersects(a,b,[x,y,w,h],padding=10){
   return first<=last;
 }
 
-test('Routers and their halos stay outside unrelated peripheral areas',()=>{
+test('Routers, BTS and their halos stay outside unrelated peripheral areas',()=>{
   const collisions=[];
-  for(const n of Object.values(net.nodes).filter(n=>n.type==='router'))for(const [region,[x,y,w,h]] of peripheral){
+  for(const n of Object.values(net.nodes).filter(n=>['router','bts'].includes(n.type)))for(const [region,[x,y,w,h]] of peripheral){
     if(owns(region,[n.region]))continue;
     const dx=n.x-Math.max(x,Math.min(x+w,n.x)),dy=n.y-Math.max(y,Math.min(y+h,n.y));
     if(Math.hypot(dx,dy)<43)collisions.push(`${n.id} / ${region}`);
@@ -30,17 +32,17 @@ test('Routers and their halos stay outside unrelated peripheral areas',()=>{
   assert.deepEqual(collisions,[]);
 });
 
-test('Every connection avoids the reserved area of unrelated homes and services',()=>{
+test('Every drawn connection avoids the reserved area of unrelated homes and services',()=>{
   const collisions=[];
-  for(const link of Object.values(net.links)){
+  for(const link of drawnLinks){
     const a=net.nodes[link.a],b=net.nodes[link.b];
     for(const [region,box] of peripheral)if(!owns(region,[a.region,b.region])&&intersects(a,b,box))collisions.push(`${link.id} / ${region}`);
   }
   assert.deepEqual(collisions,[]);
 });
 
-test('Connections meet only at their shared device, without crossings or overlapping stretches',()=>{
-  const links=Object.values(net.links),collisions=[];
+test('Drawn connections meet only at their shared device, without crossings or overlapping stretches',()=>{
+  const links=drawnLinks,collisions=[];
   const cross=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
   const on=(a,b,p)=>cross(a,b,p)===0&&p.x>=Math.min(a.x,b.x)&&p.x<=Math.max(a.x,b.x)&&p.y>=Math.min(a.y,b.y)&&p.y<=Math.max(a.y,b.y);
   for(let i=0;i<links.length;i++)for(let j=i+1;j<links.length;j++){
@@ -58,9 +60,9 @@ test('Connections meet only at their shared device, without crossings or overlap
   assert.deepEqual(collisions,[]);
 });
 
-test('A connection stays clear of the halo of every device it does not connect',()=>{
+test('A drawn connection stays clear of the halo of every device it does not connect',()=>{
   const collisions=[];
-  for(const l of Object.values(net.links)){
+  for(const l of drawnLinks){
     const a=net.nodes[l.a],b=net.nodes[l.b],dx=b.x-a.x,dy=b.y-a.y;
     for(const n of Object.values(net.nodes))if(![l.a,l.b].includes(n.id)){
       const t=Math.max(0,Math.min(1,((n.x-a.x)*dx+(n.y-a.y)*dy)/(dx*dx+dy*dy)));
@@ -70,8 +72,8 @@ test('A connection stays clear of the halo of every device it does not connect',
   assert.deepEqual(collisions,[]);
 });
 
-test('No connection needs a long stretch across the map',()=>{
-  const long=Object.values(net.links).filter(l=>Math.hypot(net.nodes[l.a].x-net.nodes[l.b].x,net.nodes[l.a].y-net.nodes[l.b].y)>600);
+test('No drawn connection needs a long stretch across the map',()=>{
+  const long=drawnLinks.filter(l=>Math.hypot(net.nodes[l.a].x-net.nodes[l.b].x,net.nodes[l.a].y-net.nodes[l.b].y)>600);
   assert.deepEqual(long.map(l=>l.id),[]);
 });
 

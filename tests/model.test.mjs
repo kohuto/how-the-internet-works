@@ -301,41 +301,63 @@ test('Wi-Fi local print survives an offline home router; AP loss affects Wi-Fi b
   sim.net.setAccess('laptop','offline');action(sim,'print');assert.equal(sim.status,'failed');
 });
 
-test('Phone cellular DNS/HTTP crosses a BTS and operator core in both directions, with no home LAN',()=> {
-  const sim=new Simulation();sim.net.toggleLink('uplink');sim.net.toggleNode('ap');
-  const events=action(sim,'web',{device:'phone'}),hops=branch(events);
-  assert.equal(sim.status,'success');assert.equal(sim.net.phoneBrowser.content,sim.net.server.title);assert.equal(sim.net.browser.content,null);
-  for(const id of ['phone-bts-lipova','bts-lipova-core','mobile-uplink'])assert(hops.includes(id));
-  for(const id of ['phone-wifi','ap-switch','uplink','phone-bts-park'])assert(!hops.includes(id));
-  assert(events.some(e=>e.kind==='hop'&&e.from==='phone'&&e.to==='bts-lipova'));
-  assert(events.some(e=>e.kind==='hop'&&e.from==='bts-lipova'&&e.to==='phone'));
-  assert(!events.some(e=>e.kind==='route'&&e.node.startsWith('bts-')),'BTS does not route or decrement inner IP TTL');
-  for(const p of sim.packets.values()) {
-    const routed=events.filter(e=>e.kind==='route'&&e.packet.id===p.id).length;
-    assert.equal(p.ttl,64-routed);
-    assert.equal(p.source==='phone'?p.src:p.dst,'198.51.100.10');
+test('Both BTS connect directly to different existing routers and return DNS/HTTP through the selected tower',()=> {
+  for(const [tower,router] of [['bts-lipova','edge'],['bts-park','south']]) {
+    const sim=new Simulation();sim.net.setAccess('phone','cellular',tower);sim.net.toggleLink('uplink');sim.net.toggleNode('ap');
+    const events=action(sim,'web',{device:'phone'}),hops=branch(events);
+    assert.equal(sim.status,'success');assert.equal(sim.net.phoneBrowser.content,sim.net.server.title);assert.equal(sim.net.browser.content,null);
+    assert(!sim.net.nodes['mobile-core']);assert(!sim.net.links['mobile-uplink']);
+    for(const id of [`phone-${tower}`,`${tower}-uplink`])assert(hops.includes(id));
+    for(const id of ['phone-wifi','ap-switch','uplink',tower==='bts-lipova'?'bts-park-uplink':'bts-lipova-uplink'])assert(!hops.includes(id));
+    const path=kind=>events.filter(e=>e.kind==='hop'&&!e.copy&&e.packet.kind===kind).map(e=>[e.from,e.to]);
+    assert.deepEqual(path('dns-query').slice(0,2),[['phone',tower],[tower,router]]);
+    assert.deepEqual(path('http-response').slice(-2),[[router,tower],[tower,'phone']]);
+    assert(sim.net.nodes[router].routes.some(r=>r.prefix==='198.51.100.0/24'&&r.connected&&r.link===`${tower}-uplink`));
+    assert(!events.some(e=>e.kind==='route'&&e.node.startsWith('bts-')),'BTS does not route or decrement inner IP TTL');
+    for(const p of sim.packets.values()) {
+      const routed=events.filter(e=>e.kind==='route'&&e.packet.id===p.id).length;
+      assert.equal(p.ttl,64-routed);
+      assert.equal(p.source==='phone'?p.src:p.dst,'198.51.100.10');
+      assert.equal(p.natHistory.length,0);
+    }
+    const outgoing=events.filter(e=>e.kind==='hop'&&e.packet.source==='phone');
+    assert(outgoing.filter(e=>e.link===`${tower}-uplink`).every(e=>e.frame.cellular));
+    assert(outgoing.some(e=>e.from===router&&e.frame.src&&e.frame.dst&&!e.frame.cellular));
+    assert(events.some(e=>e.kind==='radio-relay'));
   }
-  assert(events.some(e=>e.kind==='radio-relay'));
 });
 
 test('Phone Wi-Fi and cellular paths fail independently, use different IPs, and preserve separate browser caches',()=> {
   const sim=new Simulation();sim.net.setAccess('phone','wifi');
   let events=action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
-  assert(branch(events).includes('phone-wifi'));assert(!branch(events).includes('mobile-uplink'));
+  assert(branch(events).includes('phone-wifi'));assert(!branch(events).includes('bts-lipova-uplink'));
   assert.equal(sim.net.nodes.phone.ip,'192.168.10.30');assert(sim.net.phoneBrowser.dnsCache['knihovna.test']);assert.deepEqual(sim.net.browser.dnsCache,{});
   sim.net.toggleLink('uplink');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
   sim.net.setAccess('phone','cellular');events=action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
   assert.equal(sim.net.nodes.phone.ip,'198.51.100.10');assert(!branch(events).includes('uplink'));
-  sim.net.toggleLink('mobile-uplink');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
+  sim.net.toggleLink('bts-lipova-uplink');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
   sim.net.toggleLink('uplink');sim.net.setAccess('phone','wifi');action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
 });
 
 test('Only the selected BTS carries mobile data; another station can restore service after a tower or backhaul outage',()=> {
   const sim=new Simulation();sim.net.toggleNode('bts-lipova');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
   sim.net.setAccess('phone','cellular','bts-park');let events=action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
-  assert(branch(events).includes('phone-bts-park'));assert(branch(events).includes('bts-park-core'));assert(!branch(events).includes('bts-lipova-core'));
-  sim.net.toggleLink('bts-park-core');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
+  assert(branch(events).includes('phone-bts-park'));assert(branch(events).includes('bts-park-uplink'));assert(!branch(events).includes('bts-lipova-uplink'));
+  sim.net.toggleLink('bts-park-uplink');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
   sim.net.toggleNode('bts-lipova');sim.net.setAccess('phone','cellular','bts-lipova');action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
+});
+
+test('A router outage affects only its attached BTS; switching tower recomputes the return route',()=> {
+  for(const [tower,router,alternative] of [['bts-lipova','edge','bts-park'],['bts-park','south','bts-lipova']]) {
+    const sim=new Simulation();sim.net.setAccess('phone','cellular',tower);
+    action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
+    sim.net.toggleNode(router);action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
+    sim.net.setAccess('phone','cellular',alternative);const events=action(sim,'web',{device:'phone'});
+    assert.equal(sim.status,'success');assert.equal(sim.net.phoneBrowser.content,sim.net.server.title);
+    assert(branch(events).includes(`${alternative}-uplink`));assert(!branch(events).includes(`${tower}-uplink`));
+    assert(!events.some(e=>e.kind==='route'&&e.node===router));
+    assert.equal(sim.net.connectionLink('phone'),`${alternative}-uplink`);
+  }
 });
 
 test('Changing active access stops the old transfer; retry creates packets for the new interface and IP',()=> {

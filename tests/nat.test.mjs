@@ -52,7 +52,7 @@ test('Two clients using the same UDP source port share one WAN IP with distinct 
 
 test('Providers route WAN addresses, never private home prefixes; payload, TCP SEQ and routing TTL still agree',()=> {
   const sim=new Simulation(),events=run(sim);
-  for(const id of ['edge','north','south','dc','peer','mobile-core'])assert(sim.net.nodes[id].routes.every(r=>r.prefix!==HOME&&r.prefix!==FRIEND));
+  for(const id of ['edge','north','south','dc','peer'])assert(sim.net.nodes[id].routes.every(r=>r.prefix!==HOME&&r.prefix!==FRIEND));
   assert(sim.net.nodes.home.routes.some(r=>r.prefix===HOME&&r.connected));
   assert(sim.net.nodes['friend-home'].routes.some(r=>r.prefix===FRIEND&&r.connected));
   for(const e of events.filter(e=>e.kind==='hop'&&['uplink','edge-north','north-dc','dc-access'].includes(e.link))) {

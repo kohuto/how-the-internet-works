@@ -1,5 +1,16 @@
 # Záznam ověření
 
+## BTS přímo na stávajících křižovatkách · 22. listopadu 2026
+
+Odstraněna samostatná mapová oblast 08 / Mobilní síť, její hranice, podtitulek, kamerové rozměry i uzel Síť operátora s jeho společnou přípojkou. BTS Lipová je rozmístěna u severozápadního okraje města a má jedinou kabelovou přípojku přímo do stávajícího routeru A; BTS Park stojí v jiné části města a vede přímo do routeru C. Při vypnutém rozlišení zařízení se obě připojují k chytrým křižovatkám. Rozšíření Mobilní síť a BTS přidává pouze telefon a tyto dvě BTS, žádný nový router. Výběr BTS v telefonu řídí přístup i návratovou trasu. Připojený router výukově zastupuje mobilní bránu, dál pokračuje běžné IP směrování. BTS zachovává adresy a TTL, mezi routery pokračují ethernetové rámce. Šířka pásma a latence telefonu se uplatňují na přípojce vybrané BTS. Nápověda, popisky přípojek a README odpovídají novému zapojení. Prostředky `v=161`.
+
+Prošlo všech **355 testů** celé sady a kontrola syntaxe upravených skriptů a testů. Přenosy DNS a HTTP přes obě BTS ověřují přesné první a poslední skoky, návratovou tabulku, zachování IP bez domácího NAT, počet snížení TTL a přechod z mobilního kanálu na běžné ethernetové rámce. Ověřeny výpadky BTS, její přípojky i připojeného routeru a obnovení po volbě druhé BTS. Nastavení spojení se ověřuje přes obě přípojky včetně VPN. Kontroly rozložení se vztahují na skutečně kreslené spoje: žádná kabelová přípojka nekříží jinou, nezasahuje do cizího zařízení ani oblasti a není delší než 600 mapových jednotek. Nekreslené rádiové úseky dovolují animaci paketu mezi telefonem a vzdálenou BTS. Výřezy obsahují uzly i jejich popisky pro základ, úplný model i každé rozšíření. Úplný model má 83 zařízení a 100 spojů.
+
+V prohlížeči při 1047 × 858 px ověřen základ bez BTS i mobilní oblasti, samostatné zapnutí Mobilní sítě a BTS, dvě přímé přípojky k různým existujícím křižovatkám a animovaný požadavek telefon → BTS Lipová → křižovatka. Web se skutečně doručil na telefon a odpověď se vrátila stejnou BTS. Po vypnutí BTS Lipová nový pokus selhal a zachoval původně přijatou stránku. Výběr BTS Park obnovil obousměrný přenos přes router C. Zapnutí Routerů a switchů zachovalo vypnutou BTS i úspěšný přenos a zobrazilo správné názvy A / C. V úplné sestavě ověřeno 83 uzlů, absence původní oblasti, oba detaily BTS a přípojky i kruhové dosahy v nových polohách.
+
+Při 320 × 568 px ověřena aplikace Připojení, posun obsahu k výběru BTS Park a úspěšné načtení knihovny přes tuto BTS. Telefon a stránka bez vodorovného přetékání; konzole bez chyb a varování. Uživatelská karta prohlížeče nebyla změněna, ověření proběhlo v odděleném kontextu.
+
+
 ## Kategorie nastavení podle obtížnosti · 22. listopadu 2026
 
 Dialog nastavení nově obsahuje tři kategorie: Základní se sedmi volbami, Rozšiřující s jedenácti a Pokročilé se sedmi zbývajícími. Pořadí prvních dvou kategorií odpovídá zadání; Routery a switche a NAT jsou mezi rozšiřujícími volbami. Zbývající možnosti se automaticky zařazují mezi pokročilé. Změna upravuje pouze rozložení existujících řádků; katalog, výchozí sestava, návaznosti, oddělené funkční a zobrazovací volby, ovládání dialogu i styly zůstávají. README aktualizováno, prostředky `v=160`.

@@ -30,7 +30,7 @@
     const boxes=[...regions.map(id=>{const [x,y,w,h]=MAP_LAYOUT.bounds[id];return [x,y,w,h+32];}),...nodes.map(n=>[n.x-65,n.y-55,130,155])],x=Math.min(...boxes.map(b=>b[0])),y=Math.min(...boxes.map(b=>b[1]));
     return [x,y,Math.max(...boxes.map(b=>b[0]+b[2]))-x,Math.max(...boxes.map(b=>b[1]+b[3]))-y];
   };
-  const presets={home:[35,270,465,440],city:[480,100,1720,1140],all:bounds(Object.keys(MAP_LAYOUT.bounds)),ads:bounds(['partners']),mail:bounds(['dc']),dc:bounds(['dc']),friend:bounds(['friend']),mobile:bounds(['home','mobile']),cafe:bounds(['cafe']),vpn:bounds(['vpn']),hacker:bounds(['hacker']),satellite:bounds(['cabin','satellite'])};
+  const presets={home:[35,270,465,440],city:[480,100,1720,1140],all:bounds(Object.keys(MAP_LAYOUT.bounds)),ads:bounds(['partners']),mail:bounds(['dc']),dc:bounds(['dc']),friend:bounds(['friend']),mobile:bounds(['home','city']),cafe:bounds(['cafe']),vpn:bounds(['vpn']),hacker:bounds(['hacker']),satellite:bounds(['cabin','satellite'])};
   const decor=`
     <defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#213d37" flood-opacity=".09"/></filter>${Object.values(signalStyles).map(s=>`<radialGradient id="${s.medium}-coverage-gradient"><stop offset="0%" stop-color="${s.color}" stop-opacity=".24"/><stop offset="45%" stop-color="${s.color}" stop-opacity=".14"/><stop offset="75%" stop-color="${s.color}" stop-opacity=".05"/><stop offset="100%" stop-color="${s.color}" stop-opacity="0"/></radialGradient>`).join('')}</defs>
     <rect x="-3000" y="-3000" width="7000" height="7000" fill="#f0f3eb"/>
@@ -76,11 +76,9 @@
     <g transform="translate(1520 460)"><rect width="59" height="44" rx="9" fill="#dde3c9" stroke="#bdcbaa" stroke-width="1.5"/><path d="M6 18h47M15 8v20m29-20v20" stroke="#bdcbaa" stroke-width="2" fill="none"/></g>
     <g transform="translate(1770 690)"><circle r="20" fill="#d7e2c0"/><path d="M0 14V-13M-10-1 0 5 11-7" stroke="#a2b784" fill="none" stroke-width="2"/><rect x="-11" y="12" width="22" height="16" rx="3" fill="#d2b89a"/></g>
     <text x="1490" y="375" class="place-label">07 / U MATĚJE</text><text x="1680" y="441" class="room-label">MATĚJŮV POKOJ</text>
-    </g><g data-region="mobile"><path d="M150 815q430-150 800 5v192H150Z" fill="#ece7f2" stroke="#d6c9e3" stroke-dasharray="6 9"/>
-    <text x="170" y="785" class="place-label">08 / MOBILNÍ SÍŤ</text></g>
+    </g>
     <g class="cafe-house" data-region="cafe"><rect x="65" y="1135" width="765" height="425" rx="18" fill="#f4ede0" stroke="#c7b797" stroke-width="4"/><path d="M100 1135h690" stroke="#b58e67" stroke-width="14" stroke-dasharray="40 14"/><circle cx="180" cy="1300" r="63" fill="#e5d4b8" stroke="#c6ac84" stroke-width="2"/><circle data-feature="mitm" cx="440" cy="1440" r="63" fill="#dac9d5" stroke="#b69aaf" stroke-width="2"/><path d="M635 1160h160v65H635z" fill="#dfceb1" stroke="#c7b797"/><path d="M673 1182h20v21h-20zm20 3q16-3 12 9h-12" fill="none" stroke="#a48c67" stroke-width="3"/><text x="560" y="1105" class="place-label">15 / KAVÁRNA NA ROHU</text><text x="78" y="1538" class="region-subtitle">HOST · VEŘEJNÁ WI-FI · NAPODOBENÝ HOTSPOT</text></g>
     <g class="hacker-house" data-region="hacker"><rect x="1935" y="1080" width="350" height="350" rx="12" fill="#ede6ee" stroke="#c3b4c8" stroke-width="4"/><rect x="2125" y="1140" width="92" height="82" rx="9" fill="#c6bbce" stroke="#a597af" stroke-width="2"/><text x="1935" y="1050" class="place-label">13 / HACKERSKÉ DOUPĚ</text><text x="1950" y="1405" class="region-subtitle">POČÍTAČ ÚTOČNÍKA · VLASTNÍ PŘÍPOJKA</text></g>
-    <text data-region="mobile" x="170" y="1050" class="region-subtitle">BTS · PŘÍPOJKA · SÍŤ OPERÁTORA</text>
     </g>`;
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   class NetworkMap {
@@ -220,7 +218,7 @@
         const a=this.net.nodes[l.a],b=this.net.nodes[l.b],active=this.net.isActive(l);
         const x=(a.x+b.x)/2,y=(a.y+b.y)/2;
         const unused=!this.net.selectedAccess(l);
-        const label=['uplink','edge-north','north-dc','edge-south','south-dc','dc-access','north-peer','friend-uplink','mobile-uplink'].includes(l.id)&&!l.on?`<g class="link-label" transform="translate(${x},${y-13})"><rect x="-22" y="-11" width="44" height="20" rx="6"/><text text-anchor="middle" y="3">odpojeno</text></g>`:'';
+        const label=(l.medium==='backhaul'||['uplink','edge-north','north-dc','edge-south','south-dc','dc-access','north-peer','friend-uplink'].includes(l.id))&&!l.on?`<g class="link-label" transform="translate(${x},${y-13})"><rect x="-22" y="-11" width="44" height="20" rx="6"/><text text-anchor="middle" y="3">odpojeno</text></g>`:'';
         return `<g class="map-link medium-${l.medium} ${active?'':'offline'} ${unused?'unused':''} ${selected?.kind==='link'&&selected.id===l.id?'selected':''} ${active&&vpnLinks.has(l.id)?'vpn-route':''} ${active&&['cafe-twin','cafe-relay'].includes(l.id)?'mitm-route':''}" data-map-kind="link" data-id="${l.id}" role="button" aria-label="${esc(this.net.displayLinkName(l))} · ${unused?'nevybrané připojení':active?'spojeno':'nedostupné'}" tabindex="0"><title>${esc(this.net.displayLinkName(l))} · otevřít detail</title><path class="link-hit" d="M${a.x},${a.y}L${b.x},${b.y}"/><path class="link-line" d="M${a.x},${a.y}L${b.x},${b.y}"/>${label}${!active&&!unused?`<g transform="translate(${x},${y})" class="cut-mark"><circle r="10"/><path d="m-4-4 8 8m0-8-8 8"/></g>`:''}</g>`;
       }).join('');
       this.svg.querySelector('#nodes-layer').innerHTML=this.net.visibleNodes().map(n=> {
