@@ -15,7 +15,9 @@
       if(pl.publicText)content+=preview(pl.publicText);
       if(pl.record)content+=preview(hex(pl.record.data,160));
     } else if(pl.bytes) {
-      if(pl.contentType&&pl.contentType!=='text') {
+      if(['smtp','imap'].includes(p.connection)) {
+        label=p.connection.toUpperCase();content=preview(new TextDecoder().decode(pl.bytes));
+      } else if(pl.contentType&&pl.contentType!=='text') {
         label=pl.contentType==='video'?'video':'obrázek';content=preview(hex(pl.bytes,64));
       } else {
         content=preview(new TextDecoder().decode(pl.bytes));
@@ -25,9 +27,9 @@
       label='DNS';content=preview(`Dotaz ${pl.type||'A'}: ${pl.name}`);
     } else if(p.kind==='dns-response') {
       label='DNS';content=preview(`Odpověď ${pl.type||'A'}: ${pl.name} → ${pl.exchange?pl.preference+' '+pl.exchange+'; A → ':''}${pl.answer}`);
-    } else if(p.kind==='http-request') {
+    } else if(p.kind==='http-request'||p.connection==='phishing-api'&&p.kind==='phish-request') {
       label='HTTP';content=preview(requestText(pl));
-    } else if(p.kind==='http-response') {
+    } else if(p.kind==='http-response'||p.connection==='phishing-api'&&p.kind==='phish-response') {
       label='HTTP';content=preview(responseText(pl));
     } else if(p.kind==='ig-connect') {
       content=preview(JSON.stringify({purpose:pl.purpose}));

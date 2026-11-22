@@ -67,7 +67,7 @@
         Object.assign(p,{sport:response?443:51000,dport:response?51000:443,connection:'https',label:labels[kind],seq:this.webSeq[response?'response':'request']});
         this.webSeq[response?'response':'request']+=(payload.record?.data.length||0)+encoder.encode(payload.publicText||'').length;
       }
-      if(this.ads.embedded&&['https-request','https-response'].includes(kind))p.label=kind==='https-request'?'HTTPS · žádost o reklamu':'HTTPS · vybraná reklama';
+      if(this.ads.embedded&&['http-request','http-response','https-request','https-response'].includes(kind))p.label=`${kind.startsWith('https')?'HTTPS':'HTTP'} · ${response?'vybraná reklama':'žádost o reklamu'}`;
       Object.assign(p,header);
       const flow=[src,dst,p.protocol,p.sport,p.dport].join('|');
       p.packetOrder=header.packetOrder??(this.packetOrders.get(flow)||0)+1;this.packetOrders.set(flow,p.packetOrder);
@@ -684,6 +684,7 @@
           this.next([{kind:request?'web-decrypt-request':'web-decrypt-response',node:p.destination,packet:p,title:request?'Server dešifruje a zpracuje požadavek':'Prohlížeč dešifruje odpověď',description:'Čitelný obsah je dostupný na konci zabezpečeného spojení.'}]);
           e.description='Dorazil šifrovaný obsah. Příjemce ho nyní musí dešifrovat a ověřit jeho integritu.';
         } else if(p.kind==='http-request') {
+          if(p.destination==='ads'){this.ads.pending=p.payload;this.browser().tlsPhase='processing';this.next([{kind:'ads-select',node:'ads',packet:p,title:'Reklamní server vybírá obsah',description:'Server přečte požadavek, případně vyhledá svůj profil podle cookie a vybere reklamu.'}]);e.description='Čitelný HTTP požadavek dorazil reklamnímu serveru.';return this.current;}
           const server=this.net.server;
           this.browser().tlsPhase='response';
           try{this.next([this.originate(this.replyPacket('http-response',p,this.webResponse(p.payload,false,p)))]);}

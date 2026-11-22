@@ -165,7 +165,7 @@ test('DNS has the same simple header and reveals its actual UDP header in detail
 });
 
 test('Mail exposes encrypted payload without the lesson about mail sessions or byte offsets',()=>{
-  const net=network(['mail']),sim=run(net,'mail-check',{device:'laptop'});
+  const net=network(['mail','tls']),sim=run(net,'mail-check',{device:'laptop'});
   const p=[...sim.packets.values()].find(p=>p.connection==='imap'),html=packetView(net,p);
   assert(html.includes(hex(p.payload.record.data.slice(0,160))));
   assert(!html.includes('Část modelového proudu'));assert(!html.includes('SMTP · odeslání'));

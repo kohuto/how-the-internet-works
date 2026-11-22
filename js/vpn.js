@@ -57,7 +57,7 @@
     remember(p,client,direction) {
       const n=this.net,count=p.payload.packetCount||1,c=n.vpn.clients[client];
       if(direction==='out'){n.vpn.sent+=count;c.sent+=count;}else{n.vpn.received+=count;c.received+=count;}
-      const preview=p.kind==='http-request'?globalThis.InternetLab.requestText(p.payload):p.kind==='http-response'?globalThis.InternetLab.responseText(p.payload):p.payload.record?'Obsah uvnitř dál chrání HTTPS/TLS. VPN server jej nedešifruje.':p.kind.startsWith('dns')?`DNS ${p.payload.name}${p.payload.answer?' → '+p.payload.answer:''}`:'Aplikační data modelu. Prohlédni si předávaný paket.';
+      const preview=p.kind==='http-request'?globalThis.InternetLab.requestText(p.payload):p.kind==='http-response'?globalThis.InternetLab.responseText(p.payload):p.payload.record?'Obsah uvnitř dál chrání TLS. VPN server jej nedešifruje.':p.kind.startsWith('dns')?`DNS ${p.payload.name}${p.payload.answer?' → '+p.payload.answer:''}`:'Aplikační data modelu. Prohlédni si předávaný paket.';
       n.vpn.last={client,direction,packetId:p.id,header:n.packetHeader(p),https:!!p.payload.record,preview};
     }
     receive(p,e) {
@@ -82,9 +82,9 @@
           const r=this.restore(p,e.node);
           if(r.direction==='out'){
             this.exit(p,r.client);e.title='VPN server sejmul vnější obal a předává původní paket';
-            e.description=p.payload.record?'HTTPS uvnitř zůstává šifrované. Web uvidí veřejnou IP VPN serveru.':p.connection==='http'?'VPN ochrana zde končí. HTTP obsah je na cestě k webu čitelný; web uvidí IP VPN serveru.':'Původní paket pokračuje do internetu z IP VPN serveru. VPN obal byl odstraněn.';
+            e.description=p.payload.record?'Obsah uvnitř zůstává šifrovaný pomocí TLS. Cílový server uvidí veřejnou IP VPN serveru.':p.connection==='http'?'VPN ochrana zde končí. HTTP obsah je na cestě k webu čitelný; web uvidí IP VPN serveru.':'Původní paket pokračuje do internetu z IP VPN serveru. VPN obal byl odstraněn.';
             s.next([s.originate(p,'vpn')]);
-          }else s.next([{kind:'deliver',node:r.client,packet:p,title:'Zařízení předává rozbalený paket své aplikaci',description:'Případné HTTPS ještě musí dešifrovat prohlížeč.'}]);
+          }else s.next([{kind:'deliver',node:r.client,packet:p,title:'Zařízení předává rozbalený paket své aplikaci',description:'Případné TLS ještě musí dešifrovat cílová aplikace.'}]);
         }
       }catch(error){return s.failure(error.message,p,e.node);}
       return s.current;

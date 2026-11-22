@@ -27,7 +27,7 @@
       if(!this.#seen.has(p.id)){
         this.#seen.add(p.id);
         const outer=p.kind.startsWith('vpn-'),protectedData=outer||!!p.payload.record;
-        const before=p.kind==='http-request'?requestText(p.payload):p.kind==='http-response'?responseText(p.payload):p.kind.startsWith('dns-')?`DNS · ${p.payload.name}${p.payload.answer?' → '+p.payload.answer:''}`:p.payload.publicText||'';
+        const before=p.kind==='http-request'?requestText(p.payload):p.kind==='http-response'?responseText(p.payload):p.kind.startsWith('dns-')?`DNS · ${p.payload.name}${p.payload.answer?' → '+p.payload.answer:''}`:p.payload.publicText||(!protectedData&&p.payload.bytes?new TextDecoder().decode(p.payload.bytes):'');
         const row={id:++n.mitm.serial,run:s.run,packetId:p.id,kind:p.kind,label:p.label,header:{...n.packetHeader(p)},direction:e.inLink==='cafe-twin'?'out':'in',protected:protectedData,protection:outer?'VPN':p.payload.record?'TLS':'',before,after:before,changed:false,result:''};
         if(n.mitm.mode==='http'&&p.kind==='http-response'){
           p.payload.title=MITM_TITLE;p.payload.bodyBytes=new TextEncoder().encode(responseBody(p.payload)).length;
@@ -41,7 +41,7 @@
         }else if(n.mitm.mode==='tls'&&p.kind==='https-request'){
           p.payload.record.data[0]^=1;row.changed=true;row.result='Změněn bajt chráněného záznamu. Příjemce změnu odhalí kontrolou integrity; nevznikne platný upravený požadavek.';
         }else if(outer)row.result='Viditelné jsou vnější IP a UDP porty tunelu. Původní IP, DNS i webový obsah jsou uvnitř VPN skryté.';
-        else if(protectedData)row.result='HTTP obsah nelze na tomto místě přečíst ani platně přepsat. TLS končí až v prohlížeči a na webovém serveru.';
+        else if(protectedData)row.result='Obsah nelze na tomto místě přečíst ani platně přepsat. TLS končí až v cílové aplikaci a na serveru.';
         else row.result='Nešifrovaný obsah je na útočníkově přenosové cestě čitelný.';
         n.mitm.logs.push(row);if(n.mitm.logs.length>20)n.mitm.logs.shift();
         p.mitmHistory??=[];p.mitmHistory.push({node:e.node,logId:row.id,changed:row.changed,protection:row.protection,result:row.result});

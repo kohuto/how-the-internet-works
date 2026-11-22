@@ -1,5 +1,5 @@
 /* A closed teaching scenario. Fixed fictional mail and credentials, no real network I/O.
-   Admin access uses a prepared model TLS session; web navigation uses the full existing TLS flow. */
+   Admin access follows the optional TLS setting; web navigation uses the full existing TLS flow. */
 (() => {
   'use strict';
   const CLIENTS=['laptop','friend','phone','cabin','cafe'];
@@ -18,7 +18,7 @@
     accepts(type){return type==='phish-results';}
     validate(type,payload){return type==='phish-results'&&payload.device==='hacker';}
     start(){
-      const s=this.sim;this.tls=new globalThis.InternetLab.ModelTLS(s.run,s.clientId());this.tls.ready=true;
+      const s=this.sim;this.tls=this.net.featureEnabled('tls')?new globalThis.InternetLab.ModelTLS(s.run,s.clientId()):null;if(this.tls)this.tls.ready=true;
       Object.assign(this.state.hacker,{state:'loading',notice:'Připravuje se dotaz na záznamy podvodného serveru.'});
       s.next([{kind:'phishing-prepare',node:s.clientId(),title:'Útočník načítá záznamy podvodného webu',description:'Přenos spusť krokováním nebo přehráním.'}]);
     }
@@ -26,22 +26,23 @@
       const s=this.sim,id=s.clientId();
       if(!this.net.nodes[id].on||!this.net.accessReady(id))return s.failure(`${this.net.nodes[id].name} nemá dostupné připojení.`,null,id);
       const body={method:'POST',path:'/sprava/zaznamy',host:PHISH_HOST,message:JSON.stringify({op:'results'})};
-      const p=s.createPacket('phish-request',id,'phish-web',{record:this.tls.seal('request',body,'phish-web')},{sport:51005,dport:443,connection:'phishing-api',label:'Útočník · dotaz na záznamy'});
-      s.next([s.originate(p)]);e.description='Správcovské přihlášení a model TLS jsou připravené.';
+      const p=s.createPacket('phish-request',id,'phish-web',this.tls?{record:this.tls.seal('request',body,'phish-web')}:body,{sport:51005,dport:this.tls?443:80,connection:'phishing-api',label:'Útočník · dotaz na záznamy'});
+      s.next([s.originate(p)]);e.description=this.tls?'Správcovské přihlášení a model TLS jsou připravené.':'Správcovské přihlášení je připravené. Požadavek se odešle přes HTTP.';
     }
     receive(p,e){
       const s=this.sim,id=s.clientId();
       try{
         if(p.kind==='phish-request'){
-          const value=JSON.parse(this.tls.open(p.payload.record,p.destination,'request').message);
+          const value=JSON.parse((this.tls?this.tls.open(p.payload.record,p.destination,'request'):p.payload).message);
           if(value.op!=='results'||id!=='hacker'||p.destination!=='phish-web')throw new Error('Server odmítl požadavek.');
           const result={status:200,items:[...this.state.captures.values()].slice(-4).map(x=>({...x})),total:this.state.captures.size};
           e.title='Podvodný server připravil záznamy pro útočníka';e.description='Ještě se musí přenést zpět do počítače.';
-          const q=s.replyPacket('phish-response',p,{record:this.tls.seal('response',{status:200,title:JSON.stringify(result),revision:1},id)});q.connection='phishing-api';q.label='Správa · odpověď';s.next([s.originate(q)]);
+          const body={status:200,title:JSON.stringify(result),revision:1};
+          const q=s.replyPacket('phish-response',p,this.tls?{record:this.tls.seal('response',body,id)}:body);q.connection='phishing-api';q.label='Správa · odpověď';s.next([s.originate(q)]);
         }else{
-          const result=JSON.parse(this.tls.open(p.payload.record,id,'response').title);
+          const result=JSON.parse((this.tls?this.tls.open(p.payload.record,id,'response'):p.payload).title);
           Object.assign(this.state.hacker,{state:'ready',results:result.items,total:result.total,fetched:true,notice:result.total?'Záznamy dorazily z podvodného serveru.':'Server zatím nepřijal žádné ukázkové přihlášení.'});
-          s.finish('Záznamy dorazily do počítače útočníka','Zařízení ověřilo a otevřelo modelově chráněnou odpověď.',id);
+          s.finish('Záznamy dorazily do počítače útočníka',this.tls?'Zařízení ověřilo a otevřelo modelově chráněnou odpověď.':'Zařízení přijalo čitelnou HTTP odpověď.',id);
         }
       }catch(error){s.failure(error.message,p,e.node);}
     }

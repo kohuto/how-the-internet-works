@@ -9,7 +9,7 @@
     {id:'hacker',group:'areas',label:'Hackerské doupě',description:'Počítač útočníka, podvodný e-mail a server s falešnou knihovnou.',requires:['mail'],regions:['hacker','phish']},
     {id:'printer',group:'services',label:'Tiskárna',description:'Místní tisk z dokumentu na notebooku.',nodes:['printer']},
     {id:'dns',group:'services',label:'DNS server',description:'Překlad názvů webů na IP adresy. Bez rozšíření se tento krok vynechá.',nodes:['dns']},
-    {id:'tls',group:'services',label:'TLS / HTTPS',description:'Zabezpečení webu, ověření certifikátu a šifrovaný přenos. Bez rozšíření se používá HTTP.'},
+    {id:'tls',group:'services',label:'Šifrování komunikace (TLS)',description:'Šifrovaný web, e-mail a správa podvodného serveru. Bez této volby je obsah těchto přenosů čitelný. VPN má vlastní šifrování.'},
     {id:'cookies',group:'services',label:'Cookies',description:'Rozpoznání prohlížeče, záznamy návštěv a cookies přihlašovacích relací.'},
     {id:'wifi',group:'services',label:'Wi-Fi v domácnostech',description:'Bezdrátové připojení na Lipové, u Matěje a na chatě. Platí pro zapnuté domácnosti.',nodes:['ap','friend-ap','cabin-ap']},
     {id:'connection-timing',group:'services',label:'Šířka pásma a Latence',description:'Volby šířky pásma a latence v aplikaci Připojení na počítačích a telefonu. Umožní porovnat rozestupy paketů a zdržení přenosu.'},
@@ -19,7 +19,7 @@
     {id:'cloud',group:'services',label:'Cloud',description:'Ukládání, stahování a sdílení souborů. Hlavní i záložní datové centrum a kopírování mezi nimi.',regions:['cloud','replica']},
     {id:'vpn',group:'services',label:'VPN',description:'Samostatná aplikace VPN pro zapnutí šifrovaného tunelu a VPN server.',regions:['vpn']},
     {id:'chatbot',group:'services',label:'Chatbot',description:'Dotaz a odpověď zpracovaná na vzdáleném serveru.',nodes:['chatbot']},
-    {id:'ads',group:'services',label:'Personalizovaná reklama',description:'E-shop a Zprávy se společným reklamním serverem. Ukáže, jak prohlížení na jednom webu ovlivní reklamu na druhém.',requires:['tls','cookies'],nodes:['shop','news','ads']}
+    {id:'ads',group:'services',label:'Personalizovaná reklama',description:'E-shop a Zprávy se společným reklamním serverem. Ukáže, jak prohlížení na jednom webu ovlivní reklamu na druhém.',requires:['cookies'],nodes:['shop','news','ads']}
   ];
   const DETAILS=[
     {id:'devices',label:'Routery a switche',description:'Rozliší chytré křižovatky na routery a switche a zobrazí jejich původní názvy a ikony.'},

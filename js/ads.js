@@ -11,7 +11,7 @@
     }
     reset(){this.context=null;this.pending=null;}
     get embedded(){return this.context?.phase==='partner';}
-    address(){return this.embedded?{host:HOSTS.ads,server:'ads',secure:true,path:'/vyber',url:'https://reklamy.test/vyber'}:webAddress(this.sim.browser().address);}
+    address(){const secure=this.net.featureEnabled('tls');return this.embedded?{host:HOSTS.ads,server:'ads',secure,path:'/vyber',url:`${secure?'https':'http'}://reklamy.test/vyber`}:webAddress(this.sim.browser().address);}
     certificate(target){return this.state.certificates[target];}
     page(request,packet){
       const kind=packet.destination,topic=kind==='shop'?(/(?:\?|&)tema=(cyklistika|hudba|cestovani)(?:&|$)/.exec(request.path)?.[1]||'cyklistika'):'obecna';
@@ -30,13 +30,13 @@
       const client=this.state.clients[sim.clientId()];
       const data={site:c.site,context:c.topic,...(client.allowed?{event:c.kind==='shop'?'prohlizeni':'zobrazeni',...(c.kind==='shop'?{topic:c.topic}:{})}:{event:'kontextova-reklama'})};
       sim.webRequest={method:'POST',host:HOSTS.ads,path:'/vyber',contentType:'application/json',message:JSON.stringify(data)};
-      Object.assign(sim.browser(),{tlsPhase:this.net.featureEnabled('dns')?'dns':'handshake',certificateVerified:false});
+      Object.assign(sim.browser(),{tlsPhase:this.net.featureEnabled('dns')?'dns':this.address().secure?'handshake':'request',certificateVerified:false});
       if(!this.net.featureEnabled('dns')||sim.browser().dnsCache[HOSTS.ads])sim.webConnect();
       else sim.next([sim.originate(sim.createPacket('dns-query',sim.clientId(),'dns',{name:HOSTS.ads,type:'A'}))]);
     }
     cookieHeader(){
       const c=this.state.clients[this.sim.clientId()];if(c.cookie?.expiresAt<=this.net.cookieTime)c.cookie=null;
-      c.lastSent=c.allowed&&c.cookie?`reklama_id=${c.cookie.value}`:'';
+      c.lastSent=c.allowed&&c.cookie&&(!c.cookie.secure||this.address().secure)?`reklama_id=${c.cookie.value}`:'';
       delete this.sim.webRequest.cookie;if(c.lastSent)this.sim.webRequest.cookie=c.lastSent;
       c.notice=c.allowed?(c.lastSent?'Prohlížeč připojil vlastní identifikátor reklamního partnera.':'Požadavek neměl reklamní cookie. Nové ID server vrátí v odpovědi.'):'Propojení vypnuté: reklamní cookie se neodesílá a historie se nezapisuje do profilu. Volba používá jen kontext této stránky.';
     }
@@ -51,7 +51,7 @@
       const ranking=profile?Object.entries(profile.interests).sort((a,b)=>b[1]-a[1]):[];
       const personalized=!!ranking.length,topic=personalized?ranking[0][0]:data.context;
       const ad={topic,title:TOPICS[topic].title,text:TOPICS[topic].text,personalized,reason:personalized?`Podle uloženého zájmu „${TOPICS[topic].label}“ z prohlížení obchod.test.`:data.context==='obecna'?'Obecný výběr bez uloženého zájmu.':'Podle tématu právě otevřené stránky; historie nebyla potřeba.',provider:HOSTS.ads};
-      const response={status:200,title:'Výběr reklamy',revision:number,advertising:{ad},...(profile?{setCookie:`reklama_id=${profile.id}; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=None`}:{})};
+      const response={status:200,title:'Výběr reklamy',revision:number,advertising:{ad},...(profile?{setCookie:`reklama_id=${profile.id}; Path=/; Max-Age=3600${this.address().secure?'; Secure':''}; HttpOnly${this.address().secure?'; SameSite=None':''}`}:{})};
       this.state.last={number,profile:profile?.id||null,site:data.site,event:data.event,topic:data.topic||null,context:data.context,cookie:request.cookie||'',ad:structuredClone(ad),sourceIp:packet.src,packetId:packet.id};
       response.bodyBytes=encoder.encode(responseBody(response)).length;return response;
     }
@@ -61,12 +61,13 @@
       if(e.kind==='ads-prepare'){if(!this.net.accessReady(sim.clientId()))return sim.failure('Zařízení nemá připojení pro načtení reklamy.',null,sim.clientId());this.prepare();return;}
       try{sim.webReply=this.select(this.pending,e.packet);this.pending=null;
         e.description=`${this.state.last.profile?'Server použil profil '+this.state.last.profile+'.':'Server nepropojuje návštěvy.'} ${sim.webReply.advertising.ad.reason} Reklama teprve čeká na doručení.`;
-        sim.next([{kind:'web-encrypt-response',node:'ads',packet:e.packet,title:'Reklamní server šifruje odpověď',description:'Vybraný banner a případná Set-Cookie se vracejí přes HTTPS do prohlížeče.'}]);
+        if(this.address().secure)sim.next([{kind:'web-encrypt-response',node:'ads',packet:e.packet,title:'Reklamní server šifruje odpověď',description:'Vybraný banner a případná Set-Cookie se vracejí přes HTTPS do prohlížeče.'}]);
+        else sim.next([sim.originate(sim.replyPacket('http-response',e.packet,sim.webReply))]);
       }catch(error){sim.failure(error.message,e.packet,e.node);}
     }
     receive(response){
       const sim=this.sim,c=this.state.clients[sim.clientId()],b=sim.browser();
-      if(response.setCookie){c.lastReceived=response.setCookie;const value=/^reklama_id=(r[1-9][0-9]*);/.exec(response.setCookie)?.[1];if(c.allowed&&value)c.cookie={name:'reklama_id',value,domain:HOSTS.ads,path:'/',secure:true,httpOnly:true,sameSite:'None',expiresAt:this.net.cookieTime+3600};}
+      if(response.setCookie){c.lastReceived=response.setCookie;const value=/^reklama_id=(r[1-9][0-9]*);/.exec(response.setCookie)?.[1],secure=/;\s*Secure(?:;|$)/i.test(response.setCookie);if(c.allowed&&value&&(!secure||this.address().secure))c.cookie={name:'reklama_id',value,domain:HOSTS.ads,path:'/',secure,httpOnly:true,sameSite:secure?'None':null,expiresAt:this.net.cookieTime+3600};}
       Object.assign(b.adPage,{ad:structuredClone(response.advertising.ad),state:'ready',notice:'Banner se zobrazil až po doručení odpovědi reklamního serveru.'});
       Object.assign(b,{state:'ready',tlsPhase:'done',loadedSecure:this.context.topSecure,certificateVerified:this.context.topSecure});this.context.phase='done';
       sim.finish('Reklama dorazila do prohlížeče',b.adPage.ad.reason,sim.clientId());

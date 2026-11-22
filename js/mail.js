@@ -1,4 +1,4 @@
-/* Local Gmail model: one protected request/reply per SMTP submission or IMAP
+/* Local Gmail model: one request/reply, optionally protected by TLS, per SMTP submission or IMAP
    operation. No real mail, sockets or credentials are used. */
 (() => {
   'use strict';
@@ -44,24 +44,83 @@
       if(this.state.dialogue.length>160)this.state.dialogue.shift();
     }
     session(from,to,protocol,phase){
-      const id=`mail-${this.sim.run}-${++this.#sessionSerial}`,tls=new ModelTLS(this.sim.run*100+this.#sessionSerial,from);tls.ready=true;
+      const id=`mail-${this.sim.run}-${++this.#sessionSerial}`,tls=this.net.featureEnabled('tls')?new ModelTLS(this.sim.run*100+this.#sessionSerial,from):null;if(tls)tls.ready=true;
       const session={id,from,to,protocol,phase,tls,requestSeq:1001,responseSeq:8001,lastRequest:null};this.#sessions.set(id,session);return session;
     }
+    encodePlain(session,value,response){
+      if(session.protocol==='IMAP'&&response&&value.items){
+        return encoder.encode(value.items.map((m,i)=>{
+          const wire=mailWire(m);
+          return `* ${i+1} FETCH (UID ${m.uid} FLAGS (${m.seen?'\\Seen':''}) BODY[] {${encoder.encode(wire).length}}\r\n${wire})\r\n`;
+        }).join('')+'A1 OK Obsah zpráv odeslán');
+      }
+      return encoder.encode(value.wire);
+    }
+    readMessage(wire){
+      const m=/^Message-ID: <([^<>]+)>\r\nFrom: ([^\r\n]+)\r\nTo: ([^\r\n]+)\r\nSubject: ([^\r\n]+)\r\n\r\n([\s\S]*)\r\n\.\r\n$/.exec(wire);
+      if(!m)throw new Error('Neplatný formát přenášeného e-mailu.');
+      const source=MAIL_CLIENTS.find(id=>emailFor(id)===m[2]),target=PHISH_CLIENTS.find(id=>emailFor(id)===m[3]),rawId=m[1].slice(0,m[1].lastIndexOf('@'));
+      if(!source||!target||m[1]!==rawId+'@'+domainOf(m[2])||!(/^(?:mail-[1-9][0-9]*|[1-9][0-9]*)$/).test(rawId))throw new Error('Neplatná adresa nebo ID přenášeného e-mailu.');
+      const id=/^[0-9]+$/.test(rawId)?Number(rawId):rawId,body=m[5].replace(/\r\n/g,'\n').replace(/^\.\./gm,'.');
+      const message={id,source,target,from:m[2],fromName:source==='hacker'?mailTemplate(target,id).fromName:this.net.nodes[source].name,to:m[3],subject:m[4],body};
+      if(source==='hacker'){
+        const link=/\n\n([^\n]+)\n(https:\/\/knihovna-podpora\.test\/overeni\?zprava=[0-9]+)$/.exec(body);
+        if(link)Object.assign(message,{body:body.slice(0,link.index),linkLabel:link[1],link:link[2]});
+      }
+      return message;
+    }
+    decodePlain(session,bytes,response){
+      const text=decoder.decode(bytes),fail=()=>{throw new Error('Neplatná odpověď nebo příkaz poštovního přenosu.');};
+      if(session.protocol==='SMTP'){
+        if(!response)return {cmd:'CONTENT',message:this.readMessage(text),wire:text,say:'Přijatý e-mail.'};
+        if(text!=='250 2.0.0 Zpráva přijata')return fail();
+        return {cmd:'OK',wire:text,say:'E-mail je uložený ve schránce příjemce.'};
+      }
+      if(!response){
+        if(text==='A1 UID FETCH 1:* (FLAGS BODY.PEEK[])')return {cmd:'FETCH',wire:text,say:'Pošli mi obsah doručené schránky.'};
+        const store=/^A1 UID STORE ([1-9][0-9]*) \+FLAGS \(\\Seen\)$/.exec(text),m=store&&this.state.boxes[session.from].find(m=>m.uid===Number(store[1]));
+        if(!m)return fail();
+        return {cmd:'STORE',messageId:m.id,wire:text,say:'Označ tuto zprávu jako přečtenou.'};
+      }
+      if(this.sim.action.type==='mail-seen'){
+        const store=/^\* [1-9][0-9]* FETCH \(UID ([1-9][0-9]*) FLAGS \(\\Seen\)\)\r\nA1 OK Příznak \\Seen uložen$/.exec(text),m=store&&this.net.phishing.clients[session.from].items.find(m=>m.uid===Number(store[1]));
+        if(!m)return fail();
+        return {cmd:'OK',messageId:m.id,wire:text,say:'Příznak přečtení je uložen na serveru.'};
+      }
+      const items=[];let position=0;
+      while(bytes[position]===42){
+        const end=bytes.indexOf(13,position);if(end<0||bytes[end+1]!==10)return fail();
+        const line=decoder.decode(bytes.subarray(position,end)),m=/^\* [1-9][0-9]* FETCH \(UID ([1-9][0-9]*) FLAGS \((\\Seen)?\) BODY\[\] \{([0-9]+)\}$/.exec(line);
+        if(!m)return fail();
+        const start=end+2,after=start+Number(m[3]);
+        if(after>bytes.length||decoder.decode(bytes.subarray(after,after+3))!==')\r\n')return fail();
+        items.push({...this.readMessage(decoder.decode(bytes.subarray(start,after))),uid:Number(m[1]),seen:!!m[2]});position=after+3;
+      }
+      if(decoder.decode(bytes.subarray(position))!=='A1 OK Obsah zpráv odeslán')return fail();
+      return {cmd:'OK',items,wire:text,say:'Posílám zprávy uložené ve tvé schránce.'};
+    }
     send(session,value,response=false){
-      const s=this.sim,bytes=encoder.encode(JSON.stringify(value)),transfer=++this.#transfer,from=response?session.to:session.from,to=response?session.from:session.to;
+      const s=this.sim,bytes=session.tls?encoder.encode(JSON.stringify(value)):this.encodePlain(session,value,response),transfer=++this.#transfer,from=response?session.to:session.from,to=response?session.from:session.to;
       if(!this.net.nodes[from].on)return s.failure(`${this.net.nodes[from].name} je vypnutý.`,null,from);
       this.log(from,session,'out',value);
       const sequence=response?'responseSeq':'requestSeq',firstSeq=session[sequence],events=[];
       const purpose=session.protocol==='SMTP'?(response?'potvrzení přijetí':'e-mail'):this.sim.action.type==='mail-seen'?(response?'potvrzení přečtení':'označení přečtení'):(response?'zprávy ze schránky':'žádost o zprávy');
-      for(let position=0;position<bytes.length;position+=CHUNK){
-        const data={transfer,length:bytes.length,bytes:Array.from(bytes.slice(position,position+CHUNK))},record=session.tls.seal('mail-chunk',data,to);
-        const payload={record,mailSession:session.id};
+      const parts=[];
+      for(let position=0;position<bytes.length;){
+        let end=Math.min(position+CHUNK,bytes.length);
+        // Keep a complete UTF-8 character in each readable part. TCP still uses byte SEQ.
+        if(!session.tls)while(end<bytes.length&&(bytes[end]&0xc0)===0x80)end--;
+        parts.push(bytes.slice(position,end));position=end;
+      }
+      for(const [index,chunk] of parts.entries()){
+        const data={transfer,length:bytes.length,bytes:Array.from(chunk)};
+        const payload=session.tls?{record:session.tls.seal('mail-chunk',data,to),mailSession:session.id}:{bytes:chunk,mailPart:{transfer,length:bytes.length},mailSession:session.id};
         const kind=`${session.protocol.toLowerCase()}-${response?'response':'request'}`;
-        const p=response?s.replyPacket(kind,session.lastRequest,payload):s.createPacket(kind,from,to,payload,{sport:session.protocol==='SMTP'?51006:51007,dport:session.protocol==='SMTP'?465:993});
-        p.connection=session.protocol.toLowerCase();p.label=`${session.protocol} · ${purpose}${bytes.length>CHUNK?' '+(Math.floor(position/CHUNK)+1)+'/'+Math.ceil(bytes.length/CHUNK):''}`;
-        p.seq=session[sequence];session[sequence]=(session[sequence]+record.data.length)>>>0;
+        const p=response?s.replyPacket(kind,session.lastRequest,payload):s.createPacket(kind,from,to,payload,{sport:session.protocol==='SMTP'?51006:51007,dport:session.protocol==='SMTP'?(session.tls?465:587):(session.tls?993:143)});
+        p.connection=session.protocol.toLowerCase();p.label=`${session.protocol} · ${purpose}${parts.length>1?' '+(index+1)+'/'+parts.length:''}`;
+        p.seq=session[sequence];session[sequence]=(session[sequence]+(payload.record?.data.length||chunk.length))>>>0;
         p.mailMeta={protocol:session.protocol,phase:session.phase,session:session.id,seq:p.seq,total:bytes.length,partBytes:data.bytes.length};
-        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+Math.floor(position/CHUNK)*s.packetGap(from,to),title:`${session.protocol} · ${purpose}${bytes.length>CHUNK?` · část ${Math.floor(position/CHUNK)+1} / ${Math.ceil(bytes.length/CHUNK)}`:''}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes společný server Gmailu.'}`});
+        p.initialHeader=this.net.packetHeader(p);events.push({kind:'mail-part',node:from,packet:p,at:s.time+1+index*s.packetGap(from,to),title:`${session.protocol} · ${purpose}${parts.length>1?` · část ${index+1} / ${parts.length}`:''}`,description:`${this.net.nodes[from].name} → ${this.net.nodes[to].name}. ${session.protocol==='IMAP'?'Přístup ke schránce.':'Odeslání přes společný server Gmailu.'}`});
       }
       this.#buffers.set(session.id+':'+transfer,{length:bytes.length,stream:new globalThis.InternetLab.TCPReceiveStream(firstSeq,(session[sequence]-firstSeq)>>>0),chunks:new Map()});
       s.next(events);
@@ -140,15 +199,15 @@
         const session=this.#sessions.get(p.payload.mailSession);if(!session)throw new Error('Poštovní spojení už není platné.');
         const response=p.kind.endsWith('response'),receiver=response?session.from:session.to;
         if(p.destination!==receiver)throw new Error('Poštovní data dorazila jinému konci spojení.');
-        const part=session.tls.open(p.payload.record,receiver,'mail-chunk'),key=session.id+':'+part.transfer;
+        const part=session.tls?session.tls.open(p.payload.record,receiver,'mail-chunk'):{...p.payload.mailPart,bytes:p.payload.bytes},key=session.id+':'+part.transfer;
         const buffer=this.#buffers.get(key);
         if(!buffer||part.length!==buffer.length)throw new Error('Neplatná část poštovního přenosu.');
-        buffer.stream.receive(p.seq,p.payload.record.data);buffer.chunks.set(p.seq,new Uint8Array(part.bytes));
+        buffer.stream.receive(p.seq,session.tls?p.payload.record.data:p.payload.bytes);buffer.chunks.set(p.seq,new Uint8Array(part.bytes));
         if(!buffer.stream.complete)return;
         const bytes=new Uint8Array(buffer.length);let position=0;
         for(const [,data] of [...buffer.chunks].sort((a,b)=>((a[0]-buffer.stream.firstSeq)>>>0)-((b[0]-buffer.stream.firstSeq)>>>0))){bytes.set(data,position);position+=data.length;}
         if(position!==buffer.length)throw new Error('Poštovní přenos nemá souvislé bajty.');
-        this.#buffers.delete(key);const value=JSON.parse(decoder.decode(bytes));this.log(receiver,session,'in',value);
+        this.#buffers.delete(key);const value=session.tls?JSON.parse(decoder.decode(bytes)):this.decodePlain(session,bytes,response);this.log(receiver,session,'in',value);
         if(response)this.clientReply(session,value);else{session.lastRequest={...p};this.serverCommand(session,value,e);}
       }catch(error){s.failure(error.message,p,e.node);}
     }

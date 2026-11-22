@@ -45,7 +45,8 @@ test('The base is a usable web network without optional hosts or DNS transfers',
 });
 test('Dependencies are added transitively and stay enabled until their dependents are removed',()=>{
   let settings=new LabSettings({features:['mobile','instagram','hacker','cloud','ads']});
-  for(const id of ['phone','friend','mail','tls','cookies'])assert(settings.has(id),id);
+  for(const id of ['phone','friend','mail','cookies'])assert(settings.has(id),id);
+  assert(!settings.has('tls'));
   assert(!settings.has('wifi'),'Mobile-only phone does not require home Wi-Fi');
   assert.deepEqual(new LabSettings({features:['phone']}).requiredBy('wifi').map(f=>f.id),['phone']);
   settings=settings.toggle('mobile',false);
@@ -208,7 +209,7 @@ test('One advertising scenario enables both websites and their partner, then rem
   assert(!LAB_FEATURES.some(f=>['shop','news'].includes(f.id)));
   const settings=new LabSettings().toggle('ads',true),net=new Network(settings),sim=new Simulation(net);
   assert.deepEqual(settings.toJSON().features,['ads']);
-  for(const id of ['tls','cookies'])assert(settings.has(id),id);
+  assert(settings.has('cookies'));assert(!settings.has('tls'));
   const nodes=['shop','news','ads','partners-router','partners-switch'];
   for(const id of nodes)assert(net.nodeAvailable(id),id);
   for(const address of ['https://obchod.test/?tema=hudba','https://zpravy.test/']){
@@ -333,10 +334,11 @@ test('Browser history and repeat use the effective protocol for enabled websites
     assert.equal(nav.active('laptop').history.length,urls.length);
   }
 });
-test('Only the secure advertising lesson automatically requires web TLS',()=>{
-  for(const feature of LAB_FEATURES)assert.equal(new LabSettings({features:[feature.id]}).has('tls'),['tls','ads'].includes(feature.id),feature.id);
-  assert.deepEqual(new LabSettings({features:['ads']}).requiredBy('tls').map(f=>f.id),['ads']);
-  assert.equal(new LabSettings({features:['ads']}).toggle('ads',false).has('tls'),false);
+test('TLS is opt-in for every lesson, including advertising, and can be independently disabled',()=>{
+  for(const feature of LAB_FEATURES)assert.equal(new LabSettings({features:[feature.id]}).has('tls'),feature.id==='tls',feature.id);
+  const ads=new LabSettings({features:['ads','tls']});
+  assert.deepEqual(ads.requiredBy('tls'),[]);assert(!ads.toggle('tls',false).has('tls'));assert(ads.toggle('tls',false).has('ads'));
+  assert(LabSettings.full().has('tls'));assert(!new LabSettings().has('tls'));
 });
 test('The cafe HTTP attack works without TLS and gains encrypted web protection when enabled',()=>{
   for(const tls of [false,true]){
