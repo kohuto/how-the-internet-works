@@ -1,5 +1,13 @@
 # Záznam ověření
 
+## Připojení v kavárně sjednocené s ostatními počítači · 22. listopadu 2026
+
+Notebook hosta používá stejnou společnou šablonu Připojení k síti jako ostatní počítače: nadpis, ikony, volby Wi-Fi / Odpojit, zelené zvýraznění a stavový panel. Odstraněna kávová značka, hnědé provedení i samostatné tlačítko odpojení. Seznam dostupných sítí a přihlašovací formulář zůstávají součástí této společné aplikace a používají její barvy. Volba Wi-Fi přesune fokus do seznamu bez automatického výběru sítě nebo obejití hesla. Po výběru zabezpečené sítě se pole pro heslo posune do viditelné části okna. Dlouhé názvy se zalamují v kartách, stavu i podrobnostech. NAT a vlastnosti připojení používají společné zobrazení. Prostředky `v=164`.
+
+Prošlo všech **29 souvisejících testů** kavárenské Wi-Fi, MITM, mobilního připojení a šířky pásma / latence. Existující kontrola bezpečného vykreslení názvů nyní ověřuje celou aplikaci hosta přes computerView, včetně společného stavového panelu. Kontrola syntaxe všech tří upravených skriptů bez chyb.
+
+V odděleném prohlížeči při 1047 × 858 px porovnány skutečné CSS hodnoty s domácím notebookem: nadpis, aktivní volba i stavový panel mají shodné písmo, barvy, pozadí, okraje, odsazení a zaoblení. Ověřena chyba při nesprávném hesle, úspěch se správným heslem, připojení k otevřenému hotspotu, odpojení a fokus seznamu po volbě Wi-Fi. Při 320 × 568 px je přihlašovací pole po výběru sítě viditelné a zaměřené, včetně tlačítek; bez vodorovného přetékání i s 32znakovým názvem hotspotu. Volitelné NAT a vlastnosti připojení jsou dostupné. Skutečné načtení knihovny přes kavárenskou Wi-Fi po 38 krocích uspělo; během přenosu jsou ovladače kavárny blokované a poté opět dostupné. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Jednotný popisek BTS a vlastní IP adresa · 22. listopadu 2026
 
 Obě základnové stanice mají společný viditelný název BTS a vlastní modelovou IP adresu: 198.51.100.2 pro stanici připojenou k routeru A a 198.51.100.3 pro stanici u routeru C. Sdílené vykreslení zařízení automaticky přidá druhý řádek s IP stejným stylem jako u ostatních zařízení. Vlastní místní názvy odstraněny také z popisků spojů; detail stanice i stav telefonu používají prostý název BTS. Vnitřní identifikátory a připojení zůstávají zachované. IP adresy BTS jsou oddělené od adresy telefonu 198.51.100.10 a neprovádějí překlad ani změnu uživatelských paketů; správa stanic přes IP není samostatně simulována. README aktualizováno, prostředky `v=163`.

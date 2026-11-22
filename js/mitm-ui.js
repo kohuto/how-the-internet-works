@@ -2,14 +2,12 @@
   'use strict';
   const {esc,MITM_MODES}=globalThis.InternetLab;
   const disabled=sim=>sim.status==='running'?'disabled':'';
-  function cafeConnection(net,sim,vpn,ui={}){
-    const a=net.access.cafe,ready=net.accessReady('cafe'),connected=a.mode==='wifi',networks=net.cafeNetworks();
-    const ssid=a.hotspot==='rogue'?net.mitm.ssid:net.cafeWifi.ssid;
-    return `<div class="connection-settings cafe-connection"><div class="cafe-brand"><span>☕</span><div><h3>Wi-Fi v kavárně</h3></div></div>
+  function cafeConnection(net,sim,ui={}){
+    const a=net.access.cafe,connected=a.mode==='wifi',networks=net.cafeNetworks();
+    return `<section class="cafe-networks" aria-label="Dostupné Wi-Fi sítě">
       <div class="field-label">DOSTUPNÉ SÍTĚ</div><div class="cafe-hotspots">${networks.length?networks.map(n=>`<button type="button" data-cafe-hotspot="${n.id}" aria-pressed="${connected&&a.hotspot===n.id}" ${disabled(sim)}><strong>${esc(n.ssid)}</strong><small>${n.secured?'🔒 Zabezpečená síť':'Otevřená síť'}${connected&&a.hotspot===n.id?' · Připojeno':''}</small></button>`).join(''):'<p>Žádné dostupné sítě.</p>'}</div>
       ${ui.cafeWifiChoice==='trusted'&&networks.some(n=>n.id==='trusted')?`<form class="cafe-wifi-login" data-form="cafe-wifi"><label for="cafe-wifi-password">Heslo pro ${esc(net.cafeWifi.ssid)}</label><input id="cafe-wifi-password" type="password" data-field="cafePassword" value="${esc(ui.cafePassword||'')}" autocomplete="off" required ${disabled(sim)}>${ui.cafeWifiError?`<p class="cafe-wifi-error" role="alert">${esc(ui.cafeWifiError)}</p>`:''}<div><button type="submit" class="primary-button" ${disabled(sim)}>Připojit</button><button type="button" class="secondary-button" data-action="cafe-wifi-cancel">Zrušit</button></div></form>`:''}
-      <div class="connection-status ${ready?'':'unavailable'}"><strong>${!connected?'Bez připojení':esc(ssid)}</strong><span>${!connected?'Vyber Wi-Fi ze seznamu dostupných sítí.':ready?'Připojeno':'Vybraná síť není dostupná.'}</span></div>
-      ${connected?`<button class="secondary-button" data-access-mode="offline" data-id="cafe" ${disabled(sim)}>Odpojit</button>${net.detailEnabled('nat')?`<dl class="connection-address"><dt>Veřejná IP přes NAT</dt><dd>${net.natAddress('cafe-router')}</dd></dl>`:''}`:''}${vpn}</div>`;
+      </section>`;
   }
   function cafeBrowserInfo(net){
     const a=net.access.cafe;

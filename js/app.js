@@ -469,9 +469,13 @@
       if(b.dataset.browserNav==='network'&&state.networkOpen)$('.browser-network')?.scrollIntoView({block:'nearest'});
       return;
     }
+    if(b.dataset.action==='cafe-wifi-choose'){
+      if(sim.status==='running'||ui.monitorDevice!=='cafe')return;
+      $('.cafe-hotspots button')?.focus();return;
+    }
     if(b.dataset.cafeHotspot){
       if(sim.status==='running'||ui.monitorDevice!=='cafe')return;
-      if(b.dataset.cafeHotspot==='trusted'){if(net.access.cafe.mode==='wifi'&&net.access.cafe.hotspot==='trusted')return;ui.cafeWifiChoice='trusted';ui.cafeWifiError='';render();$('#cafe-wifi-password')?.focus({preventScroll:true});}
+      if(b.dataset.cafeHotspot==='trusted'){if(net.access.cafe.mode==='wifi'&&net.access.cafe.hotspot==='trusted')return;ui.cafeWifiChoice='trusted';ui.cafeWifiError='';render();$('#cafe-wifi-password')?.focus();}
       else {if(net.setCafeHotspot('rogue'))sim.connectionChanged('cafe');ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();}return;
     }
     if(b.dataset.action==='cafe-wifi-cancel'){ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();return;}
