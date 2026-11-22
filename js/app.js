@@ -581,7 +581,6 @@
     root.addEventListener('click',handleClick);
   }
   $('#zoom-in').addEventListener('click',()=>map.zoom(.78));$('#zoom-out').addEventListener('click',()=>map.zoom(1.28));
-  $('#labels').addEventListener('change',e=>{map.labels=e.target.checked;map.render();});
   $('#signal-coverage').addEventListener('change',e=>{map.signalCoverage=e.target.checked;map.render();});
   $('#step').addEventListener('click',()=>{stop();advance();});
   $('#play').addEventListener('click',()=> {

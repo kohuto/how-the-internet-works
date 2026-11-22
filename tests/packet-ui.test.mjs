@@ -28,23 +28,23 @@ function run(net,type='web',payload={}) {
 const packet=(sim,kind)=>[...sim.packets.values()].find(p=>p.kind===kind);
 const hex=bytes=>Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join(' ');
 
-test('TTL and split headers are independent session-only details; payload is always available',()=>{
+test('TTL, split headers and frames are independent session-only details; payload is always available',()=>{
   const settings=new LabSettings();
-  assert.equal(settings.details.ttl,false);assert.equal(settings.details.headers,false);
+  assert.equal(settings.details.ttl,false);assert.equal(settings.details.headers,false);assert.equal(settings.details.frames,false);
   assert(!LAB_DETAILS.some(d=>['payload','tcp'].includes(d.id)));
   assert(LAB_DETAILS.some(d=>d.id==='headers'));
-  for(const id of ['ttl','headers'])assert.equal(LabSettings.full().details[id],true);
-  const restored=new LabSettings(new LabSettings({details:{ttl:true,headers:false}}).toJSON());
-  assert.equal(restored.details.ttl,true);assert.equal(restored.details.headers,false);
+  for(const id of ['ttl','headers','frames'])assert.equal(LabSettings.full().details[id],true);
+  const restored=new LabSettings(new LabSettings({details:{ttl:true,headers:false,frames:true}}).toJSON());
+  assert.equal(restored.details.ttl,true);assert.equal(restored.details.headers,false);assert.equal(restored.details.frames,true);assert.equal(restored.details.mac,false);
   assert(settings.sameNetwork(restored));
 });
 
-test('Base HTTP reveals ports, request and received HTML, keeps MAC addresses and hides TTL and SEQ',()=>{
+test('Base HTTP reveals ports, request and received HTML, but hides frame MAC addresses, TTL and SEQ',()=>{
   const net=network(),sim=run(net),request=packet(sim,'http-request'),response=packet(sim,'http-response');
   const html=packetView(net,request);
   assert(html.includes('GET / HTTP/1.1'));assert(html.includes('Host: knihovna.test'));
   assert(html.includes(request.src));assert(html.includes(request.dst));
-  assert(html.includes('Ethernetový rámec'));assert(html.includes(request.frame.src));
+  assert(!html.includes('Ethernetový rámec'));assert(!html.includes('Zdrojová MAC'));assert(!html.includes(request.frame.src));assert(!html.includes(request.frame.dst));
   assert(!html.includes('TTL'));assert(!html.includes('TCP HLAVIČKA'));
   assert(html.includes(`<dt>Zdrojový port → cílový port</dt><dd>${request.sport} → ${request.dport}</dd>`));assert(!html.includes('SEQ'));
   assert(html.includes('HLAVIČKA PAKETU'));assert(!html.includes('IP HLAVIČKA'));
@@ -54,6 +54,36 @@ test('Base HTTP reveals ports, request and received HTML, keeps MAC addresses an
   assert(body.includes(`<dt>Zdrojový port → cílový port</dt><dd>${response.sport} → ${response.dport}</dd>`));
   assert(body.includes('HTTP/1.1 200 OK'));assert(body.includes('&lt;h1&gt;Dnes otevřeno do 16 hodin&lt;/h1&gt;'));
   assert(!body.includes('<h1>'),'Received markup must be displayed as text');
+});
+
+test('The frames option reveals real Ethernet and Wi-Fi MACs at every observed hop without changing packets',()=>{
+  for(const mode of ['cable','wifi']) {
+    const net=network(['wifi']),sim=new Simulation(net),observed=[],nodes=new Set();
+    assert(net.setAccess('laptop',mode)||net.access.laptop.mode===mode);
+    assert(sim.start('web',{address:'http://knihovna.test/'}));
+    for(let i=0;sim.status==='running'&&i<4000;i++) {
+      const e=sim.advance();
+      if(e.kind==='hop'&&!e.copy&&e.packet.frame?.src) {
+        observed.push(structuredClone(e.packet));nodes.add(e.from);nodes.add(e.to);
+      }
+    }
+    assert.equal(sim.status,'success');assert(nodes.has('laptop')&&nodes.has('home')&&nodes.has('web'));
+    assert(observed.some(p=>p.frame.medium==='cable'));
+    if(mode==='wifi')assert(observed.some(p=>p.frame.medium==='wifi'));
+    const before=structuredClone(observed),packets=sim.packets,current=sim.current,nat=structuredClone(net.nat);
+    for(const frames of [false,true,false])for(const headers of [false,true]) {
+      net.settings=new LabSettings({features:['wifi'],details:{frames,headers,mac:!frames}});
+      for(const p of observed) {
+        const html=packetView(net,p),label=p.frame.medium==='wifi'?'Wi-Fi rámec':'Ethernetový rámec';
+        assert.equal(html.includes(label),frames);
+        assert.equal(html.includes('Zdrojová MAC'),frames);assert.equal(html.includes('Cílová MAC'),frames);
+        assert.equal(html.includes(p.frame.src),frames);assert.equal(html.includes(p.frame.dst),frames);
+        assert(html.includes('DATA'));assert(html.includes(p.src)&&html.includes(p.dst));
+      }
+    }
+    assert.deepEqual(observed,before);assert.strictEqual(sim.packets,packets);assert.strictEqual(sim.current,current);assert.deepEqual(net.nat,nat);
+    assert.equal(net.browser.content,net.server.title);
+  }
 });
 
 test('All four TTL/header combinations change only their fields and preserve packet bytes and headers',()=>{
@@ -143,7 +173,7 @@ test('Mail exposes encrypted payload without the lesson about mail sessions or b
 });
 
 test('Text data is escaped, and MAC addresses remain available only on frames that have them',()=>{
-  const net=network(['instagram']),sim=run(net,'message',{text:'<img src=x onerror=alert(1)>'});
+  const net=network(['instagram'],{frames:true}),sim=run(net,'message',{text:'<img src=x onerror=alert(1)>'});
   const p=structuredClone(packet(sim,'message'));
   const html=packetView(net,p);
   assert(html.includes('&lt;img src=x onerror=alert(1)&gt;'));assert(!html.includes('<img'));

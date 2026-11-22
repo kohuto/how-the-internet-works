@@ -1,5 +1,14 @@
 # Záznam ověření
 
+## Volitelné rámce a odstranění přepínače Popisky · 22. listopadu 2026
+
+Do Nastavení → Zobrazované podrobnosti přidána samostatná volba Ethernetové a Wi-Fi rámce, ve výchozím stavu vypnutá. Společný detail paketu vykreslí rozbalovací rámec se zdrojovou a cílovou MAC adresou jen při jejím zapnutí. Platí pro všechny pakety a zařízení, nezávisle na MAC tabulkách a zobrazení hlaviček; přepnutí zachová běžící přenos. Z mapy odstraněn přepínač Popisky, jeho obsluha, stav a nepoužívané styly skrývání. Názvy a IP adresy zařízení zůstávají viditelné, samostatný přepínač Dosah signálu zůstává funkční. README aktualizováno, prostředky `v=157`.
+
+Prošla celá sada **342 testů**, včetně **46 souvisejících testů nastavení a detailů paketů** a **16 testů mapy**, i kontrola syntaxe čtyř upravených skriptů a obou upravených testů. Nový integrační test sleduje skutečné HTTP pakety na každém pozorovaném ethernetovém a Wi-Fi úseku a ověřuje nezávislé skrytí/zobrazení rámců bez změny dat, hlaviček, NATu či výsledku přenosu. Základní nastavení rámce skrývá, úplné je zapíná a převod nastavení uchovává jejich volbu.
+
+V prohlížeči při 1047 × 858 px ověřeno výchozí skrytí ethernetového rámce, zapnutí a opětovné vypnutí u stejného živého paketu bez resetu i následné úspěšné doručení webu. Při 320 × 568 px ověřena dostupnost nové volby, výchozí skrytí Wi-Fi rámce, zobrazení jeho skutečných MAC adres po zapnutí a dokončení přenosu přes Wi-Fi. Přepínač Popisky v obou rozloženích chybí, názvy a adresy zařízení zůstávají viditelné; zapnutí a vypnutí Dosahu signálu je zachová. Rozhraní bez vodorovného přetékání, konzole bez chyb a varování.
+
+
 ## Statické vyhledávání v Gmailu · 22. listopadu 2026
 
 Vyhledávací oblast v záhlaví Gmailu nově tvoří běžný blok s ikonou a textem Hledat v poště. Původní label a readonly vstup odstraněny, takže oblast neobsahuje zaměřitelné ani editovatelné pole. Dekorace je skrytá před asistivními technologiemi, nepodporuje výběr textu a používá běžný kurzor. Zachována barva, zaoblení, rozměry, ikona a typografie včetně úzkého rozložení. Odstraněny nepoužívané styly vstupu, placeholderu a focus-within. README aktualizováno, prostředky `v=156`.

@@ -48,7 +48,7 @@
       html+=`<section class="protocol-box tcp"><h3>${p.protocol==='TCP'?'TCP HLAVIČKA':'UDP HLAVIČKA'}</h3><dl class="dl">${ports}${p.protocol==='TCP'?definition('Pořadové číslo TCP · SEQ',p.seq):''}</dl></section>`;
     }
     html+=packetData(p);
-    if(p.frame&&!p.frame.satellite&&!p.frame.cellular) {
+    if(net.detailEnabled('frames')&&p.frame&&!p.frame.satellite&&!p.frame.cellular) {
       html+=`<details><summary class="hint">${p.frame.medium==='wifi'?'Wi-Fi':'Ethernetový'} rámec</summary><dl class="dl">${definition('Zdrojová MAC',p.frame.src)}${definition('Cílová MAC',p.frame.dst)}</dl></details>`;
     }
     return html;

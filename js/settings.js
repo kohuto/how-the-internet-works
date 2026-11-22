@@ -24,6 +24,7 @@
   const DETAILS=[
     {id:'devices',label:'Routery a switche',description:'Rozliší chytré křižovatky na routery a switche a zobrazí jejich původní názvy a ikony.'},
     {id:'mac',label:'MAC tabulky',description:'Naučené adresy, rozhodování, porty a připojené spoje switchů a přístupových bodů. Také podrobnosti spojnic.'},
+    {id:'frames',label:'Ethernetové a Wi-Fi rámce',description:'Rozbalovací obal paketu se zdrojovou a cílovou MAC adresou v detailu paketu.'},
     {id:'routes',label:'Směrovací tabulky',description:'Cílové sítě, rozhodování, rozhraní a připojené spoje routerů. Také podrobnosti spojnic.'},
     {id:'nat',label:'NAT',description:'Tabulky a záznamy překladu IP adres a portů v routerech.'},
     {id:'ttl',label:'TTL',description:'Hodnota životnosti v IP hlavičce paketu.'},

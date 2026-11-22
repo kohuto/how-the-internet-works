@@ -85,7 +85,7 @@
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   class NetworkMap {
     constructor(svg,net,onSelect) {
-      this.svg=svg;this.net=net;this.scene='home';this.box=[...presets.home];this.onSelect=onSelect;this.labels=true;this.lastEvent=null;this.selected=null;this.selectedPacket=null;svg.dataset.scene='home';
+      this.svg=svg;this.net=net;this.scene='home';this.box=[...presets.home];this.onSelect=onSelect;this.lastEvent=null;this.selected=null;this.selectedPacket=null;svg.dataset.scene='home';
       this.packets=new Map();this.packetViews=new Map();this.frame=[];this.pointers=new Map();this.signalCoverage=false;
       svg.innerHTML=decor+'<g id="signal-coverage-layer" aria-hidden="true" pointer-events="none"></g><g id="links-layer"></g><g id="nodes-layer"></g><g id="packet-layer"></g>';
       svg.querySelectorAll('[data-region]').forEach(el=>{
@@ -202,7 +202,6 @@
     }
     render(event=this.lastEvent,selected=this.selected,selectedPacket=this.selectedPacket,animate=false,duration=650,packets=this.packets,frame=this.frame) {
       this.lastEvent=event;this.selected=selected;this.selectedPacket=selectedPacket;this.packets=packets;this.frame=frame;
-      this.svg.classList.toggle('hide-labels',!this.labels);
       const regions=new Set(this.net.visibleNodes().map(n=>n.region));
       this.svg.querySelectorAll('[data-region]').forEach(el=>{el.style.display=regions.has(el.dataset.region)?'':'none';});
       this.svg.querySelectorAll('[data-feature]').forEach(el=>{el.style.display=this.net.featureEnabled(el.dataset.feature)?'':'none';});
@@ -259,7 +258,7 @@
         g.setAttribute('aria-label',`${copy?'Kopie rámce · ':''}Prozkoumat paket ${p.label}`);
         g.innerHTML=`<circle r="23" class="packet-hit"/><rect x="-17" y="-13" width="34" height="26" rx="8"/><text text-anchor="middle" y="5">${p.state==='lost'?'×':message?p.payload.index+1:p.direction==='response'?'↩':'→'}</text><g class="packet-label" transform="translate(0,-28)"><rect x="${message?-44:-62}" y="-13" width="${message?88:124}" height="23" rx="7"/><text y="3" text-anchor="middle">${esc(label)}</text></g>`;
         if(p.kind.startsWith('vpn-'))g.innerHTML=`<circle r="30" class="packet-hit"/><rect class="vpn-shell" x="-27" y="-20" width="54" height="40" rx="10"/><rect class="vpn-inner" x="-17" y="-11" width="34" height="23" rx="5"/><path class="vpn-lock" d="M-5-3v-5a5 5 0 0 1 10 0v5M-7-3H7V8H-7Z"/><g class="packet-label" transform="translate(0,-34)"><rect x="-62" y="-13" width="124" height="23" rx="7"/><text y="3" text-anchor="middle">${esc(label)}</text></g>`;
-        // Keep an existing animation when a panel, labels or the viewport changes.
+        // Keep an existing animation when a panel or the viewport changes.
         if(view.visual===visual)continue;
         view.animation?.cancel();view.animation=null;view.visual=visual;
         view.destination=`translate(${destination.x},${destination.y})`;
