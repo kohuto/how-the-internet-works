@@ -46,7 +46,7 @@ test('HTTPS remains protected after VPN decapsulation and is decoded only by the
 
 test('VPN works independently through laptop Wi-Fi, friend Wi-Fi and phone Wi-Fi/cellular',()=>{
  for(const [id,mode,link] of [['laptop','wifi','laptop-wifi'],['friend','wifi','friend-wifi'],['phone','wifi','phone-wifi'],['phone','cellular','phone-bts-park']]){
-  const s=new Simulation();s.net.setAccess(id,mode,id==='phone'?'bts-park':undefined);s.net.setVPN(id,true);
+  const s=new Simulation();s.net.setAccess(id,mode);if(id==='phone'&&mode==='cellular')s.net.toggleNode('bts-lipova');s.net.setVPN(id,true);
   const events=run(s,'chatbot',{device:id,prompt:'Ahoj přes VPN'});assert.equal(s.status,'success');assert.equal(s.chatTurn().answer,CHATBOT_REPLY);
   assert(events.some(e=>e.kind==='hop'&&e.link===link));assert(s.net.vpnPeerValid(id));
   if(mode==='cellular')assert.equal(s.net.nat.home.rows.length,0);

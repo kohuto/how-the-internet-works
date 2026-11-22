@@ -92,7 +92,7 @@ test('Profiles are per device, validated, independent of access mode, and reset 
 
 test('Configured delay works over cellular, satellite and VPN, while local printing never enters the internet queue',()=>{
   for(const [device,vpn,tower] of [['phone',false,'bts-lipova'],['phone',true,'bts-park'],['cabin',true]]) {
-    const s=new Simulation();if(tower)s.net.setAccess(device,'cellular',tower);s.net.setConnectionProfile(device,profile('high','high'));if(vpn)s.net.setVPN(device,true);
+    const s=new Simulation();if(tower==='bts-park')s.net.toggleNode('bts-lipova');s.net.setConnectionProfile(device,profile('high','high'));if(vpn)s.net.setVPN(device,true);
     assert(s.start('message',{device,messageType:'image'}));const r=finish(s);content(s,9);
     const boundary=device==='phone'?`${tower}-uplink`:'cabin-wan';
     assert(r.events.some(e=>e.kind==='connection-wait'&&e.link===boundary));

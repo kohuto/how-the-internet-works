@@ -303,7 +303,7 @@ test('Wi-Fi local print survives an offline home router; AP loss affects Wi-Fi b
 
 test('Both BTS connect directly to different existing routers and return DNS/HTTP through the selected tower',()=> {
   for(const [tower,router] of [['bts-lipova','edge'],['bts-park','south']]) {
-    const sim=new Simulation();sim.net.setAccess('phone','cellular',tower);sim.net.toggleLink('uplink');sim.net.toggleNode('ap');
+    const sim=new Simulation();if(tower==='bts-park')sim.net.toggleNode('bts-lipova');sim.net.toggleLink('uplink');sim.net.toggleNode('ap');
     const events=action(sim,'web',{device:'phone'}),hops=branch(events);
     assert.equal(sim.status,'success');assert.equal(sim.net.phoneBrowser.content,sim.net.server.title);assert.equal(sim.net.browser.content,null);
     assert(!sim.net.nodes['mobile-core']);assert(!sim.net.links['mobile-uplink']);
@@ -335,24 +335,24 @@ test('Phone Wi-Fi and cellular paths fail independently, use different IPs, and 
   sim.net.toggleLink('uplink');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
   sim.net.setAccess('phone','cellular');events=action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
   assert.equal(sim.net.nodes.phone.ip,'198.51.100.10');assert(!branch(events).includes('uplink'));
-  sim.net.toggleLink('bts-lipova-uplink');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
+  sim.net.toggleLink('bts-lipova-uplink');events=action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');assert(branch(events).includes('phone-bts-park'));
+  sim.net.toggleLink('bts-park-uplink');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
   sim.net.toggleLink('uplink');sim.net.setAccess('phone','wifi');action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
 });
 
-test('Only the selected BTS carries mobile data; another station can restore service after a tower or backhaul outage',()=> {
-  const sim=new Simulation();sim.net.toggleNode('bts-lipova');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
-  sim.net.setAccess('phone','cellular','bts-park');let events=action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
+test('Only the automatically selected BTS carries data; another station restores service after a tower outage',()=> {
+  const sim=new Simulation();sim.net.toggleNode('bts-lipova');assert.equal(sim.net.access.phone.tower,'bts-park');
+  let events=action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
   assert(branch(events).includes('phone-bts-park'));assert(branch(events).includes('bts-park-uplink'));assert(!branch(events).includes('bts-lipova-uplink'));
   sim.net.toggleLink('bts-park-uplink');action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
-  sim.net.toggleNode('bts-lipova');sim.net.setAccess('phone','cellular','bts-lipova');action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
+  sim.net.toggleNode('bts-lipova');assert.equal(sim.net.access.phone.tower,'bts-lipova');action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
 });
 
-test('A router outage affects only its attached BTS; switching tower recomputes the return route',()=> {
+test('A router outage automatically selects the other BTS and recomputes the return route',()=> {
   for(const [tower,router,alternative] of [['bts-lipova','edge','bts-park'],['bts-park','south','bts-lipova']]) {
-    const sim=new Simulation();sim.net.setAccess('phone','cellular',tower);
+    const sim=new Simulation();if(tower==='bts-park'){Object.assign(sim.net.nodes.phone,{x:1200,y:800});sim.net.changed();}assert.equal(sim.net.access.phone.tower,tower);
     action(sim,'web',{device:'phone'});assert.equal(sim.status,'success');
-    sim.net.toggleNode(router);action(sim,'web',{device:'phone'});assert.equal(sim.status,'failed');
-    sim.net.setAccess('phone','cellular',alternative);const events=action(sim,'web',{device:'phone'});
+    sim.net.toggleNode(router);assert.equal(sim.net.access.phone.tower,alternative);const events=action(sim,'web',{device:'phone'});
     assert.equal(sim.status,'success');assert.equal(sim.net.phoneBrowser.content,sim.net.server.title);
     assert(branch(events).includes(`${alternative}-uplink`));assert(!branch(events).includes(`${tower}-uplink`));
     assert(!events.some(e=>e.kind==='route'&&e.node===router));

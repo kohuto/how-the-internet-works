@@ -115,7 +115,7 @@ test('SMTP and IMAP reassemble UTF-8 mail across staggered protected chunks belo
 });
 test('Client SMTP and IMAP reach the shared provider across Wi-Fi, cellular, satellite and VPN',()=>{
  for(const [device,mode,link] of [['laptop','wifi','laptop-wifi'],['phone','cellular','phone-bts-park'],['cabin','wifi','sat-uplink']]){
- const s=new Simulation();s.net.setAccess(device,mode,device==='phone'?'bts-park':undefined);s.net.setVPN(device,true);const events=send(s,device,'friend');assert.equal(s.status,'success',device);assert(events.some(e=>e.kind==='hop'&&e.link===link));assert(events.some(e=>e.packet?.kind==='vpn-outbound'));assert(!events.some(e=>e.packet?.mailMeta?.phase==='relay'));check(s);assert.equal(s.net.phishing.clients.friend.inbox.body,draft().body);
+ const s=new Simulation();s.net.setAccess(device,mode);if(device==='phone'&&mode==='cellular')s.net.toggleNode('bts-lipova');s.net.setVPN(device,true);const events=send(s,device,'friend');assert.equal(s.status,'success',device);assert(events.some(e=>e.kind==='hop'&&e.link===link));assert(events.some(e=>e.packet?.kind==='vpn-outbound'));assert(!events.some(e=>e.packet?.mailMeta?.phase==='relay'));check(s);assert.equal(s.net.phishing.clients.friend.inbox.body,draft().body);
  }
 });
 test('Cafe observer cannot read mail bodies; changing access or corrupting TLS rejects the old transfer',()=>{

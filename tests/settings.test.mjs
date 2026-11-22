@@ -150,7 +150,7 @@ test('Every optional area can stand alone with its dependencies; all restores th
 test('Phone Wi-Fi and mobile access only offer enabled connections',()=>{
   const wifi=network(['phone']);
   assert.equal(wifi.access.phone.mode,'wifi');assert(wifi.accessReady('phone'));
-  assert.equal(wifi.setAccess('phone','cellular','bts-park'),false);
+  assert.equal(wifi.setAccess('phone','cellular'),false);
   assert.equal(network([]).setAccess('laptop','wifi'),false);
   const mobile=network(['mobile']);assert.equal(mobile.access.phone.mode,'cellular');assert(mobile.accessReady('phone'));
   for(const net of [wifi,mobile]){const sim=new Simulation(net);sim.start('web',{device:'phone',address:'https://knihovna.test/'});finish(sim);assert(net.phoneBrowser.content);}

@@ -57,7 +57,7 @@ test('The legitimate cookie stays bound to the library and is never sent to the 
 
 test('The scenario works through all recipient accesses, including satellite, and keeps requests/responses bound through VPN',()=>{
  for(const [device,mode,linkId] of [['laptop','wifi','laptop-wifi'],['friend','wifi','friend-wifi'],['phone','cellular','phone-bts-park'],['phone','wifi','phone-wifi'],['cabin','wifi','sat-uplink']]){
- const s=new Simulation();s.net.setAccess(device,mode,device==='phone'?'bts-park':undefined);s.net.setVPN(device,true);s.net.setVPN('hacker',true);
+ const s=new Simulation();s.net.setAccess(device,mode);if(device==='phone'&&mode==='cellular')s.net.toggleNode('bts-lipova');s.net.setVPN(device,true);s.net.setVPN('hacker',true);
  const events=capture(s,device);assert.equal(s.status,'success',device+' '+mode);assert(events.some(e=>e.kind==='hop'&&e.link===linkId));assert.equal(s.net.phishing.lastWeb.sourceIp,s.net.nodes.vpn.ip);
  run(s,'phish-results',{device:'hacker'});assert.equal(s.status,'success');assert.equal(s.net.phishing.hacker.results.length,1);assert(s.net.vpnPeerValid('hacker'));
  }

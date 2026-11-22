@@ -101,13 +101,13 @@
     if(ui.scene==='home')setScene('all');
     advance();
   }
-  function changeAccess(id,mode,tower,focusTower=false) {
-    if(!net.setAccess(id,mode,tower))return;
+  function changeAccess(id,mode) {
+    if(!net.setAccess(id,mode))return;
     sim.connectionChanged(id);
     if(sim.status!=='running')stop();
     syncReader();notify(`${net.nodes[id].name}: ${mode==='wifi'?'Wi-Fi':mode==='cellular'?'mobilní data':mode==='cable'?'kabel':'odpojeno'}.`);
     if(!resumeMessage())render();
-    $(focusTower?'#cell-tower':'#monitor-content [data-access-mode][aria-pressed="true"]')?.focus({preventScroll:true});
+    $('#monitor-content [data-access-mode][aria-pressed="true"]')?.focus({preventScroll:true});
   }
   function organizeDeviceHelp(body) {
     const notes=[...body.querySelectorAll('[data-device-help]')];
@@ -573,7 +573,6 @@
       if(e.target.hasAttribute('data-web-certificate')){const value=e.target.value;Object.assign(net.server.certificate,{name:value==='wrong-name'?'jiny-web.test':'knihovna.test',valid:value!=='expired',trusted:value!=='untrusted'});render();$('#web-certificate').focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-cloud-center')){const device=ui.monitorDevice,draft=ui.cloud[device];draft.server=e.target.value;draft.permissions={};draft.view='files';Object.assign(net.cloud.clients[device],{state:'idle',catalog:[],listed:false,preview:null});if(draft.tab==='remote'&&sim.status!=='running')startCloud({op:'list'});else render();return;}
       if(e.target.dataset.cloudAccess){ui.cloud[ui.monitorDevice].permissions[e.target.dataset.cloudAccess]=e.target.value;return;}
-      if(e.target.dataset.tower){changeAccess('phone','cellular',e.target.value,true);return;}
       if(e.target.hasAttribute('data-receipts')){net.friend.receipts=e.target.checked;if(net.friend.read&&net.friend.receipts)sim.markRead('friend');render();}
     });
     root.addEventListener('submit',handleSubmit);

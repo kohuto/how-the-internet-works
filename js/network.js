@@ -243,7 +243,7 @@
         if(MAP_LAYOUT.positions[n.id])[n.x,n.y]=MAP_LAYOUT.positions[n.id];
       }
       this.satellite={clearView:true};this.mitm={active:false,ssid:'Kavarna_free',mode:'observe',logs:[],serial:0};this.cafeWifi={ssid:'Kavarna_hoste',password:'kava1234'};
-      this.access={cafe:{mode:'offline',hotspot:null},hacker:{mode:'cable'},cabin:{mode:'wifi'},laptop:{mode:'cable'},friend:{mode:'cable'},phone:{mode:'cellular',tower:'bts-lipova'}};
+      this.access={cafe:{mode:'offline',hotspot:null},hacker:{mode:'cable'},cabin:{mode:'wifi'},laptop:{mode:'cable'},friend:{mode:'cable'},phone:{mode:'cellular',tower:null}};
       this.connectionProfiles=Object.fromEntries(Object.keys(this.access).map(id=>[id,{bandwidth:'low',latency:'low'}]));
       this.links = Object.fromEntries(linkDefinitions.map(([id,a,b,pa,pb,name,addresses,options={}],i)=> {
         if(id==='laptop-switch')options={...options,device:'laptop',mode:'cable'};
@@ -290,6 +290,7 @@
       if(!this.featureEnabled('mobile'))this.access.phone.mode='wifi';
       if(!this.featureEnabled('wifi'))this.access.cabin.mode='cable';
       this.dnsRecords=Object.fromEntries(Object.entries(this.dnsRecords).filter(([,ip])=>this.hostId(ip)));
+      this.updateCellularAccess();
       this.applyAccess('cafe');this.applyAccess('hacker');this.applyAccess('cabin');this.applyAccess('laptop');this.applyAccess('friend');this.applyAccess('phone');
       this.recomputeRoutes();
     }
@@ -347,6 +348,16 @@
     advanceCookieTime(seconds=3600) {if(!Number.isFinite(seconds)||seconds<0)return false;this.cookieTime+=seconds;for(const id of ['laptop','friend','phone','cabin','cafe'])globalThis.InternetLab.WebCookies.expire(this.browserFor(id).cookies,this.cookieTime);for(const c of Object.values(this.ads?.clients||{}))if(c.cookie?.expiresAt<=this.cookieTime)c.cookie=null;return true;}
     accessLink(id) {return this.adjacent(id).find(l=>l.device===id&&this.selectedAccess(l))||null;}
     accessReady(id) {return this.isActive(this.accessLink(id));}
+    updateCellularAccess() {
+      const access=this.access.phone,phone=this.nodes.phone;
+      // Distance is only a teaching approximation; radio propagation is not simulated.
+      const towers=access.mode==='cellular'&&phone.on?this.adjacent('phone')
+        .filter(l=>l.medium==='cellular'&&l.on&&this.nodes[this.peer(l,'phone')].on)
+        .map(l=>this.nodes[this.peer(l,'phone')])
+        .filter(n=>this.adjacent(n.id).some(l=>l.medium==='backhaul'&&this.isActive(l)))
+        .sort((a,b)=>Math.hypot(a.x-phone.x,a.y-phone.y)-Math.hypot(b.x-phone.x,b.y-phone.y)||a.id.localeCompare(b.id)):[];
+      access.tower=towers[0]?.id||null;
+    }
     setConnectionProfile(id,profile) {
       const current=this.connectionProfiles[id];
       if(!this.featureEnabled('connection-timing')||!this.nodeAvailable(id)||!current||!profile||!['low','high'].includes(profile.bandwidth)||!['low','high'].includes(profile.latency))return false;
@@ -363,11 +374,11 @@
         if(profile){i.ip=profile[0];i.mac=profile[1];}
       }
     }
-    setAccess(id,mode,tower=this.access[id]?.tower) {
+    setAccess(id,mode) {
       const allowed=id==='cafe'?['offline']:id==='hacker'?['cable','offline']:id==='phone'?['wifi','cellular','offline']:['cable','wifi','offline'];
-      if(!this.nodeAvailable(id)||!this.access[id]||!allowed.includes(mode)||!this.accessModeAvailable(id,mode)||(id==='phone'&&!['bts-lipova','bts-park'].includes(tower)))return false;
-      if(this.access[id].mode===mode&&this.access[id].tower===tower)return false;
-      this.access[id]={mode,...(id==='phone'?{tower}:id==='cafe'?{hotspot:this.access.cafe.hotspot}:{})};this.applyAccess(id);this.changed();return true;
+      if(!this.nodeAvailable(id)||!this.access[id]||!allowed.includes(mode)||!this.accessModeAvailable(id,mode))return false;
+      if(this.access[id].mode===mode)return false;
+      this.access[id]={mode,...(id==='phone'?{tower:null}:id==='cafe'?{hotspot:this.access.cafe.hotspot}:{})};this.applyAccess(id);this.changed();return true;
     }
     cafeNetworks() {
       if(!this.nodeAvailable('cafe'))return [];
@@ -420,6 +431,7 @@
     }
     changed() {
       this.version++;
+      this.updateCellularAccess();
       for(const n of Object.values(this.nodes).filter(n=>['switch','ap'].includes(n.type))) {
         for(const [mac,port] of Object.entries(n.macTable)) {
           const l=this.links[n.interfaces[port].link]; if(!n.on||!this.isActive(l))delete n.macTable[mac];

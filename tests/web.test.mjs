@@ -102,7 +102,7 @@ test('HTTPS works through laptop Wi-Fi and both phone accesses and fails with th
     const sim=new Simulation();sim.net.setAccess(device,mode);const events=run(sim,true,{device,...post});
     assert.equal(sim.status,'success');assert.equal(sim.net.browserFor(device).receipt,post.message);
     assert(events.some(e=>e.kind==='hop'&&e.link===link));
-    sim.net.toggleLink(link);run(sim,true,{device,...post});assert.equal(sim.status,'failed');
+    sim.net.toggleLink(link);if(mode==='cellular')sim.net.toggleNode('bts-park');run(sim,true,{device,...post});assert.equal(sim.status,'failed');
     assert.equal(sim.net.browserFor(device).receipt,post.message,'Previously delivered receipt is preserved with old content');
   }
 });

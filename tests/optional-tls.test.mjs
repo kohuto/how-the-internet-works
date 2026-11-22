@@ -166,7 +166,7 @@ test('Plain SMTP retry is idempotent and interrupted IMAP preserves the old snap
 test('Both mail modes deliver over Wi-Fi, cellular, satellite and cafe access with or without VPN',()=>{
   for(const tls of [false,true])for(const vpn of [false,true])for(const [device,mode,link] of [['laptop','wifi','laptop-wifi'],['phone','cellular','phone-bts-park'],['cabin','wifi','sat-uplink'],['cafe','wifi','cafe-wifi']]){
     const s=create(['mail','wifi','mobile','satellite','mitm','vpn'],tls);
-    if(device==='cafe')assert(s.net.setCafeHotspot('trusted',s.net.cafeWifi.password));else s.net.setAccess(device,mode,device==='phone'?'bts-park':undefined);
+    if(device==='cafe')assert(s.net.setCafeHotspot('trusted',s.net.cafeWifi.password));else s.net.setAccess(device,mode);if(device==='phone'&&mode==='cellular')s.net.toggleNode('bts-lipova');
     if(vpn)s.net.setVPN(device,true);
     const events=run(s,'mail-send',{...draft,device});
     assert(events.some(e=>e.kind==='hop'&&e.link===link),device);
