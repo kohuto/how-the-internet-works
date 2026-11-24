@@ -584,6 +584,13 @@
   }
   $('#zoom-in').addEventListener('click',()=>map.zoom(.78));$('#zoom-out').addEventListener('click',()=>map.zoom(1.28));
   $('#signal-coverage').addEventListener('change',e=>{map.signalCoverage=e.target.checked;map.render();});
+  $('#toggle-explanation').addEventListener('click',e=>{
+    const button=e.currentTarget,show=button.getAttribute('aria-expanded')!=='true';
+    $('#transmission-explanation').hidden=!show;
+    $('.transport').classList.toggle('explanation-hidden',!show);
+    button.setAttribute('aria-expanded',String(show));
+    button.setAttribute('aria-label',show?'Skrýt vysvětlení':'Zobrazit vysvětlení');
+  });
   $('#step').addEventListener('click',()=>{stop();advance();});
   $('#play').addEventListener('click',()=> {
     if(playing){stop();render();}

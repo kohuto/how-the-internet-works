@@ -128,3 +128,12 @@
 .device-control-button{min-height:32px;font-size:11px;padding:7px 12px;border-radius:8px}
 .device-body:empty{display:none}
 @media(max-width:700px){.device-window-title{font-size:18px}.device-controls{padding:8px 16px}.device-control-button{min-height:40px;padding:8px 12px}}
+
+/* Explanation visibility does not move the playback controls. */
+.transport-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.explanation-toggle{min-height:35px;padding:8px 10px;font-size:10px;gap:6px;flex-shrink:0}
+.explanation-toggle svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.explanation-toggle[aria-expanded=true]{background:#eaf4e8;border-color:#6eaa88;color:#356c4d}
+.transport.explanation-hidden{min-height:0;background:transparent;border-top-color:transparent;box-shadow:none}
+@media(min-width:1500px){.transport{padding-bottom:29.5px}.transport-actions{display:contents}.explanation-toggle{order:-1}.transport-buttons,.explanation-toggle{align-self:flex-end}.transport-status{margin-right:auto}.transport.explanation-hidden{padding-top:0}}
+@media(max-width:700px){.transport-actions{gap:8px}.explanation-toggle{min-height:37px;padding:8px;font-size:10px}}

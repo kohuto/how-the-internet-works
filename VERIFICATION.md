@@ -1,5 +1,13 @@
 # Záznam ověření
 
+## Volitelná spodní lišta vysvětlení · 24. listopadu 2026
+
+Vysvětlení přenosu začíná skryté. Přepínač Vysvětlení vlevo dole ovládá panel přes hidden a aria-expanded; má popisek Zobrazit / Skrýt vysvětlení a vazbu aria-controls. Se skrytým panelem zmizí jeho pozadí a okraj a mapa získá volné místo. Ovladače Opakovat, Přehrát / Pauza a Krok zůstávají vpravo dole na původním místě, při zobrazení panelu jsou opět jeho součástí. Přepnutí nepřekresluje aplikaci, neposouvá simulaci ani nepozastavuje přehrávání. Skrytý text se dál aktualizuje a po otevření odpovídá aktuálnímu kroku. Volba se zachová při běžném vykreslení aplikace; nové načtení začíná opět skryté. Z formuláře Napište knihovně odstraněna celá rozbalovací sekce Co je při odesílání vidět na síti?; formulář a potvrzení ze serveru zůstávají. Prostředky `v=166`.
+
+Prošlo **62 souvisejících testů** modelu, ovládání mapy, navigace prohlížeče a webových přenosů. Kontrola syntaxe app.js a browser-ui.js bez chyb. V odděleném prohlížeči při 1047 × 858, 1600 × 1000 a 320 × 568 px změřeny pozice všech tří ovladačů před úpravou, při skrytém panelu i po otevření: souřadnice a rozměry jsou shodné. Stejné pozice zachovány i při záměrně velmi dlouhém vysvětlení na velké obrazovce. Na malé obrazovce se přepínač i všechny ovladače vejdou bez přetékání a mapa získá 52 px výšky.
+
+Ověřeno výchozí skrytí na nové stránce, přepnutí při otevřeném monitoru i přehrávání, zachování přehrávání a počtu kroků při přepnutí, aktuální text po skrytém krokování, Pauza, Krok a Opakovat. Přepínač funguje i klávesou Enter a zachová fokus. Přes skutečné rozhraní načtena knihovna a odeslán vzkaz; formulář neobsahuje odstraněnou sekci a vrácené potvrzení obsahuje správný text. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Personalizovaná reklama v Rozšiřujících možnostech · 22. listopadu 2026
 
 Volba Personalizovaná reklama přesunuta z Pokročilých na konec kategorie Rozšiřující. Kategorie nyní obsahují 7, 12 a 6 voleb. Vzhled, chování i závislost na cookies zůstávají stejné. Aktualizován přehled kategorií v README a prostředky `v=165`.
