@@ -14,7 +14,7 @@ Při každém novém otevření se vytvoří výchozí model. Obsah ani zásahy 
 
 ## Nastavení sestavy a podrobností
 
-Ozubené kolo je na pevném místě nad mapou. Při otevřeném monitoru nebo detailu zařízení, spoje či paketu je skryté; po zavření se objeví na původní pozici. Po každém otevření či obnovení stránky se začne základní sestavou: notebook a chytré křižovatky v bytě na Lipové, město Lipov a datové centrum hostingu se třemi servery zákazníků. Základ obsahuje 14 zařízení a 15 spojů; web se otevře přes HTTP bez kroků DNS a TLS a bez cookies. Ostatní oblasti, zařízení a služby se přidávají jednotlivě v nastavení; nejde o učitelský či žákovský režim.
+Pravidelné ozubené kolo pro nastavení je v pravém horním rohu mapy, jako první tlačítko společného svislého sloupce nad přiblížením + / −. Všechna tři tlačítka mají shodnou velikost a zarovnání; skupina drží pevné odsazení od okraje mapy. Při otevřeném monitoru nebo detailu zařízení, spoje či paketu je skryté; po zavření se objeví na původní pozici. Po každém otevření či obnovení stránky se začne základní sestavou: notebook a chytré křižovatky v bytě na Lipové, město Lipov a datové centrum hostingu se třemi servery zákazníků. Základ obsahuje 14 zařízení a 15 spojů; web se otevře přes HTTP bez kroků DNS a TLS a bez cookies. Ostatní oblasti, zařízení a služby se přidávají jednotlivě v nastavení; nejde o učitelský či žákovský režim.
 
 - **Základní:** Matějův byt, chata se satelitem, mobilní síť a BTS, Wi-Fi v domácnostech, telefon, Instagram a chatbot.
 - **Rozšiřující:** hackerské doupě, Útočník v kavárně, tiskárna, VPN, DNS server, cookies, Šířka pásma a Latence, E-mail, Cloud, Routery a switche, NAT a personalizovaná reklama.

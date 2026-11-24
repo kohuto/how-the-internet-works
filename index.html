@@ -7,49 +7,52 @@
   <meta name="description" content="Prozkoumej, jak funguje internet. Česká interaktivní síťová laboratoř: web, místní tisk, pakety a náhradní cesta.">
   <title>Jak funguje internet · Síť pod lupou</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./assets/style.css?v=167">
-  <link rel="stylesheet" href="./assets/computer.css?v=167">
-  <link rel="stylesheet" href="./assets/browser.css?v=167">
-  <link rel="stylesheet" href="./assets/instagram.css?v=167">
-  <link rel="stylesheet" href="./assets/gmail.css?v=167">
-  <link rel="stylesheet" href="./assets/cloud.css?v=167">
-  <link rel="stylesheet" href="./assets/settings.css?v=167">
-  <script src="./js/network.js?v=167" defer></script>
-  <script src="./js/settings.js?v=167" defer></script>
-  <script src="./js/cloud.js?v=167" defer></script>
-  <script src="./js/media.js?v=167" defer></script>
-  <script src="./js/web.js?v=167" defer></script>
-  <script src="./js/privacy.js?v=167" defer></script>
-  <script src="./js/auth.js?v=167" defer></script>
-  <script src="./js/vpn.js?v=167" defer></script>
-  <script src="./js/phishing.js?v=167" defer></script>
-  <script src="./js/mitm.js?v=167" defer></script>
-  <script src="./js/mail.js?v=167" defer></script>
-  <script src="./js/ads.js?v=167" defer></script>
-  <script src="./js/simulation.js?v=167" defer></script>
-  <script src="./js/map.js?v=167" defer></script>
-  <script src="./js/settings-ui.js?v=167" defer></script>
-  <script src="./js/browser-navigation.js?v=167" defer></script>
-  <script src="./js/instagram-ui.js?v=167" defer></script>
-  <script src="./js/cloud-ui.js?v=167" defer></script>
-  <script src="./js/computer.js?v=167" defer></script>
-  <script src="./js/browser-ui.js?v=167" defer></script>
-  <script src="./js/phishing-ui.js?v=167" defer></script>
-  <script src="./js/mitm-ui.js?v=167" defer></script>
-  <script src="./js/mail-ui.js?v=167" defer></script>
-  <script src="./js/privacy-ui.js?v=167" defer></script>
-  <script src="./js/auth-ui.js?v=167" defer></script>
-  <script src="./js/ads-ui.js?v=167" defer></script>
-  <script src="./js/packet-ui.js?v=167" defer></script>
-  <script src="./js/app.js?v=167" defer></script>
+  <link rel="stylesheet" href="./assets/style.css?v=168">
+  <link rel="stylesheet" href="./assets/computer.css?v=168">
+  <link rel="stylesheet" href="./assets/browser.css?v=168">
+  <link rel="stylesheet" href="./assets/instagram.css?v=168">
+  <link rel="stylesheet" href="./assets/gmail.css?v=168">
+  <link rel="stylesheet" href="./assets/cloud.css?v=168">
+  <link rel="stylesheet" href="./assets/settings.css?v=168">
+  <script src="./js/network.js?v=168" defer></script>
+  <script src="./js/settings.js?v=168" defer></script>
+  <script src="./js/cloud.js?v=168" defer></script>
+  <script src="./js/media.js?v=168" defer></script>
+  <script src="./js/web.js?v=168" defer></script>
+  <script src="./js/privacy.js?v=168" defer></script>
+  <script src="./js/auth.js?v=168" defer></script>
+  <script src="./js/vpn.js?v=168" defer></script>
+  <script src="./js/phishing.js?v=168" defer></script>
+  <script src="./js/mitm.js?v=168" defer></script>
+  <script src="./js/mail.js?v=168" defer></script>
+  <script src="./js/ads.js?v=168" defer></script>
+  <script src="./js/simulation.js?v=168" defer></script>
+  <script src="./js/map.js?v=168" defer></script>
+  <script src="./js/settings-ui.js?v=168" defer></script>
+  <script src="./js/browser-navigation.js?v=168" defer></script>
+  <script src="./js/instagram-ui.js?v=168" defer></script>
+  <script src="./js/cloud-ui.js?v=168" defer></script>
+  <script src="./js/computer.js?v=168" defer></script>
+  <script src="./js/browser-ui.js?v=168" defer></script>
+  <script src="./js/phishing-ui.js?v=168" defer></script>
+  <script src="./js/mitm-ui.js?v=168" defer></script>
+  <script src="./js/mail-ui.js?v=168" defer></script>
+  <script src="./js/privacy-ui.js?v=168" defer></script>
+  <script src="./js/auth-ui.js?v=168" defer></script>
+  <script src="./js/ads-ui.js?v=168" defer></script>
+  <script src="./js/packet-ui.js?v=168" defer></script>
+  <script src="./js/app.js?v=168" defer></script>
 </head>
 <body>
   <main class="workspace">
     <section class="map-area" aria-label="Interaktivní mapa sítě">
       <div class="stage" id="stage">
-        <button id="open-settings" class="icon-button settings-launch" aria-label="Nastavení aplikace" title="Nastavení aplikace"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-1 3-3 1-2 3 2 2-1 3 3 2 1 3h4l1-3 3-1 2-3-2-2 1-3-3-2-1-3Z"/><circle cx="10" cy="11" r="3"/></svg></button>
+        <div class="map-tools" role="group" aria-label="Nastavení a měřítko mapy">
+          <button type="button" id="open-settings" class="icon-button settings-launch" aria-label="Nastavení aplikace" title="Nastavení aplikace"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.137 5.045 L10.678 2.592 L13.322 2.592 L13.863 5.045 L15.600 5.765 L17.717 4.413 L19.587 6.283 L18.235 8.400 L18.955 10.137 L21.408 10.678 L21.408 13.322 L18.955 13.863 L18.235 15.600 L19.587 17.717 L17.717 19.587 L15.600 18.235 L13.863 18.955 L13.322 21.408 L10.678 21.408 L10.137 18.955 L8.400 18.235 L6.283 19.587 L4.413 17.717 L5.765 15.600 L5.045 13.863 L2.592 13.322 L2.592 10.678 L5.045 10.137 L5.765 8.400 L4.413 6.283 L6.283 4.413 L8.400 5.765 Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button id="zoom-in" class="icon-button" aria-label="Přiblížit mapu" title="Přiblížit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">+</button>
+          <button id="zoom-out" class="icon-button" aria-label="Oddálit mapu" title="Oddálit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">−</button>
+        </div>
         <svg id="network-map" role="group" aria-label="Síťová mapa. Zařízení a spoje lze otevřít klepnutím. Přiblížení gestem dvěma prsty nebo Ctrl a kolečkem myši." viewBox="35 270 465 440"></svg>
-        <div class="map-tools"><button id="zoom-in" class="icon-button" aria-label="Přiblížit mapu" title="Přiblížit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">+</button><button id="zoom-out" class="icon-button" aria-label="Oddálit mapu" title="Oddálit mapu · gesto dvěma prsty nebo Ctrl/Cmd + kolečko">−</button></div>
         <div class="map-display-controls">
           <label class="labels-control" id="signal-coverage-control" hidden title="Ilustrační dosah Wi-Fi, BTS a satelitu bez skutečného měřítka. Připojení ani rychlost přenosu se nemění."><input id="signal-coverage" type="checkbox"> Dosah signálu</label>
         </div>

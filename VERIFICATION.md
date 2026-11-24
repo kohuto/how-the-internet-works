@@ -1,5 +1,13 @@
 # Záznam ověření
 
+## Pravidelné kolečko a zarovnané ovládání mapy · 24. listopadu 2026
+
+Nastavení má nové obrysové SVG s osmi stejnými zuby po 45° a kruhovým otvorem ve středu (12, 12). Tlačítko je prvním prvkem společného svislého sloupce v pravém horním rohu mapy nad + / −. Samostatné absolutní umístění nastavení a rozdílné polohy v responzivních pravidlech odstraněny. Tlačítka mají shodný rozměr 36 × 36 px, na malé obrazovce 32 × 32 px, společné barvy a zvýraznění při najetí. Oddělení nastavení od dvojice přiblížení tvoří mezera 10 px; mezi + / − zůstávají 4 px. Skupina má přístupný název a předchází mapě i v pořadí klávesnice. Dosavadní skrývání nastavení při otevřeném monitoru či detailu zůstává. Prostředky `v=168`.
+
+Prošlo **40 testů nastavení a vstupního ovládání mapy**. Geometrická kontrola ověřila opakování všech zubů otočením o 45°. V odděleném prohlížeči při 1047 × 858, 1600 × 1000 a 320 × 568 px vizuálně ověřena nová ikona a změřeno shodné x, šířka i výška všech tří tlačítek. Odsazení skupiny od vnitřního okraje mapy činí 16 px, na malé obrazovce 12 px; vnější měření včetně rámečku 17 / 13 px. Mezerám odpovídá 10 / 4 px, bez vodorovného přetékání. Střed skutečného SVG ohraničení je (12, 12).
+
+První Tab zaměří nastavení, Enter otevře dialog, Escape jej zavře a vrátí fokus na kolečko. Zapnutí Matějova bytu se použije a ponechá kolečko na stejných souřadnicích; totéž platí po přiblížení mapy. Otevření notebooku i detailu chytré křižovatky kolečko skryje a po zavření se vrátí přesně na původní místo. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Nápověda zařízení pod ikonou otazníku · 24. listopadu 2026
 
 Dosavadní rozbalovací Nápověda na konci obsahu nahrazena kruhovým otazníkem v pravém dolním rohu okna zařízení. Ikona zůstává mimo posouvané tělo; texty jsou ve vlastní bublině uvnitř okna, pod jeho záhlavím. Najetí myší ji otevře, lze přejít na vysvětlení a číst nebo posouvat jeho obsah, odjetí ji zavře. Klepnutí na dotykové obrazovce přepíná zobrazení a klepnutí mimo nápovědu ji zavře. Zaměření ikony klávesnicí ukáže vysvětlení; Escape je skryje a ponechá okno zařízení otevřené. Tlačítko má přístupný popisek, aria-expanded a aria-controls; panel je pojmenovaná oblast dosažitelná klávesnicí. Přepnutí zařízení, otevření spoje nebo paketu a zařízení bez nápovědy starý obsah skryjí. Aktualizace stejného zařízení zachová otevření i posunutí nápovědy. Prostředky `v=167`.
