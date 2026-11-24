@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Jemnější kroky přibližování a oddalování · 24. listopadu 2026
+
+Citlivost kolečka snížena z 0,005 na 0,001 na normalizovaný pixel. Exponent jednotlivé události je omezen na ±0,15 místo ±1, takže ani velký impuls nezpůsobí násobný skok. Tlačítko + mění šířku viewBoxu násobkem 0,9 místo 0,78 a − jeho přesnou převrácenou hodnotou místo 1,28; dvojice opačných kliknutí se vrátí na stejné měřítko. Bod pod kurzorem, meze měřítka a ovládání gest zůstávají zachovány. Prostředky `v=172`.
+
+Prošlo **8 testů ovládání mapy** a kontrola syntaxe map.js i app.js. V odděleném prohlížeči při 727 × 743 px naměřen pro wheel deltaY −100 poměr šířky 0,904837 oproti původním 0,606531. Platí bez modifikátoru i s Ctrl/Cmd; opačná událost vrací přesně původní měřítko. Velká událost deltaY 10000 má poměr nejvýše 1,161835. Tlačítko + používá poměr 0,9 a následné − vrátí původní hodnotu. Při 320 × 568 px ověřeny stejné jemné kroky a zachování bodu pod kurzorem s odchylkou menší než 0,001 souřadnic mapy. Bez vodorovného přetékání, konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Přibližování mapy samotným kolečkem myši · 24. listopadu 2026
 
 Událost wheel nad mapou nyní přibližuje a oddaluje i bez Ctrl nebo Cmd. Zachována stejná citlivost, normalizace pixelových / řádkových / stránkových kroků, meze měřítka a bod pod kurzorem. Podpora Ctrl/Cmd, gest touchpadu, dotykového přibližování, tlačítek + / − a navazujícího tažení se nemění. Listener zůstává pouze na SVG mapy; kolečko nad obsahem otevřeného okna se nezachytává. Aktualizován odpovídající test dosavadního požadavku na modifikátor, dokumentace a prostředky `v=171`.

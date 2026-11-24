@@ -587,7 +587,7 @@
     root.addEventListener('submit',handleSubmit);
     root.addEventListener('click',handleClick);
   }
-  $('#zoom-in').addEventListener('click',()=>map.zoom(.78));$('#zoom-out').addEventListener('click',()=>map.zoom(1.28));
+  $('#zoom-in').addEventListener('click',()=>map.zoom(.9));$('#zoom-out').addEventListener('click',()=>map.zoom(1/.9));
   $('#signal-coverage').addEventListener('change',e=>{map.signalCoverage=e.target.checked;map.render();});
   const deviceHelp=$('#device-help'),helpTrigger=$('#device-help-trigger');
   deviceHelp.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch'&&matchMedia('(any-hover: hover)').matches)setDeviceHelpOpen(true);});

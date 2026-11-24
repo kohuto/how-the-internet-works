@@ -138,7 +138,7 @@
         e.preventDefault();
         if(this.gesture||this.pointers.size>=2)return;
         const unit=e.deltaMode===1?16:e.deltaMode===2?svg.clientHeight:1;
-        this.zoom(Math.exp(Math.max(-1,Math.min(1,e.deltaY*unit*.005))),{x:e.clientX,y:e.clientY});
+        this.zoom(Math.exp(Math.max(-.15,Math.min(.15,e.deltaY*unit*.001))),{x:e.clientX,y:e.clientY});
         this.rebaseDrag();
       },{passive:false});
       // Safari also provides native gesture events. Do not apply a touch pinch twice.
