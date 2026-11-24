@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Zjednodušené detaily satelitního přístupu, BTS a Instagramu · 24. listopadu 2026
+
+Z detailů Satelit LEO a Satelitní anténa odstraněny údaje Předané pakety / Úloha a celá sekce Připojení. Ze satelitu odstraněna také zkratka Otevřít notebook na chatě. U obou BTS odstraněna celá sekce Připojení s porty radio / backhaul. Z detailu Instagramu odstraněna obě tlačítka pro otevření zařízení odesílatele a příjemce. Stavové panely, poslední rozhodnutí, nápovědy a vypínání zůstávají; anténa má nadále ovládání výhledu. Pozemní stanice a router na chatě si ponechávají své údaje a odkazy. Model přenosu a skutečné spoje se nemění. Prostředky `v=169`.
+
+Prošlo **22 souvisejících testů** satelitního přístupu, mobilní sítě a Instagramu a kontrola syntaxe app.js. V odděleném prohlížeči při 727 × 743 px otevřeny všechny upravené detaily, ověřena nepřítomnost odstraněných prvků a zachování nápověd i vypínačů. Zakrytí výhledu antény změní cestu na přerušenou, obnovení ji vrátí do dostupného stavu; totéž funguje při vypnutí a zapnutí satelitu. Pozemní stanice nadále ukazuje počítadlo a úlohu, obě pozemní zařízení mají původní zkratku na notebook. Při 320 × 568 px zkontrolováno všech pět upravených oken a otevírání nápovědy, bez vodorovného přetékání. Vizuálně zkontrolovány satelit, anténa i Instagram. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Pravidelné kolečko a zarovnané ovládání mapy · 24. listopadu 2026
 
 Nastavení má nové obrysové SVG s osmi stejnými zuby po 45° a kruhovým otvorem ve středu (12, 12). Tlačítko je prvním prvkem společného svislého sloupce v pravém horním rohu mapy nad + / −. Samostatné absolutní umístění nastavení a rozdílné polohy v responzivních pravidlech odstraněny. Tlačítka mají shodný rozměr 36 × 36 px, na malé obrazovce 32 × 32 px, společné barvy a zvýraznění při najetí. Oddělení nastavení od dvojice přiblížení tvoří mezera 10 px; mezi + / − zůstávají 4 px. Skupina má přístupný název a předchází mapě i v pořadí klávesnice. Dosavadní skrývání nastavení při otevřeném monitoru či detailu zůstává. Prostředky `v=168`.
