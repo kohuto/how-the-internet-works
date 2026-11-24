@@ -33,31 +33,25 @@ function worldAt(svg,box,point) {
     y+(point.y-rect.top-(rect.height-h*fitted)/2)/fitted];
 }
 
-test('Ctrl/Cmd wheel and trackpad pinch zoom around the cursor in both SVG aspect ratios',()=> {
-  for(const [width,height] of [[1000,600],[320,700]]) {
+test('Mouse wheel with or without Ctrl/Cmd zooms around the cursor in both SVG aspect ratios',()=> {
+  for(const [width,height] of [[1000,600],[320,700]])for(const modifiers of [{},{ctrlKey:true},{metaKey:true}]) {
     const {svg,map}=setup(width,height),point={x:width*.8,y:height*.4};
     const anchor=worldAt(svg,map.box,point),before=map.box[2];
-    assert(input(svg,'wheel',{clientX:point.x,clientY:point.y,ctrlKey:true,deltaY:-30}).defaultPrevented);
+    assert(input(svg,'wheel',{clientX:point.x,clientY:point.y,...modifiers,deltaY:-30}).defaultPrevented);
     assert(map.box[2]<before);
     worldAt(svg,map.box,point).forEach((v,i)=>near(v,anchor[i]));
-    input(svg,'wheel',{clientX:point.x,clientY:point.y,metaKey:true,deltaY:30});
+    input(svg,'wheel',{clientX:point.x,clientY:point.y,...modifiers,deltaY:30});
     near(map.box[2],before);
     worldAt(svg,map.box,point).forEach((v,i)=>near(v,anchor[i]));
   }
 });
 
-test('Unmodified wheel remains available for ordinary scrolling',()=> {
-  const {svg,map}=setup(),before=[...map.box];
-  assert.equal(input(svg,'wheel',{deltaY:100}).defaultPrevented,false);
-  assert.deepEqual(map.box,before);
-});
-
 test('Wheel line and page deltas work in both directions',()=> {
   for(const [deltaMode,deltaY] of [[0,-32],[1,-2],[2,-32/600]]) {
     const {svg,map}=setup(),before=map.box[2];
-    input(svg,'wheel',{ctrlKey:true,deltaY,deltaMode});
+    input(svg,'wheel',{deltaY,deltaMode});
     assert(map.box[2]<before);
-    input(svg,'wheel',{ctrlKey:true,deltaY:-deltaY,deltaMode});
+    input(svg,'wheel',{deltaY:-deltaY,deltaMode});
     near(map.box[2],before);
   }
 });
@@ -123,7 +117,7 @@ test('Mouse drag survives wheel zoom and pointer capture loss without snapping b
   const {svg,map}=setup();
   input(svg,'pointerdown',{clientX:400,clientY:300});
   input(svg,'pointermove',{clientX:440,clientY:320});
-  input(svg,'wheel',{ctrlKey:true,deltaY:-30,clientX:440,clientY:320});
+  input(svg,'wheel',{deltaY:-30,clientX:440,clientY:320});
   const zoomed=[...map.box];
   input(svg,'pointermove',{clientX:440,clientY:320});assert.deepEqual(map.box,zoomed);
   input(svg,'pointermove',{clientX:460,clientY:320});assert(map.box[0]<zoomed[0]);

@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Přibližování mapy samotným kolečkem myši · 24. listopadu 2026
+
+Událost wheel nad mapou nyní přibližuje a oddaluje i bez Ctrl nebo Cmd. Zachována stejná citlivost, normalizace pixelových / řádkových / stránkových kroků, meze měřítka a bod pod kurzorem. Podpora Ctrl/Cmd, gest touchpadu, dotykového přibližování, tlačítek + / − a navazujícího tažení se nemění. Listener zůstává pouze na SVG mapy; kolečko nad obsahem otevřeného okna se nezachytává. Aktualizován odpovídající test dosavadního požadavku na modifikátor, dokumentace a prostředky `v=171`.
+
+Prošlo všech **8 testů vstupního ovládání mapy** a kontrola syntaxe map.js. Testy zahrnují kolečko bez modifikátoru i s Ctrl/Cmd v obou směrech a poměrech stran SVG, řádkové / stránkové kroky, meze, Safari, dotykové gesto a pokračování v tažení. V odděleném prohlížeči při 727 × 743 px ověřeny události wheel z ikony zařízení probublané do mapy: každý směr se zachytí i bez modifikátoru, opačný krok vrátí původní měřítko a bod pod kurzorem zůstává stejný s odchylkou menší než 0,001 souřadnic mapy. Tlačítka + / − fungují dál. Nad posuvným detailem domácího routeru událost není zachycena a viewBox mapy se nezmění. Při 320 × 568 px ověřeny oba směry bez modifikátoru a zachování bodu pod kurzorem, bez vodorovného přetékání. Vizuálně zkontrolována mapa; konzole bez chyb a varování, uživatelská karta nezměněna.
+
 ## Detail Instagramu a pozemní satelitní brány · 24. listopadu 2026
 
 Z detailu serveru odstraněn odkaz Zkusit doručit znovu, panel se stavem a počty přenesených bajtů i nadpis Aktuální přenos zprávy. Samostatný údaj Příjemce zprávy přesunut do karty uchované zprávy jako Příjemce: @matej nebo @ty.na.lipove podle skutečného adresáta. Karta se stejně jako dosud objeví až po úplném přijetí zprávy na server; do té doby je zobrazeno Zatím žádná přijatá zpráva. Uchovaný obsah, potvrzení přečtení, vypínač a nápověda zůstávají dostupné. Automatické doručení po připojení příjemce i opakování z klientské aplikace se nemění. Z pozemní satelitní brány odstraněny údaje Předané pakety / Úloha a odkaz Otevřít notebook na chatě. Stav satelitní cesty, vypínač a nápověda zůstávají. Prostředky `v=170`.

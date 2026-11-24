@@ -133,9 +133,8 @@
         this.drag=this.pointers.size===1?{...point,box:[...this.box]}:null;
       };
       for(const type of ['pointerup','pointercancel','lostpointercapture'])svg.addEventListener(type,endPointer);
-      // Trackpad pinch is reported as Ctrl + wheel in Chromium and Firefox.
+      // Mouse wheel zooms directly; trackpad pinch also arrives here as Ctrl + wheel.
       svg.addEventListener('wheel',e=> {
-        if(!e.ctrlKey&&!e.metaKey)return;
         e.preventDefault();
         if(this.gesture||this.pointers.size>=2)return;
         const unit=e.deltaMode===1?16:e.deltaMode===2?svg.clientHeight:1;
