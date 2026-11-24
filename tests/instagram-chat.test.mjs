@@ -12,10 +12,11 @@ import '../js/ads.js';
 import '../js/simulation.js';
 import '../js/map.js';
 import '../js/instagram-ui.js';
+import '../js/packet-ui.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-const {Simulation,instagramView}=globalThis.InternetLab;
+const {Simulation,instagramView,packetView}=globalThis.InternetLab;
 const finish=s=>{for(let i=0;s.status==='running'&&i<4000;i++)s.advanceFrame();assert.notEqual(s.status,'running');};
 const send=(s,device,text,extra={})=>{assert(s.start('message',{device,text,...extra}));finish(s);};
 const until=(s,predicate)=>{for(let i=0;!predicate()&&s.status==='running'&&i<4000;i++)s.advanceFrame();assert(predicate());};
@@ -98,6 +99,7 @@ test('Reverse media and read receipts traverse VPN and independent channels in b
   const s=new Simulation();s.net.setVPN('laptop',true);s.net.setVPN('friend',true);
   send(s,'friend','',{messageType:'image'});assert.equal(s.status,'success');
   assert.equal(s.net.friend.receivedPackets,9);assert(s.net.instagramChannel('laptop'));assert(s.net.instagramChannel('friend'));
+  assert([...s.packets.values()].some(p=>p.kind==='ig-check'&&p.source==='laptop'&&p.vpnHistory?.some(t=>t.client==='laptop'&&t.direction==='out')));
   assert([...s.packets.values()].some(p=>p.vpnHistory?.some(t=>t.client==='friend'&&t.direction==='out')));
   read(s,'laptop');assert.equal(s.net.instagram.history[0].status,'read');assert.equal(s.net.sender.state,'read');
 });
@@ -115,4 +117,56 @@ test('Invalid reply targets and starting over a stored delivery do not corrupt t
   s.net.toggleNode('laptop');send(s,'friend','Čekající zpráva');
   assert.equal(s.start('message',{device:'laptop',text:'Jiná zpráva'}),false);
   assert.equal(s.net.instagram.history.length,1);assert.equal(s.net.instagram.history[0].text,'Čekající zpráva');
+});
+
+
+test('Every message waits for a recipient check at the server, including reused channels and reverse replies',()=>{
+  const s=new Simulation();
+  for(const [device,text] of [['laptop','První zpráva'],['laptop','Druhá zpráva'],['friend','Odpověď']]) {
+    const recipient=device==='friend'?'laptop':'friend';
+    assert(s.start('message',{device,text}));
+    until(s,()=>s.net.instagram.text===text);
+    assert.equal(s.net.friend.text,'');
+    assert(![...s.packets.values()].some(p=>p.kind==='ig-check'||p.kind==='ig-delivery'));
+    until(s,()=>[...s.packets.values()].some(p=>p.kind==='ig-check'&&p.state==='delivered'));
+    const checks=[...s.packets.values()].filter(p=>p.kind==='ig-check');
+    assert.equal(checks.length,1);const check=checks[0];
+    assert.equal(check.source,recipient);assert.equal(check.destination,'instagram');
+    assert.equal(check.initialHeader.dport,443);assert.equal(check.initialHeader.sport,recipient==='friend'?52002:51002);
+    assert.equal(check.payload.account,recipient==='friend'?'@matej':'@ty.na.lipove');
+    assert(check.label.includes('Kontrola nových zpráv'));
+    assert(packetView(s.net,check).includes('Kontrola nových zpráv'));
+    assert(packetView(s.net,check).includes(check.payload.account));
+    assert(![...s.packets.values()].some(p=>p.kind==='ig-delivery'),'No response exists until the server processes the received check');
+    finish(s);assert.equal(s.status,'success');assert.equal(s.net.friend.text,text);
+    const delivery=[...s.packets.values()].find(p=>p.kind==='ig-delivery');
+    assert.equal(delivery.initialHeader.dst,check.src);assert.equal(delivery.initialHeader.dport,check.sport);
+  }
+});
+
+test('An offline recipient and a lost check keep the stored message; reconnecting checks again without uploading again',()=>{
+  const s=new Simulation(),text='Zpráva počká na kontrolu';s.net.toggleNode('friend');
+  send(s,'laptop',text);assert.equal(s.status,'waiting');
+  const uploads=[...s.packets.values()].filter(p=>p.kind==='message').map(p=>p.id);
+  assert(![...s.packets.values()].some(p=>p.kind==='ig-check'||p.kind==='ig-delivery'));
+  s.net.toggleNode('friend');assert(s.resumePending());
+  until(s,()=>[...s.packets.values()].some(p=>p.kind==='ig-check'&&p.state==='transit'));
+  s.net.toggleLink('friend-uplink');finish(s);
+  assert.equal(s.status,'waiting');assert.equal(s.net.instagram.text,text);assert.equal(s.net.friend.text,'');
+  assert(![...s.packets.values()].some(p=>p.kind==='ig-delivery'));
+  s.net.toggleLink('friend-uplink');assert(s.resumePending());finish(s);
+  assert.equal(s.status,'success');assert.equal(s.net.friend.text,text);
+  assert.equal([...s.packets.values()].filter(p=>p.kind==='ig-check').length,2);
+  assert.deepEqual([...s.packets.values()].filter(p=>p.kind==='message').map(p=>p.id),uploads);
+});
+
+test('Losing the NAT binding after a check requires another check before returning the message',()=>{
+  const s=new Simulation();assert(s.start('message',{text:'Nová návratová cesta'}));
+  until(s,()=>[...s.packets.values()].some(p=>p.kind==='ig-check'&&p.state==='delivered'));
+  assert(![...s.packets.values()].some(p=>p.kind==='ig-delivery'));
+  s.net.clearNat('friend-home');finish(s);
+  assert.equal(s.status,'success');assert.equal(s.net.friend.text,'Nová návratová cesta');
+  const checks=[...s.packets.values()].filter(p=>p.kind==='ig-check');assert.equal(checks.length,2);
+  const delivery=[...s.packets.values()].find(p=>p.kind==='ig-delivery');
+  assert.equal(delivery.initialHeader.dst,checks[1].src);assert.equal(delivery.initialHeader.dport,checks[1].sport);
 });

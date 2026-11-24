@@ -1,5 +1,13 @@
 # Záznam ověření
 
+## Instagram: kontrola nových zpráv před každým doručením · 24. listopadu 2026
+
+Po úplném přijetí zprávy Instagram uloží obsah a zařízení příjemce automaticky odešle vlastní paket Kontrola nových zpráv (`ig-check`). Obsah požadavku v náhledu uvádí kontrolu a účet příjemce. Nevyžaduje nové tlačítko a vznikne i při již platném spojení. Datové pakety odpovědi se vytvoří až po přijetí kontroly a používají adresu a port pozorované na ní. Po ztrátě NAT mezi kontrolou a odpovědí se nejprve odešle nová kontrola. Offline příjemce nebo ztráta požadavku uchová zprávu na serveru; obnovení, opakování i klientské Zkusit doručit znovu začínají kontrolou bez dalšího nahrání obsahu. Platí pro oba směry, telefon, chatu i VPN. Přečtení zůstává samostatným přenosem. Popisky kroků a nápověda vysvětlují jednu výukovou kontrolu místo opakovaného dotazování na pozadí. Prostředky `v=173`.
+
+Prošlo **109 souvisejících testů** Instagramu, NAT, časování spojů, modelu, VPN, mobilního a satelitního přístupu, médií, skládání TCP a náhledů i vykreslení paketů. Nové testy ověřují hranici mezi přijetím zprávy, kontrolou a odpovědí při opakované zprávě a opačném směru, správný účet a porty, ztrátu požadavku, obnovení bez dalšího uploadu a ztrátu NAT po přijetí kontroly. Test VPN ověřuje také skutečné zabalení kontroly příjemce. Kontroly syntaxe simulation.js, packet-ui.js a app.js bez chyb.
+
+V odděleném prohlížeči při 1047 × 858 px první zpráva po 27 krocích zobrazila v mapě paket Kontrola nových zpráv vycházející od Matěje. Následně bylo zaznamenáno přijetí kontroly na serveru, až v dalším kroku příprava odpovědi a nakonec doručení. Druhá zpráva přes již existující spojení znovu zobrazila samostatnou kontrolu. Notebook na Lipové poté vypnut, Matěj odeslal odpověď a server ji uchoval pro @ty.na.lipove. Po zapnutí notebook nejprve odeslal kontrolu z 192.168.10.10:51002 do 203.0.113.80:443; náhled obsahoval Kontrola nových zpráv a správný účet. Při 320 × 568 px ověřeno zobrazení a posouvání náhledu bez vodorovného přetékání. Po zavření a dokončení přenosu se celá odpověď zobrazila v Instagramu notebooku. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Jemnější kroky přibližování a oddalování · 24. listopadu 2026
 
 Citlivost kolečka snížena z 0,005 na 0,001 na normalizovaný pixel. Exponent jednotlivé události je omezen na ±0,15 místo ±1, takže ani velký impuls nezpůsobí násobný skok. Tlačítko + mění šířku viewBoxu násobkem 0,9 místo 0,78 a − jeho přesnou převrácenou hodnotou místo 1,28; dvojice opačných kliknutí se vrátí na stejné měřítko. Bod pod kurzorem, meze měřítka a ovládání gest zůstávají zachovány. Prostředky `v=172`.

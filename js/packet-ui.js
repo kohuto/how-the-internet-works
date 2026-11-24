@@ -31,6 +31,8 @@
       label='HTTP';content=preview(requestText(pl));
     } else if(p.kind==='http-response'||p.connection==='phishing-api'&&p.kind==='phish-response') {
       label='HTTP';content=preview(responseText(pl));
+    } else if(p.kind==='ig-check') {
+      content=preview(`Kontrola nových zpráv\nÚčet: ${pl.account}`);
     } else if(p.kind==='ig-connect') {
       content=preview(JSON.stringify({purpose:pl.purpose}));
     } else if(p.kind==='ig-read') {

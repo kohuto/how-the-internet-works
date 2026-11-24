@@ -61,6 +61,7 @@
       if(kind.startsWith('chatbot-'))Object.assign(p,{sport:response?443:51004,dport:response?51004:443,connection:'chatbot',label:`Chatbot · ${response?'odpověď':'dotaz'} ${payload.index+1}/${payload.total}`});
       if(kind==='cloud-replica')Object.assign(p,{sport:52004,dport:443,connection:'replica',direction:'replication',label:`Kopie A → B · ${payload.index+1}/${payload.total}`});
       if(kind==='ig-connect')Object.assign(p,{sport:src==='friend'?52002:51002,dport:443,connection:src==='friend'?'instagram-matej':'ty-instagram',label:`Připojení · ${this.net.nodes[src].name} → Instagram`});
+      if(kind==='ig-check')Object.assign(p,{sport:src==='friend'?52002:51002,dport:443,connection:src==='friend'?'instagram-matej':'ty-instagram',label:'Kontrola nových zpráv'});
       if(kind.startsWith('http-')){p.connection='http';if(payload.cookie)p.label='HTTP · Cookie';else if(payload.setCookie)p.label='HTTP · Set-Cookie';}
       if(kind.startsWith('https-')||kind.startsWith('tls-')) {
         const labels={'tls-client-hello':'TLS · ClientHello','tls-server-response':'TLS · odpověď serveru','tls-finished':'TLS · dokončení','https-request':'HTTPS · požadavek','https-response':'HTTPS · obsah'};
@@ -76,6 +77,10 @@
     }
     replyPacket(kind,request,payload) {
       return this.createPacket(kind,request.destination,request.source,payload,{src:request.dst,sport:request.dport,dst:request.src,dport:request.sport});
+    }
+    instagramCheck() {
+      const device=this.instagramRecipient();
+      return {kind:'ig-check-prepare',node:device,title:`${this.net.nodes[device].name} kontroluje nové zprávy`,description:'Aplikace příjemce automaticky odešle kontrolu. Model ukazuje jednu kontrolu místo pravidelných dotazů na pozadí.'};
     }
     receiptRelay() {
       return {kind:'receipt-relay',node:'instagram',title:`Instagram připravuje potvrzení pro ${this.net.nodes[this.net.instagram.senderDevice].name}`,description:'Odpověď použije spojení otevřené zařízením směrem ven.'};
@@ -194,14 +199,14 @@
     resumePending() {
       if(this.status==='running')return false;
       const ig=this.net.instagram,recipient=ig.recipientDevice;
-      if(ig.text&&ig.state==='queued'&&this.net.canReach('instagram',recipient)) {
-        this.continuation();this.phase='delivery';
-        this.next([{kind:'relay',node:'instagram',title:'Příjemce je připojený. Instagram připravuje doručení',description:'Zpráva uložená na serveru vyrazí v nových paketech.'}]);
+      if(ig.text&&ig.state==='queued'&&this.net.canReach(recipient,'instagram')) {
+        this.continuation();this.phase='check-delivery';
+        this.next([this.instagramCheck()]);
       } else if(ig.readRequested&&!ig.readNotified&&this.net.canReach(ig.readKnown?'instagram':recipient,ig.readKnown?ig.senderDevice:'instagram')) {
         this.continuation();this.phase='read';
         this.next([ig.readKnown?this.receiptRelay():this.originate(this.createPacket('ig-read',recipient,'instagram',{messageId:ig.id}))]);
       } else return false;
-      this.current={kind:'ready',at:this.time,node:'instagram',title:this.phase==='read'?'Potvrzení přečtení je připravené':'Instagram může doručit čekající zprávu',description:'Přenos spusť přehráním nebo krokováním.'};return true;
+      this.current={kind:'ready',at:this.time,node:this.phase==='read'?'instagram':recipient,title:this.phase==='read'?'Potvrzení přečtení je připravené':'Příjemce připravuje kontrolu nových zpráv',description:'Přenos spusť přehráním nebo krokováním.'};return true;
     }
     markRead(device=this.instagramRecipient()) {
       const friend=this.net.friend,ig=this.net.instagram;
@@ -464,9 +469,9 @@
       do {events.push(this.advance());}while(this.status==='running'&&this.queue[0]?.at===at);
       this.frame=events;
       if(events.length>1&&this.status==='running'&&!this.replicaResult&&this.action.type==='message') {
-        const connecting=this.phase.startsWith('connect-'),kind=connecting?'ig-connect':this.phase==='upload'?'message':this.phase==='delivery'?'ig-delivery':'ig-read';
+        const connecting=this.phase.startsWith('connect-'),checking=this.phase==='check-delivery',kind=checking?'ig-check':connecting?'ig-connect':this.phase==='upload'?'message':this.phase==='delivery'?'ig-delivery':'ig-read';
         const packets=[...this.packets.values()].filter(p=>this.vpn.logical(p).kind===kind&&p.state!=='stopped'&&p.state!=='lost'),count=p=>p.payload.packetCount||1,active=packets.filter(p=>p.state==='transit').reduce((n,p)=>n+count(p),0),delivered=packets.filter(p=>p.state==='delivered').reduce((n,p)=>n+count(p),0),total=packets.reduce((n,p)=>n+count(p),0);
-        this.current={...events.at(-1),kind:'parallel',title:`${connecting?'Otevření spojení k Instagramu':this.phase==='upload'?`${this.instagramName(this.net.instagram.senderDevice)} → Instagram`:this.phase==='delivery'?`Instagram → ${this.instagramName(this.instagramRecipient())}`:'Potvrzení přečtení'} · na cestě ${active} z ${total}`,description:`Doručeno ${delivered} / ${total}. ${events.at(-1).title}`};
+        this.current={...events.at(-1),kind:'parallel',title:`${checking?'Kontrola nových zpráv':connecting?'Otevření spojení k Instagramu':this.phase==='upload'?`${this.instagramName(this.net.instagram.senderDevice)} → Instagram`:this.phase==='delivery'?`Instagram → ${this.instagramName(this.instagramRecipient())}`:'Potvrzení přečtení'} · na cestě ${active} z ${total}`,description:`Doručeno ${delivered} / ${total}. ${events.at(-1).title}`};
       }
       this.resumeReplication();
       return this.current;
@@ -545,18 +550,21 @@
         const bytes=this.net.sender.content.bytes;this.totalBytes=bytes.length;
         const total=this.messagePackets('message',this.clientId(),'instagram',bytes,MSS);
         e.description=`${bytes.length} B → ${total} datových paketů, nejvýše ${MSS} B dat v jednom. Pakety odcházejí jednotlivě s odstupem.`;
+      } else if(e.kind==='ig-check-prepare') {
+        const ig=this.net.instagram,device=ig.recipientDevice;
+        if(!this.net.canReach(device,'instagram')) {ig.state='queued';return this.wait('Zpráva čeká na Instagramu','Příjemce zatím nemůže zkontrolovat nové zprávy. Uložená zpráva čeká na obnovení jeho připojení.');}
+        this.phase='check-delivery';
+        this.next([this.originate(this.createPacket('ig-check',device,'instagram',{account:device==='friend'?'@matej':'@ty.na.lipove'}))]);
       } else if(e.kind==='relay') {
         const ig=this.net.instagram,device=ig.recipientDevice;
         if(!this.net.canReach('instagram',device)) {ig.state='queued';return this.wait('Zpráva čeká na Instagramu','Zařízení příjemce nebo cesta k němu je nedostupná. Zpráva je uložená pro pozdější doručení.');}
         const channel=this.net.instagramChannel(device);
-        if(!channel) {
-          this.phase='connect-delivery';
-          e.title=`${this.net.nodes[device].name} otevírá spojení k Instagramu`;e.description='Klient zahájí spojení směrem ven. Domácí NAT si připraví překlad pro návrat zprávy.';
-          this.next([this.originate(this.createPacket('ig-connect',device,'instagram',{purpose:'delivery'}))]);return e;
+        if(p?.kind!=='ig-check'||p.source!==device||p.destination!=='instagram'||p.state!=='delivered'||!channel||channel.ip!==p.src||channel.port!==p.sport) {
+          this.phase='check-delivery';this.next([this.instagramCheck()]);return e;
         }
         ig.state='delivering';ig.error='';this.phase='delivery';this.tcpStream=null;Object.assign(this.net.friend,{state:'receiving',receivedBytes:0,receivedPackets:0,streamBytes:0});ig.sentBytes=0;ig.sentPackets=0;
-        const total=this.messagePackets('ig-delivery','instagram',device,ig.content.bytes,DELIVERY_MSS,{dst:channel.ip,dport:channel.port});
-        e.title=`Instagram vytváří nové pakety pro ${this.net.nodes[device].name}`;e.description=`Připravené spojení: 203.0.113.80:443 → ${channel.ip}:${channel.port}. ${total} nových částí; návrat využije připravené připojení příjemce.`;
+        const total=this.messagePackets('ig-delivery','instagram',device,ig.content.bytes,DELIVERY_MSS,{dst:p.src,dport:p.sport});
+        e.title=`Instagram odpovídá zprávou pro ${this.net.nodes[device].name}`;e.description=`Kontrola nových zpráv dorazila od ${p.src}:${p.sport}. Server pošle ${total} nových částí jako odpověď na tento požadavek.`;
       } else if(e.kind==='receipt-relay') {
         const ig=this.net.instagram,device=ig.senderDevice,channel=this.net.instagramChannel(device);
         if(!this.net.canReach('instagram',device))return this.wait('Instagram uchoval potvrzení přečtení','Zařízení odesílatele nebo jeho připojení je nedostupné.');
@@ -654,9 +662,12 @@
         if(['smtp','imap'].includes(p.connection)){this.mail.receive(p,e);return this.current;}
         if(p.connection==='phishing-api'){this.phishing.receive(p,e);return this.current;}
         if(p.destination==='instagram'&&p.source!=='instagram')this.net.rememberInstagramChannel(p);
-        if(p.kind==='ig-connect') {
+        if(p.kind==='ig-check') {
+          e.title='Instagram přijal kontrolu nových zpráv';e.description=`Příjemce ${p.payload.account} požádal o nové zprávy. Server připraví odpověď na pozorovanou adresu ${p.src}:${p.sport}.`;
+          this.next([{kind:'relay',node:'instagram',packet:p,title:'Instagram připravuje odpověď na kontrolu zpráv',description:'Uchovanou zprávu odešle až po přijetí požadavku příjemce.'}]);
+        } else if(p.kind==='ig-connect') {
           e.title='Instagram přijal spojení otevřené klientem';e.description=`Pro odpovědi použije ${p.src}:${p.sport}. Server použije adresu a port pozorované na přijatém paketu.`;
-          this.next([p.payload.purpose==='read'?this.receiptRelay():{kind:'relay',node:'instagram',title:'Instagram doručí zprávu po otevřeném spojení',description:'NAT příjemce už zná návratovou cestu.'}]);
+          this.next([this.receiptRelay()]);
         } else if(p.kind.startsWith('chatbot-'))this.receiveChatbot(p,e);
         else if(p.kind==='cloud-replica')this.receiveReplica(p,e);
         else if(p.kind.startsWith('cloud-'))this.receiveCloud(p,e);
@@ -711,8 +722,8 @@
             recipient.content={...original,bytes};recipient.text=original.type==='text'?decoder.decode(bytes):original.name;
             if(p.kind==='message') {
               recipient.state='queued';this.net.sender.state='sent';this.instagramStatus('sent',{accepted:true,error:''});
-              e.title='Instagram převzal celou zprávu';e.description=`Zpráva je uložená pro ${this.instagramName(this.instagramRecipient())}. Služba nyní připraví druhé spojení.`;
-              this.next([{kind:'relay',node:'instagram',title:`Instagram připravuje doručení do ${this.net.nodes[this.instagramRecipient()].name}`,description:'Na druhém spojení vzniknou nové pakety s jinými adresami.'}]);
+              e.title='Instagram převzal celou zprávu';e.description=`Zpráva je uložená pro ${this.instagramName(this.instagramRecipient())}. Server ji odešle až po kontrole nových zpráv z jeho zařízení.`;
+              this.next([this.instagramCheck()]);
             } else {
               recipient.state='delivered';this.net.instagram.state='delivered';this.net.sender.state='delivered';
               this.instagramStatus('delivered',{delivered:true,error:''});

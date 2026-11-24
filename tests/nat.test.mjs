@@ -108,7 +108,7 @@ test('Changing access or power removes obsolete mappings without affecting the o
 test('Instagram recipient opens the outbound NAT session before the service can deliver through it',()=> {
   const sim=new Simulation(),events=run(sim,'message',{text:'Zpráva přes dva domácí NATy 🙂'});
   assert.equal(sim.status,'success');assert.equal(sim.net.friend.text,'Zpráva přes dva domácí NATy 🙂');
-  const connect=events.find(e=>e.kind==='deliver'&&e.packet.kind==='ig-connect'),delivery=events.find(e=>e.kind==='origin'&&e.packet.kind==='ig-delivery');
+  const connect=events.find(e=>e.kind==='deliver'&&e.packet.kind==='ig-check'),delivery=events.find(e=>e.kind==='origin'&&e.packet.kind==='ig-delivery');
   assert(connect&&delivery&&connect.at<delivery.at);
   assert.equal(connect.header.src,'192.0.2.26');assert.equal(connect.header.dst,'203.0.113.80');
   const p=[...sim.packets.values()].find(p=>p.kind==='ig-delivery');
@@ -124,7 +124,7 @@ test('Losing the recipient NAT session forces a new outbound session for the nex
   const sim=new Simulation();run(sim,'message',{text:'První'});
   sim.net.clearNat('friend-home');const events=run(sim,'message',{text:'Druhá'});
   assert.equal(sim.status,'success');assert.equal(sim.net.friend.text,'Druhá');
-  assert(events.some(e=>e.kind==='origin'&&e.packet.kind==='ig-connect'&&e.packet.source==='friend'));
+  assert(events.some(e=>e.kind==='origin'&&e.packet.kind==='ig-check'&&e.packet.source==='friend'));
 });
 
 test('Cloud response segments use the observed mapped client port and retain exact file data',()=> {

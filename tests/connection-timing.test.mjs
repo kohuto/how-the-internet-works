@@ -65,13 +65,13 @@ test('Higher latency shifts every arrival equally without throttling the pipelin
   assert(b.events.some(e=>e.kind==='connection-wait'));assert(b.frames>a.frames);
 });
 
-test('Recipient settings affect only the Instagram-to-recipient leg, including its own outbound registration',()=>{
+test('Recipient settings affect only the Instagram-to-recipient leg, including its own outbound message check',()=>{
   const normal=new Simulation(),changed=new Simulation();changed.net.setConnectionProfile('friend',profile('high','high'));
   const a=send(normal,'image'),b=send(changed,'image');content(changed,9);
   assert.deepEqual(upload(a).map(e=>e.at),upload(b).map(e=>e.at));
   const received=r=>r.events.filter(e=>e.kind==='hop'&&e.link==='friend-uplink'&&e.packetKind==='ig-delivery');
   assert(gaps(received(b)).every(g=>g===1));assert(gaps(received(a)).every(g=>g===3));
-  assert(b.events.some(e=>e.kind==='connection-wait'&&e.packetKind==='ig-connect'));
+  assert(b.events.some(e=>e.kind==='connection-wait'&&e.packetKind==='ig-check'));
 });
 
 test('Applying profiles during a run preserves that run; repeating uses the new values and identical attachment',()=>{
