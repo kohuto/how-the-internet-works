@@ -109,13 +109,18 @@
     if(!resumeMessage())render();
     $('#monitor-content [data-access-mode][aria-pressed="true"]')?.focus({preventScroll:true});
   }
+  function setDeviceHelpOpen(open) {
+    const help=$('#device-help'),show=open&&!help.hidden;
+    help.dataset.open=String(show);
+    $('#device-help-content').hidden=!show;
+    $('#device-help-trigger').setAttribute('aria-expanded',String(show));
+  }
   function organizeDeviceHelp(body) {
-    const notes=[...body.querySelectorAll('[data-device-help]')];
-    if(!notes.length)return;
-    const help=document.createElement('details');
-    help.className='device-help';help.dataset.detailKey='device-help';
-    const summary=document.createElement('summary');summary.textContent='Nápověda';help.append(summary);
-    const content=document.createElement('div');content.className='device-help-content';help.append(content);
+    const notes=ui.deviceOpen?[...body.querySelectorAll('[data-device-help]')]:[];
+    const help=$('#device-help'),content=$('#device-help-content');
+    help.hidden=!notes.length;$('#device-content').classList.toggle('has-device-help',!!notes.length);
+    content.replaceChildren();
+    if(!notes.length){setDeviceHelpOpen(false);return;}
     const topics=new Map();
     for(const note of notes) {
       const topic=note.dataset.deviceHelp;
@@ -125,7 +130,6 @@
       }
       topics.get(topic).append(note);
     }
-    body.append(help);
   }
   function portList(n) {
     return `<div class="port-list">${Object.values(n.interfaces).filter(i=>net.linkAvailable(net.links[i.link])).map(i=> {const l=net.links[i.link],peer=net.nodes[net.peer(l,n.id)];return `<div class="port-item ${net.isActive(l)?'':'off'}"><i class="port-led"></i><code>${i.port}</code><span>${esc(net.displayName(peer))}</span>${['switch','router','terminal','bts'].includes(n.type)?'':`<button data-select-link="${l.id}" aria-label="Otevřít spoj ${esc(net.displayLinkName(l))}">↗</button>`}</div>`;}).join('')}</div>`;
@@ -302,6 +306,8 @@
     const infoOpen=ui.deviceOpen||ui.linkOpen||ui.packetOpen;
     const deviceKey=infoOpen?`${ui.selection.kind}:${ui.selection.id}`:'',sameDevice=deviceKey!==''&&deviceKey===deviceViewKey;
     const deviceScroll=sameDevice?$('#device-body').scrollTop:0;
+    const helpScroll=sameDevice?$('#device-help-content').scrollTop:0;
+    if(!sameDevice)setDeviceHelpOpen(false);
     const expanded=sameDevice?[...document.querySelectorAll('#device-body details[open]')].map(d=>d.dataset.detailKey||d.querySelector('summary')?.textContent):[];
     const deviceToggleFocused=sameDevice&&focused?.matches('#device-content [data-action="toggle-node"], #device-content [data-action="toggle-link"]')?{action:focused.dataset.action,id:focused.dataset.id}:null;
     deviceViewKey=deviceKey;
@@ -332,8 +338,9 @@
     const controls=$('#device-controls');controls.hidden=!selectedNode&&!selectedLink;
     controls.innerHTML=selectedNode?button('toggle-node',selectedNode.on?'Vypnout zařízení':'Zapnout zařízení',`toggle-button device-control-button ${selectedNode.on?'danger':''}`,`data-id="${selectedNode.id}"`):selectedLink?button('toggle-link',selectedLink.on?'Odpojit spoj':'Obnovit spoj',`toggle-button device-control-button ${selectedLink.on?'danger':''}`,`data-id="${selectedLink.id}"`):'';
     $('#device-body').innerHTML=ui.packetOpen?packetDetail(ui.selection.id):ui.linkOpen?linkDetail(ui.selection.id):ui.deviceOpen?deviceDetail(net.nodes[ui.selection.id]):'';
-    if(ui.deviceOpen)organizeDeviceHelp($('#device-body'));
-    pruneUnavailable($('#device-body'));pruneUnavailable($('#monitor-content'));
+    organizeDeviceHelp($('#device-body'));
+    pruneUnavailable($('#device-content'));pruneUnavailable($('#monitor-content'));
+    $('#device-help-content').scrollTop=helpScroll;
     if(infoOpen) {
       document.querySelectorAll('#device-body details').forEach(d=>{d.open=expanded.includes(d.dataset.detailKey||d.querySelector('summary')?.textContent);});
       $('#device-body').scrollTop=deviceScroll;
@@ -584,6 +591,16 @@
   }
   $('#zoom-in').addEventListener('click',()=>map.zoom(.78));$('#zoom-out').addEventListener('click',()=>map.zoom(1.28));
   $('#signal-coverage').addEventListener('change',e=>{map.signalCoverage=e.target.checked;map.render();});
+  const deviceHelp=$('#device-help'),helpTrigger=$('#device-help-trigger');
+  deviceHelp.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch'&&matchMedia('(any-hover: hover)').matches)setDeviceHelpOpen(true);});
+  deviceHelp.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')setDeviceHelpOpen(false);});
+  helpTrigger.addEventListener('focus',()=>{if(helpTrigger.matches(':focus-visible'))setDeviceHelpOpen(true);});
+  helpTrigger.addEventListener('click',e=>{
+    const hovering=e.pointerType==='mouse'&&matchMedia('(any-hover: hover)').matches;
+    setDeviceHelpOpen(hovering||helpTrigger.getAttribute('aria-expanded')!=='true');
+  });
+  deviceHelp.addEventListener('focusout',e=>{if(!deviceHelp.contains(e.relatedTarget))setDeviceHelpOpen(false);});
+  document.addEventListener('pointerdown',e=>{if(!deviceHelp.contains(e.target))setDeviceHelpOpen(false);});
   $('#toggle-explanation').addEventListener('click',e=>{
     const button=e.currentTarget,show=button.getAttribute('aria-expanded')!=='true';
     $('#transmission-explanation').hidden=!show;
@@ -605,6 +622,7 @@
   const settingsPanel=new globalThis.InternetLab.SettingsPanel({getSettings:()=>net.settings,onOpen:()=>{settingsWasPlaying=playing;stop();render();},onApply:applySettings,onClose:()=>{if(settingsWasPlaying)resumePlayback();else render();}});
   document.addEventListener('keydown',e=> {
     if(settingsPanel.dialog.open)return;
+    if(e.key==='Escape'&&!$('#device-help-content').hidden){e.preventDefault();helpTrigger.focus({preventScroll:true});setDeviceHelpOpen(false);return;}
     if(ui.monitorOpen&&$('.gmail-application')){
       const draft=ui.mailComposer[ui.monitorDevice];
       if(e.key==='Escape'&&draft.composeOpen){e.preventDefault();clearMailComposer();render();$('[data-gmail-action="compose"]')?.focus({preventScroll:true});return;}
