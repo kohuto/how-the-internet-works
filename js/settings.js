@@ -22,7 +22,7 @@
     {id:'ads',group:'services',label:'Personalizovaná reklama',description:'E-shop a Zprávy se společným reklamním serverem. Ukáže, jak prohlížení na jednom webu ovlivní reklamu na druhém.',requires:['cookies'],nodes:['shop','news','ads']}
   ];
   const DETAILS=[
-    {id:'devices',label:'Routery a switche',description:'Rozliší chytré křižovatky na routery a switche a zobrazí jejich původní názvy a ikony.'},
+    {id:'devices',label:'Routery a switche',description:'Rozliší chytré křižovatky na routery a switche. Zapne také učení MAC adres a rozesílání neznámých rámců. Bez této volby paket pokračuje jen směrem k cíli.'},
     {id:'mac',label:'MAC tabulky',description:'Naučené adresy, rozhodování, porty a připojené spoje switchů a přístupových bodů. Také podrobnosti spojnic.'},
     {id:'frames',label:'Ethernetové a Wi-Fi rámce',description:'Rozbalovací obal paketu se zdrojovou a cílovou MAC adresou v detailu paketu.'},
     {id:'routes',label:'Směrovací tabulky',description:'Cílové sítě, rozhodování, rozhraní a připojené spoje routerů. Také podrobnosti spojnic.'},

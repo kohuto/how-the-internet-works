@@ -46,6 +46,13 @@
     clientId() {return this.action?.payload.device||'laptop';}
     clientName() {return this.net.nodes[this.clientId()].name;}
     instagramName(device) {return device==='friend'?'Matěj':'Ty';}
+    deviceModeChanged() {
+      for(const n of Object.values(this.net.nodes))if(['switch','ap'].includes(n.type)){n.macTable={};n.lastDecision=null;}
+      if(!this.net.detailEnabled('devices')) {
+        this.queue=this.queue.filter(e=>!e.copy);this.frame=this.frame.filter(e=>!e.copy);
+      }
+      if(this.current?.kind==='switch'||this.current?.copy)this.current={kind:'ready',at:this.time,node:this.current.node,title:'Přenos je připravený pokračovat',description:'Pokračuj přehráním nebo krokováním.'};
+    }
     instagramRecipient() {return this.net.instagram.recipientDevice;}
     instagramEntry() {return this.net.instagram.history.find(m=>m.id===this.net.instagram.id);}
     instagramStatus(status,extra={}) {const entry=this.instagramEntry();if(entry)Object.assign(entry,{status},extra);}
@@ -620,11 +627,12 @@
         const n=this.net.nodes[e.node];if(!n.on)return this.failure(`${n.name} je vypnutý.`,p,n.id);
         if(!e.copy)p.visual={kind:'switch',node:n.id};
         const decision=this.net.switchFrame(n.id,e.inLink,e.frame,p.id);e.decision=decision;
-        e.title=decision.known?`${n.name} zná cílovou MAC adresu`:`${n.name} zatím nezná cílovou MAC adresu`;
-        e.description=`Ze zdrojové adresy se naučí port ${decision.input}. `+(decision.known?`Rámec pošle na ${decision.known}.`:`Kopii pošle na ostatní aktivní porty: ${decision.ports.join(', ')||'žádné'}.`);
+        const direct=decision.action==='direct';
+        e.title=direct?`${n.name} předává paket směrem k cíli`:decision.known?`${n.name} zná cílovou MAC adresu`:`${n.name} zatím nezná cílovou MAC adresu`;
+        e.description=direct?'Paket pokračuje jediným spojem směrem k cíli.':`Ze zdrojové adresy se naučí port ${decision.input}. `+(decision.known?`Rámec pošle na ${decision.known}.`:`Kopii pošle na ostatní aktivní porty: ${decision.ports.join(', ')||'žádné'}.`);
         if(!decision.ports.length) {
           if(e.copy){e.discarded=true;e.title=`${n.name} nemá další port pro kopii rámce`;}
-          else return this.failure('Přepínač nemá aktivní výstupní port pro tento rámec.',p,n.id);
+          else return this.failure(direct?'Zařízení nemá dostupný spoj směrem k cíli.':'Přepínač nemá aktivní výstupní port pro tento rámec.',p,n.id);
         }
         // Wrong-destination copies are observable too; the intended copy is last.
         const outputs=decision.ports.map(port=>this.net.links[n.interfaces[port].link]);

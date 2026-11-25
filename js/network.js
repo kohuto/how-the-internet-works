@@ -568,6 +568,11 @@
     route(id,ip) {return this.nodes[id].routes.filter(r=>contains(r.prefix,ip)).sort((a,b)=>Number(b.prefix.split('/')[1])-Number(a.prefix.split('/')[1]))[0]||null;}
     switchFrame(id,inLink,frame,packetId) {
       const n=this.nodes[id],input=this.port(this.links[inLink],id);
+      if(!this.detailEnabled('devices')) {
+        const out=this.adjacent(id).find(l=>l.id!==inLink&&this.isActive(l)&&this.linkLeadsTo(l,id,frame.dst));
+        const decision={kind:'switch',packetId,input,src:frame.src,dst:frame.dst,learned:null,known:null,ports:out?[this.port(out,id)]:[],action:'direct',version:this.version,table:{...n.macTable}};
+        n.lastDecision=decision;return decision;
+      }
       n.macTable[frame.src]=input;
       const known=n.macTable[frame.dst];
       const ports=known?(known===input?[]:[known]):Object.keys(n.interfaces).filter(p=>p!==input&&this.isActive(this.links[n.interfaces[p].link]));

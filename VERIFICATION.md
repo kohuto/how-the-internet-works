@@ -1,5 +1,15 @@
 # Záznam ověření
 
+## Chytré křižovatky bez rozesílání kopií · 25. listopadu 2026
+
+Vypnutá volba Routery a switche nově mění i předávání ve switchích a Wi-Fi přístupových bodech. Pro přijatý rámec se podle dostupné cesty k cíli vybere jediný aktivní výstup; nevznikají vedlejší kopie a neučí se MAC adresy. Při chybějící cestě přenos skončí s odpovídajícím vysvětlením. Zapnutá volba zachovává původní učení zdrojové MAC, rozeslání neznámého unicastu a přeposlání známého cíle. Zobrazení MAC tabulek, rámců či směrování samo rozesílání nezapne. Nápověda, rozhodnutí zařízení, aktuální kroky i popis volby odpovídají zvolenému režimu.
+
+Přepnutí za běhu zachovává pokus, pakety, serverová data a zapojení. Vyprázdní MAC tabulky a předchozí rozhodnutí přepínacích zařízení, aby další předání odpovídalo novému režimu. Při vypnutí rozlišení se navíc odstraní už naplánované i aktuálně vykreslené vedlejší kopie; původní paket pokračuje. Sestava se kvůli této volbě neobnovuje. README aktualizováno, prostředky `v=176`.
+
+Prošlo všech **388 testů projektu** (`node --test tests/*.test.mjs`). Šest nových scénářů ověřuje první web a místní tisk bez kopií i při zapnutých technických podrobnostech, výběr jediného hostingového zákazníka, selhání při výpadku cílové cesty, ignorování neplatné staré MAC tabulky, původní učení a rozeslání skutečných switchů, přepínání během rozpracovaného přenosu s naplánovanými kopiemi a zjednodušené předávání přes domácí Wi-Fi, mobilní telefon na Wi-Fi, satelit, obě kavárenské cesty, Instagram a VPN. Původní testy obou zobrazení nyní porovnávají stejnou zamýšlenou cestu a hlavičky, zároveň vyžadují rozdíl v kopiích a učení MAC. Samostatná cílená sada 43 testů prošla; syntaxe network.js, simulation.js, app.js a settings.js bez chyb.
+
+V odděleném prohlížeči při 1047 × 858 px zapnuty Wi-Fi, telefon a tiskárna. První HTTP po kabelu v režimu křižovatek měl po celou cestu nejvýše jednu viditelnou značku paketu, žádné kopie ani kroky učení MAC; knihovna se načetla. Zapnutí Routerů a switchů zachovalo stránku a další přenos ukázal u domácího switche rozeslání na p2/p3/p4 a dvě vedlejší značky kopií. Vypnutí přímo v tomto kroku okamžitě odstranilo obě kopie, zachovalo paket 2.1 a dokončilo načtení bez dalšího větvení. Další načtení přes domácí Wi-Fi opět bez kopií. Při 320 × 568 px ověřen popis volby a nastavení bez vodorovného přetékání. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Ověření portů všech částí zprávy · 25. listopadu 2026
 
 Prověřen původní model i skutečné náhledy paketů. Rozdílné porty mezi částmi jednoho spojení se nepotvrdily. Obrázek má 9 paketů notebook → Instagram s dvojicí `51002 → 443` a 9 nových paketů Instagram → Matěj s dvojicí `443 → 52002` (bez NATu a VPN). Video má 35 paketů na každém z těchto samostatných spojení. Záměrně se nesjednocují porty dvou různých spojení ani porty vnitřního a vnějšího VPN paketu. Se zapnutým NATem se porovnávají všechny části ve stejném bodě cesty; překlad na routeru je pro celé spojení jednotný. Kód přenosů ani rozhraní nebylo potřeba měnit.

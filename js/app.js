@@ -164,7 +164,8 @@
     if(d.kind==='nat-drop')return html+`<h3>NAT paket nepředal do domácnosti</h3><p>${esc(d.reason)}</p></div>`;
     if(d.kind==='satellite')return html+`<h3>Předání satelitních dat</h3><p>Vstup: <code>${d.input}</code><br>Výstup: <code>${d.out}</code></p></div>`;
     if(d.kind==='cellular')return html+`<h3>Předání mobilních dat</h3><p>Vstup: <code>${d.input}</code><br>Výstup: <code>${d.out}</code></p></div>`;
-    if(d.kind==='switch')html+=`<h3>${d.known?'Cílová MAC je známá':'Neznámá cílová MAC → rozeslání'}</h3><p>Vstupní port: <code>${d.input}</code></p><p>Zdrojová MAC: <code>${esc(d.src)}</code><br>Cílová MAC: <code>${esc(d.dst)}</code></p><p>Ze <strong>zdrojové</strong> MAC se naučil port ${d.learned}. ${d.known?`Pro cílovou MAC vybral ${d.known}.`:`Cílová MAC v tabulce nebyla. Kopie poslal na ${d.ports.join(', ')||'žádný port'}.`}</p>`;
+    if(d.action==='direct')html+=`<h3>${d.ports.length?'Paket předal směrem k cíli':'Pro cíl není dostupná cesta'}</h3>`;
+    else if(d.kind==='switch')html+=`<h3>${d.known?'Cílová MAC je známá':'Neznámá cílová MAC → rozeslání'}</h3><p>Vstupní port: <code>${d.input}</code></p><p>Zdrojová MAC: <code>${esc(d.src)}</code><br>Cílová MAC: <code>${esc(d.dst)}</code></p><p>Ze <strong>zdrojové</strong> MAC se naučil port ${d.learned}. ${d.known?`Pro cílovou MAC vybral ${d.known}.`:`Cílová MAC v tabulce nebyla. Kopie poslal na ${d.ports.join(', ')||'žádný port'}.`}</p>`;
     else if(!net.detailEnabled('routes'))html+=`<h3>${d.row?'Paket předal dál':'Pro cíl není dostupná cesta'}</h3>`;
     else html+=`<h3>${d.row?'Rozhodnutí podle cílové IP':'Pro cíl není dostupná cesta'}</h3><p>Cílová IP: <code>${d.dst}</code></p>${d.row?`<p>Použitý záznam: <code>${d.row.prefix}</code><br>Výstup: <code>${d.row.out}</code><br>Další uzel: ${d.row.next?`${esc(net.nodes[d.row.next].name)} · ${d.row.nextIp}`:'cílové zařízení v přímo připojené síti'}</p>`:''}`;
     if(d.nat&&net.detailEnabled('nat'))html+=`<h3>NAT · ${d.nat.direction==='out'?'změna zdroje':'obnovení cíle'}</h3>${natComparison(d.nat)}`;
@@ -204,7 +205,7 @@
     if(n.type==='bts')return html+`<p class="hint" data-device-help="Jak zařízení funguje">Spojuje telefon rádiem s připojenou sítí. Přijatá data předává po kabelové přípojce k zařízení ${esc(net.displayName(net.peer(net.adjacent(n.id).find(l=>l.medium==='backhaul'),n.id)))}.</p>${decision(n)}<div class="note-card" data-device-help="Mobilní síť">BTS zajišťuje rádiový přístup. Dál paket pokračuje přes připojené ${net.detailEnabled('devices')?'routery':'chytré křižovatky'} k cíli. Vnitřní IP adresy a TCP segmenty při předání přes BTS zůstávají stejné.</div>`;
     if(n.type==='ap')html+=`<dl class="dl">${definition('Wi-Fi síť',n.id==='cafe-ap'?net.cafeWifi.ssid:n.id==='cabin-ap'?'Chata':n.id==='ap'?'Lipova':'U Mateje')}${n.id==='cafe-ap'?definition('Heslo k Wi-Fi',net.cafeWifi.password):''}</dl><p class="hint" data-device-help="Přepínání v LAN">Přístupový bod propojuje bezdrátová zařízení ${net.detailEnabled('devices')?'se switchem':'s chytrou křižovatkou'} v domácí síti.</p>`;
     if(n.type==='switch'||n.type==='ap') {
-      if(!junction)html+=`<p class="hint" data-device-help="Jak zařízení funguje">${n.type==='ap'?'Přemosťuje Wi-Fi a Ethernet uvnitř jedné LAN.':'Přeposílá ethernetové rámce uvnitř jedné LAN.'} Pro rozhodování používá MAC adresy.</p>`;
+      if(!junction)html+=`<p class="hint" data-device-help="Jak zařízení funguje">${net.detailEnabled('devices')?`${n.type==='ap'?'Přemosťuje Wi-Fi a Ethernet uvnitř jedné LAN.':'Přeposílá ethernetové rámce uvnitř jedné LAN.'} Pro rozhodování používá MAC adresy.`:'Předává paket jediným dostupným spojem směrem k cíli.'}</p>`;
       if(net.detailEnabled('mac')) {
       html+=decision(n);
       html+='<div class="section-label">AKTUÁLNÍ TABULKA MAC ADRES</div>';
@@ -212,7 +213,7 @@
       html+=entries.length?`<table class="data-table"><thead><tr><th>NAUČENÁ ZDROJOVÁ MAC</th><th>PORT</th></tr></thead><tbody>${entries.map(([mac,port])=>`<tr class="${n.lastDecision?.src===mac?'used':''}"><td class="mac-cell">${mac}</td><td>${port}</td></tr>`).join('')}</tbody></table>`:'<p class="empty-table">Tabulka je prázdná.</p>';
       html+=`<div class="section-label">PORTY · STAV PŘEPOSÍLÁNÍ</div>${portList(n)}`;
       }
-      html+=`<div class="note-card" data-device-help="Přepínání v LAN">Všechny aktivní porty patří do jedné LAN a přeposílají. Neznámý unicast se rozesílá na ostatní aktivní porty; cílová MAC se přitom nemění. Tabulka na začátku není předvyplněná. První příchozí rámec přidá zdrojovou adresu a vstupní port.</div>`;
+      html+=`<div class="note-card" data-device-help="Přepínání v LAN">${net.detailEnabled('devices')?'Všechny aktivní porty patří do jedné LAN a přeposílají. Neznámý unicast se rozesílá na ostatní aktivní porty; cílová MAC se přitom nemění. Tabulka na začátku není předvyplněná. První příchozí rámec přidá zdrojovou adresu a vstupní port.':'V tomto režimu se paket nerozkopíruje do dalších zařízení. Učení MAC adres a rozesílání neznámých rámců se zapne volbou Routery a switche.'}</div>`;
     } else if(n.type==='router') {
       if(!junction&&['cabin-router','sat-gateway'].includes(n.id))html+=satelliteInfo(n);
       html+=`${natTable(n)}<p class="hint" data-device-help="Jak zařízení funguje">IP paket předává podle <strong>cílové IP adresy</strong>. Další spoj určuje nejpřesnější odpovídající záznam v tabulce.</p>`;
@@ -278,7 +279,11 @@
     });
   }
   function applySettings(next) {
-    if(net.settings.sameNetwork(next)){net.settings=next;render();return;}
+    if(net.settings.sameNetwork(next)){
+      const devicesChanged=net.detailEnabled('devices')!==next.details.devices;net.settings=next;
+      if(devicesChanged){sim.deviceModeChanged();map.finishAnimations();}
+      render();return;
+    }
     stop();sim.auth.cancel();sim.onAsyncReady=null;settingsWasPlaying=false;
     net=new Network(next);sim=new Simulation(net);
     for(const key of Object.keys(ui))delete ui[key];
