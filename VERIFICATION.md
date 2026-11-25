@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Ovládací tlačítka pouze během přenosu · 25. listopadu 2026
+
+Skupina Pauza / Pokračovat, Krok a Opakovat je skrytá už ve výchozím HTML. Zobrazuje se pouze při modelovém stavu `running`, včetně ruční pauzy a náhledu paketu; po úspěchu, chybě, zastavení nebo čekání na připojení se skryje. Neaktivní Přehrát bylo odstraněno. Samostatný přepínač Vysvětlení zůstává dostupný a zachovává své chování. Síťový model ani automatické spouštění se nemění. README aktualizováno, prostředky `v=178`.
+
+Prošlo všech **9 souvisejících testů** (`node --test tests/transfer-journey.test.mjs`) a kontrola syntaxe app.js. V odděleném prohlížeči při 1047 × 858 px ověřen výchozí stav, otevření a zavření vysvětlení, automatické zahájení HTTP přenosu, stabilní pauza, krok, opakování během přenosu, pokračování a úspěšný návrat načtené knihovny. Tlačítka byla viditelná pouze během rozpracovaného přenosu; otevřené i skryté vysvětlení zachovalo stejnou polohu ovládání. Při 320 × 568 px ověřen výchozí stav, přenos k vypnutému serveru a následná chyba: po ukončení jsou tlačítka skrytá, Vysvětlení zůstává dostupné, výsledek se vrátí do zařízení a dokument nepřetéká vodorovně. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Automatický přenos, kartička zařízení a návrat výsledku · 25. listopadu 2026
 
 Kliknutí na web nebo síťovou akci už nečeká na samostatné Přehrát. Web, formuláře, Instagram, tisk, chatbot, cloud, SMTP/IMAP i správa podvodného webu automaticky rozběhnou stejný prezentační průběh. Původní aplikace nejprve zobrazí svůj skutečný stav načítání/odesílání; monitor se během 500 ms plynule zmenší ke kartičce vlevo dole a odkryje mapu. Kartička obsahuje inertní miniaturu zařízení bez duplicitních ID, jméno, popis akce, stav a Otevřít zařízení. Miniatura je oddělená od ovládání, fokusování i přístupnostního stromu. Po modelovém dokončení následuje 700 ms pro zobrazení doručení a zvětšení původního zařízení se stejnou aplikací. Chyba nebo čekání na offline příjemce vrací pravdivý stav a čitelnou zprávu; lokální tisk potvrzení vytištění. Návrat neoznačí příjemcův Instagram automaticky za přečtený.

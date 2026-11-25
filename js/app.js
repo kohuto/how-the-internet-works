@@ -449,7 +449,8 @@
     const current=sim.current;
     $('#event-title').textContent=net.displayText(current?.title||'')||'Síť čeká na tvůj první přenos';$('#event-description').textContent=net.displayText(current?.description||'')||(ui.monitorOpen?(ui.monitorDevice==='cafe-attacker'?'Otevři MITM a nastav hotspot.':ui.monitorDevice==='cafe'?(net.accessReady('cafe')?'Otevři Prohlížeč a načti web.':'V Připojení nejprve vyber Wi-Fi.'):ui.monitorDevice==='hacker'?'Otevři Správu webu nebo Gmail.':ui.monitorDevice==='cabin'?'Otevři některou z dostupných aplikací na chatě.':ui.monitorDevice==='friend'?'Otevři některou z dostupných aplikací u Matěje.':ui.monitorDevice==='phone'?'Otevři některou z dostupných aplikací v telefonu.':'Na ploše otevři některou z dostupných aplikací.'):'Klikni na notebook v mapě a otevři jeho plochu.');
     $('#run-dot').className=`status-dot ${sim.status}`;
-    $('#play').disabled=ui.packetOpen||sim.status!=='running';$('#play').innerHTML=playing?'Ⅱ <span>Pauza</span>':sim.status==='running'?'▶ <span>Pokračovat</span>':'▶ <span>Přehrát</span>';$('#play').setAttribute('aria-label',playing?'Pozastavit přenos':'Pokračovat v přenosu');
+    $('.transport-buttons').hidden=sim.status!=='running';
+    $('#play').disabled=ui.packetOpen||sim.status!=='running';$('#play').innerHTML=playing?'Ⅱ <span>Pauza</span>':'▶ <span>Pokračovat</span>';$('#play').setAttribute('aria-label',playing?'Pozastavit přenos':'Pokračovat v přenosu');
     $('#step').disabled=ui.packetOpen||sim.status!=='running'||sim.auth.working;$('#repeat').disabled=ui.packetOpen||!sim.lastAction;
     $('#signal-coverage-control').hidden=!net.visibleNodes().some(n=>['ap','bts','satellite'].includes(n.type));
     map.render(current,ui.selection,ui.selection.kind==='packet'?ui.selection.id:null,animate,ANIMATION_DELAY,sim.packets,sim.frame);
