@@ -152,3 +152,6 @@
 }
 @media(pointer:coarse){.browser-address input,.browser-account input,.browser-site-section textarea{font-size:16px}.browser-icon,.browser-tab-close{min-height:36px}.browser-bookmarks button{min-height:36px}}
 @media(prefers-reduced-motion:reduce){.browser-loading .browser-history [data-browser-nav=reload] svg{animation:none}}
+
+/* History arrows are decorative; reloading remains an interactive control. */
+.browser-icon-disabled,.browser-icon-disabled:hover{background:none;opacity:.4;cursor:default;pointer-events:none}

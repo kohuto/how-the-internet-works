@@ -558,10 +558,9 @@
       else if(b.dataset.browserClose){if(!browserNavigation.close(device,b.dataset.browserClose,busy))return;}
       else {
         const action=b.dataset.browserNav;
-        if(['back','forward','reload'].includes(action)) {
+        if(action==='reload') {
           if(busy)return;
-          const address=action==='reload'?tab.url:browserNavigation.travel(device,action==='back'?-1:1);
-          if(!address)return;ui[addressKey(device)]=address;startAction('web',action==='reload'?{browserReload:true}:{});return;
+          if(!tab.url)return;ui[addressKey(device)]=tab.url;startAction('web',{browserReload:true});return;
         }
         if(action==='new'){if(!browserNavigation.add(device,busy))return;}
         else if(action==='menu'||action==='security')state.panel=state.panel===action?null:action;

@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Neaktivní ikony Zpět a Vpřed v prohlížeči · 25. listopadu 2026
+
+Šipky historie jsou nyní pouze dekorativní prvky span se stejným SVG a rozměry jako dříve. Zachovávají zeslabený vzhled neaktivního ovládání, nemají akci, fokus ani položku v přístupnostním stromu a nereagují na ukazatel. Z obsluhy rozhraní byla odstraněna navigace zpět/vpřed; záznamy adres a správa karet zůstávají zachované. Obnovit stránku nadále spouští skutečný nový požadavek. README aktualizováno, prostředky `v=182`.
+
+Prošlo všech **8 souvisejících testů** (`node --test tests/browser-navigation.test.mjs`) a kontroly syntaxe app.js a browser-ui.js. V odděleném prohlížeči při 773 × 858 px ověřen původní vzhled prázdné karty a poté návštěva Knihovny a E-shopu: obě šipky zůstaly neinteraktivní, pokus o kliknutí ani fokus nezměnil adresu, událost ani nespustil přenos. Obnovení zůstalo aktivní, zahájilo nový přenos a načetlo stejnou adresu. Při 320 × 568 px zůstaly obě ikony viditelné, neinteraktivní a bez vodorovného přetékání. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Rychlost přehrávání a zrušení přenosu · 25. listopadu 2026
 
 Ovládání rozpracovaného přenosu nově obsahuje přístupný výběr Rychlost přehrávání 1× / 2× / 4× a tlačítko Zrušit přenos. Rychlost mění reálné prodlevy přehrávání a rychlost stávajících i nových animací paketů, se zachováním pozice, zbývajícího času a pauzy. Nemění modelový čas, rozestupy v síti, obsah ani pořadí kroků; nenahrazuje šířku pásma a latenci. Volba zůstává při dalších přenosech a změně sestavy, po obnovení stránky začíná na 1×. Na úzké obrazovce jsou nové volby nad původními tlačítky; Vysvětlení a přehrávání zůstávají zarovnané dole. Mimo rozpracovaný přenos je celé ovládání skryté.
