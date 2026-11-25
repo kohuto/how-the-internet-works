@@ -613,7 +613,7 @@
           else if(['terminal','satellite'].includes(n.type))this.next([{kind:'satellite-relay',node:n.id,inLink:l.id,frame:e.frame,packet:p}]);
           else if(n.type==='bts')this.next([{kind:'radio-relay',node:n.id,inLink:l.id,frame:e.frame,packet:p}]);
           else if(n.type==='router') this.next([{kind:'route',node:n.id,inLink:l.id,packet:p,frame:e.frame}]);
-          else if(n.ip===p.dst) this.next([{kind:'deliver',node:n.id,packet:p,frame:e.frame}]);
+          else if(n.ip===p.dst||n.id==='vpn'&&!this.net.detailEnabled('nat')&&this.net.vpnClientFor(p.dst)) this.next([{kind:'deliver',node:n.id,packet:p,frame:e.frame}]);
           else return this.failure('IP paket dorazil na jiné cílové zařízení.',p,e.to);
         }
       } else if(e.kind==='switch') {

@@ -1,5 +1,5 @@
 /* Local teaching model: opaque VPN envelopes, endpoint-only inner packets,
-   real model routes and separate exit NAT. No actual VPN or cryptography. */
+   real model routes and optional exit NAT. No actual VPN or cryptography. */
 (() => {
   'use strict';
   const encoder=new TextEncoder();
@@ -46,6 +46,7 @@
     exit(p,client) {
       const n=this.net,c=n.vpn.clients[client];
       if(p.ttl<=1)throw new Error('Vnitřní paket vyčerpal TTL na VPN serveru.');p.ttl--;
+      if(!n.detailEnabled('nat')){this.remember(p,client,'out');return;}
       let row=n.vpn.rows.find(r=>r.client===client&&r.epoch===c.epoch&&r.protocol===p.protocol&&r.insideIp===p.src&&r.insidePort===p.sport&&r.remoteIp===p.dst&&r.remotePort===p.dport);
       if(!row){
         const port=n.vpn.nextPort++;if(n.vpn.nextPort>65535)n.vpn.nextPort=55000;
@@ -65,11 +66,14 @@
         p.state='transit';this.sim.next([{kind:'vpn-unpack',node:e.node,packet:p,title:e.node==='vpn'?'VPN server ověřuje a rozbaluje VPN obal':'Zařízení rozbaluje odpověď z VPN tunelu',description:'Z vnějšího paketu získá původní vnitřní paket.'}]);
         e.description='Dorazil chráněný VPN obal. Jeho vnitřní IP a obsah nejsou na síti čitelné.';return;
       }
-      const n=this.net,row=n.vpn.rows.find(r=>r.protocol===p.protocol&&r.outsidePort===p.dport&&r.remoteIp===p.src&&r.remotePort===p.sport);
-      if(!row||!n.vpnPeerValid(row.client))return this.sim.failure('VPN server nemá platný záznam pro návrat tohoto paketu. Nechráněné doručení se nepoužije.',p,'vpn');
-      const before=n.packetHeader(p);p.dst=row.insideIp;p.dport=row.insidePort;p.ttl--;row.inbound+=p.payload.packetCount||1;
-      n.recordNat('vpn',p,row,'in',before);this.remember(p,row.client,'in');
-      p.state='transit';this.sim.next([this.event(p,'vpn','in')]);e.title='VPN server přijal odpověď z internetu';e.description='Podle svého záznamu obnovil vnitřní adresu zařízení. Nyní odpověď zabalí do VPN.';
+      const n=this.net,nat=n.detailEnabled('nat'),row=nat?n.vpn.rows.find(r=>r.protocol===p.protocol&&r.outsidePort===p.dport&&r.remoteIp===p.src&&r.remotePort===p.sport):null,client=nat?row?.client:n.vpnClientFor(p.dst);
+      if(!client||client!==p.destination||!n.vpnPeerValid(client))return this.sim.failure('VPN server nemá platný záznam pro návrat tohoto paketu. Nechráněné doručení se nepoužije.',p,'vpn');
+      if(nat){
+        const before=n.packetHeader(p);p.dst=row.insideIp;p.dport=row.insidePort;row.inbound+=p.payload.packetCount||1;
+        n.recordNat('vpn',p,row,'in',before);
+      }
+      p.ttl--;this.remember(p,client,'in');
+      p.state='transit';this.sim.next([this.event(p,'vpn','in')]);e.title='VPN server přijal odpověď z internetu';e.description=nat?'Podle svého záznamu obnovil vnitřní adresu zařízení. Nyní odpověď zabalí do VPN.':'Cílová IP patří zařízení ve VPN. Server odpověď zabalí do jeho šifrovaného tunelu.';
     }
     handle(e) {
       const s=this.sim,p=e.packet;
@@ -82,7 +86,7 @@
           const r=this.restore(p,e.node);
           if(r.direction==='out'){
             this.exit(p,r.client);e.title='VPN server sejmul vnější obal a předává původní paket';
-            e.description=p.payload.record?'Obsah uvnitř zůstává šifrovaný pomocí TLS. Cílový server uvidí veřejnou IP VPN serveru.':p.connection==='http'?'VPN ochrana zde končí. HTTP obsah je na cestě k webu čitelný; web uvidí IP VPN serveru.':'Původní paket pokračuje do internetu z IP VPN serveru. VPN obal byl odstraněn.';
+            e.description=(p.payload.record?'Obsah uvnitř zůstává šifrovaný pomocí TLS.':p.connection==='http'?'VPN ochrana zde končí. HTTP obsah je na cestě k webu čitelný.':'VPN obal byl odstraněn.')+(this.net.detailEnabled('nat')?' Cílový server uvidí veřejnou IP VPN serveru.':' Cílový server uvidí vnitřní IP zařízení ve VPN.');
             s.next([s.originate(p,'vpn')]);
           }else s.next([{kind:'deliver',node:r.client,packet:p,title:'Zařízení předává rozbalený paket své aplikaci',description:'Případné TLS ještě musí dešifrovat cílová aplikace.'}]);
         }

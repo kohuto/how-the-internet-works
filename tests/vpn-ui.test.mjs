@@ -29,10 +29,10 @@ test('VPN app follows the real tunnel lifecycle without claiming a connection be
   assert(view(s).includes('vpn-ready'));assert(view(s).includes('aria-label="Odpojit VPN"'));
   assert(!view(s).includes('vpn-connected'));assert.deepEqual(n.access.laptop,access);
   web(s);assert(n.vpnPeerValid('laptop'));assert(view(s).includes('vpn-connected'));
-  assert.equal(n.server.lastRequest.sourceIp,n.nodes.vpn.ip);
+  assert.equal(n.server.lastRequest.sourceIp,n.vpn.clients.laptop.ip);
   assert(n.vpn.clients.laptop.sent>0&&n.vpn.clients.laptop.received>0);
   assert(n.setVPN('laptop',false));assert(!n.vpnPeerValid('laptop'));assert(view(s).includes('vpn-off'));
-  web(s);assert.notEqual(n.server.lastRequest.sourceIp,n.nodes.vpn.ip);
+  web(s);assert.equal(n.server.lastRequest.sourceIp,n.nodes.laptop.ip);
 });
 
 test('Unavailable VPN is shown honestly, can be disabled, and never falls back to an unprotected transfer',()=>{

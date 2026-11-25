@@ -40,7 +40,7 @@ test('The base is a usable web network without optional hosts or DNS transfers',
   assert.deepEqual(events.find(e=>e.kind==='switch').decision.ports,['p3']);
   assert(net.nodes.switch.macTable[net.nodes.laptop.mac]);
   assert(net.nodes.home.routes.length>0);
-  assert(net.nat.home.rows.length>0,'NAT still operates with its display disabled');
+  assert.equal(net.nat.home.rows.length,0,'NAT is disabled together with the extension');
   assert(Object.values(net.settings.details).every(v=>!v));
 });
 test('Dependencies are added transitively and stay enabled until their dependents are removed',()=>{
@@ -233,10 +233,10 @@ test('One advertising scenario enables both websites and their partner, then rem
   for(const id of nodes)assert(!shared.nodeAvailable(id),id);
   for(const id of ['hacker','phish-web','peer','transit-i','transit-j','transit-z'])assert(shared.nodeAvailable(id),id);
 });
-test('Showing details changes no forwarding, data delivery or address translation',()=>{
+test('Showing presentation details changes no forwarding or data delivery',()=>{
   const settings=new LabSettings(),net=new Network(settings),sim=new Simulation(net);
   sim.start('web',{address:'http://knihovna.test/'});const first=finish(sim).filter(e=>e.kind==='hop').map(e=>[e.from,e.to]);
-  settings.details={mac:true,frames:true,routes:true,nat:true,ttl:true,headers:true};
+  settings.details={mac:true,frames:true,routes:true,nat:false,ttl:true,headers:true};
   const same=new Network(settings),second=new Simulation(same);second.start('web',{address:'http://knihovna.test/'});
   assert.deepEqual(finish(second).filter(e=>e.kind==='hop').map(e=>[e.from,e.to]),first);
   assert.deepEqual(same.nat.home.rows,net.nat.home.rows);

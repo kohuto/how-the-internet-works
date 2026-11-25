@@ -151,14 +151,14 @@ test('VPN still hides the outer mail payload with TLS disabled and exposes clear
 
 test('Plain SMTP retry is idempotent and interrupted IMAP preserves the old snapshot and UID flags',()=>{
   const s=create(['mail']);s.net.toggleNode('friend');assert(s.start('mail-send',draft));
-  until(s,()=>s.mail.entry.accepted);s.net.clearNat('home');finish(s,'failed');
+  until(s,()=>s.mail.entry.accepted);s.net.toggleLink('uplink');finish(s,'failed');
   assert.equal(s.net.mail.boxes.friend.length,1);assert.equal(s.net.phishing.clients.laptop.sent.length,0);
-  assert(s.repeat());finish(s);assert.equal(s.net.mail.boxes.friend.length,1);assert.equal(s.net.phishing.clients.laptop.sent.length,1);
+  s.net.toggleLink('uplink');assert(s.repeat());finish(s);assert.equal(s.net.mail.boxes.friend.length,1);assert.equal(s.net.phishing.clients.laptop.sent.length,1);
   s.net.toggleNode('friend');run(s,'mail-check',{device:'friend'});
   const body='Řádek s 🐎\n..dva body\n.\n';run(s,'mail-send',{...draft,body});
   assert(s.start('mail-check',{device:'friend'}));until(s,()=>packets(s,'imap-response').some(p=>p.state==='delivered'));
-  s.net.clearNat('friend-home');finish(s,'failed');assert.equal(s.net.phishing.clients.friend.items.length,1);
-  assert(s.repeat());finish(s);assert.deepEqual(s.net.phishing.clients.friend.items.map(m=>m.uid),[1,2]);assert.equal(s.net.phishing.clients.friend.inbox.body,body);
+  s.net.toggleLink('friend-uplink');finish(s,'failed');assert.equal(s.net.phishing.clients.friend.items.length,1);
+  s.net.toggleLink('friend-uplink');assert(s.repeat());finish(s);assert.deepEqual(s.net.phishing.clients.friend.items.map(m=>m.uid),[1,2]);assert.equal(s.net.phishing.clients.friend.inbox.body,body);
   run(s,'mail-seen',{device:'friend',messageId:'mail-1'});run(s,'mail-check',{device:'friend'});
   assert.deepEqual(s.net.phishing.clients.friend.items.map(m=>m.seen),[true,false]);
 });

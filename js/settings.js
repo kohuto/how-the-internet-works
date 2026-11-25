@@ -26,7 +26,7 @@
     {id:'mac',label:'MAC tabulky',description:'Naučené adresy, rozhodování, porty a připojené spoje switchů a přístupových bodů. Také podrobnosti spojnic.'},
     {id:'frames',label:'Ethernetové a Wi-Fi rámce',description:'Rozbalovací obal paketu se zdrojovou a cílovou MAC adresou v detailu paketu.'},
     {id:'routes',label:'Směrovací tabulky',description:'Cílové sítě, rozhodování, rozhraní a připojené spoje routerů. Také podrobnosti spojnic.'},
-    {id:'nat',label:'NAT',description:'Tabulky a záznamy překladu IP adres a portů v routerech.'},
+    {id:'nat',label:'NAT',description:'Zapne překlad IP adres a portů v routerech a na výstupu VPN, včetně tabulek. Bez něj si paket zachová adresy zařízení. Změna obnoví sestavu.'},
     {id:'ttl',label:'TTL',description:'Hodnota životnosti v IP hlavičce paketu.'},
     {id:'headers',label:'IP a TCP hlavička',description:'Oddělené IP a TCP/UDP hlavičky. U TCP se místo zjednodušeného pořadí zobrazí skutečné číslo SEQ.'}
   ];
@@ -48,7 +48,7 @@
       const selected=new Set(this.selected);on?selected.add(id):selected.delete(id);
       return new LabSettings({features:[...selected],details:this.details});
     }
-    sameNetwork(other) {return FEATURES.every(f=>this.has(f.id)===other.has(f.id));}
+    sameNetwork(other) {return this.details.nat===other.details.nat&&FEATURES.every(f=>this.has(f.id)===other.has(f.id));}
     nodeEnabled(node) {
       if(['ap','friend-ap','cabin-ap'].includes(node.id)&&!this.has('wifi'))return false;
       if(node.enabledBy)return !node.enabledBy.length||node.enabledBy.some(id=>this.has(id));

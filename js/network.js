@@ -446,15 +446,18 @@
         const uplink=this.links[this.connectionLink('phone')];
         if(uplink)domains.push({prefix:MOBILE,router:this.peer(uplink,this.access.phone.tower),link:uplink.id});
       }
+      // Without NAT, this teaching model routes client addresses directly,
+      // including tunnel addresses whose next host is the VPN endpoint.
+      if(!this.detailEnabled('nat'))for(const c of Object.values(this.vpn.clients))if(c.enabled)domains.push({prefix:`${c.ip}/32`,router:'vpn-router',link:'vpn-lan',host:'vpn'});
       for(const n of Object.values(this.nodes).filter(n=>n.type==='router')) {
         n.routes=[]; if(!n.on)continue;
         for(const d of domains) {
-          if(d.private&&n.id!==d.router)continue;
+          if(d.private&&this.detailEnabled('nat')&&n.id!==d.router)continue;
           if(!this.isActive(this.links[d.link]))continue;
           if(d.prefix.endsWith('/30')&&this.adjacent(n.id).some(l=>l.prefix===d.prefix&&this.isActive(l)))continue;
           const path=this.shortest(n.id,d.router); if(!path)continue;
           const next=path.slice(1).find(id=>this.nodes[id].type==='router'); const l=path[1]?this.adjacent(n.id).find(l=>this.peer(l,n.id)===path[1]):this.links[d.link];
-          n.routes.push({prefix:d.prefix,out:this.port(l,n.id),link:l.id,next:next||null,nextIp:next?Object.values(this.nodes[next].interfaces).find(i=>i.prefix===l.prefix)?.ip:null,metric:path.length-1,connected:!next});
+          n.routes.push({prefix:d.prefix,out:this.port(l,n.id),link:l.id,next:next||null,nextIp:next?Object.values(this.nodes[next].interfaces).find(i=>i.prefix===l.prefix)?.ip:null,metric:path.length-1,connected:!next,...(d.host?{host:d.host}:{})});
         }
         for(const l of this.adjacent(n.id).filter(l=>l.prefix?.endsWith('/30')&&this.isActive(l))) {
           n.routes.push({prefix:l.prefix,out:this.port(l,n.id),link:l.id,next:null,nextIp:null,metric:0,connected:true});
@@ -493,6 +496,7 @@
       p.natHistory??=[];p.natHistory.push(trace);return trace;
     }
     natIncoming(id,p,inLink) {
+      if(!this.detailEnabled('nat'))return null;
       const nat=this.nat[id];if(!nat||p.dst!==this.natAddress(id))return null;
       if(inLink!==nat.wanLink)return {blocked:true,reason:'Přístup na vlastní veřejnou adresu zevnitř (hairpin NAT) se v tomto modelu nepoužívá.'};
       const row=nat.rows.find(r=>r.protocol===p.protocol&&r.outsidePort===p.dport&&r.remoteIp===p.src&&r.remotePort===p.sport);
@@ -501,6 +505,7 @@
       return this.recordNat(id,p,row,'in',before);
     }
     natOutgoing(id,p,inLink,outLink) {
+      if(!this.detailEnabled('nat'))return null;
       const nat=this.nat[id];if(!nat||inLink!==nat.lanLink||outLink!==nat.wanLink||!contains(nat.lan,p.src))return null;
       let row=nat.rows.find(r=>r.protocol===p.protocol&&r.insideIp===p.src&&r.insidePort===p.sport&&r.remoteIp===p.dst&&r.remotePort===p.dport);
       if(!row) {
@@ -521,8 +526,9 @@
     }
     instagramChannel(device) {
       const c=this.instagramChannels[device];if(!c||c.insideIp!==this.nodes[device].ip||!this.accessReady(device))return null;
-      if(c.vpn)return this.vpnPeerValid(device)&&c.epoch===this.vpn.clients[device].epoch&&this.vpn.rows.some(r=>r.client===device&&r.protocol==='TCP'&&r.insidePort===c.insidePort&&r.remoteIp===this.nodes.instagram.ip&&r.remotePort===443&&r.outsidePort===c.port)?c:null;
+      if(c.vpn)return this.vpnPeerValid(device)&&c.epoch===this.vpn.clients[device].epoch&&(this.detailEnabled('nat')?this.vpn.rows.some(r=>r.client===device&&r.protocol==='TCP'&&r.insidePort===c.insidePort&&r.remoteIp===this.nodes.instagram.ip&&r.remotePort===443&&r.outsidePort===c.port):c.ip===this.vpn.clients[device].ip&&c.port===c.insidePort)?c:null;
       if(this.vpn.clients[device]?.enabled)return null;
+      if(!this.detailEnabled('nat'))return c.ip===c.insideIp&&c.port===c.insidePort?c:null;
       const router=this.natRouterFor(device);
       if(router&&!this.nat[router].rows.some(r=>r.protocol==='TCP'&&r.insideIp===c.insideIp&&r.insidePort===c.insidePort&&r.remoteIp===this.nodes.instagram.ip&&r.remotePort===443&&r.outsidePort===c.port))return null;
       return c;
@@ -538,8 +544,10 @@
     vpnPeerValid(id) {
       const c=this.vpn.clients[id],p=c?.peer;if(!c?.enabled||!p||p.epoch!==c.epoch||p.physicalIp!==this.nodes[id].ip||!this.accessReady(id)||!this.physicalCanReach(id,'vpn'))return false;
       const router=this.natRouterFor(id);
-      return !router||this.nat[router].rows.some(r=>r.protocol==='UDP'&&r.insideIp===p.physicalIp&&r.insidePort===c.port&&r.outsidePort===p.port&&r.remoteIp===this.nodes.vpn.ip&&r.remotePort===51820);
+      if(!this.detailEnabled('nat')||!router)return p.ip===p.physicalIp&&p.port===c.port;
+      return this.nat[router].rows.some(r=>r.protocol==='UDP'&&r.insideIp===p.physicalIp&&r.insidePort===c.port&&r.outsidePort===p.port&&r.remoteIp===this.nodes.vpn.ip&&r.remotePort===51820);
     }
+    vpnClientFor(ip) {return Object.keys(this.vpn.clients).find(id=>this.vpn.clients[id].enabled&&this.vpn.clients[id].ip===ip);}
     canReach(from,to) {
       if(this.vpn.clients[from]?.enabled&&!['home','friend','cabin','hacker','cafe'].includes(this.nodes[to].region))return this.physicalCanReach(from,'vpn')&&this.physicalCanReach('vpn',to);
       if(this.vpn.clients[to]?.enabled&&!['home','friend','cabin','hacker','cafe'].includes(this.nodes[from].region))return this.physicalCanReach(from,'vpn')&&this.physicalCanReach('vpn',to);
@@ -592,7 +600,7 @@
       const l=this.links[row.link],iface=this.iface(id,l);
       if(['satellite','satellite-access'].includes(l.medium))return {link:l,frame:{satellite:true,target:ip},row};
       if(l.medium==='backhaul')return {link:l,frame:{cellular:true,target:ip},row};
-      const target=row.next?this.iface(row.next,l):l.prefix.endsWith('/30')?this.iface(this.peer(l,id),l):this.nodes[this.hostId(ip)];
+      const target=row.next?this.iface(row.next,l):l.prefix.endsWith('/30')?this.iface(this.peer(l,id),l):this.nodes[row.host||this.hostId(ip)];
       if(!target)return null;
       return {link:l,frame:{src:iface.mac,dst:target.mac},row};
     }
