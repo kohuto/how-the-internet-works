@@ -1,5 +1,13 @@
 # Záznam ověření
 
+## Ověření portů všech částí zprávy · 25. listopadu 2026
+
+Prověřen původní model i skutečné náhledy paketů. Rozdílné porty mezi částmi jednoho spojení se nepotvrdily. Obrázek má 9 paketů notebook → Instagram s dvojicí `51002 → 443` a 9 nových paketů Instagram → Matěj s dvojicí `443 → 52002` (bez NATu a VPN). Video má 35 paketů na každém z těchto samostatných spojení. Záměrně se nesjednocují porty dvou různých spojení ani porty vnitřního a vnějšího VPN paketu. Se zapnutým NATem se porovnávají všechny části ve stejném bodě cesty; překlad na routeru je pro celé spojení jednotný. Kód přenosů ani rozhraní nebylo potřeba měnit.
+
+Přidána sada šesti regresních testů message-ports.test.mjs. Kontroluje zdrojový i cílový port při vytvoření a doručení každé části i na každém skutečně projetém spoji. Zahrnuje delší text, obrázek a video v obou směrech se všemi čtyřmi kombinacemi NAT/VPN, port odpovědi podle přijaté kontroly zpráv, přesnou shodu složených bajtů, domácí Wi-Fi, mobilní data a satelit. Stejná invarianta se ověřuje pro segmentované SMTP/IMAP, chatbot a cloud s volitelným NATem a TLS. Všech šest nových testů prošlo. Následná sada **71 souvisejících testů** (message-ports, media, instagram-chat, nat, vpn, mail a optional-nat) prošla bez chyby. README vysvětluje rozdíl obou spojení; verze prostředků zůstává v175, protože se mění jen testy a dokumentace.
+
+V odděleném prohlížeči při 1047 × 858 px zapnut pouze Instagram a odeslán obrázek. V jednom zastaveném kroku porovnáno sedm současně viditelných odchozích částí 3–9: všechny zobrazily `192.168.10.10 → 203.0.113.80`, porty `51002 → 443`. Ve druhé fázi porovnáno pět současně viditelných částí 1–5: všechny zobrazily `203.0.113.80 → 172.16.20.10`, porty `443 → 52002`. Doručení obrázku dokončeno, konzole bez chyb a varování. Uživatelská karta nezměněna.
+
 ## NAT pouze po zapnutí rozšíření · 25. listopadu 2026
 
 Volba NAT už řídí samotný překlad IP adres a portů, ne jen viditelnost tabulek. Výchozí model nepřekládá zdroj ani cíl, nevytváří NAT záznamy ani historii a směruje odpovědi přímo k původním klientským adresám. HTTP požadavek po celé cestě zachovává `192.168.10.10:51000 → 203.0.113.10:80`; odpověď jde na adresu notebooku. Platí také pro DNS, TLS, poštu, Instagram, chatbot, cloud, všechny domácnosti, Wi-Fi, mobilní data, satelit a kavárnu. Bez NATu se výukově směrují i soukromé sítě; při zapnutí NATu se obnoví původní izolace soukromých prefixů a překlady ve všech pěti hraničních routerech.
