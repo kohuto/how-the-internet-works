@@ -555,7 +555,14 @@
       if(b.dataset.browserUrl){if(busy)return;ui[addressKey(device)]=b.dataset.browserUrl;startAction('web');return;}
       if(b.dataset.browserPage){tab.page=b.dataset.browserPage;state.panel=null;render();return;}
       if(b.dataset.browserTab){if(!browserNavigation.select(device,b.dataset.browserTab,busy))return;}
-      else if(b.dataset.browserClose){if(!browserNavigation.close(device,b.dataset.browserClose,busy))return;}
+      else if(b.dataset.browserClose){
+        const last=state.tabs.length===1;
+        if(!browserNavigation.close(device,b.dataset.browserClose,busy))return;
+        if(last){
+          if(journey.current?.device===device&&journey.current.app==='web')journey.clear();
+          ui[addressKey(device)]='';openComputerApp('desktop');return;
+        }
+      }
       else {
         const action=b.dataset.browserNav;
         if(action==='reload') {

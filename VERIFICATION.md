@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Zavření poslední karty zavře prohlížeč · 25. listopadu 2026
+
+Křížek karty při více otevřených kartách zavře pouze vybranou kartu. Při zavření poslední karty se nyní zavře aplikace Prohlížeč a zařízení se vrátí na plochu. Pro další otevření je připravena nová prázdná karta s prázdnou adresou; cookies a DNS cache zařízení se nemažou. Pokud k zavření dojde těsně po dokončení přenosu, zruší se i případný naplánovaný návrat právě zavřeného prohlížeče. README aktualizováno, prostředky `v=184`.
+
+Prošlo všech **8 souvisejících testů** (`node --test tests/browser-navigation.test.mjs`) a kontrola syntaxe app.js. V odděleném prohlížeči při 773 × 858 px ověřeno zavření jediné prázdné karty, návrat na plochu a další otevření jedné prázdné karty. Po načtení knihovny ověřeno zavření neaktivní i aktivní druhé karty: původní karta a načtený dokument zůstaly zachované. Zavření poslední načtené karty zavřelo prohlížeč; další otevření neobnovilo starou stránku ani nespustilo síťový požadavek. Při ručním dokončení přenosu a zavření poslední karty během závěrečného zpoždění zůstala plocha zobrazená i po uplynutí časovače. Při 320 × 568 px ověřen stejný návrat na plochu bez zavření zařízení a bez vodorovného přetékání. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Neaktivní ikona obnovení stránky · 25. listopadu 2026
 
 Ikona obnovení v horní liště prohlížeče je nyní stejně jako Zpět a Vpřed pouze dekorativní span. Zachovává SVG, místo a zeslabený vzhled, nemá akci, fokus ani položku v přístupnostním stromu. Během přenosu zůstává statická; nepoužívaná animace otáčení byla odstraněna. Nové načtení přes záložku nebo adresu a samostatné chybové tlačítko Zkusit znovu zůstávají funkční. README aktualizováno, prostředky `v=183`.
