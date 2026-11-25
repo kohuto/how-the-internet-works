@@ -123,7 +123,7 @@
     journeyAnimation?.cancel();journeyAnimation=null;
     if(kind==='packet'&&journey.current?.phase==='expanded')journey.minimize();
     if(journey.current&&kind!=='packet'){
-      if(kind==='node'&&id===journey.current.device)journey.expand();else journey.disarm();
+      if(kind==='node'&&id===journey.current.device)journey.expand();else journey.browse();
     }
     if(ui.monitorOpen&&(kind!=='node'||id!==ui.monitorDevice))clearMailComposer();
     const resume=ui.packetOpen&&kind!=='packet'&&ui.packetResume;
@@ -152,7 +152,7 @@
   function openComputerApp(app) {
     if(!net.appAvailable(app,ui.monitorDevice))return;
     if(!['desktop','web','print','message','cloud','chatbot','network','vpn','mail','attack','mitm'].includes(app))return;
-    if(journey.current)journey.disarm();ui.transferOutcome=null;
+    if(journey.current)journey.browse();ui.transferOutcome=null;
     if(app!=='mail')clearMailComposer();
     if(ui.monitorDevice==='cafe-attacker'){if(!['desktop','mitm'].includes(app))return;ui.cafeAttackerTab=app;}else if(ui.monitorDevice==='cafe'){if(!['desktop','web','network','vpn','mail'].includes(app))return;ui.cafeTab=app;}else if(ui.monitorDevice==='hacker'){if(!['desktop','mail','attack','network','vpn'].includes(app))return;ui.hackerTab=app;}else if(ui.monitorDevice==='cabin'){if(app==='print')return;ui.cabinTab=app;}else if(ui.monitorDevice==='friend'){if(!['desktop','web','message','cloud','chatbot','network','vpn','mail'].includes(app))return;ui.friendTab=app;}else if(ui.monitorDevice==='phone'){if(app==='print')return;ui.phoneTab=app;}else ui.tab=app;syncReader();render();
     const input=app==='cloud'?$('.drive-scroll'):app==='vpn'?$('#monitor-content [data-action="vpn-toggle"]'):$('#monitor-content [data-field]');
@@ -371,7 +371,7 @@
   }
   function render(animate=false) {
     sim.onAsyncReady=()=>render();
-    journey.observe(sim,{blocked:ui.packetOpen||ui.deviceOpen||ui.linkOpen||$('#settings-dialog').open,sourceOn:!journey.current||net.nodes[journey.current.device]?.on});
+    journey.observe(sim,{blocked:ui.packetOpen||$('#settings-dialog').open,sourceOn:!journey.current||net.nodes[journey.current.device]?.on});
     for(const [device,draft] of Object.entries(ui.mailComposer))if(draft.sendingId&&net.phishing.clients[device].sent.some(m=>m.id===draft.sendingId))Object.assign(draft,{sendingId:null,subject:'',body:'',composeOpen:false});
     const webStarted=browserNavigation.sync(sim);
     if(webStarted)ui[addressKey(webStarted)]=browserNavigation.active(webStarted).draft;

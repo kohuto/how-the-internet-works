@@ -24,7 +24,7 @@
     }
     open() {
       if(this.dialog.open)return;
-      this.draft=new LabSettings(this.getSettings().toJSON());this.onOpen();this.render();this.dialog.showModal();
+      this.draft=new LabSettings(this.getSettings().toJSON());this.render();this.dialog.showModal();this.onOpen();
     }
     render() {
       const scroll=this.dialog.querySelector('.settings-scroll'),top=scroll.scrollTop;

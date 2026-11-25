@@ -47,11 +47,25 @@ test('Pausing, empty async queues and packet/settings inspection cannot cause an
   finish(s);journey.observe(s);tick(300);journey.observe(s,{blocked:true});tick(3000);assert(journey.current);
   journey.observe(s,{blocked:false});tick(700);assert.equal(events.at(-1)[0],'restore');
 });
-test('Manual navigation cancels automatic focus changes, including during the departure animation',()=>{
-  for(const depart of [true,false]){
-    const {journey,tick,events}=setup(),s=model();s.start('web');begin(journey,s);if(!depart)tick(500);
-    journey.disarm();tick(1000);if(depart)assert(!events.some(e=>e[0]==='map'));
-    finish(s);journey.observe(s);tick(1000);assert(!events.some(e=>e[0]==='restore'));assert.equal(journey.current,null);
+test('Browsing another view preserves the thumbnail and restores the originating app after delivery',()=>{
+  for(const phase of ['departing','map','expanded']){
+    const {journey,tick,events}=setup(),s=model();s.start('web');begin(journey,s);
+    if(phase==='map')tick(500);else if(phase==='expanded')journey.expand();
+    const context=journey.current;journey.browse();tick(1000);journey.observe(s);
+    assert.equal(journey.current,context);assert.equal(context.phase,'map');
+    if(phase==='departing')assert(!events.some(e=>e[0]==='map'));
+    assert(!events.some(e=>e[0]==='restore'));
+    finish(s);journey.observe(s);tick(699);assert.equal(journey.current,context);
+    tick(1);assert.deepEqual(events.at(-1),['restore','laptop','web','success']);assert.equal(journey.current,null);
+  }
+});
+test('Browsing during the arrival delay preserves the pending return, while inspection can still defer it',()=>{
+  for(const blocked of [false,true]){
+    const {journey,tick,events}=setup(),s=model();s.start('web');begin(journey,s);tick(500);finish(s);journey.observe(s);tick(300);
+    journey.browse();journey.observe(s,{blocked});
+    if(blocked){tick(2000);assert(journey.current);assert(!events.some(e=>e[0]==='restore'));journey.observe(s);tick(700);}
+    else tick(400);
+    assert.deepEqual(events.at(-1),['restore','laptop','web','success']);assert.equal(journey.current,null);
   }
 });
 test('Expanding the originating device is reversible and does not restart or step the simulation',()=>{

@@ -7,7 +7,7 @@
       this.current=null;this.departTimer=null;this.returnTimer=null;
     }
     begin(sim,info) {
-      this.clear();const context=this.current={...info,run:sim.run,phase:'departing',returnAllowed:true};
+      this.clear();const context=this.current={...info,run:sim.run,phase:'departing'};
       this.departTimer=this.setTimer(()=>{this.departTimer=null;if(this.current===context)this.minimize();},this.departure);
       return context;
     }
@@ -19,17 +19,15 @@
       if(!this.current)return;
       this.clearTimer(this.departTimer);this.departTimer=null;this.current.phase='expanded';return this.current;
     }
-    disarm() {
+    browse() {
       if(!this.current)return;
-      this.clearTimer(this.departTimer);this.departTimer=null;this.current.returnAllowed=false;
-      if(this.current.phase==='departing')this.current.phase='map';
+      this.clearTimer(this.departTimer);this.departTimer=null;this.current.phase='map';
     }
     observe(sim,{blocked=false,sourceOn=true}={}) {
       const context=this.current;if(!context)return;
       if(sim.run!==context.run||!sourceOn){this.clear();return;}
       const result=sim.replicaResult||{status:sim.status,current:sim.current};
       if(result.status==='running'){this.clearTimer(this.returnTimer);this.returnTimer=null;return;}
-      if(!context.returnAllowed){this.clear();return;}
       if(blocked){this.clearTimer(this.returnTimer);this.returnTimer=null;return;}
       if(this.returnTimer!==null)return;
       this.returnTimer=this.setTimer(()=>{

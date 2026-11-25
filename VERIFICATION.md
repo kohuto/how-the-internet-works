@@ -1,5 +1,13 @@
 # Záznam ověření
 
+## Návrat zařízení i po prohlížení jiného náhledu · 25. listopadu 2026
+
+Otevření jiného zařízení, serveru, spoje nebo aplikace během přenosu už neruší kontext původního zařízení. TransferJourney při prohlížení jiného okna zachová miniaturu, zruší pouze případné odložené zmenšení a po dokončení přenosu znovu otevře původní zařízení se stejnou aplikací. Běžný detail serveru nebo spoje návrat neblokuje. Detail paketu a nastavení jej dočasně odloží; zavření dovolí návrat. Nastavení nyní oznámí otevření až po skutečném zobrazení dialogu, takže zablokuje i návrat naplánovaný těsně před jeho otevřením. Změna sestavy, nový přenos a vypnutí zdrojového zařízení nadále ruší neplatné návraty. README aktualizováno, prostředky `v=180`.
+
+Prošlo **57 souvisejících testů**: 26 v transfer-journey.test.mjs, browser-navigation.test.mjs a device-power.test.mjs a 31 v settings.test.mjs. Test návratu nově ověřuje prohlížení během počáteční animace, z mapy i po ručním zvětšení zařízení: kontext a miniatura zůstávají až do skutečného dokončení a návrat otevře původní aplikaci. Nový test ověřuje zachování již naplánovaného návratu při dalším prohlížení i jeho odložení chráněným náhledem. Kontroly syntaxe app.js, transfer-journey.js a settings-ui.js bez chyb.
+
+V odděleném prohlížeči při 1047 × 858 px přirozeným tempem ověřeno načtení knihovny s ponechaným otevřeným detailem webového serveru: miniatura nezmizela před návratem a po doručení se otevřel notebook s načtenou stránkou a správným fokusem. Dále ověřeno otevření spoje ještě během počáteční animace, prohlížení aplikace Připojení v Matějově notebooku a návrat k původnímu prohlížeči. Otevření nastavení během závěrečného zpoždění zachovalo miniaturu a návrat proběhl až po zavření dialogu. Při 320 × 568 px ověřen telefon přes mobilní data: během přenosu otevřen a vypnut server, následně se správně vrátil telefon s pravdivou chybou, bez vodorovného přetékání. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Vysvětlení dostupné pouze během přenosu · 25. listopadu 2026
 
 Přepínač Vysvětlení je skrytý už ve výchozím HTML a řídí se stejným stavem `running` jako ostatní ovládací tlačítka. Při pauze nebo prohlížení paketu zůstává dostupný. Po ukončení přenosu se skryje a případná otevřená vysvětlující lišta se zavře; současně se obnoví správné `aria-expanded` a přístupný popisek. Při dalším přenosu je tlačítko znovu dostupné a lišta začíná zavřená. README aktualizováno, prostředky `v=179`.
