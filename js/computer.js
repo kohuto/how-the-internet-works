@@ -25,7 +25,7 @@
   const icon=name=>`<svg viewBox="0 0 24 24" aria-hidden="true">${symbols[name]}</svg>`;
   function transfer(sim,tab,device='laptop') {
     if(sim.status!=='running'||sim.action?.type!==tab||sim.clientId()!==device)return '';
-    return '<div class="computer-transfer"><span><i></i>Čekání na dokončení přenosu</span><button type="button" data-action="show-map">Sledovat v mapě ↗</button></div>';
+    return '<div class="computer-transfer"><span><i></i>Přenos v síti</span><button type="button" data-action="show-map">Sledovat v mapě ↗</button></div>';
   }
   function browser(net,sim,ui,device='laptop') {return globalThis.InternetLab.browserView(net,sim,ui,device);}
   function vpnApp(net,id) {
