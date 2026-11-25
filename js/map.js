@@ -185,10 +185,15 @@
     setAnimationsPlaying(playing) {
       for(const view of this.packetViews.values())if(view.animation)playing?view.animation.play():view.animation.pause();
     }
+    setPlaybackRate(rate) {
+      if(![1,2,4].includes(rate))return;
+      this.playbackRate=rate;
+      for(const {animation} of this.packetViews.values())if(animation)animation.updatePlaybackRate(rate);
+    }
     animationTimeRemaining() {
       let remaining=0;
       for(const {animation} of this.packetViews.values())if(animation) {
-        remaining=Math.max(remaining,Number(animation.effect.getTiming().duration)-(animation.currentTime||0));
+        remaining=Math.max(remaining,(Number(animation.effect.getTiming().duration)-(animation.currentTime||0))/(this.playbackRate||1));
       }
       return Math.max(0,remaining);
     }
@@ -262,6 +267,7 @@
         g.setAttribute('transform',view.destination);
         if(animate&&isHop&&!matchMedia('(prefers-reduced-motion: reduce)').matches) {
           const animation=g.animate([{transform:`translate(${origin.x}px,${origin.y}px)`},{transform:`translate(${destination.x}px,${destination.y}px)`}],{duration:Math.max(100,duration*.8),fill:'forwards',easing:'linear'});
+          animation.playbackRate=this.playbackRate||1;
           view.animation=animation;
           animation.onfinish=()=> {
             if(view.animation!==animation)return;

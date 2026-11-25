@@ -141,3 +141,12 @@
 @media(max-width:700px){.transport-actions{gap:8px}.explanation-toggle{min-height:37px;padding:8px;font-size:10px}}
 
 @media(max-width:700px){.device-help-trigger,.device-help-content,.device-help[data-open=true]::before{right:12px}.device-help-content,.device-help[data-open=true]::before{width:min(360px,calc(100% - 24px))}}
+
+/* Playback speed changes presentation time; cancellation ends the current transfer. */
+.transport-actions{align-items:flex-end}
+.transport-options,.transport-playback{display:flex;align-items:center;justify-content:flex-end;gap:7px}
+.playback-speed{display:flex;align-items:center;gap:6px;min-height:35px;padding:0 7px 0 10px;border:1px solid #dce5d8;border-radius:9px;background:#fffefb;color:var(--ink);font-size:10px;white-space:nowrap}
+.playback-speed select{border:0;background:transparent;color:inherit;font-weight:650;font-size:11px;min-height:32px;cursor:pointer;padding:4px 0}
+.transport-buttons .cancel-transfer{border-color:#e6ccc3;color:#9a5447;white-space:nowrap}
+.transport-buttons .cancel-transfer:hover{background:#fcf0eb}
+@media(max-width:700px){.playback-speed-detail{display:none}.transport-buttons{flex-direction:column;align-items:flex-end;gap:6px}.transport-options,.transport-playback{gap:5px}.playback-speed{min-height:37px;padding:0 6px 0 8px;gap:4px}.transport-buttons .cancel-transfer{padding:8px}.transport-actions{gap:6px}}

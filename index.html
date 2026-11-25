@@ -7,42 +7,42 @@
   <meta name="description" content="Prozkoumej, jak funguje internet. Česká interaktivní síťová laboratoř: web, místní tisk, pakety a náhradní cesta.">
   <title>Jak funguje internet · Síť pod lupou</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./assets/style.css?v=180">
-  <link rel="stylesheet" href="./assets/computer.css?v=180">
-  <link rel="stylesheet" href="./assets/browser.css?v=180">
-  <link rel="stylesheet" href="./assets/instagram.css?v=180">
-  <link rel="stylesheet" href="./assets/gmail.css?v=180">
-  <link rel="stylesheet" href="./assets/cloud.css?v=180">
-  <link rel="stylesheet" href="./assets/settings.css?v=180">
-  <script src="./js/network.js?v=180" defer></script>
-  <script src="./js/settings.js?v=180" defer></script>
-  <script src="./js/cloud.js?v=180" defer></script>
-  <script src="./js/media.js?v=180" defer></script>
-  <script src="./js/web.js?v=180" defer></script>
-  <script src="./js/privacy.js?v=180" defer></script>
-  <script src="./js/auth.js?v=180" defer></script>
-  <script src="./js/vpn.js?v=180" defer></script>
-  <script src="./js/phishing.js?v=180" defer></script>
-  <script src="./js/mitm.js?v=180" defer></script>
-  <script src="./js/mail.js?v=180" defer></script>
-  <script src="./js/ads.js?v=180" defer></script>
-  <script src="./js/simulation.js?v=180" defer></script>
-  <script src="./js/map.js?v=180" defer></script>
-  <script src="./js/settings-ui.js?v=180" defer></script>
-  <script src="./js/browser-navigation.js?v=180" defer></script>
-  <script src="./js/instagram-ui.js?v=180" defer></script>
-  <script src="./js/cloud-ui.js?v=180" defer></script>
-  <script src="./js/computer.js?v=180" defer></script>
-  <script src="./js/browser-ui.js?v=180" defer></script>
-  <script src="./js/phishing-ui.js?v=180" defer></script>
-  <script src="./js/mitm-ui.js?v=180" defer></script>
-  <script src="./js/mail-ui.js?v=180" defer></script>
-  <script src="./js/privacy-ui.js?v=180" defer></script>
-  <script src="./js/auth-ui.js?v=180" defer></script>
-  <script src="./js/ads-ui.js?v=180" defer></script>
-  <script src="./js/packet-ui.js?v=180" defer></script>
-  <script src="./js/transfer-journey.js?v=180" defer></script>
-  <script src="./js/app.js?v=180" defer></script>
+  <link rel="stylesheet" href="./assets/style.css?v=181">
+  <link rel="stylesheet" href="./assets/computer.css?v=181">
+  <link rel="stylesheet" href="./assets/browser.css?v=181">
+  <link rel="stylesheet" href="./assets/instagram.css?v=181">
+  <link rel="stylesheet" href="./assets/gmail.css?v=181">
+  <link rel="stylesheet" href="./assets/cloud.css?v=181">
+  <link rel="stylesheet" href="./assets/settings.css?v=181">
+  <script src="./js/network.js?v=181" defer></script>
+  <script src="./js/settings.js?v=181" defer></script>
+  <script src="./js/cloud.js?v=181" defer></script>
+  <script src="./js/media.js?v=181" defer></script>
+  <script src="./js/web.js?v=181" defer></script>
+  <script src="./js/privacy.js?v=181" defer></script>
+  <script src="./js/auth.js?v=181" defer></script>
+  <script src="./js/vpn.js?v=181" defer></script>
+  <script src="./js/phishing.js?v=181" defer></script>
+  <script src="./js/mitm.js?v=181" defer></script>
+  <script src="./js/mail.js?v=181" defer></script>
+  <script src="./js/ads.js?v=181" defer></script>
+  <script src="./js/simulation.js?v=181" defer></script>
+  <script src="./js/map.js?v=181" defer></script>
+  <script src="./js/settings-ui.js?v=181" defer></script>
+  <script src="./js/browser-navigation.js?v=181" defer></script>
+  <script src="./js/instagram-ui.js?v=181" defer></script>
+  <script src="./js/cloud-ui.js?v=181" defer></script>
+  <script src="./js/computer.js?v=181" defer></script>
+  <script src="./js/browser-ui.js?v=181" defer></script>
+  <script src="./js/phishing-ui.js?v=181" defer></script>
+  <script src="./js/mitm-ui.js?v=181" defer></script>
+  <script src="./js/mail-ui.js?v=181" defer></script>
+  <script src="./js/privacy-ui.js?v=181" defer></script>
+  <script src="./js/auth-ui.js?v=181" defer></script>
+  <script src="./js/ads-ui.js?v=181" defer></script>
+  <script src="./js/packet-ui.js?v=181" defer></script>
+  <script src="./js/transfer-journey.js?v=181" defer></script>
+  <script src="./js/app.js?v=181" defer></script>
 </head>
 <body>
   <main class="workspace">
@@ -84,7 +84,10 @@
         <div class="transport-status" id="transmission-explanation" hidden><span class="status-dot" id="run-dot"></span><div><strong id="event-title">Síť čeká na tvůj první přenos</strong><span id="event-description">Klikni na notebook v mapě a otevři jeho plochu.</span></div></div>
         <div class="transport-actions">
           <button type="button" id="toggle-explanation" class="secondary-button explanation-toggle" hidden aria-expanded="false" aria-controls="transmission-explanation" aria-label="Zobrazit vysvětlení"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></svg><span>Vysvětlení</span></button>
-          <div class="transport-buttons" hidden><button id="repeat" class="icon-button" aria-label="Opakovat stejnou akci" disabled>↻</button><button id="play" class="primary-button play" disabled aria-label="Pokračovat v přenosu">▶ <span>Pokračovat</span></button><button id="step" class="secondary-button" disabled>Krok <span aria-hidden="true">→</span></button></div>
+          <div class="transport-buttons" hidden>
+            <div class="transport-options"><label class="playback-speed" title="Rychlost přehrávání"><span>Rychlost<span class="playback-speed-detail"> přehrávání</span></span><select id="playback-speed" aria-label="Rychlost přehrávání"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label><button type="button" id="cancel-transfer" class="secondary-button cancel-transfer" disabled>Zrušit přenos</button></div>
+            <div class="transport-playback"><button id="repeat" class="icon-button" aria-label="Opakovat stejnou akci" disabled>↻</button><button id="play" class="primary-button play" disabled aria-label="Pokračovat v přenosu">▶ <span>Pokračovat</span></button><button id="step" class="secondary-button" disabled>Krok <span aria-hidden="true">→</span></button></div>
+          </div>
         </div>
       </footer>
     </section>

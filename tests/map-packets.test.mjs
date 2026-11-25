@@ -34,6 +34,21 @@ function setup(t){
 }
 const packet=(id,direction='request')=>({id,state:'transit',location:'client',kind:`smtp-${direction}`,direction,connection:'smtp',label:`SMTP ${direction}`,payload:{}});
 
+test('Playback speed retimes existing and subsequent packet animations without moving or resuming paused packets',t=>{
+  const {map,layer}=setup(t),previous=globalThis.matchMedia;
+  globalThis.matchMedia=()=>({matches:false});t.after(()=>{globalThis.matchMedia=previous;delete Element.prototype.animate;});
+  Element.prototype.animate=function(_keyframes,timing){return {currentTime:0,playbackRate:1,paused:false,effect:{getTiming:()=>timing},updatePlaybackRate(rate){this.playbackRate=rate;},pause(){this.paused=true;},play(){this.paused=false;},cancel(){}};};
+  const p=packet('speed'),visual={kind:'hop',from:'client',to:'server'};p.visual=visual;
+  const packets=new Map([[p.id,p]]);map.render(null,null,null,true,650,packets,[]);
+  const animation=map.packetViews.get(p.id).animation;assert.equal(animation.playbackRate,1);animation.currentTime=130;
+  map.setPlaybackRate(2);assert.equal(animation.currentTime,130);assert.equal(animation.playbackRate,2);assert.equal(map.animationTimeRemaining(),195);
+  map.setAnimationsPlaying(false);map.setPlaybackRate(4);assert(animation.paused);assert.equal(animation.currentTime,130);assert.equal(map.animationTimeRemaining(),97.5);
+  map.render(null,null,null,false,650,packets,[]);assert.equal(map.packetViews.get(p.id).animation,animation);assert.equal(layer.children.length,1);
+  map.setPlaybackRate(0);assert.equal(animation.playbackRate,4);map.setAnimationsPlaying(true);assert(!animation.paused);
+  p.visual={...visual};map.render(null,null,null,true,650,packets,[]);assert.equal(map.packetViews.get(p.id).animation.playbackRate,4);
+  map.finishAnimations();assert.equal(map.animationTimeRemaining(),0);assert.equal(p.state,'transit');
+});
+
 test('An inspected packet disappears on delivery while its response continues without another selection',t=>{
   const {map,layer}=setup(t),request=packet('1'),packets=new Map([[request.id,request]]),selection={kind:'packet',id:request.id};
   map.render(null,selection,request.id,false,650,packets,[]);

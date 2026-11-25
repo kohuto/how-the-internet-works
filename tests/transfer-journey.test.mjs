@@ -90,3 +90,10 @@ test('Transfer captions describe the user action and distinguish message attachm
   }
   s.status='stopped';s.start('web');assert.equal(transferCaption(s),'Načítám knihovnu');
 });
+test('Cancelling a transfer clears the thumbnail and all delayed returns',()=>{
+  for(const phase of ['departing','map','expanded']){
+    const {journey,tick,events}=setup(),s=model();s.start('web');begin(journey,s);
+    if(phase==='map')tick(500);else if(phase==='expanded')journey.expand();
+    assert(s.cancel());journey.observe(s);tick(2000);assert.equal(journey.current,null);assert(!events.some(e=>e[0]==='restore'));
+  }
+});

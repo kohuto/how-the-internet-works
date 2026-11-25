@@ -4,7 +4,7 @@
   const ANIMATION_DELAY=650;
   const $=s=>{const first=document.querySelector(s);return !first||first.id==='transfer-preview'||!first.closest('#transfer-preview')?first:[...document.querySelectorAll(s)].find(el=>!el.closest('#transfer-preview'));},encoder=new TextEncoder();
   let net=new Network(new globalThis.InternetLab.LabSettings()),sim=new Simulation(net),timer=null,playing=false,toastTimer=null;
-  let timerDue=0,remaining=0,computerViewKey='',deviceViewKey='';
+  let timerDue=0,remaining=0,playbackRate=1,computerViewKey='',deviceViewKey='';
   const messageKey=(device,field='message')=>device==='laptop'?field:`${device}${field[0].toUpperCase()}${field.slice(1)}`;
   const addressKey=device=>device==='laptop'?'address':`${device}Address`;
   function createUI() {
@@ -41,6 +41,7 @@
   const map=new NetworkMap($('#network-map'),net,select);
   let journeyAnimation=null;
   const tabKey=device=>device==='laptop'?'tab':device==='cafe-attacker'?'cafeAttackerTab':`${device}Tab`;
+  const transferApp=type=>type.startsWith('mail-')||type==='phish-send'?'mail':type==='phish-results'?'attack':type==='message'?'message':type==='cloud'||type==='replicate'?'cloud':type==='chatbot'?'chatbot':type==='print'?'print':'web';
   const journey=new globalThis.InternetLab.TransferJourney({
     onClear:()=>{journeyAnimation?.cancel();journeyAnimation=null;},
     onMinimize:context=>{
@@ -454,11 +455,12 @@
     if(sim.status!=='running')setExplanationOpen(false);
     $('#play').disabled=ui.packetOpen||sim.status!=='running';$('#play').innerHTML=playing?'Ⅱ <span>Pauza</span>':'▶ <span>Pokračovat</span>';$('#play').setAttribute('aria-label',playing?'Pozastavit přenos':'Pokračovat v přenosu');
     $('#step').disabled=ui.packetOpen||sim.status!=='running'||sim.auth.working;$('#repeat').disabled=ui.packetOpen||!sim.lastAction;
+    $('#playback-speed').value=String(playbackRate);$('#cancel-transfer').disabled=sim.status!=='running';
     $('#signal-coverage-control').hidden=!net.visibleNodes().some(n=>['ap','bts','satellite'].includes(n.type));
     map.render(current,ui.selection,ui.selection.kind==='packet'?ui.selection.id:null,animate,ANIMATION_DELAY,sim.packets,sim.frame);
   }
   function advance() {if(ui.packetOpen)return;map.finishAnimations();remaining=0;sim.advanceFrame();if(sim.status!=='running')stop();render(true);resumeBackground();}
-  function schedule(delay=ANIMATION_DELAY) {
+  function schedule(delay=ANIMATION_DELAY/playbackRate) {
     timerDue=performance.now()+delay;
     timer=setTimeout(()=> {timer=null;remaining=0;if(!playing||ui.packetOpen)return;advance();if(playing)schedule();},delay);
   }
@@ -720,11 +722,25 @@
     if(playing){stop();render();}
     else resumePlayback();
   });
+  $('#playback-speed').addEventListener('change',e=>{
+    const rate=Number(e.target.value);if(![1,2,4].includes(rate)||rate===playbackRate)return;
+    const resume=playing,previous=playbackRate;stop();playbackRate=rate;remaining*=previous/rate;map.setPlaybackRate(rate);
+    if(resume)resumePlayback();else render();
+  });
+  $('#cancel-transfer').addEventListener('click',()=>{
+    if(sim.status!=='running')return;
+    const context=journey.current||{device:sim.clientId(),app:transferApp(sim.action.type)},from=$('.transfer-thumbnail').getBoundingClientRect();
+    stop();sim.cancel();journey.clear();map.finishAnimations();remaining=0;ui.packetResume=false;settingsWasPlaying=false;
+    ui.monitorDevice=context.device;ui[tabKey(context.device)]=context.app;ui.selection={kind:'node',id:context.device};
+    ui.monitorOpen=!!net.nodes[context.device]?.on;ui.deviceOpen=false;ui.linkOpen=false;ui.packetOpen=false;
+    ui.transferOutcome={device:context.device,status:'cancelled',text:'Přenos byl zrušen. Můžeš začít jinou akci.'};
+    if(ui.mailComposer[context.device])ui.mailComposer[context.device].sendingId=null;
+    syncReader();render();if(ui.monitorOpen){animateMonitor(from,false);$('#monitor-content').focus({preventScroll:true});}
+  });
   $('#repeat').addEventListener('click',()=> {
     stop();if(sim.status==='running')sim.status='stopped';if(!sim.repeat()){render();return;}
     if(ui.selection.kind==='packet')ui.selection={kind:'node',id:sim.clientId()};
-    const type=sim.action.type,app=type.startsWith('mail-')||type==='phish-send'?'mail':type==='phish-results'?'attack':type==='message'?'message':type==='cloud'?'cloud':type==='chatbot'?'chatbot':type==='print'?'print':'web';
-    beginTransfer(app);notify('Opakuji stejnou akci. Změny sítě i serveru zůstaly.');
+    beginTransfer(transferApp(sim.action.type));notify('Opakuji stejnou akci. Změny sítě i serveru zůstaly.');
   });
   let settingsWasPlaying=false;
   const settingsPanel=new globalThis.InternetLab.SettingsPanel({getSettings:()=>net.settings,onOpen:()=>{settingsWasPlaying=playing;stop();render();},onApply:applySettings,onClose:()=>{if(settingsWasPlaying)resumePlayback();else render();}});

@@ -14,7 +14,7 @@
   const avatar=(self=false,large=false)=>`<span class="ig-avatar ${self?'self':''} ${large?'large':''}" aria-hidden="true">${self?'T':'M'}</span>`;
   const receiptSetting=net=>`<label class="ig-receipt-setting"><input type="checkbox" data-receipts ${net.friend.receipts?'checked':''}> Potvrzení přečtení</label>`;
   const visibleMessages=(net,device)=>net.instagram.history.filter(m=>!net.instagram.hidden?.[device]?.has(m.id)&&(m.senderDevice===device||(m.recipientDevice===device&&m.delivered)));
-  const senderStatus=(net,entry)=>({sending:'Odesílání…',sent:entry.id===net.instagram.id&&net.instagram.state==='queued'?'Odesláno · čeká na připojení':'Odesláno',delivered:'Doručeno',read:'Zobrazeno',failed:'Nepodařilo se odeslat'}[entry.status]);
+  const senderStatus=(net,entry)=>({sending:'Odesílání…',sent:entry.id===net.instagram.id&&net.instagram.cancelled?'Uloženo na serveru · přenos zrušen':entry.id===net.instagram.id&&net.instagram.state==='queued'?'Odesláno · čeká na připojení':'Odesláno',cancelled:'Zrušeno',delivered:'Doručeno',read:'Zobrazeno',failed:'Nepodařilo se odeslat'}[entry.status]);
 
   function contact(friend) {
     const name=friend?'Ty':'Matěj',handle=friend?'ty.na.lipove':'matej';

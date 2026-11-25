@@ -162,7 +162,7 @@
       } else {
         const content=makeMessage(payload.messageType||'text',payload.text||DEFAULT_MESSAGE),text=content.type==='text'?new TextDecoder().decode(content.bytes):content.name;
         Object.assign(this.net.sender,{text,content,sentBytes:0,sentPackets:0,state:'sending'});
-        Object.assign(this.net.instagram,{id:this.net.instagram.id+1,text:'',content:null,state:'receiving',totalBytes:content.size,totalPackets:messagePlan(content.size).packets,receivedBytes:0,receivedPackets:0,sentBytes:0,sentPackets:0,streamBytes:0,readRequested:false,readKnown:false,readNotified:false,error:'',senderDevice:this.clientId(),recipientDevice:this.clientId()==='friend'?(payload.targetDevice||this.net.instagram.replyDevice):'friend'});
+        Object.assign(this.net.instagram,{id:this.net.instagram.id+1,text:'',content:null,state:'receiving',totalBytes:content.size,totalPackets:messagePlan(content.size).packets,receivedBytes:0,receivedPackets:0,sentBytes:0,sentPackets:0,streamBytes:0,readRequested:false,readKnown:false,readNotified:false,cancelled:false,error:'',senderDevice:this.clientId(),recipientDevice:this.clientId()==='friend'?(payload.targetDevice||this.net.instagram.replyDevice):'friend'});
         const ig=this.net.instagram;
         ig.history.push({id:ig.id,senderDevice:ig.senderDevice,recipientDevice:ig.recipientDevice,text,content:{type:content.type,name:content.name,size:content.size},status:'sending',accepted:false,delivered:false,read:false,error:''});
         Object.assign(this.net.friend,{text:'',content:null,state:'idle',receivedBytes:0,receivedPackets:0,streamBytes:0,read:false});
@@ -178,9 +178,23 @@
       }
       return this.start(this.lastAction.type,this.lastAction.payload);
     }
+    cancel() {
+      if(this.status!=='running')return false;
+      const reason='Přenos byl zrušen.';
+      this.failure(reason,null,this.clientId());this.auth.cancel();
+      if(this.action.type==='web'&&this.browser().state==='error')Object.assign(this.browser(),{state:'cancelled',tlsPhase:'idle'});
+      if(this.action.type==='message') {
+        const ig=this.net.instagram;Object.assign(ig,{state:'cancelled',cancelled:true,readRequested:false,error:reason});
+        if(this.net.sender.state==='sending'||this.net.sender.state==='failed')this.net.sender.state=ig.text?'sent':'cancelled';
+        if(['sending','sent','failed'].includes(this.instagramEntry()?.status))this.instagramStatus(ig.text?'sent':'cancelled',{error:reason});
+      }
+      this.queue=[];this.frame=[];this.tcpStream=null;this.linkReady.clear();this.replicaResult=null;
+      this.status='cancelled';this.current={kind:'cancelled',at:this.time,node:this.clientId(),title:reason,description:'Můžeš začít jinou akci. Data, která už dorazila na server, zůstávají zachovaná.'};
+      return true;
+    }
     resumeReplication() {
       const storage=this.net.cloud;
-      if(this.status==='running'||this.status==='waiting'||this.replicaResult||!this.net.featureEnabled('cloud')||storage.replicaCurrent())return false;
+      if(this.status==='running'||this.status==='waiting'||this.status==='cancelled'||this.replicaResult||!this.net.featureEnabled('cloud')||storage.replicaCurrent())return false;
       if(!this.net.nodeAvailable('cloud')||!this.net.nodeAvailable('cloud-backup'))return false;
       if(!this.net.physicalCanReach('cloud','cloud-backup')) {
         Object.assign(storage.replica,{state:'pending',message:'Automatická synchronizace čeká na obnovení spojení mezi centry.'});return false;
@@ -212,7 +226,7 @@
       this.action={type:'message',payload:{text:this.net.sender.text,messageType:this.net.instagram.content?.type||'text',device:this.net.instagram.senderDevice,targetDevice:this.net.instagram.recipientDevice}};this.lastAction={...this.action,payload:{...this.action.payload}};this.status='running';
     }
     resumePending() {
-      if(this.status==='running')return false;
+      if(this.status==='running'||this.status==='cancelled'||this.net.instagram.cancelled)return false;
       const ig=this.net.instagram,recipient=ig.recipientDevice;
       if(ig.text&&ig.state==='queued'&&this.net.canReach(recipient,'instagram')) {
         this.continuation();this.phase='check-delivery';

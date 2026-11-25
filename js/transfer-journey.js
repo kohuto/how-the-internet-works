@@ -25,7 +25,7 @@
     }
     observe(sim,{blocked=false,sourceOn=true}={}) {
       const context=this.current;if(!context)return;
-      if(sim.run!==context.run||!sourceOn){this.clear();return;}
+      if(sim.run!==context.run||!sourceOn||sim.status==='cancelled'){this.clear();return;}
       const result=sim.replicaResult||{status:sim.status,current:sim.current};
       if(result.status==='running'){this.clearTimer(this.returnTimer);this.returnTimer=null;return;}
       if(blocked){this.clearTimer(this.returnTimer);this.returnTimer=null;return;}
