@@ -22,6 +22,7 @@
     }
   };
   const browserState=()=>({content:null,pageDocument:null,revision:null,state:'idle',error:'',dnsCache:{},address:'knihovna.test',secure:false,loadedSecure:false,tlsPhase:'idle',certificateVerified:false,receipt:'',visitor:null,greeting:'',cookies:{allowed:true,items:[],lastSent:'',lastReceived:'',sendNote:'Zatím žádný webový požadavek.',receiveNote:'Zatím žádná odpověď s cookie.'}});
+  const CLIENT_DEVICES=['laptop','friend','phone','cabin','cafe','hacker','cafe-attacker'];
   const CHATBOT_REPLY='Ahoj! Tvůj dotaz dorazil na server. Tady jsem připravil tuto odpověď a poslal ji přes síť zpět do tvého zařízení.';
   const MAC = {laptop:'02:00:00:00:10:10', printer:'02:00:00:00:10:20', home:'02:00:00:00:10:01', dc:'02:00:00:00:20:01', dns:'02:00:00:00:20:53', web:'02:00:00:00:20:10',instagram:'02:00:00:00:20:80',friend:'02:00:00:00:30:10','friend-home':'02:00:00:00:30:01'};
   const nodeDefinitions = [
@@ -293,6 +294,37 @@
       this.updateCellularAccess();
       this.applyAccess('cafe');this.applyAccess('hacker');this.applyAccess('cabin');this.applyAccess('laptop');this.applyAccess('friend');this.applyAccess('phone');
       this.recomputeRoutes();
+      this.clientDefaults={};this.captureClientDefaults();
+    }
+    clientStateSlots(id) {
+      const browserKeys={laptop:'browser',friend:'friendBrowser',phone:'phoneBrowser',cabin:'cabinBrowser',cafe:'cafeBrowser'};
+      return [
+        ['access',this.access,id],['connectionProfile',this.connectionProfiles,id],['browser',this,browserKeys[id]],
+        ['vpn',this.vpn.clients,id],['chatbot',this.chatbot.clients,id],['cloudClient',this.cloud.clients,id],['localFiles',this.cloud.local,id],
+        ['mail',this.phishing?.clients,id],['auth',this.server.auth?.clients,id],['privacy',this.server.privacy?.clients,id],['ads',this.ads?.clients,id],
+        ['admin',this.phishing,id==='hacker'?'hacker':undefined],['hotspot',this,id==='cafe-attacker'?'mitm':undefined]
+      ].filter(([,parent,key])=>parent&&key!==undefined&&Object.hasOwn(parent,key));
+    }
+    captureClientDefaults() {
+      for(const id of CLIENT_DEVICES) {
+        const initial=this.clientDefaults[id]??={};
+        for(const [name,parent,key] of this.clientStateSlots(id))if(!Object.hasOwn(initial,name))initial[name]=structuredClone(parent[key]);
+      }
+    }
+    resetClient(id) {
+      const initial=this.clientDefaults[id];if(!initial)return false;
+      const epoch=this.vpn.clients[id]?.epoch;
+      for(const [name,parent,key] of this.clientStateSlots(id))if(Object.hasOwn(initial,name))parent[key]=structuredClone(initial[name]);
+      if(this.vpn.clients[id])this.vpn.clients[id].epoch=epoch+1;
+      this.vpn.rows=this.vpn.rows.filter(row=>row.client!==id);delete this.instagramChannels[id];
+      if(this.server.auth?.clients[id])Object.assign(this.server.auth.clients[id],{user:null,notice:''});
+      this.instagram.hidden??={};
+      this.instagram.hidden[id]=new Set(this.instagram.history.filter(m=>m.senderDevice===id||m.recipientDevice===id&&m.delivered).map(m=>m.id));
+      if(this.instagram.openDevice===id)this.instagram.openDevice=null;
+      if(this.instagram.recipientDevice===id)Object.assign(this.friend,{text:'',content:null,receivedPackets:0,state:'idle',receivedBytes:0,streamBytes:0,read:false});
+      if(id==='friend'){this.friend.receipts=true;this.friend.chatOpen=false;}
+      if(this.access[id])this.applyAccess(id);
+      this.nodes[id].lastDecision=null;return true;
     }
     featureEnabled(id) {return this.settings?.has(id)??true;}
     webAddress(value) {
@@ -449,6 +481,7 @@
     toggleNode(id) {
       if(!this.nodeAvailable(id))return false;
       this.nodes[id].on=!this.nodes[id].on;
+      if(!this.nodes[id].on&&CLIENT_DEVICES.includes(id)){this.onClientPowerOff?.(id);this.resetClient(id);}
       if(!this.nodes[id].on&&((id==='cafe-ap'&&this.access.cafe.hotspot==='trusted')||(id==='cafe-attacker'&&this.access.cafe.hotspot==='rogue')))this.access.cafe.mode='offline';
       this.changed();return this.nodes[id].on;
     }

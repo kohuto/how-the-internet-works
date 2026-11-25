@@ -34,6 +34,14 @@
       this.time=0;this.order=0;this.linkReady=new Map();this.frame=[];this.phase='upload';this.vpn=new VPNTransport(this);this.phishing=new PhishingScenario(this);this.mitm=new MITMScenario(this);this.mail=new MailScenario(this);this.privacy=new PrivacyService(this.net);this.auth=new AuthService(this);this.ads=new AdsScenario(this);
       this.connectionProfiles=structuredClone(this.net.connectionProfiles);
       this.replicaResult=null;this.replicaAttempt=null;
+      this.net.captureClientDefaults();this.net.onClientPowerOff=id=>this.clientPowerOff(id);
+    }
+    clientPowerOff(id) {
+      if(this.status!=='running'||this.replicaResult)return;
+      const packet=[...this.packets.values()].find(p=>{const logical=this.vpn.logical(p);return ['waiting','transit'].includes(p.state)&&(logical.source===id||logical.destination===id);});
+      const ownAction=this.clientId()===id&&this.action.type!=='replicate'&&(this.action.type!=='message'||!this.net.instagram.text);
+      const pendingMessage=this.action.type==='message'&&this.net.instagram.recipientDevice===id&&this.net.instagram.text&&['queued','delivering'].includes(this.net.instagram.state);
+      if(packet||ownAction||pendingMessage)this.failure(`${this.net.nodes[id].name} je vypnutý. Jeho rozpracovaný přenos je ukončen.`,packet,id);
     }
     clientId() {return this.action?.payload.device||'laptop';}
     clientName() {return this.net.nodes[this.clientId()].name;}

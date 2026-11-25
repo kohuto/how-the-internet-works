@@ -22,6 +22,18 @@
     ui.cloud=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>{const f=net.cloud.local[device][0];return [device,{tab:'remote',view:'files',editorKey:0,remoteId:null,server:'cloud',localId:f?.id||null,cloudName:f?.name||'',cloudContent:f?.content||'',cloudFileId:'',permissions:{},downloadSerial:0,resultSerial:0}];}));
     return ui;
   }
+  function resetDeviceUI(device) {
+    const tabs={laptop:'tab',friend:'friendTab',phone:'phoneTab',cabin:'cabinTab',cafe:'cafeTab',hacker:'hackerTab','cafe-attacker':'cafeAttackerTab'};
+    if(!tabs[device])return;
+    const initial=createUI();ui[tabs[device]]='desktop';
+    for(const field of ['address','message','messageType']){const key=field==='address'?addressKey(device):messageKey(device,field);if(Object.hasOwn(initial,key))ui[key]=initial[key];}
+    for(const field of ['mailComposer','authDraft','privacyOpen','cookieOpen','chatbot','webMessages','cloud'])if(Object.hasOwn(initial[field],device))ui[field][device]=initial[field][device];
+    delete ui.connectionDrafts[device];
+    if(device==='laptop')ui.document=initial.document;
+    if(device==='cafe'){ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';}
+    if(device==='cafe-attacker')ui.mitmSsid=initial.mitmSsid;
+    if(browserNavigation.reset(device))ui[addressKey(device)]='';
+  }
   const ui=createUI();
   let browserNavigation=ui.browserNavigation=new globalThis.InternetLab.BrowserNavigation(net);
   for(const device of Object.keys(browserNavigation.devices))ui[addressKey(device)]='';
@@ -564,7 +576,8 @@
     else if(b.dataset.selectPacket)select('packet',b.dataset.selectPacket);
     else if(b.dataset.action==='toggle-node') {
       const on=net.toggleNode(b.dataset.id);
-      if(b.dataset.id==='cafe-attacker')ui.cafeAttackerTab='desktop';if(b.dataset.id==='cafe')ui.cafeTab='desktop';if(b.dataset.id==='hacker')ui.hackerTab='desktop';if(b.dataset.id==='cabin')ui.cabinTab='desktop';if(b.dataset.id==='laptop')ui.tab='desktop';if(b.dataset.id==='friend')ui.friendTab='desktop';if(b.dataset.id==='phone')ui.phoneTab='desktop';syncReader();
+      if(!on)resetDeviceUI(b.dataset.id);
+      if(sim.status!=='running')stop();syncReader();
       notify(`${net.nodes[b.dataset.id].name}: ${on?'zapnuto':'vypnuto'}.`);if(!resumeMessage())render();
       if(ui.monitorOpen&&b.dataset.id===ui.monitorDevice)$('.computer-power').focus({preventScroll:true});
     } else if(b.dataset.action==='toggle-link') {

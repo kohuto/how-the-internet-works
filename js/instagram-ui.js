@@ -13,7 +13,7 @@
   const icon=id=>`<svg viewBox="0 0 24 24" aria-hidden="true">${paths[id]}</svg>`;
   const avatar=(self=false,large=false)=>`<span class="ig-avatar ${self?'self':''} ${large?'large':''}" aria-hidden="true">${self?'T':'M'}</span>`;
   const receiptSetting=net=>`<label class="ig-receipt-setting"><input type="checkbox" data-receipts ${net.friend.receipts?'checked':''}> Potvrzení přečtení</label>`;
-  const visibleMessages=(net,device)=>net.instagram.history.filter(m=>m.senderDevice===device||(m.recipientDevice===device&&m.delivered));
+  const visibleMessages=(net,device)=>net.instagram.history.filter(m=>!net.instagram.hidden?.[device]?.has(m.id)&&(m.senderDevice===device||(m.recipientDevice===device&&m.delivered)));
   const senderStatus=(net,entry)=>({sending:'Odesílání…',sent:entry.id===net.instagram.id&&net.instagram.state==='queued'?'Odesláno · čeká na připojení':'Odesláno',delivered:'Doručeno',read:'Zobrazeno',failed:'Nepodařilo se odeslat'}[entry.status]);
 
   function contact(friend) {
@@ -38,7 +38,7 @@
   function instagramView(net,sim,ui,device='laptop') {
     const friend=device==='friend',ig=net.instagram,entries=visibleMessages(net,device);
     const receiving=ig.recipientDevice===device&&net.friend.state==='receiving'&&!ig.history.at(-1)?.delivered;
-    const ownTransfer=ig.senderDevice===device;
+    const ownTransfer=ig.senderDevice===device&&!ig.hidden?.[device]?.has(ig.id);
     const notices=ownTransfer?`${ig.state==='queued'?'<div class="ig-notice">Příjemce není dostupný. Instagram zprávu uchoval a doručí ji po připojení.</div>':''}${ig.error?`<div class="ig-notice error">${esc(ig.error)}</div>`:''}`:'';
     return `<div class="instagram-app">${sidebar(net,friend,device)}<section class="ig-main" aria-label="Chat s ${friend?'tebou':'Matějem'}">${contact(friend)}<div class="ig-conversation" tabindex="0" aria-label="Zprávy v konverzaci">${introduction(friend)}${entries.map(entry=>message(net,entry,device)).join('')}${receiving?'<div class="ig-receiving" role="status"><i></i><i></i><i></i><span>Přijímání zprávy…</span></div>':''}${notices}</div>${composer(net,sim,ui,friend)}${ownTransfer&&ig.state==='queued'?'<div class="ig-retry"><button type="button" class="ig-text-button" data-action="resume-message">Zkusit doručit znovu ↗</button></div>':''}</section></div>`;
   }
