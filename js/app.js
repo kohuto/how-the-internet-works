@@ -450,6 +450,8 @@
     $('#event-title').textContent=net.displayText(current?.title||'')||'Síť čeká na tvůj první přenos';$('#event-description').textContent=net.displayText(current?.description||'')||(ui.monitorOpen?(ui.monitorDevice==='cafe-attacker'?'Otevři MITM a nastav hotspot.':ui.monitorDevice==='cafe'?(net.accessReady('cafe')?'Otevři Prohlížeč a načti web.':'V Připojení nejprve vyber Wi-Fi.'):ui.monitorDevice==='hacker'?'Otevři Správu webu nebo Gmail.':ui.monitorDevice==='cabin'?'Otevři některou z dostupných aplikací na chatě.':ui.monitorDevice==='friend'?'Otevři některou z dostupných aplikací u Matěje.':ui.monitorDevice==='phone'?'Otevři některou z dostupných aplikací v telefonu.':'Na ploše otevři některou z dostupných aplikací.'):'Klikni na notebook v mapě a otevři jeho plochu.');
     $('#run-dot').className=`status-dot ${sim.status}`;
     $('.transport-buttons').hidden=sim.status!=='running';
+    $('#toggle-explanation').hidden=sim.status!=='running';
+    if(sim.status!=='running')setExplanationOpen(false);
     $('#play').disabled=ui.packetOpen||sim.status!=='running';$('#play').innerHTML=playing?'Ⅱ <span>Pauza</span>':'▶ <span>Pokračovat</span>';$('#play').setAttribute('aria-label',playing?'Pozastavit přenos':'Pokračovat v přenosu');
     $('#step').disabled=ui.packetOpen||sim.status!=='running'||sim.auth.working;$('#repeat').disabled=ui.packetOpen||!sim.lastAction;
     $('#signal-coverage-control').hidden=!net.visibleNodes().some(n=>['ap','bts','satellite'].includes(n.type));
@@ -699,13 +701,14 @@
   });
   deviceHelp.addEventListener('focusout',e=>{if(!deviceHelp.contains(e.relatedTarget))setDeviceHelpOpen(false);});
   document.addEventListener('pointerdown',e=>{if(!deviceHelp.contains(e.target))setDeviceHelpOpen(false);});
-  $('#toggle-explanation').addEventListener('click',e=>{
-    const button=e.currentTarget,show=button.getAttribute('aria-expanded')!=='true';
+  function setExplanationOpen(show) {
+    const button=$('#toggle-explanation');
     $('#transmission-explanation').hidden=!show;
     $('.transport').classList.toggle('explanation-hidden',!show);
     button.setAttribute('aria-expanded',String(show));
     button.setAttribute('aria-label',show?'Skrýt vysvětlení':'Zobrazit vysvětlení');
-  });
+  }
+  $('#toggle-explanation').addEventListener('click',e=>setExplanationOpen(e.currentTarget.getAttribute('aria-expanded')!=='true'));
   $('#step').addEventListener('click',()=>{stop();advance();});
   $('#transfer-open').addEventListener('click',()=>{
     const context=journey.expand();if(!context)return;

@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Vysvětlení dostupné pouze během přenosu · 25. listopadu 2026
+
+Přepínač Vysvětlení je skrytý už ve výchozím HTML a řídí se stejným stavem `running` jako ostatní ovládací tlačítka. Při pauze nebo prohlížení paketu zůstává dostupný. Po ukončení přenosu se skryje a případná otevřená vysvětlující lišta se zavře; současně se obnoví správné `aria-expanded` a přístupný popisek. Při dalším přenosu je tlačítko znovu dostupné a lišta začíná zavřená. README aktualizováno, prostředky `v=179`.
+
+Prošlo všech **9 souvisejících testů** (`node --test tests/transfer-journey.test.mjs`) a kontrola syntaxe app.js. V odděleném prohlížeči při 1047 × 858 px ověřeno skrytí před přenosem, zobrazení při automatickém zahájení, otevření lišty v pauze, stabilní pauza, krokování, pokračování a úplné doručení knihovny. Po dokončení zmizelo tlačítko i otevřená lišta; další požadavek obnovil tlačítko se zavřenou lištou. Při 320 × 568 px ověřen výchozí stav a přenos k vypnutému serveru s otevřeným vysvětlením: po chybě jsou tlačítko i lišta skryté, přístupnostní stav odpovídá zavření a dokument nepřetéká vodorovně. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Ovládací tlačítka pouze během přenosu · 25. listopadu 2026
 
 Skupina Pauza / Pokračovat, Krok a Opakovat je skrytá už ve výchozím HTML. Zobrazuje se pouze při modelovém stavu `running`, včetně ruční pauzy a náhledu paketu; po úspěchu, chybě, zastavení nebo čekání na připojení se skryje. Neaktivní Přehrát bylo odstraněno. Samostatný přepínač Vysvětlení zůstává dostupný a zachovává své chování. Síťový model ani automatické spouštění se nemění. README aktualizováno, prostředky `v=178`.
