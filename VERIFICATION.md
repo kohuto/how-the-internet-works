@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Celá kartička přenosu zvětšuje zařízení · 25. listopadu 2026
+
+Ze zmenšeného okna byly odstraněny samostatné tlačítko Otevřít zařízení i stavový řádek s tečkou a texty Pozastaveno / Přenos probíhá / Hotovo. Celá kartička je nyní jedním přístupným ovládacím prvkem s názvem konkrétního zařízení: kliknutí na náhled, text i volný okraj plynule zvětší původní aplikaci. Stejnou akci provedou Enter a mezerník. Samotná miniatura zůstává inertní, takže se její vnitřní aplikace ani tlačítka neovládají. Zvětšení nemění pauzu ani rychlost přenosu. Měřítko a vystředění miniatury se přizpůsobují také změně velikosti okna. README aktualizováno, prostředky `v=185`.
+
+Prošlo všech **11 souvisejících testů** (`node --test tests/transfer-journey.test.mjs`) a kontrola syntaxe app.js. V odděleném prohlížeči při 773 × 858 px ověřena menší kartička bez původního tlačítka a stavového řádku, skutečné kliknutí na celou kartičku a zásahové testy názvu, popisu a volného okraje. Všechny oblasti otevřely původní aplikaci a zachovaly pauzu. Skutečné stisky Enter a mezerníku otevřely aplikaci a přesunuly fokus do jejího okna. Při 320 × 568 px ověřen kompaktní vzhled, kliknutí na miniaturu a absence vodorovného přetékání; po změně velikosti v obou směrech se celý náhled vešel do své plochy. Kliknutí při běžícím přenosu zachovalo přehrávání, návrat k mapě opět zobrazil kartičku a dokončený přenos automaticky otevřel načtenou knihovnu. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Zavření poslední karty zavře prohlížeč · 25. listopadu 2026
 
 Křížek karty při více otevřených kartách zavře pouze vybranou kartu. Při zavření poslední karty se nyní zavře aplikace Prohlížeč a zařízení se vrátí na plochu. Pro další otevření je připravena nová prázdná karta s prázdnou adresou; cookies a DNS cache zařízení se nemažou. Pokud k zavření dojde těsně po dokončení přenosu, zruší se i případný naplánovaný návrat právě zavřeného prohlížeče. README aktualizováno, prostředky `v=184`.

@@ -92,8 +92,7 @@
       const preview=$('#transfer-preview');preview.replaceChildren();preview.journeyContext=null;return;
     }
     $('#transfer-device').textContent=net.nodes[context.device].name;$('#transfer-caption').textContent=context.caption;
-    $('#transfer-state').textContent=sim.status==='waiting'?'Čeká na připojení':sim.status==='failed'?'Přenos se nepodařil':sim.status!=='running'||sim.replicaResult?'Hotovo':playing?'Přenos probíhá':'Pozastaveno';
-    card.dataset.playing=String(playing);$('#transfer-open').setAttribute('aria-label',`Otevřít zařízení ${net.nodes[context.device].name}`);
+    card.setAttribute('aria-label',`Zvětšit zařízení ${net.nodes[context.device].name}`);
     const preview=$('#transfer-preview');
     if(preview.journeyContext!==context){
       preview.journeyContext=context;preview.classList.toggle('phone-window',context.device==='phone');preview.innerHTML=context.snapshot;
@@ -718,12 +717,19 @@
   }
   $('#toggle-explanation').addEventListener('click',e=>setExplanationOpen(e.currentTarget.getAttribute('aria-expanded')!=='true'));
   $('#step').addEventListener('click',()=>{stop();advance();});
-  $('#transfer-open').addEventListener('click',()=>{
+  function expandTransfer() {
+    const from=$('.transfer-thumbnail').getBoundingClientRect();
     const context=journey.expand();if(!context)return;
     journeyAnimation?.cancel();journeyAnimation=null;
     ui.monitorDevice=context.device;ui[tabKey(context.device)]=context.app;ui.selection={kind:'node',id:context.device};
-    ui.monitorOpen=true;ui.deviceOpen=false;ui.linkOpen=false;ui.packetOpen=false;syncReader();render();$('#monitor-content').focus({preventScroll:true});
+    ui.monitorOpen=true;ui.deviceOpen=false;ui.linkOpen=false;ui.packetOpen=false;syncReader();render();animateMonitor(from,false);$('#monitor-content').focus({preventScroll:true});
+  }
+  $('#transfer-card').addEventListener('click',expandTransfer);
+  $('#transfer-card').addEventListener('keydown',e=>{
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    e.preventDefault();if(!e.repeat)expandTransfer();
   });
+  window.addEventListener('resize',renderJourney);
   $('#play').addEventListener('click',()=> {
     if(playing){stop();render();}
     else resumePlayback();
