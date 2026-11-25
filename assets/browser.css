@@ -95,8 +95,6 @@
 .browser-network .browser-lesson{margin:12px 0}
 .browser-loading-status{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#f1f5eb;border-top:1px solid #dce4d5;flex-shrink:0;font-size:10px;color:#6f8069}
 .browser-document-notice{font-size:11px;line-height:1.6;padding:9px 17px;background:#f7f0de;color:#9a7a42;border-bottom:1px solid #e9ddc2}
-.browser-loading .browser-history [data-browser-nav=reload] svg{animation:browser-loading-spin 1.2s linear infinite}
-@keyframes browser-loading-spin{to{transform:rotate(360deg)}}
 .browser-account.auth-panel{padding:24px 25px;background:none;border:0;flex:1}
 .browser-account .auth-current{padding:12px;background:#f3f6ed;margin:18px 0}
 .browser-account .auth-current strong{font-size:12px}
@@ -151,7 +149,6 @@
   .browser-popover{max-height:min(245px,var(--browser-panel-height,65vh))}
 }
 @media(pointer:coarse){.browser-address input,.browser-account input,.browser-site-section textarea{font-size:16px}.browser-icon,.browser-tab-close{min-height:36px}.browser-bookmarks button{min-height:36px}}
-@media(prefers-reduced-motion:reduce){.browser-loading .browser-history [data-browser-nav=reload] svg{animation:none}}
 
-/* History arrows are decorative; reloading remains an interactive control. */
+/* Back, forward and reload are decorative toolbar icons. */
 .browser-icon-disabled,.browser-icon-disabled:hover{background:none;opacity:.4;cursor:default;pointer-events:none}

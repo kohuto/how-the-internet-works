@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Neaktivní ikona obnovení stránky · 25. listopadu 2026
+
+Ikona obnovení v horní liště prohlížeče je nyní stejně jako Zpět a Vpřed pouze dekorativní span. Zachovává SVG, místo a zeslabený vzhled, nemá akci, fokus ani položku v přístupnostním stromu. Během přenosu zůstává statická; nepoužívaná animace otáčení byla odstraněna. Nové načtení přes záložku nebo adresu a samostatné chybové tlačítko Zkusit znovu zůstávají funkční. README aktualizováno, prostředky `v=183`.
+
+Prošlo všech **8 souvisejících testů** (`node --test tests/browser-navigation.test.mjs`) a kontrola syntaxe browser-ui.js. V odděleném prohlížeči při 773 × 858 px ověřena neaktivní ikona na prázdné kartě, během načítání i po úplném doručení knihovny. Kliknutí ani pokus o fokus po dokončení nezměnil adresu, událost ani nespustil přenos; všechny tři ikony lišty jsou neinteraktivní. Po chybě načtení v nové kartě bylo tlačítko Zkusit znovu nadále přítomné a po zapnutí serveru skutečně načetlo knihovnu. Při 320 × 568 px jsou všechny tři ikony viditelné a dokument nepřetéká vodorovně. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Neaktivní ikony Zpět a Vpřed v prohlížeči · 25. listopadu 2026
 
 Šipky historie jsou nyní pouze dekorativní prvky span se stejným SVG a rozměry jako dříve. Zachovávají zeslabený vzhled neaktivního ovládání, nemají akci, fokus ani položku v přístupnostním stromu a nereagují na ukazatel. Z obsluhy rozhraní byla odstraněna navigace zpět/vpřed; záznamy adres a správa karet zůstávají zachované. Obnovit stránku nadále spouští skutečný nový požadavek. README aktualizováno, prostředky `v=182`.
