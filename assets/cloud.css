@@ -28,3 +28,5 @@
 
 .phone-window .drive-center select{max-width:90px;font-size:9px}.phone-window .drive-toolbar>.drive-icon-button{width:28px}.phone-window .drive-options>summary{width:26px}
 @media(max-width:370px){.drive-toolbar,.phone-window .drive-toolbar{gap:2px}.drive-toolbar h3,.phone-window .drive-toolbar h3{font-size:16px}.drive-center select,.phone-window .drive-center select{max-width:82px;font-size:8px}.drive-toolbar>.drive-icon-button,.phone-window .drive-toolbar>.drive-icon-button,.drive-options>summary,.phone-window .drive-options>summary{width:26px;height:30px}}
+
+.drive-editor>#cloud-name:focus{outline:none}

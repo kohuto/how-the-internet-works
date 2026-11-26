@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Název cloudového dokumentu bez modrého orámování · 26. listopadu 2026
+
+Pole Název dokumentu (`#cloud-name`) při zaměření nezobrazuje obrys. Zachovává původní jemnou spodní linku, rozměry a editaci. Změna je omezena na toto pole v cloudovém editoru; prostředky `v=193`.
+
+V odděleném prohlížeči při 774 × 743 px ověřeno skutečné kliknutí do pole: aktivní vstup má `outline: none` a žádný stín. Přepsání názvu na Ověřený dokument.txt a uložení v počítači vytvořilo dokument s novým názvem v místním seznamu. Konzole bez chyb a varování, uživatelská karta nezměněna. Pro čistě vizuální změnu nebyly přidávány testy modelu.
+
 ## Sjednocený podvodný web a upravitelné přihlášení · 26. listopadu 2026
 
 Detail Podvodného webu používá společné vykreslení úložiště s běžným webovým serverem: Uložené soubory, složku domény a index.html s rozbalovacím náhledem. Stránka je nyní uložena v modelu serveru; náhled i skutečná odpověď po síti vycházejí ze stejného dokumentu. Přijatá přihlášení mají pod souborem samostatné rozbalovací řádky se jménem, heslem, zdrojem, zprávou a protokolem. Všechny dosavadní záznamy, poslední zpracovaný požadavek a certifikát zůstávají dostupné. Rozbalený stav se zachová při vykreslení. Původní růžový panel domény a růžové karty v detailu nahradilo standardní serverové rozložení; Správa webu dál ukazuje svou samostatně načtenou kopii. Odebrána věta o počtu načtených záznamů.
