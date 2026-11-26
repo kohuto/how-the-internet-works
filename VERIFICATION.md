@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Běžný kurzor na kartě a adresním řádku · 26. listopadu 2026
+
+Oblast karty, její text, ikona i křížek a statický adresní řádek používají běžný šipkový kurzor (`cursor: default`). Přejetí myší jej již nemění na ruku ani textový kurzor. Jde pouze o úpravu CSS; klikání na karty a jejich zavírání zůstává funkční. Prostředky `v=190`.
+
+V odděleném prohlížeči při 774 × 743 px ověřeny výsledné styly všech částí karty, adresy a koncové šipky. Skutečné najetí myší na kartu i text adresy potvrdilo `cursor: default` také ve stavu hover. Ostatní funkční prvky (záložka Knihovna a informace o připojení) si zachovávají svůj kurzor. Konzole bez chyb a varování, uživatelská karta nezměněna. Pro čistě vizuální změnu nebyly přidávány testy modelu.
+
 ## Statický adresní řádek a odebrání podrobností přenosu · 26. listopadu 2026
 
 Adresní řádek prohlížeče zachovává vzhled, ale zobrazuje pouze text aktuální adresy nebo původní výzvy. Neobsahuje vstupní pole ani formulář; také šipka na konci je pouze grafika. Odebráno zpracování psaní adresy a místní zkratky Ctrl/Cmd + L. Nová karta zaměří vlastní záložku. Z nabídky i načítání zmizely Podrobnosti přenosu, jejich panel, stav a styly. Cookies a přepínání HTTP/HTTPS zůstávají dostupné se svými rozšířeními; bez nich je ikona nabídky neaktivní, aby neotevírala prázdný panel. README aktualizováno, prostředky `v=189`.
