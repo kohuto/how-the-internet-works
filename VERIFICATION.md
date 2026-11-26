@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Wi-Fi Lipova bez hesla · 26. listopadu 2026
+
+Síť Lipova je otevřená pro notebook i telefon: po výběru a stisku Připojit se spojení naváže rovnou bez formuláře hesla. Dostupné sítě odvozují zabezpečení z konfigurace přístupového bodu; Lipova nemá zámeček ani při dočasné nedostupnosti již připojeného bodu. Z jejího detailu v mapě zmizel i řádek Heslo k Wi-Fi. Ostatní domácnosti a zabezpečená síť kavárny si hesla zachovávají. README aktualizováno, prostředky `v=188`.
+
+Prošlo všech **22 souvisejících testů** (`node --test tests/connection-panel.test.mjs tests/cafe-wifi.test.mjs tests/mobile.test.mjs tests/device-power.test.mjs`) a syntaxe tří změněných skriptů. Stávající test připojení nyní ověřuje otevřenou Lipovu na obou zařízeních a nedostupný otevřený bod; kontroly chybných, správných, zapamatovaných a změněných hesel používají zabezpečenou síť U Mateje. V odděleném prohlížeči při 1047 × 858 a 320 × 568 px ověřena Lipova bez zámečku a přímé připojení notebooku i telefonu bez pole hesla, odpovídající stavová ikona, detail přístupového bodu bez řádku hesla a zachovaná výzva k heslu u Matěje. Bez vodorovného přetékání, chyb nebo varování v konzoli; uživatelská karta nezměněna.
+
 ## Přímý seznam Wi-Fi bez Ethernetu · 26. listopadu 2026
 
 Panel připojení se otevírá přímo jako seznam dostupných Wi-Fi sítí. Záhlaví obsahuje šipku pro zavření vlevo, nadpis Wi-Fi a jediný přepínač Wi-Fi v pravém horním rohu. Původní řádek Ethernet i samostatný velký řádek přepínače Wi-Fi byly odstraněny. Seznam nabízí výběr sítě, Připojit a případné heslo; právě připojená Wi-Fi je první, má označené zabezpečení a možnost Odpojit. Po vypnutí Wi-Fi seznam nahradí krátká informace. Při nedostupném Wi-Fi rozhraní je přepínač neaktivní. Na telefonu jsou mobilní data samostatně pod seznamem. Podrobnosti připojení a volby šířky pásma/latence zůstávají sbalené pod ním.

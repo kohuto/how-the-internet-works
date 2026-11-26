@@ -11,7 +11,7 @@
   }
   function wifiList(net,id,sim,draft) {
     const access=net.access[id],connected=access.mode==='wifi',current=net.wifiNetworkId(id),networks=net.wifiNetworks(id);
-    if(connected&&!networks.some(n=>n.id===current))networks.unshift({id:current,ssid:id==='cafe'?(current==='trusted'?net.cafeWifi.ssid:net.mitm.ssid):net.wifiProfile(current)?.ssid,secured:current!=='rogue',unavailable:true});
+    if(connected&&!networks.some(n=>n.id===current))networks.unshift({id:current,ssid:id==='cafe'?(current==='trusted'?net.cafeWifi.ssid:net.mitm.ssid):net.wifiProfile(current)?.ssid,secured:!!net.wifiPassword(id,current),unavailable:true});
     networks.sort((a,b)=>Number(connected&&b.id===current)-Number(connected&&a.id===current));
     return `<div class="network-list" aria-label="Dostupné Wi-Fi sítě">${networks.length?networks.map(n=>{
       const active=connected&&current===n.id,selected=draft.selected===n.id,locked=n.secured&&!net.wifiKnown(id,n.id);

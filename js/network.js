@@ -290,7 +290,7 @@
       this.dnsRecords={'obchod.test':'192.0.2.226','zpravy.test':'192.0.2.227','reklamy.test':'192.0.2.228','knihovna.test':'203.0.113.10','knihovna-podpora.test':'192.0.2.170'};
       if(!this.featureEnabled('mobile'))this.access.phone.mode='wifi';
       if(!this.featureEnabled('wifi'))this.access.cabin.mode='cable';
-      this.wifiProfiles={ap:{ssid:'Lipova',password:'lipova1234'},'friend-ap':{ssid:'U Mateje',password:'matej1234'},'cabin-ap':{ssid:'Chata',password:'chata1234'}};
+      this.wifiProfiles={ap:{ssid:'Lipova',password:''},'friend-ap':{ssid:'U Mateje',password:'matej1234'},'cabin-ap':{ssid:'Chata',password:'chata1234'}};
       this.connectionControls=Object.fromEntries(Object.entries(this.access).map(([id,a])=>[id,{wifiEnabled:this.accessModeAvailable(id,'wifi')&&id!=='hacker',mobileEnabled:id==='phone'&&a.mode==='cellular',known:{}}]));
       this.dnsRecords=Object.fromEntries(Object.entries(this.dnsRecords).filter(([,ip])=>this.hostId(ip)));
       this.updateCellularAccess();
@@ -386,7 +386,7 @@
     wifiNetworks(id) {
       if(id==='cafe')return this.cafeNetworks().map(n=>({...n,signal:3}));
       return this.adjacent(id).filter(l=>l.device===id&&l.mode==='wifi'&&l.on&&this.nodes[this.peer(l,id)].on)
-        .map(l=>{const ap=this.peer(l,id),profile=this.wifiProfile(ap);return profile?{id:ap,ssid:profile.ssid,secured:true,signal:3}:null;}).filter(Boolean);
+        .map(l=>{const ap=this.peer(l,id),profile=this.wifiProfile(ap);return profile?{id:ap,ssid:profile.ssid,secured:!!profile.password,signal:3}:null;}).filter(Boolean);
     }
     wifiNetworkId(id) {const l=this.adjacent(id).find(l=>l.device===id&&l.mode==='wifi');return id==='cafe'?this.access.cafe.hotspot:l?this.peer(l,id):null;}
     wifiPassword(id,key) {return id==='cafe'?(key==='trusted'?this.cafeWifi.password:''):this.wifiProfile(key)?.password;}

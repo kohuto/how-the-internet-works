@@ -3,20 +3,23 @@ import test from 'node:test';import assert from 'node:assert/strict';
 const {Network,Simulation,LabSettings,computerView,connectionPanel}=globalThis.InternetLab;
 const finish=s=>{for(let i=0;i<3000&&s.status==='running';i++)s.advanceFrame();assert.equal(s.status,'success',s.current?.description);};
 
-test('Wi-Fi discovers only available local radios, validates credentials and remembers them for this device session',()=>{
+test('Wi-Fi discovers local radios, connects to open Lipova and validates and remembers secured network credentials',()=>{
   const n=new Simulation().net;
-  assert.deepEqual(n.wifiNetworks('laptop').map(x=>x.id),['ap']);
-  assert(!n.connectWifi('laptop','friend-ap','matej1234'));assert(!n.connectWifi('laptop','ap','wrong'));assert.equal(n.access.laptop.mode,'cable');
-  assert(n.connectWifi('laptop','ap','lipova1234'));assert(n.wifiKnown('laptop','ap'));assert.equal(n.nodes.laptop.ip,'192.168.10.11');
-  assert(!n.wifiKnown('phone','ap'));assert(n.disconnectWifi('laptop'));assert.equal(n.access.laptop.mode,'cable');assert(n.connectWifi('laptop','ap'));
-  n.wifiProfiles.ap.password='new-password';assert(!n.wifiKnown('laptop','ap'));n.disconnectWifi('laptop');assert(!n.connectWifi('laptop','ap'));assert(n.connectWifi('laptop','ap','new-password'));
+  assert.deepEqual(n.wifiNetworks('laptop').map(x=>x.id),['ap']);assert.equal(n.wifiNetworks('laptop')[0].secured,false);
+  assert(!n.connectWifi('laptop','friend-ap','matej1234'));assert(n.connectWifi('laptop','ap'));assert.equal(n.access.laptop.mode,'wifi');
+  assert(n.connectWifi('phone','ap'));assert.equal(n.access.phone.mode,'wifi');
+  assert(n.wifiNetworks('friend')[0].secured);assert(!n.connectWifi('friend','friend-ap','wrong'));assert.equal(n.access.friend.mode,'cable');
+  assert(n.connectWifi('friend','friend-ap','matej1234'));assert(n.wifiKnown('friend','friend-ap'));assert.equal(n.nodes.friend.ip,'172.16.20.11');
+  assert(n.disconnectWifi('friend'));assert.equal(n.access.friend.mode,'cable');assert(n.connectWifi('friend','friend-ap'));
+  n.wifiProfiles['friend-ap'].password='new-password';assert(!n.wifiKnown('friend','friend-ap'));n.disconnectWifi('friend');assert(!n.connectWifi('friend','friend-ap'));assert(n.connectWifi('friend','friend-ap','new-password'));
   n.toggleNode('ap');assert.deepEqual(n.wifiNetworks('laptop'),[]);assert(!n.accessReady('laptop'));
+  const unavailable=connectionPanel(n,'laptop',{});assert(!unavailable.includes('Připojeno, zabezpečeno'));assert(!unavailable.includes('<rect x="5" y="10"'));
   n.toggleNode('ap');n.toggleLink('laptop-wifi');assert.deepEqual(n.wifiNetworks('laptop'),[]);
 });
 
 test('Wi-Fi and mobile data have independent switches, with Wi-Fi selection and automatic mobile fallback',()=>{
   const s=new Simulation(),n=s.net;assert(n.connectionControls.phone.mobileEnabled);assert(n.connectionControls.phone.wifiEnabled);
-  assert(n.connectWifi('phone','ap','lipova1234'));assert.equal(n.access.phone.mode,'wifi');assert(n.connectionControls.phone.mobileEnabled);
+  assert(n.connectWifi('phone','ap'));assert.equal(n.access.phone.mode,'wifi');assert(n.connectionControls.phone.mobileEnabled);
   assert(n.setWifiEnabled('phone',false));assert.equal(n.access.phone.mode,'cellular');assert(n.accessReady('phone'));assert(!n.connectWifi('phone','ap'));
   assert(n.setMobileData(false));assert.equal(n.access.phone.mode,'offline');assert(!n.accessReady('phone'));
   assert(n.setWifiEnabled('phone',true));assert.equal(n.access.phone.mode,'offline');assert(n.connectWifi('phone','ap'));
@@ -26,7 +29,7 @@ test('Wi-Fi and mobile data have independent switches, with Wi-Fi selection and 
 
 test('Wired access returns automatically after Wi-Fi disconnect, restoring the cable or powering its peer back on',()=>{
   const n=new Simulation().net;
-  assert(n.connectWifi('laptop','ap','lipova1234'));assert(n.disconnectWifi('laptop'));assert.equal(n.access.laptop.mode,'cable');
+  assert(n.connectWifi('laptop','ap'));assert(n.disconnectWifi('laptop'));assert.equal(n.access.laptop.mode,'cable');
   n.connectWifi('laptop','ap');n.toggleLink('laptop-switch');n.disconnectWifi('laptop');assert.equal(n.access.laptop.mode,'offline');
   n.toggleLink('laptop-switch');assert.equal(n.access.laptop.mode,'cable');assert(n.accessReady('laptop'));
   n.connectWifi('laptop','ap');n.toggleLink('laptop-switch');assert.equal(n.access.laptop.mode,'wifi');
@@ -36,14 +39,14 @@ test('Wired access returns automatically after Wi-Fi disconnect, restoring the c
 });
 
 test('Restart resets radio controls and learned credentials without resetting another device',()=>{
-  const n=new Simulation().net;n.connectWifi('laptop','ap','lipova1234');n.connectWifi('phone','ap','lipova1234');
+  const n=new Simulation().net;n.connectWifi('laptop','ap');n.connectWifi('phone','ap');
   n.setMobileData(false);n.setWifiEnabled('phone',false);n.toggleNode('phone');n.toggleNode('phone');
   assert(n.connectionControls.phone.mobileEnabled);assert(n.connectionControls.phone.wifiEnabled);assert(!n.wifiKnown('phone','ap'));
   assert.equal(n.access.phone.mode,'cellular');assert(n.wifiKnown('laptop','ap'));assert.equal(n.access.laptop.mode,'wifi');
 });
 
 test('Extension choices hide unavailable radios, while café authentication and attacker identities remain distinct',()=>{
-  const basic=new Simulation(new Network(new LabSettings()));assert(!basic.net.setWifiEnabled('laptop',true));assert(!basic.net.connectWifi('laptop','ap','lipova1234'));assert(!basic.net.setMobileData(true));
+  const basic=new Simulation(new Network(new LabSettings()));assert(!basic.net.setWifiEnabled('laptop',true));assert(!basic.net.connectWifi('laptop','ap'));assert(!basic.net.setMobileData(true));
   const html=connectionPanel(basic.net,'laptop',basic);assert(!html.includes('Ethernet'));assert(html.includes('Wi-Fi není k dispozici'));assert(!html.includes('data-network-toggle'));
   const s=new Simulation(),n=s.net;s.mitm.configure(true,'observe',n.cafeWifi.ssid);
   assert(!n.connectWifi('cafe','trusted'));assert(n.connectWifi('cafe','rogue'));assert.equal(n.access.cafe.hotspot,'rogue');assert(!n.wifiKnown('cafe','trusted'));
