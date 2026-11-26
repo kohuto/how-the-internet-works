@@ -1,4 +1,4 @@
-/* A closed teaching scenario. Fictional mail and fixed credentials, no real network I/O.
+/* A closed teaching scenario. Fictional mail and editable example credentials, no real network I/O.
    Admin access follows the optional TLS setting; web navigation uses the full existing TLS flow. */
 (() => {
   'use strict';
@@ -10,10 +10,12 @@
   function mailTemplate(target,id) {
     return {id,target,to:emailFor(target),fromName:'Podpora knihovny',from:'podpora@knihovna-podpora.test',subject:'Ověření čtenářského účtu',body:'Dobrý den, ověřte prosím svůj čtenářský účet pomocí odkazu níže. Po ověření můžete pokračovat v používání knihovny.',linkLabel:'Ověřit účet knihovny',link:`https://${PHISH_HOST}/overeni?zprava=${id}`};
   }
+  const validLogin=value=>typeof value.username==='string'&&value.username.trim().length>0&&value.username.length<=128&&typeof value.password==='string'&&value.password.length>0&&value.password.length<=256;
   class PhishingScenario {
     constructor(sim) {
       this.sim=sim;this.net=sim.net;this.tls=null;
       this.state=this.net.phishing??={serial:0,submissionSerial:0,messages:new Map(),requests:new Map(),mailboxes:Object.fromEntries(CLIENTS.map(id=>[id,null])),clients:Object.fromEntries(MAIL_CLIENTS.map(id=>[id,{inbox:null,opened:false,reported:[],state:'idle',error:'',lastVisit:null}])),hacker:{state:'idle',notice:'Záznamy se zobrazí až po načtení ze serveru.',results:[],fetched:false,total:0},captures:new Map(),lastWeb:null,certificate:{name:PHISH_HOST,issuer:'Výuková certifikační autorita',valid:true,trusted:true}};
+      this.state.files??={'index.html':{name:'index.html',mediaType:'text/html; charset=utf-8',content:{brand:'knihovna na rohu',kicker:'ČTENÁŘSKÝ ÚČET',title:'Ověření čtenářského účtu',description:'Pro pokračování potvrďte své přihlašovací údaje.'}}};
     }
     accepts(type){return type==='phish-results';}
     validate(type,payload){return type==='phish-results'&&payload.device==='hacker';}
@@ -56,14 +58,17 @@
       const s=this.sim;
       if(this.blocked(s.clientId(),address.messageId))return null;
       s.action.payload.submissionId??=++this.state.submissionSerial;s.lastAction.payload.submissionId=s.action.payload.submissionId;
-      return JSON.stringify({...DEMO_LOGIN,messageId:address.messageId,submissionId:s.action.payload.submissionId});
+      const p=s.action.payload,login={username:p.username===undefined?DEMO_LOGIN.username:p.username,password:p.password===undefined?DEMO_LOGIN.password:p.password};
+      if(!validLogin(login))return null;
+      return JSON.stringify({...login,messageId:address.messageId,submissionId:p.submissionId});
     }
     respondWeb(request,secure,p) {
       const address=globalThis.InternetLab.webAddress(this.net.browserFor(this.sim.clientId()).address),post=request.method==='POST';
-      const result={status:200,title:'Ověření čtenářského účtu',revision:1,pageType:'phishing',messageId:address.messageId,submitted:false,receipt:''};
+      const document=structuredClone(this.state.files['index.html'].content);
+      const result={status:200,title:document.title,document,revision:1,pageType:'phishing',messageId:address.messageId,submitted:false,receipt:''};
       if(post) {
         const value=JSON.parse(request.message);
-        if(value.username!==DEMO_LOGIN.username||value.password!==DEMO_LOGIN.password||value.submissionId!==this.sim.action.payload.submissionId)throw new Error('Formulář tohoto pokusu používá pouze pevné ukázkové údaje.');
+        if(!validLogin(value)||value.submissionId!==this.sim.action.payload.submissionId)throw new Error('Neplatný formát přihlášení.');
         if(!this.state.captures.has(value.submissionId))this.state.captures.set(value.submissionId,{id:value.submissionId,messageId:value.messageId,username:value.username,password:value.password,sourceIp:p.src,secure});
         result.submitted=true;result.receipt='Ověření bylo přijato.';
       }

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const {Network,Simulation,NetworkMap,DEFAULT_MESSAGE,formatPackets,messagePreview,requestText,esc,computerView,fixedMailRecipient}=globalThis.InternetLab;
+  const {Network,Simulation,NetworkMap,DEFAULT_MESSAGE,formatPackets,messagePreview,requestText,esc,computerView,fixedMailRecipient,serverStorage}=globalThis.InternetLab;
   const ANIMATION_DELAY=650;
   const $=s=>{const first=document.querySelector(s);return !first||first.id==='transfer-preview'||!first.closest('#transfer-preview')?first:[...document.querySelectorAll(s)].find(el=>!el.closest('#transfer-preview'));},encoder=new TextEncoder();
   let net=new Network(new globalThis.InternetLab.LabSettings()),sim=new Simulation(net),timer=null,playing=false,toastTimer=null;
@@ -11,10 +11,11 @@
     const ui={selection:{kind:'node',id:'laptop'},tab:'desktop',hackerTab:'desktop',friendTab:'desktop',friendAddress:'knihovna.test',cabinTab:'desktop',cabinAddress:'knihovna.test',cabinMessage:DEFAULT_MESSAGE,cabinMessageType:'text',phoneTab:'desktop',phoneAddress:'knihovna.test',phoneMessage:DEFAULT_MESSAGE,phoneMessageType:'text',messageType:'text',monitorDevice:'laptop',monitorOpen:false,deviceOpen:false,linkOpen:false,packetOpen:false,packetResume:false,address:'knihovna.test',document:'Poznámky k projektu.pdf',message:DEFAULT_MESSAGE,scene:'home'};
     ui.friendMessage='';ui.friendMessageType='text';
     ui.cafeTab='desktop';ui.cafeAttackerTab='desktop';ui.cafeAddress='http://knihovna.test';
-    ui.mailComposer=Object.fromEntries(globalThis.InternetLab.MAIL_CLIENTS.map(id=>[id,{tab:'inbox',target:id==='hacker'?'laptop':fixedMailRecipient(id)||(net.nodeAvailable('friend')&&net.nodeAvailable('mail')?'friend':'laptop'),subject:'',body:'',phishBody:null,search:'',composeOpen:false,sentId:null}]));
+    ui.mailComposer=Object.fromEntries(globalThis.InternetLab.MAIL_CLIENTS.map(id=>[id,{tab:'inbox',target:id==='hacker'?'laptop':fixedMailRecipient(id)||(net.nodeAvailable('friend')&&net.nodeAvailable('mail')?'friend':'laptop'),subject:'',body:'',phishBody:null,phishSubject:null,search:'',composeOpen:false,sentId:null}]));
     ui.mitmSsid=net.mitm.ssid;
     ui.connectionDrafts={};ui.networkPanel=null;ui.networkDrafts={};
     ui.authDraft=Object.fromEntries(Object.keys(globalThis.InternetLab.PRIVACY_OWNERS).map(device=>[device,{mode:'login',username:device==='friend'?'matej':device==='cafe'?'host':'alex',email:'novy@knihovna.test',password:'KNIHOVNA-DEMO'}]));
+    ui.phishDraft=Object.fromEntries(globalThis.InternetLab.PHISH_CLIENTS.map(device=>[device,{...globalThis.InternetLab.DEMO_LOGIN}]));
     ui.privacyOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
     ui.cookieOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
     ui.chatbot={laptop:'',friend:'',phone:'',cabin:''};
@@ -28,7 +29,7 @@
     if(ui.transferOutcome?.device===device)ui.transferOutcome=null;
     const initial=createUI();ui[tabs[device]]='desktop';
     for(const field of ['address','message','messageType']){const key=field==='address'?addressKey(device):messageKey(device,field);if(Object.hasOwn(initial,key))ui[key]=initial[key];}
-    for(const field of ['mailComposer','authDraft','privacyOpen','cookieOpen','chatbot','webMessages','cloud'])if(Object.hasOwn(initial[field],device))ui[field][device]=initial[field][device];
+    for(const field of ['mailComposer','authDraft','phishDraft','privacyOpen','cookieOpen','chatbot','webMessages','cloud'])if(Object.hasOwn(initial[field],device))ui[field][device]=initial[field][device];
     delete ui.connectionDrafts[device];delete ui.networkDrafts[device];if(ui.networkPanel===device)ui.networkPanel=null;
     if(device==='laptop')ui.document=initial.document;
     if(device==='cafe-attacker')ui.mitmSsid=initial.mitmSsid;
@@ -164,7 +165,7 @@
   }
   function clearMailComposer() {
     const composer=ui.mailComposer[ui.monitorDevice];
-    if(composer)Object.assign(composer,{composeOpen:false,subject:'',body:'',phishBody:null});
+    if(composer)Object.assign(composer,{composeOpen:false,subject:'',body:'',phishBody:null,phishSubject:null});
   }
   function syncReader() {
     net.friend.chatOpen=ui.monitorOpen&&ui.monitorDevice==='friend'&&ui.friendTab==='message'&&net.nodes.friend.on;
@@ -280,10 +281,6 @@
     const text=terminal?'Venkovní terminál mění přenos z kabelu na obousměrný rádiový spoj. Potřebuje volný výhled na oblohu.':leo?'Přeposílá data mezi anténou na chatě a pozemní stanicí. Weby, Instagram, cloud a chatbot běží na svých serverech na zemi.':router?`Notebook se připojuje přes Wi-Fi nebo kabel. Router posílá internetový provoz do satelitní antény${net.detailEnabled('nat')?' a překládá soukromé adresy pomocí NAT':''}.`:'Propojuje satelitní přístup s pozemní sítí poskytovatele. Odsud pakety pokračují běžnými routery k datovým centrům.';
     return `<div class="satellite-notice"><strong>${terminal?'Satelitní přístup · anténa':leo?'LEO · nízká oběžná dráha':router?'Připojení k poskytovateli: satelit':'Brána ze satelitní sítě do internetu'}</strong><p data-device-help="Satelitní přístup">${net.detailEnabled('devices')?text:terminal?'Venkovní terminál mění přenos z kabelu na obousměrný rádiový spoj. Potřebuje volný výhled na oblohu.':leo?text:router?'Předává internetový provoz z místní sítě do satelitní antény.':'Propojuje satelitní přístup s pozemní sítí poskytovatele.'}</p><span>${net.physicalCanReach('cabin-router','sat-gateway')?'Satelitní cesta je dostupná':'Satelitní cesta je přerušená'}</span></div>${terminal?`<div class="satellite-view"><strong>${net.satellite.clearView?'Volný výhled na oblohu':'Výhled antény je zakrytý'}</strong><button class="secondary-button" data-action="satellite-view">${net.satellite.clearView?'Zakrýt výhled antény':'Obnovit volný výhled'}</button></div>`:''}${router?`<div class="satellite-view"><strong>Satelitní přípojka ${net.links['cabin-wan'].on?'zapnutá':'vypnutá'}</strong><button class="secondary-button" data-action="toggle-link" data-id="cabin-wan">${net.links['cabin-wan'].on?'Odpojit satelitní přípojku':'Připojit satelitní přípojku'}</button></div>`:''}${leo?'<div class="note-card" data-device-help="Satelitní přístup"><strong>Jedna zastavená poloha pro přehlednost</strong>Skutečné LEO satelity se pohybují a spojení se mezi nimi předává. Model používá jeden pevně zobrazený satelit; oběžné dráhy a předávání spojení nesimuluje.</div>':''}<p class="hint" data-device-help="Satelitní přístup">Rádiový let je zpomalený do tří kroků, aby šel sledovat. Nejde o skutečné milisekundy ani porovnání rychlosti poskytovatelů. Přenosová část anténa–satelit předává IP paket beze změny; rádiové protokoly model nerozepisuje. HTTPS i VPN fungují nad tímto připojením.</p>${router?`<button class="inline-link" data-select-node="cabin" data-open-tab="network">Otevřít notebook na chatě ↗</button>`:''}`;
   }
-  function serverStorage(server=net.server,host='knihovna.test') {
-    const file=server.files['index.html'],page=file.content;
-    return `<section class="server-storage" aria-label="Úložiště webového serveru"><div class="section-label">ULOŽENÉ SOUBORY</div><div class="server-folder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v12H3Z"/></svg><span>${esc(host)}</span></div><details class="server-file" data-detail-key="${esc(host)}-file"><summary><svg class="server-file-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2h9l5 5v15H5Zm9 0v6h5M8 12h8M8 16h8"/></svg><span class="server-file-name"><strong>${esc(file.name)}</strong><small>Webová stránka</small></span><span class="server-file-open">Otevřít</span><span class="server-file-chevron" aria-hidden="true">⌄</span></summary><div class="server-file-content"><div class="server-file-caption">NÁHLED SOUBORU · ${esc(file.name)}</div><article class="server-library-preview" aria-label="Náhled uložené stránky ${esc(host)}"><div class="server-library-brand">${esc(page.brand)}</div><div class="browser-library-home"><p class="library-kicker">${esc(page.kicker)}</p><h3 class="library-title">${esc(page.title)}</h3><p>${esc(page.description)}</p></div></article></div></details></section><p class="hint" data-device-help="Uložená stránka">Soubor index.html je uložený na tomto webovém serveru. ${host==='knihovna.test'?'Když prohlížeč požádá o stránku knihovna.test, server z něj připraví odpověď a pošle ji po síti. Prohlížeč zobrazí doručenou kopii.':'Tento server představuje dalšího zákazníka hostingu. Web knihovny je uložený na sousedním webovém serveru.'}</p>`;
-  }
   function cookieServer() {
     const state=net.server.cookies,last=state.last,busy=sim.status==='running';
     return `<section class="cookie-server" aria-label="Serverové záznamy prohlížečů"><div class="section-label">COOKIES · ROZPOZNÁNÍ PROHLÍŽEČE</div><p class="hint" data-device-help="Cookies">Server hledá identifikátor z hlavičky Cookie. IP adresa ani jméno zařízení tento záznam neurčují. Počet načtení roste při GET stránky; odeslání vzkazu POST se počítá jen do všech požadavků.</p>${net.featureEnabled('tls')?`<label class="cookie-toggle"><input type="checkbox" data-cookie-secure ${state.secureOnly?'checked':''} ${busy?'disabled':''}> Vyžadovat HTTPS pro cookie · Secure</label><p class="hint" data-device-help="Cookies">Přepínač změní příznak Set-Cookie v příští odpovědi. Již uložená cookie se změní až po jejím přijetí. Cookie se Secure poslanou přes HTTP prohlížeč odmítne.</p>`:''}${last?`<div class="cookie-server-last"><strong>${last.returning?'Známý prohlížeč':'Nový identifikátor'} · ${esc(last.id)}</strong><p>${last.received?'Přijatá hlavička:':'Požadavek neobsahoval cookie.'}</p>${last.received?`<code>Cookie: ${esc(last.received)}</code>`:''}<p>Hlavička připravená do odpovědi:</p><code>Set-Cookie: ${esc(last.setCookie)}</code>${sim.packets.has(last.packetId)?`<button class="inline-link" data-select-packet="${last.packetId}">Prozkoumat přijatý paket ↗</button>`:''}</div>`:''}<div class="cookie-server-list">${state.visitors.size?[...state.visitors.values()].map(v=>`<article class="cookie-server-row ${last?.id===v.id?'used':''}"><div><strong>${esc(v.id)}</strong>${last?.id===v.id?'<span>Poslední požadavek</span>':''}</div><p>Načtení stránky: <b>${v.loads}</b> · Všechny požadavky: ${v.requests}</p><small>Poslední zdroj: ${esc(v.lastIp)} · ${v.lastProtocol}</small></article>`).join(''):'<p class="empty-table">Žádné záznamy. Otevři web knihovny v některém zařízení.</p>'}</div><div class="note-card" data-device-help="Cookies">Smazání cookies v zařízení tyto záznamy neodstraní. Bez původního ID další požadavek vytvoří nový záznam. ID v1, v2… je názorná pomůcka; nejde o bezpečný přihlašovací token.</div></section>`;
@@ -328,7 +325,7 @@
       const site=net.hostedSites[n.id];
       html+=serverStorage(site,site.host);
     } else if(n.id==='web') {
-      html+=serverStorage();
+      html+=serverStorage(net.server,'knihovna.test');
       html+=serverServices(net.featureEnabled('tls')?'HTTP · TCP/80 a HTTPS · TLS nad TCP/443':'HTTP · TCP/80');
       if(net.featureEnabled('tls')&&net.featureEnabled('cookies')){html+=globalThis.InternetLab.authServer(net,sim);html+=globalThis.InternetLab.privacyServer(net,sim);}
       if(net.featureEnabled('cookies'))html+=cookieServer();
@@ -397,7 +394,7 @@
     if(networkDetails&&ui.networkPanel===ui.monitorDevice)networkDraft().details=networkDetails.open;
     sim.onAsyncReady=()=>render();
     journey.observe(sim,{blocked:ui.packetOpen||$('#settings-dialog').open,sourceOn:!journey.current||net.nodes[journey.current.device]?.on});
-    for(const [device,draft] of Object.entries(ui.mailComposer))if(draft.sendingId&&net.phishing.clients[device].sent.some(m=>m.id===draft.sendingId))Object.assign(draft,{sendingId:null,subject:'',body:'',phishBody:null,composeOpen:false});
+    for(const [device,draft] of Object.entries(ui.mailComposer))if(draft.sendingId&&net.phishing.clients[device].sent.some(m=>m.id===draft.sendingId))Object.assign(draft,{sendingId:null,subject:'',body:'',phishBody:null,phishSubject:null,composeOpen:false});
     const webStarted=browserNavigation.sync(sim);
     if(webStarted)ui[addressKey(webStarted)]=browserNavigation.active(webStarted).draft;
     for(const device of Object.keys(net.cloud.clients)) {
@@ -528,6 +525,7 @@
     if(e.target.dataset.connectionField){const id=e.target.closest('[data-device]').dataset.device;ui.connectionDrafts[id]??={...net.connectionProfiles[id]};ui.connectionDrafts[id][e.target.dataset.connectionField]=e.target.value;return;}
     if(e.target.dataset.authField){ui.authDraft[ui.monitorDevice][e.target.dataset.authField]=e.target.value;return;}
     if(e.target.dataset.mailField){const field=e.target.dataset.mailField,draft=ui.mailComposer[ui.monitorDevice];draft[field]=e.target.value;if(field==='search'){draft.sentId=null;net.phishing.clients[ui.monitorDevice].opened=false;}if(['target','search'].includes(field)&&!e.isComposing)render();return;}
+    if(['phishUsername','phishPassword'].includes(e.target.dataset.field)){ui.phishDraft[ui.monitorDevice][e.target.dataset.field==='phishUsername'?'username':'password']=e.target.value;return;}
     if(e.target.dataset.field==='webMessage'){ui.webMessages[ui.monitorDevice]=e.target.value;return;}
     if(e.target.dataset.field==='chatPrompt'){ui.chatbot[ui.monitorDevice]=e.target.value;return;}
     if(['cloudName','cloudContent','cloudFileId'].includes(e.target.dataset.field)) {ui.cloud[ui.monitorDevice][e.target.dataset.field]=e.target.value;return;}
@@ -548,9 +546,9 @@
       return;
     }
     if(form==='auth'){const d=ui.authDraft[ui.monitorDevice],address='https://knihovna.test';ui[addressKey(ui.monitorDevice)]=address;if(!sim.auth.validate({...d,device:ui.monitorDevice,address,authOp:d.mode})){notify('Použij jméno o 3–24 znacích (a–z, číslice, _ nebo -), heslo o 4–80 znacích a fiktivní e-mail končící .test.');return;}startAction('web',{address,authOp:d.mode,username:d.username,password:d.password,...(d.mode==='register'?{email:d.email}:{})});return;}
-    if(form==='phish-mail'){if(ui.monitorDevice==='hacker'){const {target,phishBody}=ui.mailComposer.hacker;startMail('phish-send',{target,...(phishBody!==null&&phishBody!==undefined?{body:phishBody}:{})});}return;}
+    if(form==='phish-mail'){if(ui.monitorDevice==='hacker'){const {target,phishBody,phishSubject}=ui.mailComposer.hacker;startMail('phish-send',{target,...(phishSubject!==null&&phishSubject!==undefined?{subject:phishSubject}:{}),...(phishBody!==null&&phishBody!==undefined?{body:phishBody}:{})});}return;}
     if(form==='mail-send'){const {target,subject,body}=ui.mailComposer[ui.monitorDevice];startMail('mail-send',{target:fixedMailRecipient(ui.monitorDevice)||target,subject,body});return;}
-    if(form==='phish-login'){const b=net.browserFor(ui.monitorDevice);ui[addressKey(ui.monitorDevice)]=`${b.loadedSecure?'https':'http'}://knihovna-podpora.test/overeni${b.loadedMessageId?'?zprava='+b.loadedMessageId:''}`;startAction('web',{method:'POST',phishLogin:true});
+    if(form==='phish-login'){const b=net.browserFor(ui.monitorDevice);ui[addressKey(ui.monitorDevice)]=`${b.loadedSecure?'https':'http'}://knihovna-podpora.test/overeni${b.loadedMessageId?'?zprava='+b.loadedMessageId:''}`;startAction('web',{method:'POST',phishLogin:true,...ui.phishDraft[ui.monitorDevice]});
     }else if(form==='web-message') {
       const device=ui.monitorDevice,b=net.browserFor(device),address=b.loadedSecure?'https://knihovna.test':'http://knihovna.test';
       if(!ui.webMessages[device].trim()){notify('Nejprve napiš vzkaz.');return;}

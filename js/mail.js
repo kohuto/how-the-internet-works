@@ -18,7 +18,7 @@
     }
     accepts(type){return ['mail-send','mail-check','mail-seen','phish-send'].includes(type);}
     validate(type,p){
-      if(type==='phish-send')return p.device==='hacker'&&PHISH_CLIENTS.includes(p.target)&&(p.body===undefined||typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200);
+      if(type==='phish-send')return p.device==='hacker'&&PHISH_CLIENTS.includes(p.target)&&(p.subject===undefined||typeof p.subject==='string'&&p.subject.trim().length>0&&p.subject.length<=100)&&(p.body===undefined||typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200);
       if(!MAIL_CLIENTS.includes(p.device))return false;
       if(type==='mail-send')return p.device!=='hacker'&&PHISH_CLIENTS.includes(p.target)&&(!fixedMailRecipient(p.device)||p.target===fixedMailRecipient(p.device))&&typeof p.subject==='string'&&p.subject.trim().length>0&&p.subject.length<=100&&typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200;
       if(type==='mail-seen')return this.net.phishing.clients[p.device].items.some(m=>String(m.id)===String(p.messageId));
@@ -31,7 +31,7 @@
         if(type==='phish-send')p.messageId??=++this.net.phishing.serial;else p.messageId??=`mail-${++this.state.serial}`;
         s.lastAction.payload.messageId=p.messageId;
         const old=this.state.deliveries.get(String(p.messageId));
-        const message=old?.message||(type==='phish-send'?this.readMessage(mailWire({...mailTemplate(p.target,p.messageId),...(typeof p.body==='string'?{body:p.body,link:null}:{}),source:'hacker'})):{id:p.messageId,source:p.device,target:p.target,from:emailFor(p.device),fromName:this.net.nodes[p.device].name,to:emailFor(p.target),subject:p.subject.trim().replace(/[\r\n]/g,' '),body:p.body});
+        const message=old?.message||(type==='phish-send'?this.readMessage(mailWire({...mailTemplate(p.target,p.messageId),...(typeof p.subject==='string'?{subject:p.subject.trim().replace(/[\r\n]/g,' ')}:{}),...(typeof p.body==='string'?{body:p.body,link:null}:{}),source:'hacker'})):{id:p.messageId,source:p.device,target:p.target,from:emailFor(p.device),fromName:this.net.nodes[p.device].name,to:emailFor(p.target),subject:p.subject.trim().replace(/[\r\n]/g,' '),body:p.body});
         this.entry=old||{message,origin:serverFor(p.device),destination:serverFor(p.target),state:'new',accepted:false,clientAccepted:false};
         this.phase='submission';
         if(c)Object.assign(c,{state:'sending',error:'',notice:'SMTP připravuje odeslání zprávy.'});

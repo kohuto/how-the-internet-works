@@ -150,3 +150,9 @@
 .transport-buttons .cancel-transfer{border-color:#e6ccc3;color:#9a5447;white-space:nowrap}
 .transport-buttons .cancel-transfer:hover{background:#fcf0eb}
 @media(max-width:700px){.playback-speed-detail{display:none}.transport-buttons{flex-direction:column;align-items:flex-end;gap:6px}.transport-options,.transport-playback{gap:5px}.playback-speed{min-height:37px;padding:0 6px 0 8px;gap:4px}.transport-buttons .cancel-transfer{padding:8px}.transport-actions{gap:6px}}
+
+.server-login-preview{display:grid;gap:14px;margin-top:22px;text-align:left}
+.server-login-preview span{display:block;margin-bottom:7px;font-size:11px;color:var(--muted)}
+.server-login-preview code{display:block;padding:11px 12px;border:1px solid var(--line);border-radius:7px;background:#f5f7f1;font-size:12px;overflow-wrap:anywhere}
+.server-captures .server-file{margin:10px 0}
+.server-capture .dl{margin:0}

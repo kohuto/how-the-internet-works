@@ -1,5 +1,15 @@
 # Záznam ověření
 
+## Sjednocený podvodný web a upravitelné přihlášení · 26. listopadu 2026
+
+Detail Podvodného webu používá společné vykreslení úložiště s běžným webovým serverem: Uložené soubory, složku domény a index.html s rozbalovacím náhledem. Stránka je nyní uložena v modelu serveru; náhled i skutečná odpověď po síti vycházejí ze stejného dokumentu. Přijatá přihlášení mají pod souborem samostatné rozbalovací řádky se jménem, heslem, zdrojem, zprávou a protokolem. Všechny dosavadní záznamy, poslední zpracovaný požadavek a certifikát zůstávají dostupné. Rozbalený stav se zachová při vykreslení. Původní růžový panel domény a růžové karty v detailu nahradilo standardní serverové rozložení; Správa webu dál ukazuje svou samostatně načtenou kopii. Odebrána věta o počtu načtených záznamů.
+
+Předmět připraveného e-mailu je upravitelný, zachová se při změně příjemce a do SMTP, Odeslaných i IMAP přejde skutečně zadaná hodnota. Jméno a heslo na podvodné stránce jsou rovněž upravitelné; začínají připravenou ukázkou, mají vlastní stav pro každé zařízení a při restartu zařízení se obnoví. Server ukládá skutečně doručené hodnoty. Jméno je omezeno na 128 znaků, heslo na 256 a předmět na 100. README aktualizováno, prostředky `v=192` a nový společný modul `js/server-ui.js`.
+
+Prošlo všech **67 souvisejících testů** (`node --test tests/phishing-ui.test.mjs tests/phishing.test.mjs tests/mail-ui.test.mjs tests/mail.test.mjs tests/web.test.mjs tests/device-power.test.mjs`) a kontrola syntaxe změněných skriptů. Testy ověřují společné rozložení serverů, zachované záznamy bez jejich změny náhledem, oddělení uložené stránky a klientské kopie, escapování textu, odeslání vlastního předmětu a přenos vlastního přihlášení přes HTTP i HTTPS včetně pozdějšího načtení do správce.
+
+V odděleném prohlížeči při 774 × 743 px ověřen běžný webový server se zachovaným náhledem, podvodný server před přijetím formuláře i po něm, rozbalení souboru a přihlášení a zachování rozbalených řádků při vypnutí/zapnutí serveru. Při 320 × 568 px se záznamy vejdou bez vodorovného přetékání. Upravený předmět ověřen v Odeslaných i v doručené poště, včetně jeho zachování při změně příjemce. Vlastní jméno a heslo přežily opakované vykreslení a po odeslání byly správně zobrazeny v detailu serveru i ve Správě webu; odstraněná věta se neobjevila. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Upravitelná návnada a zjednodušení phishingového rozhraní · 26. listopadu 2026
 
 V Gmailu útočníka je možné upravit celý předpřipravený text včetně popisku a adresy odkazu. Předmět a odesílatel zůstávají připravené. Rozepsaný text se zachová při změně příjemce a vykreslení; zavření zprávy jej zahodí a další zpráva začne novou šablonou. SMTP odesílá skutečně upravený obsah a tentýž obsah se uloží na server, do Odeslaných i k příjemci přes IMAP. Odstraněný odkaz se automaticky nevrací. Validace odmítá prázdný text a text nad 1200 znaků. Výběr příjemce při zaměření nemá modré orámování.
