@@ -1,4 +1,4 @@
-import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/computer.js';
+import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/connection-ui.js';import '../js/computer.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 
 const {Network,LabSettings,Simulation,computerView}=globalThis.InternetLab;
@@ -24,16 +24,16 @@ test('Mobile data choose the nearest usable BTS automatically and stay off until
   n.toggleNode('phone');assert.equal(n.access.phone.tower,'bts-park');
 });
 
-test('The connection app has data on/off controls and a passive BTS status, including no available station',()=>{
+test('Quick settings have data switches and passive BTS details, including no available station',()=>{
   const s=create(),n=s.net;
-  const check=()=>{const html=view(s);assert(!/cell-tower|data-tower|ZÁKLADNOVÁ STANICE|undefined/.test(html));assert(html.includes('data-access-mode="cellular"'));assert(html.includes('data-access-mode="offline"'));return html;};
-  assert(check().includes('Mobilní data · BTS'));
-  n.toggleNode('bts-lipova');assert(check().includes('Mobilní data · BTS'));
+  const check=()=>{const html=view(s);assert(!/cell-tower|data-tower|ZÁKLADNOVÁ STANICE|undefined/.test(html));assert(html.includes('data-network-toggle="cellular"'));assert(html.includes('role="switch"'));assert(!html.includes('data-access-mode'));return html;};
+  assert(check().includes('BTS · '+n.nodes[n.access.phone.tower].ip));
+  n.toggleNode('bts-lipova');assert(check().includes('BTS · '+n.nodes[n.access.phone.tower].ip));
   n.toggleNode('bts-park');assert.equal(n.access.phone.tower,null);assert(!n.accessReady('phone'));
-  const unavailable=check();assert(unavailable.includes('Mobilní síť není dostupná'));assert(!unavailable.includes('Mobilní data · BTS'));
-  n.setAccess('phone','offline');assert(check().includes('Zařízení je odpojené.'));
+  const unavailable=check();assert(unavailable.includes('Mobilní síť není dostupná'));assert(unavailable.includes('Žádná dostupná BTS'));
+  n.setMobileData(false);assert(check().includes('Nepřipojeno'));assert(!n.connectionControls.phone.mobileEnabled);
   n.toggleNode('bts-lipova');assert.equal(n.access.phone.mode,'offline');
-  n.setAccess('phone','cellular');assert(check().includes('Mobilní data · BTS'));
+  n.setAccess('phone','cellular');assert(check().includes('BTS · '+n.nodes[n.access.phone.tower].ip));
 });
 
 test('Losing the radio carrying an in-flight packet does not invent delivery; retry uses the new automatic BTS',()=>{

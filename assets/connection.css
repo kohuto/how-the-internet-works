@@ -1,0 +1,63 @@
+/* Network flyout above the taskbar; the open application stays in place. */
+.computer-taskbar{overflow:visible;gap:6px}
+.taskbar-apps{position:relative;display:flex;align-items:center;gap:5px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:thin}
+.computer-taskbar .computer-connection{margin-left:0;flex:0 0 35px}
+.network-backdrop{position:absolute;inset:0;z-index:3;border:0;background:transparent;cursor:default}
+.network-panel{position:absolute;right:10px;bottom:54px;z-index:4;width:min(320px,calc(100% - 20px));max-height:calc(100% - 64px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #cadbcd;border-radius:13px;background:#fffef9;box-shadow:0 10px 35px #163b3a40;font-size:12px;color:#263b36}
+.network-panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px 10px;border-bottom:1px solid #e0e8dd;flex-shrink:0}
+.network-panel-header h3{font-size:14px;font-weight:700;margin:0;letter-spacing:-.2px}
+.network-panel-header button{display:grid;place-items:center;width:28px;height:28px;flex-shrink:0;border:0;border-radius:6px;background:none;color:#638276}
+.network-panel-header button:hover{background:#edf3e9}
+.network-panel svg{width:21px;height:21px;flex-shrink:0}
+.network-panel-header svg{width:17px;height:17px}
+.network-panel-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scroll-padding-block:12px;padding:0 0 8px}
+.network-radio,.network-ethernet{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid #e5ecdf}
+.network-radio>div,.network-ethernet>div{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.network-radio strong,.network-ethernet strong{font-size:12px;font-weight:700}
+.network-radio small,.network-ethernet small{font-size:10px;line-height:1.4;color:#738779;overflow-wrap:anywhere}
+.network-radio-icon,.network-ethernet>svg{color:#54806b}
+.network-switch{position:relative;flex:0 0 35px;width:35px;height:21px;border:1px solid #95ac9a;border-radius:20px;padding:2px;background:#dfe8df;transition:background .15s}
+.network-switch>span{display:block;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #17382f30;transition:transform .15s}
+.network-switch[aria-checked=true]{background:#37735e;border-color:#37735e}
+.network-switch[aria-checked=true]>span{transform:translateX(13px)}
+.network-list{padding:6px}
+.network-item{border:1px solid transparent;border-radius:8px;overflow:hidden}
+.network-item.selected{border-color:#cbdcc8;background:#f4f8ee}
+.network-item.connected{background:#edf5ea}
+.network-item+.network-item{margin-top:4px}
+.network-choice{display:flex;align-items:center;gap:11px;width:100%;padding:11px 10px;border:0;background:none;text-align:left;color:inherit}
+.network-choice:hover{background:#e8f0e3}
+.network-choice>span:nth-child(2){display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.network-choice strong{font-size:12px;overflow-wrap:anywhere}
+.network-choice small{font-size:10px;color:#788a75;line-height:1.4}
+.network-signal{position:relative;display:block;flex:0 0 25px;width:25px;height:26px;color:#628268}
+.network-signal>svg:first-child{width:21px;height:21px}
+.network-signal>svg+svg{position:absolute;right:0;bottom:0;width:11px;height:11px;background:#fffef9;border-radius:2px}
+.network-check{display:flex;color:#427654}
+.network-check svg{width:17px;height:17px}
+.network-actions{padding:0 12px 12px 47px}
+.network-actions .primary-button,.network-actions .secondary-button,.connection-performance .secondary-button{font-size:11px;min-height:32px;padding:7px 12px}
+.network-actions form{display:flex;flex-direction:column;gap:8px}
+.network-actions label{font-size:11px;font-weight:600}
+.network-actions input{width:100%;min-width:0;border:1px solid #b9cdb8;border-radius:6px;padding:8px;background:#fffefa;font:inherit;color:inherit}
+.network-actions p{font-size:10px;line-height:1.5;color:#7d8c75;margin:0}
+.network-actions .network-error{color:#b24d40}
+.network-action-buttons{display:flex;flex-wrap:wrap;gap:6px}
+.network-empty{padding:12px 16px;margin:0;font-size:11px;line-height:1.5;color:#7c8c78}
+.network-details{margin:4px 14px 0;border-top:1px solid #e0e8dd;padding-top:5px}
+.network-details summary{padding:9px 0;cursor:pointer;font-size:11px;color:#4c7259}
+.network-details dl{margin:5px 0 13px;display:flex;flex-direction:column;gap:5px}
+.network-details dt{font-size:10px;color:#7b8f80}.network-details dd{font-size:11px;margin:0 0 5px;overflow-wrap:anywhere}
+.connection-performance{border-top:1px solid #e0e8dd;padding-top:12px}
+.connection-performance h4{font-size:12px;margin:0 0 12px}
+.connection-performance-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.connection-performance-fields label{font-size:10px;display:flex;flex-direction:column;gap:6px}
+.connection-performance select{width:100%;min-width:0;border:1px solid #cbdcc8;border-radius:6px;background:#fffefa;padding:7px;color:inherit;font:inherit}
+.connection-performance p,.network-satellite-note{font-size:10px;line-height:1.6;color:#7b8b75}
+.phone-status{pointer-events:auto;border:0;background:none;width:100%;z-index:5;cursor:pointer;font-family:inherit}
+.phone-status:hover{background:#ffffff10}
+.phone-window .network-panel{top:34px;bottom:auto;left:8px;right:8px;width:auto;max-height:calc(100% - 88px)}
+.phone-window .computer-taskbar{z-index:5}
+.monitor-screen:has(.network-panel)>.computer-taskbar{z-index:5}
+@media(max-width:370px){.network-panel{right:6px;width:calc(100% - 12px)}.network-panel-header{padding:8px 11px}.network-radio,.network-ethernet{padding:10px 12px}.network-actions{padding-left:15px}.phone-window .network-panel{left:5px;right:5px}.network-actions input{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.network-switch,.network-switch>span{transition:none}}

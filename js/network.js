@@ -290,6 +290,8 @@
       this.dnsRecords={'obchod.test':'192.0.2.226','zpravy.test':'192.0.2.227','reklamy.test':'192.0.2.228','knihovna.test':'203.0.113.10','knihovna-podpora.test':'192.0.2.170'};
       if(!this.featureEnabled('mobile'))this.access.phone.mode='wifi';
       if(!this.featureEnabled('wifi'))this.access.cabin.mode='cable';
+      this.wifiProfiles={ap:{ssid:'Lipova',password:'lipova1234'},'friend-ap':{ssid:'U Mateje',password:'matej1234'},'cabin-ap':{ssid:'Chata',password:'chata1234'}};
+      this.connectionControls=Object.fromEntries(Object.entries(this.access).map(([id,a])=>[id,{wifiEnabled:this.accessModeAvailable(id,'wifi')&&id!=='hacker',mobileEnabled:id==='phone'&&a.mode==='cellular',known:{}}]));
       this.dnsRecords=Object.fromEntries(Object.entries(this.dnsRecords).filter(([,ip])=>this.hostId(ip)));
       this.updateCellularAccess();
       this.applyAccess('cafe');this.applyAccess('hacker');this.applyAccess('cabin');this.applyAccess('laptop');this.applyAccess('friend');this.applyAccess('phone');
@@ -299,7 +301,7 @@
     clientStateSlots(id) {
       const browserKeys={laptop:'browser',friend:'friendBrowser',phone:'phoneBrowser',cabin:'cabinBrowser',cafe:'cafeBrowser'};
       return [
-        ['access',this.access,id],['connectionProfile',this.connectionProfiles,id],['browser',this,browserKeys[id]],
+        ['access',this.access,id],['connectionControls',this.connectionControls,id],['connectionProfile',this.connectionProfiles,id],['browser',this,browserKeys[id]],
         ['vpn',this.vpn.clients,id],['chatbot',this.chatbot.clients,id],['cloudClient',this.cloud.clients,id],['localFiles',this.cloud.local,id],
         ['mail',this.phishing?.clients,id],['auth',this.server.auth?.clients,id],['privacy',this.server.privacy?.clients,id],['ads',this.ads?.clients,id],
         ['admin',this.phishing,id==='hacker'?'hacker':undefined],['hotspot',this,id==='cafe-attacker'?'mitm':undefined]
@@ -380,6 +382,44 @@
     advanceCookieTime(seconds=3600) {if(!Number.isFinite(seconds)||seconds<0)return false;this.cookieTime+=seconds;for(const id of ['laptop','friend','phone','cabin','cafe'])globalThis.InternetLab.WebCookies.expire(this.browserFor(id).cookies,this.cookieTime);for(const c of Object.values(this.ads?.clients||{}))if(c.cookie?.expiresAt<=this.cookieTime)c.cookie=null;return true;}
     accessLink(id) {return this.adjacent(id).find(l=>l.device===id&&this.selectedAccess(l))||null;}
     accessReady(id) {return this.isActive(this.accessLink(id));}
+    wifiProfile(ap) {return ap==='cafe-ap'?this.cafeWifi:this.wifiProfiles[ap];}
+    wifiNetworks(id) {
+      if(id==='cafe')return this.cafeNetworks().map(n=>({...n,signal:3}));
+      return this.adjacent(id).filter(l=>l.device===id&&l.mode==='wifi'&&l.on&&this.nodes[this.peer(l,id)].on)
+        .map(l=>{const ap=this.peer(l,id),profile=this.wifiProfile(ap);return profile?{id:ap,ssid:profile.ssid,secured:true,signal:3}:null;}).filter(Boolean);
+    }
+    wifiNetworkId(id) {const l=this.adjacent(id).find(l=>l.device===id&&l.mode==='wifi');return id==='cafe'?this.access.cafe.hotspot:l?this.peer(l,id):null;}
+    wifiPassword(id,key) {return id==='cafe'?(key==='trusted'?this.cafeWifi.password:''):this.wifiProfile(key)?.password;}
+    wifiKnown(id,key) {
+      const network=this.wifiNetworks(id).find(n=>n.id===key);
+      return !!network&&this.connectionControls[id]?.known[key]===`${network.ssid}\n${this.wifiPassword(id,key)}`;
+    }
+    cableLink(id) {return this.adjacent(id).find(l=>l.device===id&&l.mode==='cable')||null;}
+    cableReady(id) {const l=this.cableLink(id);return !!l&&l.on&&this.nodes[id].on&&this.nodes[this.peer(l,id)].on;}
+    fallbackAccess(id) {return id==='phone'&&this.connectionControls.phone.mobileEnabled?'cellular':this.cableReady(id)?'cable':'offline';}
+    setWifiEnabled(id,enabled) {
+      const controls=this.connectionControls[id];
+      if(!controls||id==='hacker'||!this.nodeAvailable(id)||!this.accessModeAvailable(id,'wifi')||typeof enabled!=='boolean'||controls.wifiEnabled===enabled)return false;
+      controls.wifiEnabled=enabled;
+      if(!enabled&&this.access[id].mode==='wifi')this.setAccess(id,this.fallbackAccess(id));
+      return true;
+    }
+    connectWifi(id,key,password='') {
+      const controls=this.connectionControls[id],network=this.wifiNetworks(id).find(n=>n.id===key);
+      if(!controls?.wifiEnabled||!this.nodes[id].on||!network||network.secured&&!this.wifiKnown(id,key)&&password!==this.wifiPassword(id,key))return false;
+      if(id==='cafe')this.setCafeHotspot(key,this.wifiPassword(id,key));else this.setAccess(id,'wifi');
+      controls.known[key]=`${network.ssid}\n${this.wifiPassword(id,key)}`;
+      return true;
+    }
+    disconnectWifi(id) {return this.access[id]?.mode==='wifi'&&this.setAccess(id,this.fallbackAccess(id));}
+    setMobileData(enabled) {
+      const controls=this.connectionControls.phone;
+      if(!this.nodeAvailable('phone')||!this.featureEnabled('mobile')||typeof enabled!=='boolean'||controls.mobileEnabled===enabled)return false;
+      controls.mobileEnabled=enabled;
+      if(!enabled&&this.access.phone.mode==='cellular')this.setAccess('phone','offline');
+      else if(enabled&&this.access.phone.mode==='offline')this.setAccess('phone','cellular');
+      return true;
+    }
     updateCellularAccess() {
       const access=this.access.phone,phone=this.nodes.phone;
       // Distance is only a teaching approximation; radio propagation is not simulated.
@@ -410,6 +450,8 @@
       const allowed=id==='cafe'?['offline']:id==='hacker'?['cable','offline']:id==='phone'?['wifi','cellular','offline']:['cable','wifi','offline'];
       if(!this.nodeAvailable(id)||!this.access[id]||!allowed.includes(mode)||!this.accessModeAvailable(id,mode))return false;
       if(this.access[id].mode===mode)return false;
+      if(mode==='wifi')this.connectionControls[id].wifiEnabled=true;
+      if(mode==='cellular')this.connectionControls[id].mobileEnabled=true;
       this.access[id]={mode,...(id==='phone'?{tower:null}:id==='cafe'?{hotspot:this.access.cafe.hotspot}:{})};this.applyAccess(id);this.changed();return true;
     }
     cafeNetworks() {
@@ -480,12 +522,18 @@
     }
     setSatelliteView(clear) {if(this.satellite.clearView===clear)return false;this.satellite.clearView=clear;this.changed();return true;}
     natRouterFor(id) {return id==='cafe'?'cafe-router':id==='hacker'?'hacker-router':id==='cabin'?'cabin-router':id==='friend'?'friend-home':id==='phone'&&this.access.phone.mode==='cellular'?null:'home';}
-    toggleLink(id) {if(!this.linkAvailable(this.links[id]))return false;this.links[id].on=!this.links[id].on;this.changed();return this.links[id].on;}
+    toggleLink(id) {
+      const link=this.links[id];if(!this.linkAvailable(link))return false;
+      link.on=!link.on;
+      if(link.on&&link.device&&link.mode==='cable'&&this.access[link.device].mode==='offline'&&this.cableReady(link.device))this.setAccess(link.device,'cable');
+      this.changed();return link.on;
+    }
     toggleNode(id) {
       if(!this.nodeAvailable(id))return false;
       this.nodes[id].on=!this.nodes[id].on;
       if(!this.nodes[id].on&&CLIENT_DEVICES.includes(id)){this.onClientPowerOff?.(id);this.resetClient(id);}
       if(!this.nodes[id].on&&((id==='cafe-ap'&&this.access.cafe.hotspot==='trusted')||(id==='cafe-attacker'&&this.access.cafe.hotspot==='rogue')))this.access.cafe.mode='offline';
+      if(this.nodes[id].on)for(const link of this.adjacent(id).filter(l=>l.device&&l.mode==='cable'))if(this.access[link.device].mode==='offline'&&this.cableReady(link.device))this.setAccess(link.device,'cable');
       this.changed();return this.nodes[id].on;
     }
     packetHeader(p) {return {protocol:p.protocol,src:p.src,sport:p.sport,dst:p.dst,dport:p.dport};}

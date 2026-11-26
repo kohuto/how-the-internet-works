@@ -1,6 +1,6 @@
-import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/mitm-ui.js';import '../js/computer.js';
+import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/mitm-ui.js';import '../js/connection-ui.js';import '../js/computer.js';
 import test from 'node:test';import assert from 'node:assert/strict';
-const {Network,LabSettings,Simulation,cafeConnection,computerView,mitmApp,MITM_TITLE}=globalThis.InternetLab;
+const {Network,LabSettings,Simulation,connectionPanel,computerView,mitmApp,MITM_TITLE}=globalThis.InternetLab;
 const create=()=>new Simulation(new Network(new LabSettings({features:['mitm']})));
 function finish(s,expected='success'){for(let i=0;i<2000&&s.status==='running';i++)s.advanceFrame();assert.equal(s.status,expected,s.current?.description);}
 const web=s=>s.start('web',{device:'cafe',address:'http://knihovna.test/'});
@@ -39,9 +39,9 @@ test('Names remain distinct from network identity, allow matching SSIDs and are 
  for(const html of [guest,attacker]){assert(html.includes('&lt;img'));assert(!html.includes('<img'));}
  for(const invalid of ['', ' ', 'x'.repeat(33), 'a\nb'])assert(!s.mitm.configure(true,'observe',invalid));
  assert.equal(n.mitm.ssid,unsafe);assert(!attacker.includes('data-action="cafe-connect-rogue"'));
- s.mitm.configure(false);assert(!cafeConnection(n,s).includes('data-cafe-hotspot="rogue"'));
- const form=cafeConnection(n,s,{cafeWifiChoice:'trusted',cafePassword:'" autofocus="x',cafeWifiError:'Chybné heslo'});
- assert(form.includes('data-form="cafe-wifi"'));assert(form.includes('type="password"'));assert(form.includes('role="alert"'));assert(form.includes('&quot; autofocus=&quot;'));
+ s.mitm.configure(false);assert(!connectionPanel(n,'cafe',s).includes('data-wifi-network="rogue"'));
+ const form=connectionPanel(n,'cafe',s,{networkDrafts:{cafe:{selected:'trusted',passwordStep:true,password:'" autofocus="x',error:'Chybné heslo'}}});
+ assert(form.includes('data-form="wifi-connect"'));assert(form.includes('type="password"'));assert(form.includes('role="alert"'));assert(form.includes('&quot; autofocus=&quot;'));
 });
 test('A Wi-Fi access point stays discoverable with a broken internet uplink, but web delivery still fails',()=>{
  const s=create(),n=s.net;n.toggleLink('cafe-uplink');assert(n.cafeNetworks().some(x=>x.id==='trusted'));

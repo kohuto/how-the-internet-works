@@ -12,8 +12,8 @@
     ui.friendMessage='';ui.friendMessageType='text';
     ui.cafeTab='desktop';ui.cafeAttackerTab='desktop';ui.cafeAddress='http://knihovna.test';
     ui.mailComposer=Object.fromEntries(globalThis.InternetLab.MAIL_CLIENTS.map(id=>[id,{tab:'inbox',target:id==='hacker'?'laptop':fixedMailRecipient(id)||(net.nodeAvailable('friend')&&net.nodeAvailable('mail')?'friend':'laptop'),subject:'',body:'',search:'',composeOpen:false,sentId:null}]));
-    ui.mitmSsid=net.mitm.ssid;ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';
-    ui.connectionDrafts={};
+    ui.mitmSsid=net.mitm.ssid;
+    ui.connectionDrafts={};ui.networkPanel=null;ui.networkDrafts={};
     ui.authDraft=Object.fromEntries(Object.keys(globalThis.InternetLab.PRIVACY_OWNERS).map(device=>[device,{mode:'login',username:device==='friend'?'matej':device==='cafe'?'host':'alex',email:'novy@knihovna.test',password:'KNIHOVNA-DEMO'}]));
     ui.privacyOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
     ui.cookieOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
@@ -29,9 +29,8 @@
     const initial=createUI();ui[tabs[device]]='desktop';
     for(const field of ['address','message','messageType']){const key=field==='address'?addressKey(device):messageKey(device,field);if(Object.hasOwn(initial,key))ui[key]=initial[key];}
     for(const field of ['mailComposer','authDraft','privacyOpen','cookieOpen','chatbot','webMessages','cloud'])if(Object.hasOwn(initial[field],device))ui[field][device]=initial[field][device];
-    delete ui.connectionDrafts[device];
+    delete ui.connectionDrafts[device];delete ui.networkDrafts[device];if(ui.networkPanel===device)ui.networkPanel=null;
     if(device==='laptop')ui.document=initial.document;
-    if(device==='cafe'){ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';}
     if(device==='cafe-attacker')ui.mitmSsid=initial.mitmSsid;
     if(browserNavigation.reset(device))ui[addressKey(device)]='';
   }
@@ -53,7 +52,7 @@
     onRestore:(context,result)=>{
       if(sim.run!==context.run||!net.nodes[context.device]?.on)return;
       const from=$('.transfer-thumbnail').getBoundingClientRect();
-      ui.monitorDevice=context.device;ui[tabKey(context.device)]=context.app;ui.selection={kind:'node',id:context.device};
+      ui.networkPanel=null;ui.monitorDevice=context.device;ui[tabKey(context.device)]=context.app;ui.selection={kind:'node',id:context.device};
       ui.monitorOpen=true;ui.deviceOpen=false;ui.linkOpen=false;ui.packetOpen=false;
       ui.transferOutcome=['failed','waiting'].includes(result.status)||sim.action?.type==='print'?{device:context.device,status:result.status,text:net.displayText(result.current?.description||result.current?.title||'Přenos je dokončený.')} :null;
       syncReader();render();animateMonitor(from,false);resumeBackground();
@@ -77,7 +76,7 @@
     if(!journey.current&&sim.status!=='running'&&sim.action&&sim.action.type!=='message'&&sim.resumePending()){playAutomatically();render();}
   }
   function beginTransfer(app) {
-    journey.clear();ui.transferOutcome=null;
+    journey.clear();ui.transferOutcome=null;ui.networkPanel=null;
     const device=sim.clientId();ui.monitorDevice=device;ui[tabKey(device)]=app;ui.selection={kind:'node',id:device};
     ui.monitorOpen=true;ui.deviceOpen=false;ui.linkOpen=false;ui.packetOpen=false;ui.packetResume=false;
     syncReader();remaining=0;render();
@@ -119,6 +118,7 @@
     ui.scene=scene;map.setScene(scene);
   }
   function select(kind,id) {
+    ui.networkPanel=null;
     if(kind==='node'&&!net.nodeAvailable(id)||kind==='link'&&!net.linkAvailable(net.links[id]))return;
     journeyAnimation?.cancel();journeyAnimation=null;
     if(kind==='packet'&&journey.current?.phase==='expanded')journey.minimize();
@@ -134,6 +134,7 @@
     if(resume)resumePlayback();
   }
   function closeMonitor() {
+    ui.networkPanel=null;
     if(journey.current&&journey.current.device===ui.monitorDevice){
       if(sim.status==='running'&&!sim.replicaResult){journey.minimize();return;}
       journey.clear();
@@ -150,6 +151,8 @@
     if(resume)resumePlayback();
   }
   function openComputerApp(app) {
+    if(app==='network'){toggleNetworkPanel();return;}
+    ui.networkPanel=null;
     if(!net.appAvailable(app,ui.monitorDevice))return;
     if(!['desktop','web','print','message','cloud','chatbot','network','vpn','mail','attack','mitm'].includes(app))return;
     if(journey.current)journey.browse();ui.transferOutcome=null;
@@ -188,13 +191,33 @@
     if(ui.scene==='home')setScene('all');
     beginTransfer('cloud');
   }
-  function changeAccess(id,mode) {
-    if(!net.setAccess(id,mode))return;
-    sim.connectionChanged(id);
-    if(sim.status!=='running')stop();
-    syncReader();notify(`${net.nodes[id].name}: ${mode==='wifi'?'Wi-Fi':mode==='cellular'?'mobilní data':mode==='cable'?'kabel':'odpojeno'}.`);
+  function networkDraft() {return ui.networkDrafts[ui.monitorDevice]??={selected:null,passwordStep:false,password:'',error:'',details:false};}
+  function focusWifiPassword() {const input=$('#wifi-password');if(input){input.focus({preventScroll:true});input.form.scrollIntoView({block:'nearest'});}}
+  function closeNetworkPanel(focus=true) {
+    ui.networkPanel=null;const d=networkDraft();d.password='';d.error='';d.passwordStep=false;
+    render();if(focus)$('#monitor-content .computer-connection')?.focus({preventScroll:true});
+  }
+  function toggleNetworkPanel() {
+    const id=ui.monitorDevice;if(!net.access[id]||!net.nodes[id].on)return;
+    if(ui.networkPanel===id){closeNetworkPanel();return;}
+    ui.networkPanel=id;const d=networkDraft();Object.assign(d,{selected:net.access[id].mode==='wifi'?net.wifiNetworkId(id):null,passwordStep:false,password:'',error:''});
+    render();($('#connection-panel [data-network-toggle]')||$('#connection-panel [data-action="network-close"]'))?.focus({preventScroll:true});
+  }
+  function updateConnection(change,message,focus) {
+    const id=ui.monitorDevice,before=JSON.stringify(net.access[id]);
+    if(!change())return false;
+    if(JSON.stringify(net.access[id])!==before)sim.connectionChanged(id);
+    if(sim.status!=='running')stop();syncReader();if(message)notify(message);
     if(!resumeMessage())render();
-    $('#monitor-content [data-access-mode][aria-pressed="true"]')?.focus({preventScroll:true});
+    if(focus)$('#monitor-content '+focus)?.focus({preventScroll:true});
+    return true;
+  }
+  function connectWifi(key,password='') {
+    const id=ui.monitorDevice,d=networkDraft();
+    if(!updateConnection(()=>net.connectWifi(id,key,password),'Připojeno k Wi-Fi.',`[data-wifi-network="${key}"]`)){
+      d.error='Připojení se nezdařilo. Zkontroluj heslo a dostupnost sítě.';render();focusWifiPassword();return;
+    }
+    Object.assign(d,{selected:key,passwordStep:false,password:'',error:''});render();$(`#monitor-content [data-wifi-network="${key}"]`)?.focus({preventScroll:true});
   }
   function setDeviceHelpOpen(open) {
     const help=$('#device-help'),show=open&&!help.hidden;
@@ -278,7 +301,7 @@
     if(n.id==='phish-web')return html+globalThis.InternetLab.phishingServerDetail(net,sim,n);
     if(['terminal','satellite'].includes(n.type))return html+satelliteInfo(n)+decision(n);
     if(n.type==='bts')return html+`<p class="hint" data-device-help="Jak zařízení funguje">Spojuje telefon rádiem s připojenou sítí. Přijatá data předává po kabelové přípojce k zařízení ${esc(net.displayName(net.peer(net.adjacent(n.id).find(l=>l.medium==='backhaul'),n.id)))}.</p>${decision(n)}<div class="note-card" data-device-help="Mobilní síť">BTS zajišťuje rádiový přístup. Dál paket pokračuje přes připojené ${net.detailEnabled('devices')?'routery':'chytré křižovatky'} k cíli. Vnitřní IP adresy a TCP segmenty při předání přes BTS zůstávají stejné.</div>`;
-    if(n.type==='ap')html+=`<dl class="dl">${definition('Wi-Fi síť',n.id==='cafe-ap'?net.cafeWifi.ssid:n.id==='cabin-ap'?'Chata':n.id==='ap'?'Lipova':'U Mateje')}${n.id==='cafe-ap'?definition('Heslo k Wi-Fi',net.cafeWifi.password):''}</dl><p class="hint" data-device-help="Přepínání v LAN">Přístupový bod propojuje bezdrátová zařízení ${net.detailEnabled('devices')?'se switchem':'s chytrou křižovatkou'} v domácí síti.</p>`;
+    if(n.type==='ap')html+=`<dl class="dl">${definition('Wi-Fi síť',net.wifiProfile(n.id).ssid)}${definition('Heslo k Wi-Fi',net.wifiProfile(n.id).password)}</dl><p class="hint" data-device-help="Přepínání v LAN">Přístupový bod propojuje bezdrátová zařízení ${net.detailEnabled('devices')?'se switchem':'s chytrou křižovatkou'} v domácí síti.</p>`;
     if(n.type==='switch'||n.type==='ap') {
       if(!junction)html+=`<p class="hint" data-device-help="Jak zařízení funguje">${net.detailEnabled('devices')?`${n.type==='ap'?'Přemosťuje Wi-Fi a Ethernet uvnitř jedné LAN.':'Přeposílá ethernetové rámce uvnitř jedné LAN.'} Pro rozhodování používá MAC adresy.`:'Předává paket jediným dostupným spojem směrem k cíli.'}</p>`;
       if(net.detailEnabled('mac')) {
@@ -370,6 +393,8 @@
     notify('Nová sestava je připravená. Otevři notebook a spusť přenos.');
   }
   function render(animate=false) {
+    const networkDetails=$('#connection-panel .network-details');
+    if(networkDetails&&ui.networkPanel===ui.monitorDevice)networkDraft().details=networkDetails.open;
     sim.onAsyncReady=()=>render();
     journey.observe(sim,{blocked:ui.packetOpen||$('#settings-dialog').open,sourceOn:!journey.current||net.nodes[journey.current.device]?.on});
     for(const [device,draft] of Object.entries(ui.mailComposer))if(draft.sendingId&&net.phishing.clients[device].sent.some(m=>m.id===draft.sendingId))Object.assign(draft,{sendingId:null,subject:'',body:'',composeOpen:false});
@@ -381,13 +406,13 @@
       if(draft.downloadSerial!==client.downloadSerial){loadLocal(device,client.lastDownload);draft.downloadSerial=client.downloadSerial;}
     }
     const videoStates=[...document.querySelectorAll('#monitor-content video')].map((v,i)=>({key:v.closest('[data-instagram-message]')?.dataset.instagramMessage||`index:${i}`,time:v.currentTime,paused:v.paused,device:ui.monitorDevice,src:v.querySelector('source')?.getAttribute('src')}));
-    const focused=document.activeElement,browserFocus=focused?.dataset?.browserFocus,authField=focused?.dataset?.authField,mailField=focused?.dataset?.mailField,field=focused?.dataset?.field,start=focused?.selectionStart,end=focused?.selectionEnd;
+    const focused=document.activeElement,networkPassword=focused?.hasAttribute('data-network-password'),networkFocus=focused?.closest('#connection-panel')?focused.dataset.networkFocus:null,networkScroll=$('#connection-panel .network-panel-scroll')?.scrollTop||0,browserFocus=focused?.dataset?.browserFocus,authField=focused?.dataset?.authField,mailField=focused?.dataset?.mailField,field=focused?.dataset?.field,start=focused?.selectionStart,end=focused?.selectionEnd;
     const key=ui.monitorOpen?`${ui.monitorDevice}:${ui.monitorDevice==='cafe-attacker'?ui.cafeAttackerTab:ui.monitorDevice==='cafe'?ui.cafeTab:ui.monitorDevice==='hacker'?ui.hackerTab:ui.monitorDevice==='cabin'?ui.cabinTab:ui.monitorDevice==='friend'?ui.friendTab:ui.monitorDevice==='phone'?ui.phoneTab:ui.tab}`:'';
     const browserKey=ui.monitorOpen&&browserNavigation.state(ui.monitorDevice)&&key.endsWith(':web')?`${browserNavigation.active(ui.monitorDevice)?.id}:${browserNavigation.active(ui.monitorDevice)?.page}:${browserNavigation.state(ui.monitorDevice)?.panel}`:'';
     const fullComputerKey=key+':'+browserKey;
     const computerDetails=fullComputerKey===computerViewKey?[...document.querySelectorAll('.computer-app-body details[open]')].map(d=>d.dataset.detailKey||d.querySelector('summary')?.textContent):[];
     const computerScroll=fullComputerKey===computerViewKey?$('.computer-app-body')?.scrollTop||0:0;
-    const taskbarScroll=fullComputerKey===computerViewKey?$('.computer-taskbar')?.scrollLeft||0:0;
+    const taskbarScroll=fullComputerKey===computerViewKey?$('.taskbar-apps')?.scrollLeft||0:0;
     const mailScroll=fullComputerKey===computerViewKey?$('.gmail-scroll')?.scrollTop||0:0;
     const oldDrive=$('.drive-scroll'),driveScroll=fullComputerKey===computerViewKey&&oldDrive?{key:oldDrive.dataset.viewKey,top:oldDrive.scrollTop}:null;
     const cloudTextScroll=field==='cloudContent'?focused.scrollTop:null;
@@ -410,10 +435,13 @@
       $('#monitor-content .monitor-heading')?.after(notice);
     }
     renderJourney();
+    if($('#connection-panel .network-panel-scroll'))$('#connection-panel .network-panel-scroll').scrollTop=networkScroll;
+    if(networkFocus)$(`[data-network-focus="${networkFocus}"]`)?.focus({preventScroll:true});
+    if(networkPassword){const input=$('#wifi-password');if(input){input.focus({preventScroll:true});if(typeof start==='number')input.setSelectionRange(start,end);}}
     document.querySelectorAll('.computer-app-body details').forEach(d=>{if(computerDetails.includes(d.dataset.detailKey||d.querySelector('summary')?.textContent))d.open=true;});
     if($('.real-browser'))$('.real-browser').style.setProperty('--browser-panel-height',`${Math.max(80,$('.computer-app-body').clientHeight-$('.browser-chrome').offsetHeight-12)}px`);
     if($('.computer-app-body'))$('.computer-app-body').scrollTop=computerScroll;
-    const taskbar=$('.computer-taskbar'),activeApp=taskbar?.querySelector('.taskbar-app.active');
+    const taskbar=$('.taskbar-apps'),activeApp=taskbar?.querySelector('.taskbar-app.active');
     if(taskbar) {
       taskbar.scrollLeft=taskbarScroll;
       if(activeApp&&activeApp.offsetLeft<taskbar.scrollLeft)taskbar.scrollLeft=activeApp.offsetLeft;
@@ -496,6 +524,7 @@
     beginTransfer(type==='message'?'message':type==='print'?'print':type==='chatbot'?'chatbot':'web');
   }
   function handleInput(e) {
+    if(e.target.hasAttribute('data-network-password')){networkDraft().password=e.target.value;return;}
     if(e.target.dataset.connectionField){const id=e.target.closest('[data-device]').dataset.device;ui.connectionDrafts[id]??={...net.connectionProfiles[id]};ui.connectionDrafts[id][e.target.dataset.connectionField]=e.target.value;return;}
     if(e.target.dataset.authField){ui.authDraft[ui.monitorDevice][e.target.dataset.authField]=e.target.value;return;}
     if(e.target.dataset.mailField){const field=e.target.dataset.mailField,draft=ui.mailComposer[ui.monitorDevice];draft[field]=e.target.value;if(field==='search'){draft.sentId=null;net.phishing.clients[ui.monitorDevice].opened=false;}if(['target','search'].includes(field)&&!e.isComposing)render();return;}
@@ -507,12 +536,7 @@
   }
   function handleSubmit(e) {
     e.preventDefault();const form=e.target.dataset.form;
-    if(form==='cafe-wifi'){
-      if(ui.monitorDevice!=='cafe'||sim.status==='running')return;
-      if(net.setCafeHotspot('trusted',ui.cafePassword)){sim.connectionChanged('cafe');ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';}
-      else ui.cafeWifiError='Připojení se nezdařilo. Zkontroluj heslo a dostupnost sítě.';
-      render();return;
-    }
+    if(form==='wifi-connect'){connectWifi(e.target.dataset.network,networkDraft().password);return;}
     if(form==='mitm-hotspot'){
       if(ui.monitorDevice!=='cafe-attacker'||sim.status==='running')return;
       const ssid=ui.mitmSsid.trim();if(!ssid||ssid.length>32){notify('Zadej název Wi-Fi o 1–32 znacích.');return;}
@@ -582,16 +606,20 @@
       if(b.dataset.browserNav==='network'&&state.networkOpen)$('.browser-network')?.scrollIntoView({block:'nearest'});
       return;
     }
-    if(b.dataset.action==='cafe-wifi-choose'){
-      if(sim.status==='running'||ui.monitorDevice!=='cafe')return;
-      $('.cafe-hotspots button')?.focus();return;
+    if(b.dataset.action==='network-toggle'){toggleNetworkPanel();return;}
+    if(b.dataset.action==='network-close'){closeNetworkPanel();return;}
+    if(b.dataset.networkToggle){
+      const kind=b.dataset.networkToggle,id=ui.monitorDevice,d=networkDraft();Object.assign(d,{selected:null,passwordStep:false,password:'',error:''});
+      updateConnection(()=>kind==='wifi'?net.setWifiEnabled(id,!net.connectionControls[id].wifiEnabled):net.setMobileData(!net.connectionControls.phone.mobileEnabled),null,`[data-network-toggle="${kind}"]`);return;
     }
-    if(b.dataset.cafeHotspot){
-      if(sim.status==='running'||ui.monitorDevice!=='cafe')return;
-      if(b.dataset.cafeHotspot==='trusted'){if(net.access.cafe.mode==='wifi'&&net.access.cafe.hotspot==='trusted')return;ui.cafeWifiChoice='trusted';ui.cafeWifiError='';render();$('#cafe-wifi-password')?.focus();}
-      else {if(net.setCafeHotspot('rogue'))sim.connectionChanged('cafe');ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();}return;
+    if(b.dataset.wifiNetwork){const d=networkDraft();Object.assign(d,{selected:d.selected===b.dataset.wifiNetwork?null:b.dataset.wifiNetwork,passwordStep:false,password:'',error:''});render();$(`#monitor-content [data-wifi-network="${b.dataset.wifiNetwork}"]`)?.focus({preventScroll:true});return;}
+    if(b.dataset.wifiConnect){
+      const id=ui.monitorDevice,key=b.dataset.wifiConnect,network=net.wifiNetworks(id).find(n=>n.id===key);if(!network)return;
+      if(network.secured&&!net.wifiKnown(id,key)){const d=networkDraft();Object.assign(d,{passwordStep:true,password:'',error:''});render();focusWifiPassword();}
+      else connectWifi(key);return;
     }
-    if(b.dataset.action==='cafe-wifi-cancel'){ui.cafeWifiChoice=null;ui.cafePassword='';ui.cafeWifiError='';render();return;}
+    if(b.dataset.action==='wifi-disconnect'){const key=net.wifiNetworkId(ui.monitorDevice);updateConnection(()=>net.disconnectWifi(ui.monitorDevice),'Wi-Fi odpojena.',`[data-wifi-network="${key}"]`);return;}
+    if(b.dataset.action==='wifi-cancel'){Object.assign(networkDraft(),{passwordStep:false,password:'',error:''});render();$('#connection-panel .selected [data-wifi-connect]')?.focus({preventScroll:true});return;}
     if(b.dataset.gmailAction){
       const d=ui.mailComposer[ui.monitorDevice],c=net.phishing.clients[ui.monitorDevice],action=b.dataset.gmailAction;
       if(action==='compose'){if(sim.status==='running'&&['mail-send','phish-send'].includes(sim.action?.type)&&sim.clientId()===ui.monitorDevice)return;Object.assign(d,{composeOpen:true});}
@@ -661,7 +689,6 @@
       }
       return;
     }
-    if(b.dataset.accessMode){changeAccess(b.dataset.id,b.dataset.accessMode);return;}
     if(b.dataset.computerApp){openComputerApp(b.dataset.computerApp);return;}
     if(b.dataset.action==='close-monitor'||b.dataset.action==='show-map'){closeMonitor();return;}
     if(b.dataset.action==='computer-home'){openComputerApp('desktop');return;}
@@ -693,6 +720,7 @@
       if(e.target.dataset.cloudAccess){ui.cloud[ui.monitorDevice].permissions[e.target.dataset.cloudAccess]=e.target.value;return;}
       if(e.target.hasAttribute('data-receipts')){net.friend.receipts=e.target.checked;if(net.friend.read&&net.friend.receipts&&sim.markRead('friend'))playAutomatically();render();}
     });
+    root.addEventListener('toggle',e=>{if(e.target.isConnected&&e.target.matches('.network-details'))networkDraft().details=e.target.open;},true);
     root.addEventListener('submit',handleSubmit);
     root.addEventListener('click',handleClick);
   }
@@ -721,7 +749,7 @@
     const from=$('.transfer-thumbnail').getBoundingClientRect();
     const context=journey.expand();if(!context)return;
     journeyAnimation?.cancel();journeyAnimation=null;
-    ui.monitorDevice=context.device;ui[tabKey(context.device)]=context.app;ui.selection={kind:'node',id:context.device};
+    ui.networkPanel=null;ui.monitorDevice=context.device;ui[tabKey(context.device)]=context.app;ui.selection={kind:'node',id:context.device};
     ui.monitorOpen=true;ui.deviceOpen=false;ui.linkOpen=false;ui.packetOpen=false;syncReader();render();animateMonitor(from,false);$('#monitor-content').focus({preventScroll:true});
   }
   $('#transfer-card').addEventListener('click',expandTransfer);
@@ -743,7 +771,7 @@
     if(sim.status!=='running')return;
     const context=journey.current||{device:sim.clientId(),app:transferApp(sim.action.type)},from=$('.transfer-thumbnail').getBoundingClientRect();
     stop();sim.cancel();journey.clear();map.finishAnimations();remaining=0;ui.packetResume=false;settingsWasPlaying=false;
-    ui.monitorDevice=context.device;ui[tabKey(context.device)]=context.app;ui.selection={kind:'node',id:context.device};
+    ui.networkPanel=null;ui.monitorDevice=context.device;ui[tabKey(context.device)]=context.app;ui.selection={kind:'node',id:context.device};
     ui.monitorOpen=!!net.nodes[context.device]?.on;ui.deviceOpen=false;ui.linkOpen=false;ui.packetOpen=false;
     ui.transferOutcome={device:context.device,status:'cancelled',text:'Přenos byl zrušen. Můžeš začít jinou akci.'};
     if(ui.mailComposer[context.device])ui.mailComposer[context.device].sendingId=null;
@@ -755,9 +783,10 @@
     beginTransfer(transferApp(sim.action.type));notify('Opakuji stejnou akci. Změny sítě i serveru zůstaly.');
   });
   let settingsWasPlaying=false;
-  const settingsPanel=new globalThis.InternetLab.SettingsPanel({getSettings:()=>net.settings,onOpen:()=>{settingsWasPlaying=playing;stop();render();},onApply:applySettings,onClose:()=>{if(settingsWasPlaying)resumePlayback();else render();}});
+  const settingsPanel=new globalThis.InternetLab.SettingsPanel({getSettings:()=>net.settings,onOpen:()=>{ui.networkPanel=null;settingsWasPlaying=playing;stop();render();},onApply:applySettings,onClose:()=>{if(settingsWasPlaying)resumePlayback();else render();}});
   document.addEventListener('keydown',e=> {
     if(settingsPanel.dialog.open)return;
+    if(e.key==='Escape'&&ui.networkPanel){e.preventDefault();closeNetworkPanel();return;}
     if(e.key==='Escape'&&!$('#device-help-content').hidden){e.preventDefault();helpTrigger.focus({preventScroll:true});setDeviceHelpOpen(false);return;}
     if(ui.monitorOpen&&$('.gmail-application')){
       const draft=ui.mailComposer[ui.monitorDevice];

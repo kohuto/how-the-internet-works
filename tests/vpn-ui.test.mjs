@@ -1,4 +1,4 @@
-import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/mitm-ui.js';import '../js/computer.js';
+import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/mitm-ui.js';import '../js/connection-ui.js';import '../js/computer.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 const {Network,LabSettings,Simulation,computerView}=globalThis.InternetLab;
 const clients=['laptop','friend','phone','cabin','hacker','cafe'];

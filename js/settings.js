@@ -12,7 +12,7 @@
     {id:'tls',group:'services',label:'Šifrování komunikace (TLS)',description:'Šifrovaný web, e-mail a správa podvodného serveru. Bez této volby je obsah těchto přenosů čitelný. VPN má vlastní šifrování.'},
     {id:'cookies',group:'services',label:'Cookies',description:'Rozpoznání prohlížeče, záznamy návštěv a cookies přihlašovacích relací.'},
     {id:'wifi',group:'services',label:'Wi-Fi v domácnostech',description:'Bezdrátové připojení na Lipové, u Matěje a na chatě. Platí pro zapnuté domácnosti.',nodes:['ap','friend-ap','cabin-ap']},
-    {id:'connection-timing',group:'services',label:'Šířka pásma a Latence',description:'Volby šířky pásma a latence v aplikaci Připojení na počítačích a telefonu. Umožní porovnat rozestupy paketů a zdržení přenosu.'},
+    {id:'connection-timing',group:'services',label:'Šířka pásma a Latence',description:'Volby šířky pásma a latence v Podrobnostech připojení na počítačích a telefonu. Umožní porovnat rozestupy paketů a zdržení přenosu.'},
     {id:'phone',group:'services',label:'Telefon',description:'Telefon s prohlížečem a dalšími zapnutými aplikacemi.',requires:['wifi'],nodes:['phone']},
     {id:'mail',group:'services',label:'E-mail',description:'Společná poštovní služba pro tebe a Matěje. Odesílání zpráv a schránky uložené na serveru.',requires:['friend'],nodes:['mail']},
     {id:'instagram',group:'services',label:'Instagram',description:'Zprávy mezi tebou a Matějem přes vzdálený server.',requires:['friend'],regions:['instagram']},
