@@ -1,5 +1,15 @@
 # Záznam ověření
 
+## Upravitelná návnada a zjednodušení phishingového rozhraní · 26. listopadu 2026
+
+V Gmailu útočníka je možné upravit celý předpřipravený text včetně popisku a adresy odkazu. Předmět a odesílatel zůstávají připravené. Rozepsaný text se zachová při změně příjemce a vykreslení; zavření zprávy jej zahodí a další zpráva začne novou šablonou. SMTP odesílá skutečně upravený obsah a tentýž obsah se uloží na server, do Odeslaných i k příjemci přes IMAP. Odstraněný odkaz se automaticky nevrací. Validace odmítá prázdný text a text nad 1200 znaků. Výběr příjemce při zaměření nemá modré orámování.
+
+Z přijaté návnady zmizela tlačítka Nahlásit phishing a Otevřít známou stránku knihovny. Z podvodné stránky byly odstraněny blok s porovnáním domén, věta o připravených fiktivních údajích i blok vysvětlující doručení na podvodný server. Zůstává formulář s pevnými ukázkovými údaji a po jeho odeslání potvrzení Ověření bylo přijato. V detailu Podvodného webu již není tlačítko Otevřít správu webu. Odstraněny nepoužívané styly a obsluhy tlačítek, README aktualizováno, prostředky `v=191`.
+
+Prošlo všech **41 souvisejících testů** (`node --test tests/phishing-ui.test.mjs tests/mail.test.mjs tests/mail-ui.test.mjs tests/phishing.test.mjs`) a syntaxe změněných skriptů. Nová kontrola ověřuje vlastní Unicode text, tečku na začátku řádku, escapování HTML, změnu příjemce, shodu SMTP/IMAP a Odeslaných, vlastní popisek, odstranění odkazu a neplatný vstup, s TLS i bez něj. Stávající kontroly ověřují také odstraněné prvky.
+
+V odděleném prohlížeči při 774 × 743 px ověřeno editování, skutečný výběr příjemce se zachovaným textem, zaměření selectu bez obrysu/stínu, nové otevření s čerstvou šablonou a následné doručení upravené zprávy do pošty příjemce. Přijatý e-mail neobsahuje odstraněná tlačítka; jeho původní odkaz dál načte podvodnou stránku. Před odesláním formuláře chybějí oba označené texty, po odeslání zůstává jen potvrzení bez výukového bloku. V detailu serveru ověřen uložený záznam a absence zkratky do Správy webu. Při 320 × 568 px ověřena stránka a dokončení formuláře bez vodorovného přetékání. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Běžný kurzor na kartě a adresním řádku · 26. listopadu 2026
 
 Oblast karty, její text, ikona i křížek a statický adresní řádek používají běžný šipkový kurzor (`cursor: default`). Přejetí myší jej již nemění na ruku ani textový kurzor. Jde pouze o úpravu CSS; klikání na karty a jejich zavírání zůstává funkční. Prostředky `v=190`.

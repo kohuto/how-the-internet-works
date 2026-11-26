@@ -11,7 +11,7 @@
     const ui={selection:{kind:'node',id:'laptop'},tab:'desktop',hackerTab:'desktop',friendTab:'desktop',friendAddress:'knihovna.test',cabinTab:'desktop',cabinAddress:'knihovna.test',cabinMessage:DEFAULT_MESSAGE,cabinMessageType:'text',phoneTab:'desktop',phoneAddress:'knihovna.test',phoneMessage:DEFAULT_MESSAGE,phoneMessageType:'text',messageType:'text',monitorDevice:'laptop',monitorOpen:false,deviceOpen:false,linkOpen:false,packetOpen:false,packetResume:false,address:'knihovna.test',document:'Poznámky k projektu.pdf',message:DEFAULT_MESSAGE,scene:'home'};
     ui.friendMessage='';ui.friendMessageType='text';
     ui.cafeTab='desktop';ui.cafeAttackerTab='desktop';ui.cafeAddress='http://knihovna.test';
-    ui.mailComposer=Object.fromEntries(globalThis.InternetLab.MAIL_CLIENTS.map(id=>[id,{tab:'inbox',target:id==='hacker'?'laptop':fixedMailRecipient(id)||(net.nodeAvailable('friend')&&net.nodeAvailable('mail')?'friend':'laptop'),subject:'',body:'',search:'',composeOpen:false,sentId:null}]));
+    ui.mailComposer=Object.fromEntries(globalThis.InternetLab.MAIL_CLIENTS.map(id=>[id,{tab:'inbox',target:id==='hacker'?'laptop':fixedMailRecipient(id)||(net.nodeAvailable('friend')&&net.nodeAvailable('mail')?'friend':'laptop'),subject:'',body:'',phishBody:null,search:'',composeOpen:false,sentId:null}]));
     ui.mitmSsid=net.mitm.ssid;
     ui.connectionDrafts={};ui.networkPanel=null;ui.networkDrafts={};
     ui.authDraft=Object.fromEntries(Object.keys(globalThis.InternetLab.PRIVACY_OWNERS).map(device=>[device,{mode:'login',username:device==='friend'?'matej':device==='cafe'?'host':'alex',email:'novy@knihovna.test',password:'KNIHOVNA-DEMO'}]));
@@ -164,7 +164,7 @@
   }
   function clearMailComposer() {
     const composer=ui.mailComposer[ui.monitorDevice];
-    if(composer)Object.assign(composer,{composeOpen:false,subject:'',body:''});
+    if(composer)Object.assign(composer,{composeOpen:false,subject:'',body:'',phishBody:null});
   }
   function syncReader() {
     net.friend.chatOpen=ui.monitorOpen&&ui.monitorDevice==='friend'&&ui.friendTab==='message'&&net.nodes.friend.on;
@@ -397,7 +397,7 @@
     if(networkDetails&&ui.networkPanel===ui.monitorDevice)networkDraft().details=networkDetails.open;
     sim.onAsyncReady=()=>render();
     journey.observe(sim,{blocked:ui.packetOpen||$('#settings-dialog').open,sourceOn:!journey.current||net.nodes[journey.current.device]?.on});
-    for(const [device,draft] of Object.entries(ui.mailComposer))if(draft.sendingId&&net.phishing.clients[device].sent.some(m=>m.id===draft.sendingId))Object.assign(draft,{sendingId:null,subject:'',body:'',composeOpen:false});
+    for(const [device,draft] of Object.entries(ui.mailComposer))if(draft.sendingId&&net.phishing.clients[device].sent.some(m=>m.id===draft.sendingId))Object.assign(draft,{sendingId:null,subject:'',body:'',phishBody:null,composeOpen:false});
     const webStarted=browserNavigation.sync(sim);
     if(webStarted)ui[addressKey(webStarted)]=browserNavigation.active(webStarted).draft;
     for(const device of Object.keys(net.cloud.clients)) {
@@ -548,7 +548,7 @@
       return;
     }
     if(form==='auth'){const d=ui.authDraft[ui.monitorDevice],address='https://knihovna.test';ui[addressKey(ui.monitorDevice)]=address;if(!sim.auth.validate({...d,device:ui.monitorDevice,address,authOp:d.mode})){notify('Použij jméno o 3–24 znacích (a–z, číslice, _ nebo -), heslo o 4–80 znacích a fiktivní e-mail končící .test.');return;}startAction('web',{address,authOp:d.mode,username:d.username,password:d.password,...(d.mode==='register'?{email:d.email}:{})});return;}
-    if(form==='phish-mail'){if(ui.monitorDevice==='hacker')startMail('phish-send',{target:ui.mailComposer.hacker.target});return;}
+    if(form==='phish-mail'){if(ui.monitorDevice==='hacker'){const {target,phishBody}=ui.mailComposer.hacker;startMail('phish-send',{target,...(phishBody!==null&&phishBody!==undefined?{body:phishBody}:{})});}return;}
     if(form==='mail-send'){const {target,subject,body}=ui.mailComposer[ui.monitorDevice];startMail('mail-send',{target:fixedMailRecipient(ui.monitorDevice)||target,subject,body});return;}
     if(form==='phish-login'){const b=net.browserFor(ui.monitorDevice);ui[addressKey(ui.monitorDevice)]=`${b.loadedSecure?'https':'http'}://knihovna-podpora.test/overeni${b.loadedMessageId?'?zprava='+b.loadedMessageId:''}`;startAction('web',{method:'POST',phishLogin:true});
     }else if(form==='web-message') {
@@ -633,9 +633,7 @@
     if(['phish-send','mail-check'].includes(b.dataset.action)){startMail(b.dataset.action);return;}
     if(['phish-results'].includes(b.dataset.action)){startPhishing(b.dataset.action);return;}
     if(b.dataset.action==='mail-open'){net.phishing.clients[ui.monitorDevice].opened=true;render();return;}
-    if(b.dataset.action==='phish-report'){if(sim.status==='running')return;sim.phishing.report(ui.monitorDevice);notify('Zpráva je označená jako phishing. Odkaz a přihlášení tohoto pokusu jsou zablokované.');render();return;}
     if(b.dataset.action==='phish-open'){const m=net.phishing.clients[ui.monitorDevice].inbox;if(!m||sim.phishing.blocked(ui.monitorDevice,m.id))return;ui[addressKey(ui.monitorDevice)]=m.link;openComputerApp('web');startAction('web');return;}
-    if(b.dataset.action==='phish-legit'){ui[addressKey(ui.monitorDevice)]='https://knihovna.test';openComputerApp('web');startAction('web');return;}
     if(b.dataset.adsOpen||b.dataset.adsTopic){const address=b.dataset.adsTopic?'https://obchod.test/?tema='+b.dataset.adsTopic:b.dataset.adsOpen==='shop'?'https://obchod.test':b.dataset.adsOpen==='news'?'https://zpravy.test':'https://knihovna.test';ui[addressKey(ui.monitorDevice)]=address;startAction('web',{address});return;}
     if(b.dataset.action==='ads-clear'){if(sim.ads.clear(ui.monitorDevice))render();return;}
     if(b.dataset.authMode){ui.authDraft[ui.monitorDevice].mode=b.dataset.authMode;render();return;}

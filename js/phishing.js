@@ -1,4 +1,4 @@
-/* A closed teaching scenario. Fixed fictional mail and credentials, no real network I/O.
+/* A closed teaching scenario. Fictional mail and fixed credentials, no real network I/O.
    Admin access follows the optional TLS setting; web navigation uses the full existing TLS flow. */
 (() => {
   'use strict';
