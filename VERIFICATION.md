@@ -1,5 +1,15 @@
 # Záznam ověření
 
+## Přímý seznam Wi-Fi bez Ethernetu · 26. listopadu 2026
+
+Panel připojení se otevírá přímo jako seznam dostupných Wi-Fi sítí. Záhlaví obsahuje šipku pro zavření vlevo, nadpis Wi-Fi a jediný přepínač Wi-Fi v pravém horním rohu. Původní řádek Ethernet i samostatný velký řádek přepínače Wi-Fi byly odstraněny. Seznam nabízí výběr sítě, Připojit a případné heslo; právě připojená Wi-Fi je první, má označené zabezpečení a možnost Odpojit. Po vypnutí Wi-Fi seznam nahradí krátká informace. Při nedostupném Wi-Fi rozhraní je přepínač neaktivní. Na telefonu jsou mobilní data samostatně pod seznamem. Podrobnosti připojení a volby šířky pásma/latence zůstávají sbalené pod ním.
+
+Ethernet se připojuje automaticky a signalizuje jej původní ikona na liště. Zapojení kabelu nyní přepne na Ethernet také z právě používané Wi-Fi, s odpovídající IP adresou. Jestliže při tom běží přenos na původním rozhraní, rozhraní jej ukončí obvyklým vysvětlením změny připojení. README aktualizováno, prostředky `v=187`.
+
+Prošlo všech **416 testů projektu** (`node --test tests/*.test.mjs`), předtím také 29 souvisejících testů připojení, kavárny, mobilní sítě, restartu a parametrů připojení. Stávající test připojení rozšířen o zapojení kabelu při aktivní Wi-Fi a ověření nové adresy; kontroly panelu očekávají Wi-Fi přepínač v záhlaví a absenci Ethernetu. Syntaxe změněných skriptů ověřena.
+
+V odděleném prohlížeči při 1047 × 858, 773 × 858 a 320 × 568 px ověřen přímý seznam, jediný přepínač v pravé části záhlaví, výběr sítě, nesprávné heslo se zachováním kabelu, správné heslo a změna stavové ikony, vypnutí i opětovné zapnutí Wi-Fi a zavření klávesou Escape. Na telefonu se formulář s připojovacími tlačítky i mobilní data vejdou do posuvného panelu bez vodorovného přetékání. Obnovení kabelu v mapě při Wi-Fi přepnulo notebook na kabelovou IP a ikonu; následný skutečný webový přenos doručil knihovnu. Zapojení kabelu během pozastaveného Wi-Fi přenosu ukončilo původní pokus s vysvětlením. V kavárně byl po připojení otevřený hotspot první v seznamu a skutečný stisk mezerníku vypnul Wi-Fi přepínačem v záhlaví. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Panel sítě a rychlé nastavení připojení · 25. listopadu 2026
 
 Velkou aplikaci Připojení nahradil společný panel nad ikonou sítě vpravo na hlavním panelu. Otevřená aplikace i rozepsaný obsah zůstávají na místě. Na telefonu se Rychlé nastavení otevírá také horním stavovým řádkem. Síťová ikona má pevné místo vedle samostatně posuvných zástupců aplikací; duplicitní levá ikona Připojení byla odstraněna. Panel se zavírá kliknutím mimo něj, křížkem nebo Escape s návratem fokusu na ikonu sítě.

@@ -29,6 +29,8 @@ test('Wired access returns automatically after Wi-Fi disconnect, restoring the c
   assert(n.connectWifi('laptop','ap','lipova1234'));assert(n.disconnectWifi('laptop'));assert.equal(n.access.laptop.mode,'cable');
   n.connectWifi('laptop','ap');n.toggleLink('laptop-switch');n.disconnectWifi('laptop');assert.equal(n.access.laptop.mode,'offline');
   n.toggleLink('laptop-switch');assert.equal(n.access.laptop.mode,'cable');assert(n.accessReady('laptop'));
+  n.connectWifi('laptop','ap');n.toggleLink('laptop-switch');assert.equal(n.access.laptop.mode,'wifi');
+  n.toggleLink('laptop-switch');assert.equal(n.access.laptop.mode,'cable');assert.equal(n.nodes.laptop.ip,'192.168.10.10');
   n.connectWifi('laptop','ap');n.toggleNode('switch');n.disconnectWifi('laptop');assert.equal(n.access.laptop.mode,'offline');
   n.toggleNode('switch');assert.equal(n.access.laptop.mode,'cable');assert(n.accessReady('laptop'));
 });
@@ -42,7 +44,7 @@ test('Restart resets radio controls and learned credentials without resetting an
 
 test('Extension choices hide unavailable radios, while café authentication and attacker identities remain distinct',()=>{
   const basic=new Simulation(new Network(new LabSettings()));assert(!basic.net.setWifiEnabled('laptop',true));assert(!basic.net.connectWifi('laptop','ap','lipova1234'));assert(!basic.net.setMobileData(true));
-  const html=connectionPanel(basic.net,'laptop',basic);assert(html.includes('Ethernet'));assert(!html.includes('data-network-toggle'));
+  const html=connectionPanel(basic.net,'laptop',basic);assert(!html.includes('Ethernet'));assert(html.includes('Wi-Fi není k dispozici'));assert(!html.includes('data-network-toggle'));
   const s=new Simulation(),n=s.net;s.mitm.configure(true,'observe',n.cafeWifi.ssid);
   assert(!n.connectWifi('cafe','trusted'));assert(n.connectWifi('cafe','rogue'));assert.equal(n.access.cafe.hotspot,'rogue');assert(!n.wifiKnown('cafe','trusted'));
   assert(!n.connectWifi('cafe','trusted','wrong'));assert(n.connectWifi('cafe','trusted','kava1234'));
@@ -52,7 +54,7 @@ test('Extension choices hide unavailable radios, while café authentication and 
 test('Flyout preserves the current application and keeps technical details and password fields out of the initial view',()=>{
   const s=new Simulation(),n=s.net;
   const html=computerView(n,s,{monitorDevice:'laptop',tab:'vpn',networkPanel:'laptop'});
-  assert(html.includes('vpn-app'));assert(html.includes('id="connection-panel"'));assert(!html.includes('connection-modes'));
+  assert(html.includes('vpn-app'));assert(!html.includes('network-ethernet'));assert(!html.includes('>Ethernet<'));assert(html.indexOf('data-network-toggle="wifi"')<html.indexOf('id="wifi-network-list"'));assert(html.includes('id="connection-panel"'));assert(!html.includes('connection-modes'));
   assert(!html.includes('type="password"'));assert(html.includes('<details class="network-details" >'));assert(!html.includes('taskbar-app active" data-computer-app="network"'));
-  const phone=computerView(n,s,{monitorDevice:'phone',phoneTab:'desktop',networkPanel:'phone'});assert(phone.includes('Rychlé nastavení'));assert(!phone.includes('cell-tower'));
+  const phone=computerView(n,s,{monitorDevice:'phone',phoneTab:'desktop',networkPanel:'phone'});assert(phone.includes('id="connection-panel-title">Wi-Fi</h3>'));assert(phone.includes('data-network-toggle="cellular"'));assert(!phone.includes('cell-tower'));
 });

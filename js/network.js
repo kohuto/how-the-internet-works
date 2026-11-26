@@ -525,7 +525,7 @@
     toggleLink(id) {
       const link=this.links[id];if(!this.linkAvailable(link))return false;
       link.on=!link.on;
-      if(link.on&&link.device&&link.mode==='cable'&&this.access[link.device].mode==='offline'&&this.cableReady(link.device))this.setAccess(link.device,'cable');
+      if(link.on&&link.device&&link.mode==='cable'&&this.access[link.device].mode!=='cable'&&this.cableReady(link.device))this.setAccess(link.device,'cable');
       this.changed();return link.on;
     }
     toggleNode(id) {

@@ -5,25 +5,26 @@
 .network-backdrop{position:absolute;inset:0;z-index:3;border:0;background:transparent;cursor:default}
 .network-panel{position:absolute;right:10px;bottom:54px;z-index:4;width:min(320px,calc(100% - 20px));max-height:calc(100% - 64px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #cadbcd;border-radius:13px;background:#fffef9;box-shadow:0 10px 35px #163b3a40;font-size:12px;color:#263b36}
 .network-panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px 10px;border-bottom:1px solid #e0e8dd;flex-shrink:0}
-.network-panel-header h3{font-size:14px;font-weight:700;margin:0;letter-spacing:-.2px}
-.network-panel-header button{display:grid;place-items:center;width:28px;height:28px;flex-shrink:0;border:0;border-radius:6px;background:none;color:#638276}
-.network-panel-header button:hover{background:#edf3e9}
+.network-panel-header h3{flex:1;font-size:14px;font-weight:700;margin:0;letter-spacing:-.2px}
+.network-panel-back{display:grid;place-items:center;width:28px;height:28px;flex-shrink:0;border:0;border-radius:6px;background:none;color:#638276}
+.network-panel-back:hover{background:#edf3e9}
 .network-panel svg{width:21px;height:21px;flex-shrink:0}
 .network-panel-header svg{width:17px;height:17px}
 .network-panel-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scroll-padding-block:12px;padding:0 0 8px}
-.network-radio,.network-ethernet{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid #e5ecdf}
-.network-radio>div,.network-ethernet>div{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
-.network-radio strong,.network-ethernet strong{font-size:12px;font-weight:700}
-.network-radio small,.network-ethernet small{font-size:10px;line-height:1.4;color:#738779;overflow-wrap:anywhere}
-.network-radio-icon,.network-ethernet>svg{color:#54806b}
+.network-radio{display:flex;align-items:center;gap:11px;padding:14px 16px;border-top:1px solid #e5ecdf}
+.network-radio>div{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.network-radio strong{font-size:12px;font-weight:700}
+.network-radio small{font-size:10px;line-height:1.4;color:#738779;overflow-wrap:anywhere}
+.network-radio-icon{color:#54806b}
 .network-switch{position:relative;flex:0 0 35px;width:35px;height:21px;border:1px solid #95ac9a;border-radius:20px;padding:2px;background:#dfe8df;transition:background .15s}
 .network-switch>span{display:block;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #17382f30;transition:transform .15s}
+.network-switch:disabled{opacity:.45;cursor:default}
 .network-switch[aria-checked=true]{background:#37735e;border-color:#37735e}
 .network-switch[aria-checked=true]>span{transform:translateX(13px)}
 .network-list{padding:6px}
 .network-item{border:1px solid transparent;border-radius:8px;overflow:hidden}
 .network-item.selected{border-color:#cbdcc8;background:#f4f8ee}
-.network-item.connected{background:#edf5ea}
+.network-item.connected{background:#edf5ea;box-shadow:inset 3px 0 #4e8c78}
 .network-item+.network-item{margin-top:4px}
 .network-choice{display:flex;align-items:center;gap:11px;width:100%;padding:11px 10px;border:0;background:none;text-align:left;color:inherit}
 .network-choice:hover{background:#e8f0e3}
@@ -59,5 +60,5 @@
 .phone-window .network-panel{top:34px;bottom:auto;left:8px;right:8px;width:auto;max-height:calc(100% - 88px)}
 .phone-window .computer-taskbar{z-index:5}
 .monitor-screen:has(.network-panel)>.computer-taskbar{z-index:5}
-@media(max-width:370px){.network-panel{right:6px;width:calc(100% - 12px)}.network-panel-header{padding:8px 11px}.network-radio,.network-ethernet{padding:10px 12px}.network-actions{padding-left:15px}.phone-window .network-panel{left:5px;right:5px}.network-actions input{font-size:16px}}
+@media(max-width:370px){.network-panel{right:6px;width:calc(100% - 12px)}.network-panel-header{padding:8px 11px}.network-radio{padding:10px 12px}.network-actions{padding-left:15px}.phone-window .network-panel{left:5px;right:5px}.network-actions input{font-size:16px}}
 @media(prefers-reduced-motion:reduce){.network-switch,.network-switch>span{transition:none}}

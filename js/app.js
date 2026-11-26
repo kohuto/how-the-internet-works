@@ -704,7 +704,9 @@
       notify(`${net.nodes[b.dataset.id].name}: ${on?'zapnuto':'vypnuto'}.`);if(!resumeMessage())render();
       if(ui.monitorOpen&&b.dataset.id===ui.monitorDevice)$('.computer-power').focus({preventScroll:true});
     } else if(b.dataset.action==='toggle-link') {
-      const on=net.toggleLink(b.dataset.id);notify(`${net.links[b.dataset.id].name}: ${on?'spoj obnoven':'spoj odpojen'}.`);if(!resumeMessage())render();
+      const link=net.links[b.dataset.id],previous=link.device&&net.access[link.device].mode,on=net.toggleLink(b.dataset.id);
+      if(link.device&&net.access[link.device].mode!==previous)sim.connectionChanged(link.device);
+      notify(`${link.name}: ${on?'spoj obnoven':'spoj odpojen'}.`);if(!resumeMessage())render();
     }
   }
   for(const root of [$('#monitor-overlay'),$('#device-overlay')]) {
