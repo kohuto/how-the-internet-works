@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Statický adresní řádek a odebrání podrobností přenosu · 26. listopadu 2026
+
+Adresní řádek prohlížeče zachovává vzhled, ale zobrazuje pouze text aktuální adresy nebo původní výzvy. Neobsahuje vstupní pole ani formulář; také šipka na konci je pouze grafika. Odebráno zpracování psaní adresy a místní zkratky Ctrl/Cmd + L. Nová karta zaměří vlastní záložku. Z nabídky i načítání zmizely Podrobnosti přenosu, jejich panel, stav a styly. Cookies a přepínání HTTP/HTTPS zůstávají dostupné se svými rozšířeními; bez nich je ikona nabídky neaktivní, aby neotevírala prázdný panel. README aktualizováno, prostředky `v=189`.
+
+Prošlo všech **32 souvisejících testů** (`node --test tests/browser-navigation.test.mjs tests/web.test.mjs tests/device-power.test.mjs`) a kontrola syntaxe tří změněných skriptů. Stávající test restartu již neověřuje odstraněný stav panelu. V odděleném prohlížeči při 1047 × 858 px ověřeno, že kliknutí, psaní a Enter v adresním řádku nezmění text ani nespustí přenos. Odkaz Knihovna dál spustí načítání, adresa se aktualizuje a obsah úspěšně dorazí; během načítání ani po něm se Podrobnosti nenabízejí. S rozšířeními zůstává funkční nabídka HTTP/HTTPS a Cookies. Na telefonu při 320 × 568 px ověřena statická adresa, fokus nové karty a rozložení bez vodorovného přetékání. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Wi-Fi Lipova bez hesla · 26. listopadu 2026
 
 Síť Lipova je otevřená pro notebook i telefon: po výběru a stisku Připojit se spojení naváže rovnou bez formuláře hesla. Dostupné sítě odvozují zabezpečení z konfigurace přístupového bodu; Lipova nemá zámeček ani při dočasné nedostupnosti již připojeného bodu. Z jejího detailu v mapě zmizel i řádek Heslo k Wi-Fi. Ostatní domácnosti a zabezpečená síť kavárny si hesla zachovávají. README aktualizováno, prostředky `v=188`.

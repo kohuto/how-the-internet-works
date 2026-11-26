@@ -531,7 +531,7 @@
     if(e.target.dataset.field==='webMessage'){ui.webMessages[ui.monitorDevice]=e.target.value;return;}
     if(e.target.dataset.field==='chatPrompt'){ui.chatbot[ui.monitorDevice]=e.target.value;return;}
     if(['cloudName','cloudContent','cloudFileId'].includes(e.target.dataset.field)) {ui.cloud[ui.monitorDevice][e.target.dataset.field]=e.target.value;return;}
-    const field=e.target.dataset.field;if(!field)return;if(field==='address'){ui[addressKey(ui.monitorDevice)]=e.target.value;browserNavigation.active(ui.monitorDevice).draft=e.target.value;return;}const key=ui.monitorOpen&&['phone','cabin','friend'].includes(ui.monitorDevice)&&['address','message'].includes(field)?`${ui.monitorDevice}${field[0].toUpperCase()}${field.slice(1)}`:field;ui[key]=e.target.value;
+    const field=e.target.dataset.field;if(!field)return;const key=ui.monitorOpen&&['phone','cabin','friend'].includes(ui.monitorDevice)&&field==='message'?`${ui.monitorDevice}${field[0].toUpperCase()}${field.slice(1)}`:field;ui[key]=e.target.value;
     if(field==='message')render();
   }
   function handleSubmit(e) {
@@ -596,14 +596,12 @@
         else if(action==='menu'||action==='security')state.panel=state.panel===action?null:action;
         else if(action==='cookies'&&net.featureEnabled('cookies'))state.panel='cookies';
         else if(action==='close-panel')state.panel=null;
-        else if(action==='network'){state.networkOpen=!state.networkOpen;state.panel=null;}
       }
       ui[addressKey(device)]=browserNavigation.active(device).draft;render();
       if(b.dataset.browserTab)$(`[data-browser-tab="${browserNavigation.active(device).id}"]`)?.focus({preventScroll:true});
-      else if(b.dataset.browserNav==='new')$('#web-address')?.focus({preventScroll:true});
+      else if(b.dataset.browserNav==='new')$(`[data-browser-tab="${browserNavigation.active(device).id}"]`)?.focus({preventScroll:true});
       else if(state.panel)$('.browser-popover button, .browser-drawer button')?.focus({preventScroll:true});
       else if(b.dataset.browserNav==='close-panel')$(`[data-browser-nav="${previousPanel==='security'?'security':'menu'}"]`)?.focus({preventScroll:true});
-      if(b.dataset.browserNav==='network'&&state.networkOpen)$('.browser-network')?.scrollIntoView({block:'nearest'});
       return;
     }
     if(b.dataset.action==='network-toggle'){toggleNetworkPanel();return;}
@@ -800,7 +798,6 @@
     }
     if(ui.monitorOpen&&$('.browser-application')) {
       const device=ui.monitorDevice,state=browserNavigation.state(device);
-      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='l'){e.preventDefault();$('#web-address')?.focus();$('#web-address')?.select();return;}
       if(e.target.dataset.browserTab&&['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) {
         e.preventDefault();const index=state.tabs.findIndex(t=>t.id===state.active),next=e.key==='Home'?0:e.key==='End'?state.tabs.length-1:(index+(e.key==='ArrowLeft'?-1:1)+state.tabs.length)%state.tabs.length;
         if(browserNavigation.select(device,state.tabs[next].id,sim.status==='running')){ui[addressKey(device)]=browserNavigation.active(device).draft;render();$(`[data-browser-tab="${state.active}"]`)?.focus({preventScroll:true});}return;

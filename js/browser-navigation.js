@@ -11,13 +11,13 @@
         const b=net.browserFor(device);
         const blank=Object.fromEntries(Object.entries(b).filter(([key])=>!shared.has(key)));
         Object.assign(blank,{address:'',content:null,state:'idle',error:'',tlsPhase:'idle',certificateVerified:false});
-        this.devices[device]={blank:copy(blank),tabs:[],active:null,panel:null,networkOpen:false};
+        this.devices[device]={blank:copy(blank),tabs:[],active:null,panel:null};
         this.add(device);
       }
     }
     reset(device) {
       const s=this.state(device);if(!s)return false;
-      Object.assign(s,{tabs:[],active:null,panel:null,networkOpen:false});return this.add(device);
+      Object.assign(s,{tabs:[],active:null,panel:null});return this.add(device);
     }
     normalize(value) {return this.net.webAddress(value)?.url||value.trim();}
     state(device) {return this.devices[device];}

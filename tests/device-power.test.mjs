@@ -99,11 +99,11 @@ test('Instagram clears only the restarted client history and still receives mess
 test('Browser restart removes that device tabs, history and panels without changing another browser',()=>{
   const s=new Simulation(),nav=new BrowserNavigation(s.net);
   run(s,'web',{device:'laptop'});nav.sync(s);nav.capture('laptop');nav.add('laptop');nav.begin('laptop','https://obchod.test');
-  nav.state('laptop').panel='cookies';nav.state('laptop').networkOpen=true;
+  nav.state('laptop').panel='cookies';
   const other=structuredClone(nav.state('friend'));
   s.net.toggleNode('laptop');nav.reset('laptop');s.net.toggleNode('laptop');nav.sync(s);
   assert.equal(nav.state('laptop').tabs.length,1);assert.equal(nav.active('laptop').url,'');assert.equal(nav.active('laptop').draft,'');
-  assert.deepEqual(nav.active('laptop').history,[]);assert.equal(nav.state('laptop').panel,null);assert(!nav.state('laptop').networkOpen);
+  assert.deepEqual(nav.active('laptop').history,[]);assert.equal(nav.state('laptop').panel,null);
   assert.equal(s.net.browser.content,null);assert.deepEqual(nav.state('friend'),other);
 });
 

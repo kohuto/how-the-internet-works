@@ -18,13 +18,12 @@
 .browser-toolbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:5px;padding:6px 7px}
 .browser-history{display:flex;gap:1px}
 .browser-address{display:flex;align-items:center;gap:3px;min-width:0;border:1px solid #d3ded0;border-radius:22px;background:#fffef9;padding:2px 5px;margin:0}
-.browser-address input{min-width:0;flex:1;width:100%;border:0;background:none;color:#2d4539;padding:5px 3px;font-size:12px;line-height:1.5;outline-offset:1px}
-.browser-address:focus-within{outline:2px solid #528b70;outline-offset:0}
-.browser-address input:focus-visible{outline:none}
+.browser-address-text{min-width:0;flex:1;width:100%;color:#2d4539;padding:5px 3px;font-size:12px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.browser-address-placeholder{color:#757575}
 .browser-security,.browser-go{display:grid;place-items:center;width:26px;height:26px;padding:5px;border:0;border-radius:50%;background:none;flex-shrink:0}
 .browser-security{background:#edf2e8}
 .browser-security.http{color:#8c6546}
-.browser-security:hover,.browser-go:hover{background:#e3eddd}
+.browser-security:hover{background:#e3eddd}
 .browser-bookmarks{display:flex;align-items:center;flex-wrap:wrap;gap:2px;padding:0 8px 5px;border-bottom:1px solid #dae3d6}
 .browser-bookmarks button{display:flex;align-items:center;gap:6px;border:0;border-radius:5px;background:none;padding:5px 7px;font-size:11px}
 .browser-bookmarks button:hover{background:#e4ecdf}
@@ -89,11 +88,6 @@
 .browser-muted{font-size:11px;line-height:1.7;color:#7d8c74}
 .browser-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .browser-actions button{font-size:11px}
-.browser-network{padding:15px 18px;border-top:1px solid #dce4d5;background:#f1f5eb;flex-shrink:0;font-size:11px;line-height:1.7}
-.browser-network>.browser-panel-heading{margin-bottom:8px}
-.browser-transfer-state p{margin:5px 0 12px;color:#73846c;overflow-wrap:anywhere}
-.browser-network .browser-lesson{margin:12px 0}
-.browser-loading-status{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#f1f5eb;border-top:1px solid #dce4d5;flex-shrink:0;font-size:10px;color:#6f8069}
 .browser-document-notice{font-size:11px;line-height:1.6;padding:9px 17px;background:#f7f0de;color:#9a7a42;border-bottom:1px solid #e9ddc2}
 .browser-account.auth-panel{padding:24px 25px;background:none;border:0;flex:1}
 .browser-account .auth-current{padding:12px;background:#f3f6ed;margin:18px 0}
@@ -148,7 +142,7 @@
   .browser-library-home .library-title{font-size:26px}
   .browser-popover{max-height:min(245px,var(--browser-panel-height,65vh))}
 }
-@media(pointer:coarse){.browser-address input,.browser-account input,.browser-site-section textarea{font-size:16px}.browser-icon,.browser-tab-close{min-height:36px}.browser-bookmarks button{min-height:36px}}
+@media(pointer:coarse){.browser-address-text,.browser-account input,.browser-site-section textarea{font-size:16px}.browser-icon,.browser-tab-close{min-height:36px}.browser-bookmarks button{min-height:36px}}
 
 /* Back, forward and reload are decorative toolbar icons. */
 .browser-icon-disabled,.browser-icon-disabled:hover{background:none;opacity:.4;cursor:default;pointer-events:none}
