@@ -1,5 +1,15 @@
 # Záznam ověření
 
+## Samostatné Soubory a Cloud s nabídkou Přidat · 26. listopadu 2026
+
+Místní dokumenty mají vlastní aplikaci Soubory na notebooku, u Matěje, na chatě i v telefonu. Seznam a jednoduchý editor pracují pouze s místním úložištěm a fungují bez internetu. Cloud zobrazuje výhradně seznam doručený ze serveru. Vpravo nahoře má nabídku Přidat s volbami Textový dokument a Nahrát z počítače / telefonu. První vytvoří dokument přímo na serveru bez místní kopie; druhá otevře výběr existujícího modelového souboru z daného zařízení. Místní originál zůstává zachovaný. Výběr podporuje prázdný stav, zrušení, Escape, návrat fokusu a uzavřený cyklus klávesy Tab. Nabídka se vejde také do úzkého telefonu.
+
+Cloudový náhled nabízí úpravu podle oprávnění a kontroluje verzi při uložení. Stažení vytvoří místní kopii, ponechá Cloud otevřený a nabídne Zobrazit v Souborech. Zachované jsou sdílení, oddělené účty a úložiště zařízení, záložní centrum pouze ke čtení, skutečné síťové přenosy i reset zařízení. Zrušení přenosu zachová rozepsaný cloudový dokument. README aktualizováno; prostředky `v=194`.
+
+Prošlo všech **424 automatických testů** (`node --test tests/*.test.mjs`), předtím **81 souvisejících testů** cloudu, rozhraní, restartu, nastavení, zrušení přenosu a návratu monitoru. Nové kontroly ověřují oddělení úložišť, vytvoření a úpravy na cloudu bez místní kopie, místní práci offline, výběr jen souborů daného zařízení, zachování originálu po nahrání, stažené kopie a omezení zápisu do zálohy. Syntaxe změněných skriptů ověřena.
+
+V odděleném prohlížeči při 1047 × 858 px ověřeno vytvoření a místní uložení bez přenosu, výběr a nahrání existujícího souboru, přímé vytvoření cloudového dokumentu bez jeho výskytu v Souborech, úprava a nové načtení cloudové verze, sdílení práva zápisu a následná úprava Matějem. Stažení zůstalo v Cloudu s oznámením a Zobrazit otevřelo správný místní obsah. Záloha nepovoluje Přidat ani úpravy. Zrušení uploadu zachovalo upravitelný název a text i po přepnutí do Souborů a zpět. Při 320 × 568 px ověřen telefon, nabídka Přidat, prázdný výběr s přechodem do Souborů, místní editor a nahrání pouze vlastního telefonního dokumentu. Nabídka i výběr se vejdou bez vodorovného přetékání. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Název cloudového dokumentu bez modrého orámování · 26. listopadu 2026
 
 Pole Název dokumentu (`#cloud-name`) při zaměření nezobrazuje obrys. Zachovává původní jemnou spodní linku, rozměry a editaci. Změna je omezena na toto pole v cloudovém editoru; prostředky `v=193`.

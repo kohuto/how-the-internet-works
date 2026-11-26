@@ -343,3 +343,5 @@
 .mitm-hotspot-switch:disabled{opacity:.45;cursor:default}
 
 .mitm-app>.mitm-hotspot-settings{margin-top:0}
+
+.app-files{background:linear-gradient(145deg,#fff3cf,#e5c36f);color:#8d6b28}

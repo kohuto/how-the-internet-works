@@ -29,7 +29,7 @@ test('The base is a usable web network without optional hosts or DNS transfers',
   assert.equal(net.visibleLinks().length,15);
   assert.deepEqual(net.dnsRecords,{'knihovna.test':'203.0.113.10'});
   assert.equal(net.appAvailable('web','laptop'),true);
-  for(const app of ['print','mail','message','cloud','chatbot'])assert.equal(net.appAvailable(app,'laptop'),false);
+  for(const app of ['print','mail','message','cloud','files','chatbot'])assert.equal(net.appAvailable(app,'laptop'),false);
   sim.start('web',{address:'https://knihovna.test/'});const events=finish(sim);
   assert.equal(net.browser.content,net.server.title);
   assert.equal(net.browser.address,'http://knihovna.test/');

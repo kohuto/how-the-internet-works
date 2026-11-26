@@ -361,8 +361,8 @@
       return text.replace(/další router/g,'další zařízení').replace(/rozhodnutí routeru/g,'rozhodnutí zařízení');
     }
     appAvailable(app,device) {
-      const feature={mail:'mail',print:'printer',message:'instagram',cloud:'cloud',chatbot:'chatbot',vpn:'vpn',attack:'hacker',mitm:'mitm'}[app];
-      return this.nodeAvailable(device)&&(!feature||this.featureEnabled(feature))&&(app!=='vpn'||!!this.vpn.clients[device])&&(app!=='mail'||this.nodeAvailable(globalThis.InternetLab.mailServerFor(device)));
+      const feature={mail:'mail',print:'printer',message:'instagram',cloud:'cloud',files:'cloud',chatbot:'chatbot',vpn:'vpn',attack:'hacker',mitm:'mitm'}[app];
+      return (app!=='files'||!!this.cloud?.user(device))&&this.nodeAvailable(device)&&(!feature||this.featureEnabled(feature))&&(app!=='vpn'||!!this.vpn.clients[device])&&(app!=='mail'||this.nodeAvailable(globalThis.InternetLab.mailServerFor(device)));
     }
     nodeAvailable(id) {return !!this.nodes[id]&&(!this.settings||this.settings.nodeEnabled(this.nodes[id]));}
     linkAvailable(link) {return !!link&&this.nodeAvailable(link.a)&&this.nodeAvailable(link.b);}

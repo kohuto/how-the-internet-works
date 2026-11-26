@@ -30,3 +30,44 @@
 @media(max-width:370px){.drive-toolbar,.phone-window .drive-toolbar{gap:2px}.drive-toolbar h3,.phone-window .drive-toolbar h3{font-size:16px}.drive-center select,.phone-window .drive-center select{max-width:82px;font-size:8px}.drive-toolbar>.drive-icon-button,.phone-window .drive-toolbar>.drive-icon-button,.drive-options>summary,.phone-window .drive-options>summary{width:26px;height:30px}}
 
 .drive-editor>#cloud-name:focus{outline:none}
+
+/* Local files live in their own app; the cloud header owns the add menu. */
+.drive-app{position:relative}
+.drive-header{position:relative;z-index:5}
+.files-app .drive-header>.drive-icon-button{margin-left:auto}
+.files-app .drive-logo>svg{color:#9c7b34;fill:#fff0c7}
+.files-heading{flex:1;min-width:0}
+.files-heading h3{margin:0 0 4px}
+.files-heading small{display:block;font-size:10px;color:#8c9aaa}
+.files-new{margin-left:auto;flex-shrink:0}
+.drive-add{position:relative;flex-shrink:0}
+.drive-add>summary{display:flex;align-items:center;gap:6px;min-height:34px;padding:8px 12px;border-radius:8px;background:#3d6f9e;color:#fff;list-style:none;cursor:pointer;font-size:11px}
+.drive-add>summary::-webkit-details-marker{display:none}
+.drive-add>summary:hover,.drive-add[open]>summary{background:#315f8b}
+.drive-add[inert]{opacity:.4}
+.drive-add-menu{position:absolute;right:0;top:calc(100% + 7px);width:225px;padding:6px;background:#fff;border:1px solid #dfe6ee;border-radius:10px;box-shadow:0 8px 28px #233d5a24}
+.drive-add-menu>button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 10px;border:0;border-radius:6px;background:none;text-align:left;color:#445b72;font-size:11px}
+.drive-add-menu>button:hover{background:#eff4fb}
+.drive-picker-backdrop{position:absolute;inset:0;z-index:12;background:#23374940;display:flex;align-items:center;justify-content:center;padding:16px}
+.drive-picker{display:flex;flex-direction:column;width:min(440px,100%);max-height:100%;overflow:hidden;background:#fff;border:1px solid #dce4ef;border-radius:12px;box-shadow:0 12px 40px #18304735}
+.drive-picker>header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:16px;border-bottom:1px solid #e6ecf3;flex-shrink:0}
+.drive-picker h3{margin:0 0 5px;font-size:15px;color:#344c64;letter-spacing:-.3px}
+.drive-picker header small{font-size:10px;color:#8b9bad}
+.drive-picker-files{padding:8px;overflow:auto;min-height:100px}
+.drive-picker-file{display:flex;align-items:center;gap:10px;text-align:left;width:100%;min-height:58px;padding:10px;border:1px solid transparent;border-radius:8px;background:#fff;color:#43556b}
+.drive-picker-file:hover{background:#f3f6fa}
+.drive-picker-file.selected{background:#eaf2fd;border-color:#a8c3e3}
+.drive-picker-file>span:nth-child(2){flex:1;min-width:0}
+.drive-picker-file strong{display:block;font-size:12px;font-weight:550;overflow-wrap:anywhere}
+.drive-picker-file small{display:block;margin-top:4px;font-size:10px;color:#92a0af}
+.drive-picker-check{width:16px;flex-shrink:0;color:#3d6f9e;font-size:16px}
+.drive-picker>footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid #e6ecf3;flex-shrink:0}
+.drive-download-notice{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.drive-download-notice>span{flex:1;min-width:120px}
+.drive-download-notice>button:not(.drive-icon-button){background:none;border:0;padding:3px;color:#3d6f9e;text-decoration:underline;font-size:10px}
+.drive-download-notice .drive-icon-button{width:25px;height:25px;padding:4px}
+.drive-editor>#files-name:focus{outline:none}
+@media(max-width:440px){.cloud-drive .drive-account{display:none}.drive-header{gap:7px}.drive-add>summary{padding:8px 10px}.cloud-drive .drive-toolbar h3{flex-basis:100%}.files-heading small{font-size:9px}.files-new{font-size:10px}.drive-picker-backdrop{padding:8px}.drive-picker>header{padding:12px}.drive-picker h3{font-size:14px}.drive-picker>footer{padding:10px}.drive-picker-files{padding:5px}}
+.phone-window .cloud-drive .drive-account{display:none}
+@media(max-width:440px){.cloud-drive .drive-add{position:static;margin-left:auto}.drive-add-menu{right:8px;top:calc(100% + 2px);width:min(225px,calc(100% - 16px))}}
+.phone-window .cloud-drive .drive-add{position:static;margin-left:auto}.phone-window .drive-add-menu{right:8px;top:calc(100% + 2px);width:min(225px,calc(100% - 16px))}

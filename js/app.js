@@ -20,7 +20,8 @@
     ui.cookieOpen={cafe:false,laptop:false,friend:false,phone:false,cabin:false};
     ui.chatbot={laptop:'',friend:'',phone:'',cabin:''};
     ui.webMessages={cafe:'Ahoj z kavárny, prosím o prodloužení výpůjčky.',friend:'Ahoj, píše Matěj.',cabin:'Ahoj z chaty! Zpráva putuje přes satelit.',laptop:'Ahoj, prosím o prodloužení výpůjčky.',phone:'Ahoj, prosím o prodloužení výpůjčky.'};
-    ui.cloud=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>{const f=net.cloud.local[device][0];return [device,{tab:'remote',view:'files',editorKey:0,remoteId:null,server:'cloud',localId:f?.id||null,cloudName:f?.name||'',cloudContent:f?.content||'',cloudFileId:'',permissions:{},downloadSerial:0,resultSerial:0}];}));
+    ui.files=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>[device,{view:'files',localId:null,name:'',content:'',editorKey:0}]));
+    ui.cloud=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>[device,{tab:'remote',view:'files',editorKey:0,remoteId:null,remoteVersion:null,server:'cloud',cloudName:'',cloudContent:'',cloudFileId:'',permissions:{},downloadSerial:0,resultSerial:0,uploadOpen:false,uploadId:null,downloadNotice:null}]));
     return ui;
   }
   function resetDeviceUI(device) {
@@ -29,7 +30,7 @@
     if(ui.transferOutcome?.device===device)ui.transferOutcome=null;
     const initial=createUI();ui[tabs[device]]='desktop';
     for(const field of ['address','message','messageType']){const key=field==='address'?addressKey(device):messageKey(device,field);if(Object.hasOwn(initial,key))ui[key]=initial[key];}
-    for(const field of ['mailComposer','authDraft','phishDraft','privacyOpen','cookieOpen','chatbot','webMessages','cloud'])if(Object.hasOwn(initial[field],device))ui[field][device]=initial[field][device];
+    for(const field of ['mailComposer','authDraft','phishDraft','privacyOpen','cookieOpen','chatbot','webMessages','cloud','files'])if(Object.hasOwn(initial[field],device))ui[field][device]=initial[field][device];
     delete ui.connectionDrafts[device];delete ui.networkDrafts[device];if(ui.networkPanel===device)ui.networkPanel=null;
     if(device==='laptop')ui.document=initial.document;
     if(device==='cafe-attacker')ui.mitmSsid=initial.mitmSsid;
@@ -135,6 +136,7 @@
     if(resume)resumePlayback();
   }
   function closeMonitor() {
+    if(ui.cloud[ui.monitorDevice])ui.cloud[ui.monitorDevice].uploadOpen=false;
     ui.networkPanel=null;
     if(journey.current&&journey.current.device===ui.monitorDevice){
       if(sim.status==='running'&&!sim.replicaResult){journey.minimize();return;}
@@ -154,12 +156,13 @@
   function openComputerApp(app) {
     if(app==='network'){toggleNetworkPanel();return;}
     ui.networkPanel=null;
+    if(app!=='cloud'&&ui.cloud[ui.monitorDevice])ui.cloud[ui.monitorDevice].uploadOpen=false;
     if(!net.appAvailable(app,ui.monitorDevice))return;
-    if(!['desktop','web','print','message','cloud','chatbot','network','vpn','mail','attack','mitm'].includes(app))return;
+    if(!['desktop','web','print','message','cloud','files','chatbot','network','vpn','mail','attack','mitm'].includes(app))return;
     if(journey.current)journey.browse();ui.transferOutcome=null;
     if(app!=='mail')clearMailComposer();
-    if(ui.monitorDevice==='cafe-attacker'){if(!['desktop','mitm'].includes(app))return;ui.cafeAttackerTab=app;}else if(ui.monitorDevice==='cafe'){if(!['desktop','web','network','vpn','mail'].includes(app))return;ui.cafeTab=app;}else if(ui.monitorDevice==='hacker'){if(!['desktop','mail','attack','network','vpn'].includes(app))return;ui.hackerTab=app;}else if(ui.monitorDevice==='cabin'){if(app==='print')return;ui.cabinTab=app;}else if(ui.monitorDevice==='friend'){if(!['desktop','web','message','cloud','chatbot','network','vpn','mail'].includes(app))return;ui.friendTab=app;}else if(ui.monitorDevice==='phone'){if(app==='print')return;ui.phoneTab=app;}else ui.tab=app;syncReader();render();
-    const input=app==='cloud'?$('.drive-scroll'):app==='vpn'?$('#monitor-content [data-action="vpn-toggle"]'):$('#monitor-content [data-field]');
+    if(ui.monitorDevice==='cafe-attacker'){if(!['desktop','mitm'].includes(app))return;ui.cafeAttackerTab=app;}else if(ui.monitorDevice==='cafe'){if(!['desktop','web','network','vpn','mail'].includes(app))return;ui.cafeTab=app;}else if(ui.monitorDevice==='hacker'){if(!['desktop','mail','attack','network','vpn'].includes(app))return;ui.hackerTab=app;}else if(ui.monitorDevice==='cabin'){if(app==='print')return;ui.cabinTab=app;}else if(ui.monitorDevice==='friend'){if(!['desktop','web','message','cloud','files','chatbot','network','vpn','mail'].includes(app))return;ui.friendTab=app;}else if(ui.monitorDevice==='phone'){if(app==='print')return;ui.phoneTab=app;}else ui.tab=app;syncReader();render();
+    const input=['cloud','files'].includes(app)?$('.drive-scroll'):app==='vpn'?$('#monitor-content [data-action="vpn-toggle"]'):$('#monitor-content [data-field]');
     (input||$('#monitor-content')).focus({preventScroll:true});
     if(app==='cloud'&&ui.cloud[ui.monitorDevice].tab==='remote'&&!net.cloud.clients[ui.monitorDevice].listed&&net.cloud.clients[ui.monitorDevice].state==='idle'&&sim.status!=='running')startCloud({op:'list'});
   }
@@ -176,11 +179,11 @@
   function resumeMessage(showJourney=false) {if(sim.resumePending()||sim.resumeReplication()){stop();if(showJourney&&net.nodes[sim.clientId()]?.on)beginTransfer('message');else{playAutomatically();render();}return true;}return false;}
   function loadLocal(device,id) {
     const file=net.cloud.local[device].find(f=>f.id===id);if(!file)return;
-    Object.assign(ui.cloud[device],{localId:id,cloudName:file.name,cloudContent:file.content,tab:'local',view:'editor',editorKey:(ui.cloud[device].editorKey||0)+1});
+    Object.assign(ui.files[device],{localId:id,name:file.name,content:file.content,view:'editor',editorKey:(ui.files[device].editorKey||0)+1});
   }
   function saveLocal() {
-    const device=ui.monitorDevice,draft=ui.cloud[device];if(!draft)return null;
-    const file=net.cloud.saveLocal(device,{id:draft.localId,name:draft.cloudName,content:draft.cloudContent});
+    const device=ui.monitorDevice,draft=ui.files[device];if(!draft)return null;
+    const file=net.cloud.saveLocal(device,{id:draft.localId,name:draft.name,content:draft.content});
     if(!file){notify('Vyplň název souboru do 70 znaků a text do 1200 znaků.');return null;}
     draft.localId=file.id;return file;
   }
@@ -192,6 +195,7 @@
     if(ui.scene==='home')setScene('all');
     beginTransfer('cloud');
   }
+  function closeCloudPicker(){ui.cloud[ui.monitorDevice].uploadOpen=false;render();$('.drive-add>summary')?.focus({preventScroll:true});}
   function networkDraft() {return ui.networkDrafts[ui.monitorDevice]??={selected:null,passwordStep:false,password:'',error:'',details:false};}
   function focusWifiPassword() {const input=$('#wifi-password');if(input){input.focus({preventScroll:true});input.form.scrollIntoView({block:'nearest'});}}
   function closeNetworkPanel(focus=true) {
@@ -399,8 +403,8 @@
     if(webStarted)ui[addressKey(webStarted)]=browserNavigation.active(webStarted).draft;
     for(const device of Object.keys(net.cloud.clients)) {
       const client=net.cloud.clients[device],draft=ui.cloud[device];
-      if(draft.resultSerial!==client.resultSerial){draft.permissions={};draft.resultSerial=client.resultSerial;if(client.state==='ready'&&sim.action?.type==='cloud'&&sim.clientId()===device&&sim.action.payload.request.op!=='list')notify(client.message.replace(/^\d+ · /,''));}
-      if(draft.downloadSerial!==client.downloadSerial){loadLocal(device,client.lastDownload);draft.downloadSerial=client.downloadSerial;}
+      if(draft.resultSerial!==client.resultSerial){draft.permissions={};draft.resultSerial=client.resultSerial;if(client.state==='ready'&&sim.action?.type==='cloud'&&sim.clientId()===device){if(sim.action.payload.request.op==='upload')Object.assign(draft,{view:'files',remoteId:null,remoteVersion:null,cloudName:'',cloudContent:''});if(sim.action.payload.request.op!=='list')notify(client.message.replace(/^\d+ · /,''));}}
+      if(draft.downloadSerial!==client.downloadSerial){draft.downloadNotice=client.lastDownload;draft.downloadSerial=client.downloadSerial;}
     }
     const videoStates=[...document.querySelectorAll('#monitor-content video')].map((v,i)=>({key:v.closest('[data-instagram-message]')?.dataset.instagramMessage||`index:${i}`,time:v.currentTime,paused:v.paused,device:ui.monitorDevice,src:v.querySelector('source')?.getAttribute('src')}));
     const focused=document.activeElement,networkPassword=focused?.hasAttribute('data-network-password'),networkFocus=focused?.closest('#connection-panel')?focused.dataset.networkFocus:null,networkScroll=$('#connection-panel .network-panel-scroll')?.scrollTop||0,browserFocus=focused?.dataset?.browserFocus,authField=focused?.dataset?.authField,mailField=focused?.dataset?.mailField,field=focused?.dataset?.field,start=focused?.selectionStart,end=focused?.selectionEnd;
@@ -412,7 +416,7 @@
     const taskbarScroll=fullComputerKey===computerViewKey?$('.taskbar-apps')?.scrollLeft||0:0;
     const mailScroll=fullComputerKey===computerViewKey?$('.gmail-scroll')?.scrollTop||0:0;
     const oldDrive=$('.drive-scroll'),driveScroll=fullComputerKey===computerViewKey&&oldDrive?{key:oldDrive.dataset.viewKey,top:oldDrive.scrollTop}:null;
-    const cloudTextScroll=field==='cloudContent'?focused.scrollTop:null;
+    const cloudTextScroll=['cloudContent','filesContent'].includes(field)?focused.scrollTop:null;
     const oldChat=$('.ig-conversation, .chatbot-conversation');
     const chatScroll=fullComputerKey===computerViewKey&&oldChat?{top:oldChat.scrollTop,turns:oldChat.dataset.turnCount,bottom:oldChat.scrollHeight-oldChat.scrollTop-oldChat.clientHeight<24}:null;
     computerViewKey=fullComputerKey;
@@ -528,6 +532,7 @@
     if(['phishUsername','phishPassword'].includes(e.target.dataset.field)){ui.phishDraft[ui.monitorDevice][e.target.dataset.field==='phishUsername'?'username':'password']=e.target.value;return;}
     if(e.target.dataset.field==='webMessage'){ui.webMessages[ui.monitorDevice]=e.target.value;return;}
     if(e.target.dataset.field==='chatPrompt'){ui.chatbot[ui.monitorDevice]=e.target.value;return;}
+    if(['filesName','filesContent'].includes(e.target.dataset.field)){ui.files[ui.monitorDevice][e.target.dataset.field==='filesName'?'name':'content']=e.target.value;return;}
     if(['cloudName','cloudContent','cloudFileId'].includes(e.target.dataset.field)) {ui.cloud[ui.monitorDevice][e.target.dataset.field]=e.target.value;return;}
     const field=e.target.dataset.field;if(!field)return;const key=ui.monitorOpen&&['phone','cabin','friend'].includes(ui.monitorDevice)&&field==='message'?`${ui.monitorDevice}${field[0].toUpperCase()}${field.slice(1)}`:field;ui[key]=e.target.value;
     if(field==='message')render();
@@ -554,8 +559,10 @@
       if(!ui.webMessages[device].trim()){notify('Nejprve napiš vzkaz.');return;}
       ui[addressKey(device)]=address;
       startAction('web',{address,method:'POST',message:ui.webMessages[device]});
-    } else if(form==='cloud-local') {
+    } else if(form==='files-save') {
       if(saveLocal()){notify('Soubor je uložený v tomto zařízení.');render();}
+    } else if(form==='cloud-save') {
+      const d=ui.cloud[ui.monitorDevice];startCloud({op:'upload',name:d.cloudName,content:d.cloudContent,...(d.remoteId?{fileId:d.remoteId,version:d.remoteVersion}:{})});
     } else if(form==='cloud-download') {
       const fileId=ui.cloud[ui.monitorDevice].cloudFileId.trim();if(fileId)startCloud({op:'download',fileId});
     } else if(form==='cloud-permissions') {
@@ -566,6 +573,8 @@
   function handleClick(e) {
     if(e.target===$('#monitor-overlay')){closeMonitor();return;}
     if(e.target===$('#device-overlay')){closeDevice();return;}
+    if(e.target.hasAttribute('data-cloud-picker-backdrop')){closeCloudPicker();return;}
+    const addMenu=$('.drive-add');if(addMenu?.open&&!e.target.closest('.drive-add'))addMenu.open=false;
     const b=e.target.closest('button');
     const webState=ui.monitorOpen?browserNavigation.state(ui.monitorDevice):null;
     if(webState&&['menu','security'].includes(webState.panel)&&!e.target.closest('.browser-chrome')){webState.panel=null;if(!b){render();return;}}
@@ -645,33 +654,42 @@
     if(b.dataset.action==='satellite-view'){net.setSatelliteView(!net.satellite.clearView);notify(net.satellite.clearView?'Anténa má opět volný výhled.':'Výhled antény je zakrytý. Satelitní spoj je nedostupný.');if(!resumeMessage())render();return;}
     if(b.dataset.action==='close-device'){closeDevice();return;}
     if(b.dataset.action==='clear-nat'){net.clearNat(b.dataset.id);notify('Tabulka NAT je prázdná. Příchozí odpovědi bez záznamu se nedoručí.');render();$('#device-content').focus({preventScroll:true});return;}
-    if(b.dataset.cloudTab){
-      const device=ui.monitorDevice,draft=ui.cloud[device],tab=b.dataset.cloudTab;
-      if(draft.view==='editor'&&!saveLocal())return;
-      Object.assign(draft,{tab,view:'files'});
-      if(tab==='remote'&&!net.cloud.clients[device].listed&&sim.status!=='running'){startCloud({op:'list'});return;}
-      render();$(`[data-cloud-tab="${tab}"]`).focus({preventScroll:true});return;
+    if(b.dataset.filesOpen){loadLocal(ui.monitorDevice,b.dataset.filesOpen);render();$('#files-name').focus({preventScroll:true});return;}
+    if(b.dataset.action==='files-new'){
+      const d=ui.files[ui.monitorDevice];if(d.view==='editor'&&!saveLocal())return;
+      Object.assign(d,{localId:null,name:'Nový dokument.txt',content:'',view:'editor',editorKey:d.editorKey+1});render();$('#files-name').focus({preventScroll:true});$('#files-name').select();return;
     }
-    if(b.dataset.cloudLocal){loadLocal(ui.monitorDevice,b.dataset.cloudLocal);render();$('#cloud-name').focus({preventScroll:true});return;}
+    if(b.dataset.action==='files-list'){const d=ui.files[ui.monitorDevice];if(d.view==='editor'&&!saveLocal())return;d.view='files';render();return;}
     if(b.dataset.cloudOpen){startCloud({op:'download',fileId:b.dataset.cloudOpen},undefined,true);return;}
-    if(b.dataset.action==='cloud-list'){
-      const draft=ui.cloud[ui.monitorDevice];if(draft.view==='editor'&&!saveLocal())return;
-      draft.view='files';render();return;
-    }
-    if(b.dataset.cloudUploadLocal){
-      if(sim.status==='running')return;
-      const f=net.cloud.local[ui.monitorDevice].find(f=>f.id===b.dataset.cloudUploadLocal);if(!f)return;
-      loadLocal(ui.monitorDevice,f.id);ui.cloud[ui.monitorDevice].view='files';ui.cloud[ui.monitorDevice].tab='remote';
-      startCloud({op:'upload',name:f.name,content:f.content},f.id);return;
-    }
     if(b.dataset.cloudDownload){startCloud({op:'download',fileId:b.dataset.cloudDownload});return;}
     if(b.dataset.action==='cloud-refresh'){startCloud({op:'list'});return;}
-    if(b.dataset.action==='cloud-new'){const d=ui.cloud[ui.monitorDevice];if(d.view==='editor'&&!saveLocal())return;Object.assign(d,{localId:null,cloudName:'Nový dokument.txt',cloudContent:'',tab:'local',view:'editor',editorKey:(d.editorKey||0)+1});render();$('#cloud-name').focus({preventScroll:true});$('#cloud-name').select();return;}
-    if(b.dataset.action==='cloud-upload') {
-      if(sim.status==='running')return;
-      const file=saveLocal();if(!file)return;
-      startCloud({op:'upload',name:file.name,content:file.content,...(b.dataset.replace?{fileId:file.cloudId,version:file.cloudVersion}:{})},file.id);return;
+    if(b.dataset.action==='cloud-list'){if(sim.status==='running'&&ui.cloud[ui.monitorDevice].view==='editor')return;ui.cloud[ui.monitorDevice].view='files';render();return;}
+    if(b.dataset.action==='cloud-new'){
+      if(sim.status==='running'||ui.cloud[ui.monitorDevice].server==='cloud-backup')return;
+      const d=ui.cloud[ui.monitorDevice];if($('.drive-add'))$('.drive-add').open=false;
+      Object.assign(d,{cloudName:'Nový dokument.txt',cloudContent:'',remoteId:null,remoteVersion:null,view:'editor',editorKey:d.editorKey+1,downloadNotice:null});render();$('#cloud-name').focus({preventScroll:true});$('#cloud-name').select();return;
     }
+    if(b.dataset.action==='cloud-edit'){
+      if(sim.status==='running')return;
+      const d=ui.cloud[ui.monitorDevice],c=net.cloud.clients[ui.monitorDevice],p=c.preview,meta=c.catalog.find(f=>f.id===d.remoteId);
+      if(!p||p.id!==d.remoteId||p.server!==d.server||d.server==='cloud-backup'||!['owner','write'].includes(meta?.access))return;
+      Object.assign(d,{view:'editor',cloudName:p.name,cloudContent:p.content,remoteVersion:p.version,editorKey:d.editorKey+1});render();$('#cloud-name').focus({preventScroll:true});return;
+    }
+    if(b.dataset.action==='cloud-picker-open'){
+      if(sim.status==='running'||ui.cloud[ui.monitorDevice].server==='cloud-backup')return;
+      if($('.drive-add'))$('.drive-add').open=false;
+      Object.assign(ui.cloud[ui.monitorDevice],{uploadOpen:true,uploadId:null});render();($('.drive-picker-file')||$('.drive-picker [data-action="cloud-open-files"]')||$('.drive-picker button'))?.focus({preventScroll:true});return;
+    }
+    if(b.dataset.action==='cloud-picker-cancel'){closeCloudPicker();return;}
+    if(b.dataset.cloudPick){ui.cloud[ui.monitorDevice].uploadId=b.dataset.cloudPick;render();$(`[data-cloud-pick="${b.dataset.cloudPick}"]`)?.focus({preventScroll:true});return;}
+    if(b.dataset.action==='cloud-picker-upload'){
+      if(sim.status==='running')return;
+      const d=ui.cloud[ui.monitorDevice],f=net.cloud.local[ui.monitorDevice].find(f=>f.id===d.uploadId);if(!f||d.server==='cloud-backup')return;
+      Object.assign(d,{uploadOpen:false,view:'files',downloadNotice:null});startCloud({op:'upload',name:f.name,content:f.content},f.id);return;
+    }
+    if(b.dataset.action==='cloud-open-files'){ui.cloud[ui.monitorDevice].uploadOpen=false;openComputerApp('files');return;}
+    if(b.dataset.action==='cloud-show-download'){const d=ui.cloud[ui.monitorDevice];loadLocal(ui.monitorDevice,d.downloadNotice);d.downloadNotice=null;openComputerApp('files');return;}
+    if(b.dataset.action==='cloud-dismiss-download'){ui.cloud[ui.monitorDevice].downloadNotice=null;render();return;}
     if(b.dataset.action==='vpn-toggle') {
       const id=b.dataset.id;
       if(id!==ui.monitorDevice||!net.appAvailable('vpn',id))return;
@@ -782,6 +800,12 @@
   const settingsPanel=new globalThis.InternetLab.SettingsPanel({getSettings:()=>net.settings,onOpen:()=>{ui.networkPanel=null;settingsWasPlaying=playing;stop();render();},onApply:applySettings,onClose:()=>{if(settingsWasPlaying)resumePlayback();else render();}});
   document.addEventListener('keydown',e=> {
     if(settingsPanel.dialog.open)return;
+    const picker=$('.drive-picker');
+    if(ui.monitorOpen&&picker){
+      if(e.key==='Escape'){e.preventDefault();closeCloudPicker();return;}
+      if(e.key==='Tab'){const items=[...picker.querySelectorAll('button:not(:disabled)')],first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}return;}
+    }
+    if(e.key==='Escape'&&$('.drive-add')?.open){e.preventDefault();$('.drive-add').open=false;$('.drive-add>summary').focus();return;}
     if(e.key==='Escape'&&ui.networkPanel){e.preventDefault();closeNetworkPanel();return;}
     if(e.key==='Escape'&&!$('#device-help-content').hidden){e.preventDefault();helpTrigger.focus({preventScroll:true});setDeviceHelpOpen(false);return;}
     if(ui.monitorOpen&&$('.gmail-application')){

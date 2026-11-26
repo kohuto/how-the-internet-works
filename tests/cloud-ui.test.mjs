@@ -1,7 +1,7 @@
 import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/cloud-ui.js';import '../js/computer.js';
 import test from 'node:test';import assert from 'node:assert/strict';
-const {Simulation,cloudApp,computerView}=globalThis.InternetLab;
-const state=(device='laptop',extra={})=>({monitorDevice:device,phoneTab:'cloud',cloud:{[device]:{tab:'remote',view:'files',server:'cloud',remoteId:null,localId:null,cloudName:'',cloudContent:'',cloudFileId:'',permissions:{},...extra}}});
+const {Simulation,cloudApp,filesApp,computerView}=globalThis.InternetLab;
+const state=(device='laptop',extra={})=>({monitorDevice:device,phoneTab:'cloud',files:{[device]:{view:'files',editorKey:0,localId:null,name:'',content:''}},cloud:{[device]:{tab:'remote',view:'files',server:'cloud',remoteId:null,localId:null,cloudName:'',cloudContent:'',cloudFileId:'',permissions:{},...extra}}});
 function finish(s){for(let i=0;i<2000&&s.status==='running';i++)s.advanceFrame();assert.equal(s.status,'success');}
 
 test('The file browser and preview show only received data, not the omniscient server storage',()=>{
@@ -23,7 +23,48 @@ test('Document names, local drafts and received preview text are escaped',()=>{
   const preview=cloudApp(s.net,s,ui,'laptop');assert(preview.includes('&lt;script&gt;'));assert(!preview.includes('<script>'));
 });
 
-test('The phone offers the Cloud application and its own local document location',()=>{
+test('The phone offers separate Cloud and Files applications with its own local documents',()=>{
   const s=new Simulation(),ui=state('phone');
-  const view=computerView(s.net,s,ui);assert(view.includes('data-computer-app="cloud"'));assert(view.includes('V telefonu'));assert(view.includes('drive-app'));
+  const view=computerView(s.net,s,ui);assert(view.includes('data-computer-app="cloud"'));assert(view.includes('data-computer-app="files"'));assert(!view.includes('data-cloud-tab="local"'));ui.phoneTab='files';assert(computerView(s.net,s,ui).includes('V tomto telefonu'));assert(view.includes('drive-app'));
+});
+
+
+test('Cloud lists only remote replies and offers creating or uploading through Add',()=>{
+  const s=new Simulation(),ui=state(),local=s.net.cloud.local.laptop[0];
+  assert(s.start('cloud',{device:'laptop',request:{op:'list'}}));finish(s);
+  const html=cloudApp(s.net,s,ui,'laptop');assert(html.includes('class="drive-add"'));assert(html.includes('Textový dokument'));assert(html.includes('Nahrát z počítače'));
+  assert(!html.includes(local.name));assert(!html.includes('data-cloud-tab'));assert(!html.includes('Uložit v počítači'));
+  const files=filesApp(s.net,s,ui,'laptop');assert(files.includes(local.name));assert(!files.includes(s.net.cloud.files.get('cloud-1').name));assert(!files.includes('data-cloud-download'));
+});
+
+test('Creating and editing directly on Cloud never creates a local file',()=>{
+  const s=new Simulation(),ui=state('laptop',{view:'editor',cloudName:'Pouze na cloudu.txt',cloudContent:'Vzdálený obsah'}),before=structuredClone(s.net.cloud.local);
+  const html=cloudApp(s.net,s,ui,'laptop');assert(html.includes('data-form="cloud-save"'));assert(!html.includes('data-form="files-save"'));assert(!html.includes('Uložit v počítači'));
+  assert(s.start('cloud',{device:'laptop',request:{op:'upload',name:ui.cloud.laptop.cloudName,content:ui.cloud.laptop.cloudContent}}));finish(s);
+  const file=[...s.net.cloud.files.values()].at(-1);assert.equal(file.content,'Vzdálený obsah');assert.deepEqual(s.net.cloud.local,before);
+  assert(s.start('cloud',{device:'laptop',request:{op:'upload',fileId:file.id,version:file.version,name:file.name,content:'Nová vzdálená verze'}}));finish(s);
+  assert.equal(s.net.cloud.files.get(file.id).content,'Nová vzdálená verze');assert.deepEqual(s.net.cloud.local,before);
+});
+
+test('The upload picker reads only this device files and a completed upload preserves the local original',()=>{
+  const s=new Simulation(),f=s.net.cloud.local.laptop[0],ui=state('laptop',{uploadOpen:true,uploadId:f.id}),before=structuredClone(s.net.cloud.local.laptop);
+  const html=cloudApp(s.net,s,ui,'laptop');assert(html.includes('role="dialog"'));assert(html.includes(f.name));assert(!html.includes(s.net.cloud.local.friend[0].name));assert(html.includes('aria-pressed="true"'));
+  assert.deepEqual(s.net.cloud.local.laptop,before);
+  assert(s.start('cloud',{device:'laptop',localId:f.id,request:{op:'upload',name:f.name,content:f.content}}));finish(s);
+  assert.equal(s.net.cloud.local.laptop.length,before.length);assert.equal(f.content,before[0].content);assert.equal(s.net.cloud.files.get(f.cloudId).content,f.content);
+  ui.cloud.laptop.uploadOpen=false;assert(!cloudApp(s.net,s,ui,'laptop').includes('role="dialog"'));
+});
+
+test('Local files work offline and cloud downloads appear only in Files',()=>{
+  const s=new Simulation(),ui=state();s.net.setAccess('laptop','offline');const run=s.run;
+  const f=s.net.cloud.saveLocal('laptop',{name:'Offline.txt',content:'Místní práce'});assert(f);assert(filesApp(s.net,s,ui,'laptop').includes('Offline.txt'));assert.equal(s.run,run);
+  s.net.setAccess('laptop','cable');assert(s.start('cloud',{device:'laptop',request:{op:'download',fileId:'cloud-1'}}));finish(s);
+  const downloaded=s.net.cloud.local.laptop.at(-1);assert.equal(downloaded.cloudId,'cloud-1');assert(filesApp(s.net,s,ui,'laptop').includes(downloaded.name));
+  ui.cloud.laptop.downloadNotice=downloaded.id;const html=cloudApp(s.net,s,ui,'laptop');assert(html.includes('Soubor je uložený v aplikaci Soubory.'));assert(!html.includes('data-cloud-tab="local"'));
+});
+
+test('Backup and read-only files cannot offer cloud edits or uploads',()=>{
+  const s=new Simulation(),ui=state('laptop',{server:'cloud-backup'});const backup=cloudApp(s.net,s,ui,'laptop');assert(backup.includes('inert'));assert(!backup.includes('data-action="cloud-picker-open"'));assert(!backup.includes('data-action="cloud-new"'));
+  const f=s.net.cloud.files.get('cloud-1');assert(s.start('cloud',{device:'laptop',request:{op:'download',fileId:f.id},preview:true}));finish(s);Object.assign(ui.cloud.laptop,{server:'cloud',view:'preview',remoteId:f.id});
+  assert(!cloudApp(s.net,s,ui,'laptop').includes('data-action="cloud-edit"'));
 });
