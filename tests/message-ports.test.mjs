@@ -69,6 +69,7 @@ test('Segmented mail, chatbot and cloud data keep their source and destination p
     parts(s,hops,'smtp-request');
     hops=transfer(s,'mail-check',{device:'friend'});parts(s,hops,'imap-response');
     hops=transfer(s,'chatbot',{device:'laptop',prompt:'Delší dotaz na server. '.repeat(160)});parts(s,hops,'chatbot-request');parts(s,hops,'chatbot-response',1);
+    hops=transfer(s,'cloud',{device:'laptop',request:{op:'upload',name:'Soubor k ověření portů.txt',content:'Zkušební obsah '.repeat(40)}});parts(s,hops,'cloud-request');parts(s,hops,'cloud-response');
     hops=transfer(s,'cloud',{device:'laptop',request:{op:'list'}});parts(s,hops,'cloud-request',1);parts(s,hops,'cloud-response');
   }
 });

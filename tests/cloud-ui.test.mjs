@@ -1,11 +1,15 @@
 import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/cloud-ui.js';import '../js/computer.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 const {Simulation,cloudApp,filesApp,computerView}=globalThis.InternetLab;
-const state=(device='laptop',extra={})=>({monitorDevice:device,phoneTab:'cloud',files:{[device]:{view:'files',editorKey:0,localId:null,name:'',content:''}},cloud:{[device]:{view:'files',remoteId:null,cloudName:'',cloudContent:'',permissions:{},...extra}}});
+const state=(device='laptop',extra={})=>({monitorDevice:device,phoneTab:'cloud',files:{[device]:{view:'files',editorKey:0,localId:null,name:'',content:''}},cloud:{[device]:{view:'files',remoteId:null,cloudName:'',cloudContent:'',shareId:null,shareUser:'',sharePermission:'read',...extra}}});
 function finish(s){for(let i=0;i<2000&&s.status==='running';i++)s.advanceFrame();assert.equal(s.status,'success');}
+function sharedFile(s){
+  const storage=s.net.cloud,response=storage.handle('friend',{op:'upload',name:'Sdílený test.txt',content:'Obsah přijatý ze serveru.'});
+  const file=storage.files.get(response.saved.id);storage.handle('friend',{op:'permissions',fileId:file.id,userId:'ty',permission:'read',aclVersion:file.aclVersion});storage.applyReplica(storage.snapshot());return file;
+}
 
 test('The file browser and preview show only received data, not the omniscient server storage',()=>{
-  const s=new Simulation(),ui=state(),file=s.net.cloud.files.get('cloud-1');
+  const s=new Simulation(),ui=state(),file=sharedFile(s);
   assert(!cloudApp(s.net,s,ui,'laptop').includes(file.name));
   assert(s.start('cloud',{device:'laptop',request:{op:'list'}}));finish(s);
   const listed=cloudApp(s.net,s,ui,'laptop');assert(listed.includes(file.name));assert(!listed.includes(file.content));
@@ -30,11 +34,11 @@ test('The phone offers separate Cloud and Files applications with its own local 
 
 
 test('Cloud lists only remote replies and offers creating or uploading through Add',()=>{
-  const s=new Simulation(),ui=state(),local=s.net.cloud.local.laptop[0];
+  const s=new Simulation(),ui=state(),local=s.net.cloud.local.laptop[0],remote=sharedFile(s);
   assert(s.start('cloud',{device:'laptop',request:{op:'list'}}));finish(s);
   const html=cloudApp(s.net,s,ui,'laptop');assert(html.includes('class="drive-add"'));assert(html.includes('Textový dokument'));assert(html.includes('Nahrát z počítače'));
   assert(!html.includes(local.name));assert(!html.includes('data-cloud-tab'));assert(!html.includes('Uložit v počítači'));
-  const files=filesApp(s.net,s,ui,'laptop');assert(files.includes(local.name));assert(!files.includes(s.net.cloud.files.get('cloud-1').name));assert(!files.includes('data-cloud-download'));
+  const files=filesApp(s.net,s,ui,'laptop');assert(files.includes(local.name));assert(!files.includes(remote.name));assert(!files.includes('data-cloud-download'));
 });
 
 test('Creating and editing directly on Cloud never creates a local file',()=>{
@@ -56,10 +60,10 @@ test('The upload picker reads only this device files and a completed upload pres
 });
 
 test('Local files work offline and cloud downloads appear only in Files',()=>{
-  const s=new Simulation(),ui=state();s.net.setAccess('laptop','offline');const run=s.run;
+  const s=new Simulation(),ui=state(),remote=sharedFile(s);s.net.setAccess('laptop','offline');const run=s.run;
   const f=s.net.cloud.saveLocal('laptop',{name:'Offline.txt',content:'Místní práce'});assert(f);assert(filesApp(s.net,s,ui,'laptop').includes('Offline.txt'));assert.equal(s.run,run);
-  s.net.setAccess('laptop','cable');assert(s.start('cloud',{device:'laptop',request:{op:'download',fileId:'cloud-1'}}));finish(s);
-  const downloaded=s.net.cloud.local.laptop.at(-1);assert.equal(downloaded.cloudId,'cloud-1');assert(filesApp(s.net,s,ui,'laptop').includes(downloaded.name));
+  s.net.setAccess('laptop','cable');assert(s.start('cloud',{device:'laptop',request:{op:'download',fileId:remote.id}}));finish(s);
+  const downloaded=s.net.cloud.local.laptop.at(-1);assert.equal(downloaded.cloudId,remote.id);assert(filesApp(s.net,s,ui,'laptop').includes(downloaded.name));
   ui.cloud.laptop.downloadNotice=downloaded.id;const html=cloudApp(s.net,s,ui,'laptop');assert(html.includes('Soubor je uložený v aplikaci Soubory.'));assert(!html.includes('data-cloud-tab="local"'));
 });
 
@@ -70,6 +74,22 @@ test('Cloud has no storage selector or technical menu and read-only files still 
     for(const removed of ['data-cloud-center','drive-options','Prohlédnout server','Stáhnout podle ID','Záložní kopie'])assert(!html.includes(removed));
     assert(html.includes('data-action="cloud-new"'));assert(html.includes('data-action="cloud-picker-open"'));
   }
-  const f=s.net.cloud.files.get('cloud-1');assert(s.start('cloud',{device:'laptop',request:{op:'download',fileId:f.id},preview:true}));finish(s);Object.assign(ui.cloud.laptop,{view:'preview',remoteId:f.id});
+  const f=sharedFile(s);assert(s.start('cloud',{device:'laptop',request:{op:'download',fileId:f.id},preview:true}));finish(s);Object.assign(ui.cloud.laptop,{view:'preview',remoteId:f.id});
   assert(!cloudApp(s.net,s,ui,'laptop').includes('data-action="cloud-edit"'));
+});
+
+
+test('Owners can share from the file list or preview; another user cannot reshare their file',()=>{
+  const s=new Simulation(),storage=s.net.cloud,reply=storage.handle('laptop',{op:'upload',name:'Soukromý.txt',content:'Vlastní text'}),file=storage.files.get(reply.saved.id),ui=state();
+  storage.receive('laptop',reply);
+  let html=cloudApp(s.net,s,ui,'laptop');assert(html.includes(`data-cloud-share="${file.id}"`));assert(html.includes('Soukromý soubor'));
+  Object.assign(ui.cloud.laptop,{shareId:file.id,shareUser:'matej',sharePermission:'write'});
+  html=cloudApp(s.net,s,ui,'laptop');assert(html.includes('Sdílet soubor'));assert(html.includes('value="matej"'));assert(html.includes('Může číst'));assert(html.includes('Může upravovat'));assert(!html.includes('data-cloud-revoke'));
+  assert.equal(file.permissions.matej,undefined,'Opening the dialog must not change server permissions');
+  storage.receive('laptop',storage.handle('laptop',{op:'permissions',fileId:file.id,userId:'matej',permission:'read',aclVersion:file.aclVersion}));
+  html=cloudApp(s.net,s,ui,'laptop');assert(html.includes('data-cloud-revoke'));assert(html.includes('Sdíleno · Matěj · Čtení'));
+  storage.receive('friend',storage.handle('friend',{op:'list'}));const friend=state('friend',{shareId:file.id});
+  const shared=cloudApp(s.net,s,friend,'friend');assert(!shared.includes('data-cloud-share='));assert(!shared.includes('cloud-share-title'));
+  Object.assign(ui.cloud.laptop,{shareId:null,view:'preview',remoteId:file.id});storage.clients.laptop.preview={...storage.metadata(file,'laptop'),content:file.content,server:'cloud'};
+  assert(cloudApp(s.net,s,ui,'laptop').includes(`data-cloud-share="${file.id}"`));
 });

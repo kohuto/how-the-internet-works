@@ -5,9 +5,9 @@
   const bytes=text=>new TextEncoder().encode(text).length;
   class CloudStorage {
     constructor() {
-      this.serial=1;this.localSerial=0;this.requestSerial=0;this.completed=new Map();
-      this.files=new Map([['cloud-1',{id:'cloud-1',name:'Plán na víkend.txt',content:'Ahoj! V sobotu bychom mohli vyrazit na výlet.\nSraz v deset u parku. Vezmi si svačinu a dobrou náladu. 🙂',owner:'matej',version:1,aclVersion:1,permissions:{ty:'read'}}]]);
-      this.revision=1;this.replica={revision:1,files:structuredClone(this.files),state:'ready',message:'Výchozí kopie souborů je připravená.'};
+      this.serial=0;this.localSerial=0;this.requestSerial=0;this.completed=new Map();
+      this.files=new Map();
+      this.revision=1;this.replica={revision:1,files:structuredClone(this.files),state:'ready',message:'Záložní úložiště je připravené.'};
       this.local=Object.fromEntries(Object.keys(CLOUD_USERS).map(id=>[id,[]]));this.clients={};
       for(const device of Object.keys(CLOUD_USERS))this.clients[device]={state:'idle',message:'',catalog:[],listed:false,sentBytes:0,receivedBytes:0,totalBytes:0,server:'cloud',downloadSerial:0,lastDownload:null,resultSerial:0,preview:null};
       this.saveLocal('laptop',{name:'Poznámky k projektu.txt',content:'Jak funguje internet\n\nData putují přes domácí síť, routery poskytovatele a datové centrum. Cloudový soubor je uložený na vzdáleném serveru.\nSdílení určuje, kdo si jej smí stáhnout nebo změnit.'});
@@ -45,7 +45,7 @@
       const files=server==='cloud-backup'?this.replica.files:this.files;
       const mutating=['upload','permissions'].includes(request.op),key=`${this.user(device).id}:${request.requestId}`;
       if(mutating&&request.requestId&&this.completed.has(key))return structuredClone(this.completed.get(key));
-      const file=files.get(request.fileId),access=file?this.access(file,device):'none';
+      const file=files.get(request.fileId),access=file?this.access(file,device):'none',recipient=request.userId??this.other(device).id;
       let result;
       if(request.op==='list')result={status:200,message:'Seznam souborů byl načten ze serveru.'};
       else if(request.op==='download') {
@@ -54,10 +54,11 @@
       } else if(request.op==='permissions') {
         if(!file)result={status:404,message:'Soubor na cloudu neexistuje.'};
         else if(access!=='owner')result={status:403,message:'Přístupová práva smí měnit pouze vlastník souboru.'};
+        else if(recipient!==this.other(device).id)result={status:400,message:'Vyber jiného dostupného uživatele cloudu.'};
         else if(!['none','read','write'].includes(request.permission))result={status:400,message:'Neplatné přístupové právo.'};
         else if(request.aclVersion!==file.aclVersion)result={status:409,message:'Nastavení přístupu se změnilo. Obnov seznam a zkus to znovu.'};
         else {
-          file.permissions[this.other(device).id]=request.permission;file.aclVersion++;
+          file.permissions[recipient]=request.permission;file.aclVersion++;
           result={status:200,message:'Přístupová práva jsou uložená na serveru.'};
         }
       } else if(request.op==='upload') {

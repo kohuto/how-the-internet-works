@@ -28,8 +28,16 @@ function upload(sim,device='laptop',text='Přesný obsah: háčky, čárky a emo
   assert.equal(sim.status,'success');return sim.net.cloud.files.get(file.cloudId);
 }
 function share(sim,file,permission) {
-  return run(sim,file.owner==='ty'?'laptop':'friend',{op:'permissions',fileId:file.id,permission,aclVersion:file.aclVersion});
+  return run(sim,file.owner==='ty'?'laptop':'friend',{op:'permissions',fileId:file.id,userId:sim.net.cloud.other(file.owner==='ty'?'laptop':'friend').id,permission,aclVersion:file.aclVersion});
 }
+
+function sharedFile(sim){const file=upload(sim,'friend','Testovací sdílený obsah 🙂');share(sim,file,'read');return file;}
+
+test('A fresh Cloud starts empty for both accounts and for the backup',()=>{
+  const sim=new Simulation(),storage=sim.net.cloud;assert.equal(storage.files.size,0);assert.equal(storage.replica.files.size,0);assert(storage.replicaCurrent());
+  for(const device of ['laptop','friend']){run(sim,device,{op:'list'});assert.deepEqual(storage.clients[device].catalog,[]);}
+  const file=upload(sim);assert.equal(file.id,'cloud-1');assert.equal(file.owner,'ty');assert.deepEqual(file.permissions,{});
+});
 
 test('Cloud upload commits only after all request bytes arrive; the client waits for the complete reply',()=> {
   const sim=new Simulation(),cloud=sim.net.cloud,local=cloud.local.laptop[0],text='Kůň 🙂 — data '.repeat(30),initial=cloud.files.size;
@@ -130,13 +138,13 @@ test('A broken upload leaves existing files untouched; retry after a lost reply 
 });
 
 test('Local files are independent of connectivity; server and access outages preserve downloaded copies',()=> {
-  const sim=new Simulation(),cloud=sim.net.cloud;
+  const sim=new Simulation(),cloud=sim.net.cloud,file=upload(sim);share(sim,file,'read');
   sim.net.setAccess('friend','offline');
   assert(cloud.saveLocal('friend',{name:'Offline.txt',content:'Bez internetu'}));
   run(sim,'friend',{op:'list'});assert.equal(sim.status,'failed');assert.equal(cloud.clients.friend.listed,false);
-  sim.net.setAccess('friend','wifi');run(sim,'friend',{op:'download',fileId:'cloud-1'});assert.equal(sim.status,'success');
+  sim.net.setAccess('friend','wifi');run(sim,'friend',{op:'download',fileId:file.id});assert.equal(sim.status,'success');
   const saved=cloud.local.friend.at(-1);sim.net.toggleNode('cloud');
-  run(sim,'friend',{op:'download',fileId:'cloud-1'});assert.equal(sim.status,'failed');assert.equal(saved.content,cloud.files.get('cloud-1').content);
+  run(sim,'friend',{op:'download',fileId:file.id});assert.equal(sim.status,'failed');assert.equal(saved.content,file.content);
   sim.net.toggleNode('cloud');
   assert(sim.start('cloud',{device:'friend',request:{op:'list'}}));sim.advanceFrame();sim.net.setAccess('friend','cable');sim.connectionChanged('friend');
   assert.equal(sim.status,'failed');assert.equal(cloud.clients.friend.state,'error');
@@ -154,7 +162,7 @@ test('Both users can own files; downloading a shared file does not change its or
 });
 
 test('Opening a cloud document waits for all response bytes and does not create a downloaded local copy',()=>{
-  const sim=new Simulation(),cloud=sim.net.cloud,file=cloud.files.get('cloud-1');
+  const sim=new Simulation(),cloud=sim.net.cloud,file=sharedFile(sim);
   file.content='Obsah pro náhled s diakritikou 🙂. '.repeat(30);
   const count=cloud.local.laptop.length;
   assert(sim.start('cloud',{device:'laptop',request:{op:'download',fileId:file.id},preview:true}));
@@ -168,7 +176,7 @@ test('Opening a cloud document waits for all response bytes and does not create 
 });
 
 test('A fresh preview checks current access, clears the previous view and leaves local copies intact when rejected',()=>{
-  const sim=new Simulation(),cloud=sim.net.cloud,file=cloud.files.get('cloud-1'),count=cloud.local.laptop.length;
+  const sim=new Simulation(),cloud=sim.net.cloud,file=sharedFile(sim),count=cloud.local.laptop.length;
   assert(sim.start('cloud',{device:'laptop',request:{op:'download',fileId:file.id},preview:true}));finish(sim);
   assert(cloud.clients.laptop.preview);file.permissions.ty='none';
   assert(sim.start('cloud',{device:'laptop',request:{op:'download',fileId:file.id},preview:true}));
@@ -186,16 +194,33 @@ test('The phone shares the laptop cloud account through Wi-Fi and cellular while
     const file=cloud.files.get(local.cloudId);assert.equal(file.owner,'ty');
     run(sim,'laptop',{op:'list'});assert(cloud.clients.laptop.catalog.some(f=>f.id===file.id));
     assert(!cloud.clients.friend.catalog.some(f=>f.id===file.id));
-    run(sim,'phone',{op:'download',fileId:'cloud-1'});assert.equal(sim.status,'success');
-    assert.equal(cloud.local.phone.at(-1).content,cloud.files.get('cloud-1').content);
+    run(sim,'phone',{op:'download',fileId:file.id});assert.equal(sim.status,'success');
+    assert.equal(cloud.local.phone.at(-1).content,file.content);
   }
 });
 
 test('Previewing a backup uses the selected server and rejects a stale replica without exposing its old content',()=>{
-  const sim=new Simulation(),cloud=sim.net.cloud;
-  assert(sim.start('cloud',{device:'laptop',server:'cloud-backup',request:{op:'download',fileId:'cloud-1'},preview:true}));finish(sim);
+  const sim=new Simulation(),cloud=sim.net.cloud,file=sharedFile(sim);
+  assert(sim.start('cloud',{device:'laptop',server:'cloud-backup',request:{op:'download',fileId:file.id},preview:true}));finish(sim);
   assert.equal(sim.status,'success');assert.equal(cloud.clients.laptop.preview.server,'cloud-backup');
   cloud.revision++;
-  assert(sim.start('cloud',{device:'laptop',server:'cloud-backup',request:{op:'download',fileId:'cloud-1'},preview:true}));finish(sim);
+  assert(sim.start('cloud',{device:'laptop',server:'cloud-backup',request:{op:'download',fileId:file.id},preview:true}));finish(sim);
   assert.equal(sim.status,'failed');assert.match(cloud.clients.laptop.message,/503/);assert.equal(cloud.clients.laptop.preview,null);
+});
+
+
+test('Sharing validates the recipient account and supports granting and removing access in both directions',()=>{
+  for(const owner of ['laptop','friend']){
+    const sim=new Simulation(),storage=sim.net.cloud,file=upload(sim,owner),other=owner==='laptop'?'friend':'laptop',userId=storage.user(other).id,version=file.aclVersion;
+    for(const invalid of ['neexistujici',storage.user(owner).id]){
+      run(sim,owner,{op:'permissions',fileId:file.id,userId:invalid,permission:'write',aclVersion:version});
+      assert.equal(sim.status,'failed');assert.match(storage.clients[owner].message,/400/);assert.deepEqual(file.permissions,{});assert.equal(file.aclVersion,version);
+    }
+    run(sim,owner,{op:'permissions',fileId:file.id,userId,permission:'read',aclVersion:file.aclVersion});assert.equal(sim.status,'success');
+    run(sim,other,{op:'list'});assert.equal(storage.clients[other].catalog.find(f=>f.id===file.id).access,'read');
+    run(sim,owner,{op:'permissions',fileId:file.id,userId,permission:'write',aclVersion:file.aclVersion});
+    run(sim,other,{op:'list'});assert.equal(storage.clients[other].catalog.find(f=>f.id===file.id).access,'write');
+    run(sim,owner,{op:'permissions',fileId:file.id,userId,permission:'none',aclVersion:file.aclVersion});
+    run(sim,other,{op:'list'});assert(!storage.clients[other].catalog.some(f=>f.id===file.id));assert.equal(storage.replica.files.get(file.id).permissions[userId],'none');
+  }
 });

@@ -21,7 +21,7 @@
     ui.chatbot={laptop:'',friend:'',phone:'',cabin:''};
     ui.webMessages={cafe:'Ahoj z kavárny, prosím o prodloužení výpůjčky.',friend:'Ahoj, píše Matěj.',cabin:'Ahoj z chaty! Zpráva putuje přes satelit.',laptop:'Ahoj, prosím o prodloužení výpůjčky.',phone:'Ahoj, prosím o prodloužení výpůjčky.'};
     ui.files=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>[device,{view:'files',localId:null,name:'',content:'',editorKey:0}]));
-    ui.cloud=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>[device,{view:'files',editorKey:0,remoteId:null,remoteVersion:null,cloudName:'',cloudContent:'',permissions:{},downloadSerial:0,resultSerial:0,uploadOpen:false,uploadId:null,downloadNotice:null}]));
+    ui.cloud=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>[device,{view:'files',editorKey:0,remoteId:null,remoteVersion:null,cloudName:'',cloudContent:'',shareId:null,shareUser:'',sharePermission:'read',downloadSerial:0,resultSerial:0,uploadOpen:false,uploadId:null,downloadNotice:null}]));
     return ui;
   }
   function resetDeviceUI(device) {
@@ -136,7 +136,7 @@
     if(resume)resumePlayback();
   }
   function closeMonitor() {
-    if(ui.cloud[ui.monitorDevice])ui.cloud[ui.monitorDevice].uploadOpen=false;
+    if(ui.cloud[ui.monitorDevice])Object.assign(ui.cloud[ui.monitorDevice],{uploadOpen:false,shareId:null});
     ui.networkPanel=null;
     if(journey.current&&journey.current.device===ui.monitorDevice){
       if(sim.status==='running'&&!sim.replicaResult){journey.minimize();return;}
@@ -156,7 +156,7 @@
   function openComputerApp(app) {
     if(app==='network'){toggleNetworkPanel();return;}
     ui.networkPanel=null;
-    if(app!=='cloud'&&ui.cloud[ui.monitorDevice])ui.cloud[ui.monitorDevice].uploadOpen=false;
+    if(app!=='cloud'&&ui.cloud[ui.monitorDevice])Object.assign(ui.cloud[ui.monitorDevice],{uploadOpen:false,shareId:null});
     if(!net.appAvailable(app,ui.monitorDevice))return;
     if(!['desktop','web','print','message','cloud','files','chatbot','network','vpn','mail','attack','mitm'].includes(app))return;
     if(journey.current)journey.browse();ui.transferOutcome=null;
@@ -196,6 +196,7 @@
     beginTransfer('cloud');
   }
   function closeCloudPicker(){ui.cloud[ui.monitorDevice].uploadOpen=false;render();$('.drive-add>summary')?.focus({preventScroll:true});}
+  function closeCloudShare(){const d=ui.cloud[ui.monitorDevice],id=d.shareId;d.shareId=null;render();$(`[data-cloud-share="${id}"]`)?.focus({preventScroll:true});}
   function networkDraft() {return ui.networkDrafts[ui.monitorDevice]??={selected:null,passwordStep:false,password:'',error:'',details:false};}
   function focusWifiPassword() {const input=$('#wifi-password');if(input){input.focus({preventScroll:true});input.form.scrollIntoView({block:'nearest'});}}
   function closeNetworkPanel(focus=true) {
@@ -403,7 +404,7 @@
     if(webStarted)ui[addressKey(webStarted)]=browserNavigation.active(webStarted).draft;
     for(const device of Object.keys(net.cloud.clients)) {
       const client=net.cloud.clients[device],draft=ui.cloud[device];
-      if(draft.resultSerial!==client.resultSerial){draft.permissions={};draft.resultSerial=client.resultSerial;if(client.state==='ready'&&sim.action?.type==='cloud'&&sim.clientId()===device){if(sim.action.payload.request.op==='upload')Object.assign(draft,{view:'files',remoteId:null,remoteVersion:null,cloudName:'',cloudContent:''});if(sim.action.payload.request.op!=='list')notify(client.message.replace(/^\d+ · /,''));}}
+      if(draft.resultSerial!==client.resultSerial){draft.resultSerial=client.resultSerial;if(client.state==='ready'&&sim.action?.type==='cloud'&&sim.clientId()===device){if(sim.action.payload.request.op==='upload')Object.assign(draft,{view:'files',remoteId:null,remoteVersion:null,cloudName:'',cloudContent:''});if(sim.action.payload.request.op==='permissions')draft.shareId=null;if(sim.action.payload.request.op!=='list')notify(client.message.replace(/^\d+ · /,''));}}
       if(draft.downloadSerial!==client.downloadSerial){draft.downloadNotice=client.lastDownload;draft.downloadSerial=client.downloadSerial;}
     }
     const videoStates=[...document.querySelectorAll('#monitor-content video')].map((v,i)=>({key:v.closest('[data-instagram-message]')?.dataset.instagramMessage||`index:${i}`,time:v.currentTime,paused:v.paused,device:ui.monitorDevice,src:v.querySelector('source')?.getAttribute('src')}));
@@ -564,14 +565,15 @@
     } else if(form==='cloud-save') {
       const d=ui.cloud[ui.monitorDevice];startCloud({op:'upload',name:d.cloudName,content:d.cloudContent,...(d.remoteId?{fileId:d.remoteId,version:d.remoteVersion}:{})});
     } else if(form==='cloud-permissions') {
-      const fileId=e.target.dataset.cloudId,draft=ui.cloud[ui.monitorDevice],file=net.cloud.clients[ui.monitorDevice].catalog.find(f=>f.id===fileId);
-      if(file)startCloud({op:'permissions',fileId,permission:draft.permissions[fileId]??file.sharing,aclVersion:file.aclVersion});
+      const fileId=e.target.dataset.cloudId,draft=ui.cloud[ui.monitorDevice],file=net.cloud.clients[ui.monitorDevice].catalog.find(f=>f.id===fileId&&f.access==='owner');
+      if(file)startCloud({op:'permissions',fileId,userId:draft.shareUser,permission:e.submitter?.hasAttribute('data-cloud-revoke')?'none':draft.sharePermission,aclVersion:file.aclVersion});
     } else startAction(form);
   }
   function handleClick(e) {
     if(e.target===$('#monitor-overlay')){closeMonitor();return;}
     if(e.target===$('#device-overlay')){closeDevice();return;}
     if(e.target.hasAttribute('data-cloud-picker-backdrop')){closeCloudPicker();return;}
+    if(e.target.hasAttribute('data-cloud-share-backdrop')){closeCloudShare();return;}
     const addMenu=$('.drive-add');if(addMenu?.open&&!e.target.closest('.drive-add'))addMenu.open=false;
     const b=e.target.closest('button');
     const webState=ui.monitorOpen?browserNavigation.state(ui.monitorDevice):null;
@@ -659,6 +661,13 @@
     }
     if(b.dataset.action==='files-list'){const d=ui.files[ui.monitorDevice];if(d.view==='editor'&&!saveLocal())return;d.view='files';render();return;}
     if(b.dataset.cloudOpen){startCloud({op:'download',fileId:b.dataset.cloudOpen},undefined,true);return;}
+    if(b.dataset.cloudShare){
+      if(sim.status==='running')return;
+      const file=net.cloud.clients[ui.monitorDevice].catalog.find(f=>f.id===b.dataset.cloudShare&&f.access==='owner');if(!file)return;
+      const d=ui.cloud[ui.monitorDevice];Object.assign(d,{shareId:file.id,shareUser:net.cloud.other(ui.monitorDevice).id,sharePermission:file.sharing==='write'?'write':'read',uploadOpen:false});
+      if($('.drive-add'))$('.drive-add').open=false;render();$('#cloud-share-user').focus({preventScroll:true});return;
+    }
+    if(b.dataset.action==='cloud-share-close'){closeCloudShare();return;}
     if(b.dataset.cloudDownload){startCloud({op:'download',fileId:b.dataset.cloudDownload});return;}
     if(b.dataset.action==='cloud-refresh'){startCloud({op:'list'});return;}
     if(b.dataset.action==='cloud-list'){if(sim.status==='running'&&ui.cloud[ui.monitorDevice].view==='editor')return;ui.cloud[ui.monitorDevice].view='files';render();return;}
@@ -728,7 +737,8 @@
       if(e.target.hasAttribute('data-cookie-allowed')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.browserFor(ui.monitorDevice).cookies.allowed=e.target.checked;render();$('[data-cookie-allowed]')?.focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-cookie-secure')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.server.cookies.secureOnly=e.target.checked;render();$('[data-cookie-secure]')?.focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-web-certificate')){const value=e.target.value;Object.assign(net.server.certificate,{name:value==='wrong-name'?'jiny-web.test':'knihovna.test',valid:value!=='expired',trusted:value!=='untrusted'});render();$('#web-certificate').focus({preventScroll:true});return;}
-      if(e.target.dataset.cloudAccess){ui.cloud[ui.monitorDevice].permissions[e.target.dataset.cloudAccess]=e.target.value;return;}
+      if(e.target.hasAttribute('data-cloud-share-user')){ui.cloud[ui.monitorDevice].shareUser=e.target.value;return;}
+      if(e.target.hasAttribute('data-cloud-share-permission')){ui.cloud[ui.monitorDevice].sharePermission=e.target.value;return;}
       if(e.target.hasAttribute('data-receipts')){net.friend.receipts=e.target.checked;if(net.friend.read&&net.friend.receipts&&sim.markRead('friend'))playAutomatically();render();}
     });
     root.addEventListener('toggle',e=>{if(e.target.isConnected&&e.target.matches('.network-details'))networkDraft().details=e.target.open;},true);
@@ -799,8 +809,8 @@
     if(settingsPanel.dialog.open)return;
     const picker=$('.drive-picker');
     if(ui.monitorOpen&&picker){
-      if(e.key==='Escape'){e.preventDefault();closeCloudPicker();return;}
-      if(e.key==='Tab'){const items=[...picker.querySelectorAll('button:not(:disabled)')],first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}return;}
+      if(e.key==='Escape'){e.preventDefault();if(picker.classList.contains('drive-share'))closeCloudShare();else closeCloudPicker();return;}
+      if(e.key==='Tab'){const items=[...picker.querySelectorAll('button:not(:disabled),select:not(:disabled)')],first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}return;}
     }
     if(e.key==='Escape'&&$('.drive-add')?.open){e.preventDefault();$('.drive-add').open=false;$('.drive-add>summary').focus();return;}
     if(e.key==='Escape'&&ui.networkPanel){e.preventDefault();closeNetworkPanel();return;}

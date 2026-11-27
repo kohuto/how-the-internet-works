@@ -95,7 +95,9 @@ test('One Cloud extension enables both centers, synchronization and reading the 
   assert.equal(LAB_FEATURES.filter(f=>f.id==='cloud').length,1);assert(!LAB_FEATURES.some(f=>f.id==='replica'));
   const settings=new LabSettings().toggle('cloud',true),net=new Network(settings),sim=new Simulation(net);
   assert.deepEqual(settings.toJSON().features,['cloud']);
-  for(const id of ['cloud','cloud-router','cloud-switch','cloud-backup','replica-router','replica-switch'])assert(net.nodeAvailable(id),id);
+  for(const id of ['cloud','cloud-router','cloud-switch','cloud-backup','replica-router','replica-switch','friend','friend-switch','friend-home'])assert(net.nodeAvailable(id),id);
+  assert(settings.has('friend'));assert.deepEqual(settings.requiredBy('friend').map(f=>f.id),['cloud']);
+  assert(settings.toggle('friend',false).has('friend'),'Cloud needs the other account for sharing');
   assert(net.appAvailable('cloud','laptop'));
   const content='Jeden Cloud, dvě datová centra. 🙂';
   assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Kopie.txt',content}}));const events=finish(sim);

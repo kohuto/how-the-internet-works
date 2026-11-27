@@ -16,7 +16,7 @@
     {id:'phone',group:'services',label:'Telefon',description:'Telefon s prohlížečem a dalšími zapnutými aplikacemi.',requires:['wifi'],nodes:['phone']},
     {id:'mail',group:'services',label:'E-mail',description:'Společná poštovní služba pro tebe a Matěje. Odesílání zpráv a schránky uložené na serveru.',requires:['friend'],nodes:['mail']},
     {id:'instagram',group:'services',label:'Instagram',description:'Zprávy mezi tebou a Matějem přes vzdálený server.',requires:['friend'],regions:['instagram']},
-    {id:'cloud',group:'services',label:'Cloud',description:'Ukládání, stahování a sdílení souborů. Hlavní i záložní datové centrum a kopírování mezi nimi.',regions:['cloud','replica']},
+    {id:'cloud',group:'services',label:'Cloud',description:'Ukládání, stahování a sdílení souborů s Matějem. Hlavní i záložní datové centrum a kopírování mezi nimi.',requires:['friend'],regions:['cloud','replica']},
     {id:'vpn',group:'services',label:'VPN',description:'Samostatná aplikace VPN pro zapnutí šifrovaného tunelu a VPN server.',regions:['vpn']},
     {id:'chatbot',group:'services',label:'Chatbot',description:'Dotaz a odpověď zpracovaná na vzdáleném serveru.',nodes:['chatbot']},
     {id:'ads',group:'services',label:'Personalizovaná reklama',description:'E-shop a Zprávy se společným reklamním serverem. Ukáže, jak prohlížení na jednom webu ovlivní reklamu na druhém.',requires:['cookies'],nodes:['shop','news','ads']}

@@ -141,8 +141,9 @@ test('A lost acknowledgement and an offline client do not cancel automatic repli
 
 test('A newer server change during automatic replication triggers another complete snapshot',()=>{
   const sim=new Simulation(),storage=sim.net.cloud;
-  assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Souběžná změna.txt',content:'První verze'}}));
+  assert(sim.start('cloud',{device:'laptop',request:{op:'upload',name:'Souběžná změna.txt',content:'První verze '.repeat(50)}}));
   until(sim,()=>[...sim.packets.values()].some(p=>p.kind==='cloud-replica'&&p.state==='delivered'));
+  assert(sim.replicaResult,'The newer change is made while replication is still in progress');
   const file=[...storage.files.values()].at(-1);
   const result=storage.handle('laptop',{op:'upload',fileId:file.id,version:file.version,name:file.name,content:'Novější verze 🙂'});
   assert.equal(result.status,200);finish(sim);

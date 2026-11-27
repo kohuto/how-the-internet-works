@@ -1,5 +1,15 @@
 # Záznam ověření
 
+## Prázdný Cloud, automatický Matějův byt a viditelné sdílení · 27. listopadu 2026
+
+Rozšíření Cloud automaticky vyžaduje Matějův byt; nastavení ukazuje vazbu a nedovolí byt vypnout, dokud jej Cloud potřebuje. Při samostatném zapnutí Cloudu jsou dostupné oba uživatelské účty. Hlavní i záložní úložiště nyní začínají prázdná a první nový soubor má ID cloud-1. Předpřipravený sdílený dokument odstraněn; místní ukázkové dokumenty v Souborech zůstávají.
+
+Vlastník má přímo v seznamu i v náhledu souboru tlačítko Sdílet. Dialog ukazuje druhého uživatele, umožňuje Může číst / Může upravovat, pozdější změnu a Odebrat přístup. Nový soubor je soukromý; seznam uvádí skutečné potvrzené sdílení a právo. Dialog sám oprávnění nemění, požadavek obsahuje cílový účet a server kontroluje vlastníka, příjemce a verzi práv. Změny i jejich záloha se přenášejí po síti. Čtenář ani spoluautor nemají ovládání pro další sdílení. Dialog podporuje zavření, Escape, návrat fokusu a cyklus Tab; při chybě ponechá volby a zobrazí důvod uvnitř. README aktualizováno, prostředky `v=198`.
+
+Prošlo všech **427 testů projektu** (`node --test tests/*.test.mjs`). Předtím prošlo **66 souvisejících testů** nastavení, cloudu, rozhraní a datových center a **6 testů** stálých portů. Nové kontroly ověřují prázdná úložiště, závislost Cloudu na Matějově bytu, platné i nepovolené příjemce, čtení, zápis a odebrání v obou směrech, soukromé nové soubory, viditelné sdílení jen u vlastníka a neprovedení změny pouhým otevřením dialogu. Starší testy vytvářejí vlastní dokumenty místo spoléhání na odstraněný ukázkový soubor. Kontroly souběžné replikace a portů připravují dostatečně velká data výslovně. Syntaxe čtyř změněných skriptů ověřena.
+
+V odděleném prohlížeči při 1047 × 858 px ověřeno zapnutí pouze Cloudu s automaticky zaškrtnutým Matějovým bytem a prázdný seznam po skutečném načtení. Nový vlastní dokument byl soukromý; po sdílení ke čtení jej Matěj načetl bez možnosti editace či dalšího sdílení. Po povolení úprav Matěj změnil obsah a vlastník přijal novou verzi. Po odebrání přístupu a obnovení seznamu soubor u Matěje zmizel. Ověřeno i sdílení vlastního Matějova dokumentu směrem k účtu Ty. Při 320 × 568 px telefon začínal prázdný, vytvořil a sdílel vlastní dokument; dialog, tlačítka i dlouhý název se vejdou bez vodorovného přetékání. Escape zavře dialog a vrátí fokus, Shift+Tab z prvního ovládání přejde na poslední. Při vypnutém serveru se důvod selhání zobrazí v dialogu; po obnovení serveru lze sdílení dokončit. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Cloudové servery bez zkratky do Matějova notebooku · 27. listopadu 2026
 
 Z detailů hlavního i záložního cloudového serveru odstraněno tlačítko Matějův cloud včetně obalového řádku a nepoužívané obsluhy. Seznam souborů, vlastníci, práva, technické služby a napájení zůstávají. Prostředky `v=197`.
