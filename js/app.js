@@ -21,7 +21,7 @@
     ui.chatbot={laptop:'',friend:'',phone:'',cabin:''};
     ui.webMessages={cafe:'Ahoj z kavárny, prosím o prodloužení výpůjčky.',friend:'Ahoj, píše Matěj.',cabin:'Ahoj z chaty! Zpráva putuje přes satelit.',laptop:'Ahoj, prosím o prodloužení výpůjčky.',phone:'Ahoj, prosím o prodloužení výpůjčky.'};
     ui.files=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>[device,{view:'files',localId:null,name:'',content:'',editorKey:0}]));
-    ui.cloud=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>[device,{view:'files',editorKey:0,remoteId:null,remoteVersion:null,cloudName:'',cloudContent:'',shareId:null,shareUser:'',sharePermission:'read',downloadSerial:0,resultSerial:0,uploadOpen:false,uploadId:null,downloadNotice:null}]));
+    ui.cloud=Object.fromEntries(Object.keys(net.cloud.clients).map(device=>[device,{view:'files',editorKey:0,remoteId:null,remoteVersion:null,cloudName:'',cloudContent:'',shareId:null,shareUser:'',downloadSerial:0,resultSerial:0,uploadOpen:false,uploadId:null,downloadNotice:null}]));
     return ui;
   }
   function resetDeviceUI(device) {
@@ -190,7 +190,7 @@
   function startCloud(request,localId,preview=false) {
     const device=ui.monitorDevice;if(ui.packetOpen||sim.status==='running'||!ui.cloud[device])return;
     stop();if(!sim.start('cloud',{device,server:'cloud',request,localId,preview}))return;
-    if(preview)Object.assign(ui.cloud[device],{view:'preview',remoteId:request.fileId});
+    if(preview)Object.assign(ui.cloud[device],{view:'preview',remoteId:request.fileId,remoteVersion:null,cloudName:'',cloudContent:''});
     ui.selection={kind:'node',id:device};ui.monitorOpen=true;ui.deviceOpen=false;ui.linkOpen=false;
     if(ui.scene==='home')setScene('all');
     beginTransfer('cloud');
@@ -404,7 +404,15 @@
     if(webStarted)ui[addressKey(webStarted)]=browserNavigation.active(webStarted).draft;
     for(const device of Object.keys(net.cloud.clients)) {
       const client=net.cloud.clients[device],draft=ui.cloud[device];
-      if(draft.resultSerial!==client.resultSerial){draft.resultSerial=client.resultSerial;if(client.state==='ready'&&sim.action?.type==='cloud'&&sim.clientId()===device){if(sim.action.payload.request.op==='upload')Object.assign(draft,{view:'files',remoteId:null,remoteVersion:null,cloudName:'',cloudContent:''});if(sim.action.payload.request.op==='permissions')draft.shareId=null;if(sim.action.payload.request.op!=='list')notify(client.message.replace(/^\d+ · /,''));}}
+      if(draft.resultSerial!==client.resultSerial){
+        draft.resultSerial=client.resultSerial;
+        if(client.state==='ready'&&sim.action?.type==='cloud'&&sim.clientId()===device){
+          if(sim.action.payload.request.op==='upload')Object.assign(draft,{view:'files',remoteId:null,remoteVersion:null,cloudName:'',cloudContent:''});
+          if(sim.action.payload.request.op==='permissions')draft.shareId=null;
+          if(sim.action.payload.preview&&draft.view==='preview'&&client.preview?.id===draft.remoteId&&client.preview.server==='cloud'&&['owner','write'].includes(client.preview.access))Object.assign(draft,{view:'editor',cloudName:client.preview.name,cloudContent:client.preview.content,remoteVersion:client.preview.version,editorKey:draft.editorKey+1});
+          if(sim.action.payload.request.op!=='list')notify(client.message.replace(/^\d+ · /,''));
+        }
+      }
       if(draft.downloadSerial!==client.downloadSerial){draft.downloadNotice=client.lastDownload;draft.downloadSerial=client.downloadSerial;}
     }
     const videoStates=[...document.querySelectorAll('#monitor-content video')].map((v,i)=>({key:v.closest('[data-instagram-message]')?.dataset.instagramMessage||`index:${i}`,time:v.currentTime,paused:v.paused,device:ui.monitorDevice,src:v.querySelector('source')?.getAttribute('src')}));
@@ -566,7 +574,7 @@
       const d=ui.cloud[ui.monitorDevice];startCloud({op:'upload',name:d.cloudName,content:d.cloudContent,...(d.remoteId?{fileId:d.remoteId,version:d.remoteVersion}:{})});
     } else if(form==='cloud-permissions') {
       const fileId=e.target.dataset.cloudId,draft=ui.cloud[ui.monitorDevice],file=net.cloud.clients[ui.monitorDevice].catalog.find(f=>f.id===fileId&&f.access==='owner');
-      if(file)startCloud({op:'permissions',fileId,userId:draft.shareUser,permission:e.submitter?.hasAttribute('data-cloud-revoke')?'none':draft.sharePermission,aclVersion:file.aclVersion});
+      if(file)startCloud({op:'permissions',fileId,userId:draft.shareUser,permission:e.submitter?.hasAttribute('data-cloud-revoke')?'none':'write',aclVersion:file.aclVersion});
     } else startAction(form);
   }
   function handleClick(e) {
@@ -664,7 +672,7 @@
     if(b.dataset.cloudShare){
       if(sim.status==='running')return;
       const file=net.cloud.clients[ui.monitorDevice].catalog.find(f=>f.id===b.dataset.cloudShare&&f.access==='owner');if(!file)return;
-      const d=ui.cloud[ui.monitorDevice];Object.assign(d,{shareId:file.id,shareUser:net.cloud.other(ui.monitorDevice).id,sharePermission:file.sharing==='write'?'write':'read',uploadOpen:false});
+      const d=ui.cloud[ui.monitorDevice];Object.assign(d,{shareId:file.id,shareUser:net.cloud.other(ui.monitorDevice).id,uploadOpen:false});
       if($('.drive-add'))$('.drive-add').open=false;render();$('#cloud-share-user').focus({preventScroll:true});return;
     }
     if(b.dataset.action==='cloud-share-close'){closeCloudShare();return;}
@@ -675,12 +683,6 @@
       if(sim.status==='running')return;
       const d=ui.cloud[ui.monitorDevice];if($('.drive-add'))$('.drive-add').open=false;
       Object.assign(d,{cloudName:'Nový dokument.txt',cloudContent:'',remoteId:null,remoteVersion:null,view:'editor',editorKey:d.editorKey+1,downloadNotice:null});render();$('#cloud-name').focus({preventScroll:true});$('#cloud-name').select();return;
-    }
-    if(b.dataset.action==='cloud-edit'){
-      if(sim.status==='running')return;
-      const d=ui.cloud[ui.monitorDevice],c=net.cloud.clients[ui.monitorDevice],p=c.preview,meta=c.catalog.find(f=>f.id===d.remoteId);
-      if(!p||p.id!==d.remoteId||p.server!=='cloud'||!['owner','write'].includes(meta?.access))return;
-      Object.assign(d,{view:'editor',cloudName:p.name,cloudContent:p.content,remoteVersion:p.version,editorKey:d.editorKey+1});render();$('#cloud-name').focus({preventScroll:true});return;
     }
     if(b.dataset.action==='cloud-picker-open'){
       if(sim.status==='running')return;
@@ -738,7 +740,6 @@
       if(e.target.hasAttribute('data-cookie-secure')){if(!net.featureEnabled('cookies')||sim.status==='running')return;net.server.cookies.secureOnly=e.target.checked;render();$('[data-cookie-secure]')?.focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-web-certificate')){const value=e.target.value;Object.assign(net.server.certificate,{name:value==='wrong-name'?'jiny-web.test':'knihovna.test',valid:value!=='expired',trusted:value!=='untrusted'});render();$('#web-certificate').focus({preventScroll:true});return;}
       if(e.target.hasAttribute('data-cloud-share-user')){ui.cloud[ui.monitorDevice].shareUser=e.target.value;return;}
-      if(e.target.hasAttribute('data-cloud-share-permission')){ui.cloud[ui.monitorDevice].sharePermission=e.target.value;return;}
       if(e.target.hasAttribute('data-receipts')){net.friend.receipts=e.target.checked;if(net.friend.read&&net.friend.receipts&&sim.markRead('friend'))playAutomatically();render();}
     });
     root.addEventListener('toggle',e=>{if(e.target.isConnected&&e.target.matches('.network-details'))networkDraft().details=e.target.open;},true);

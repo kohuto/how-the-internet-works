@@ -1,5 +1,15 @@
 # Záznam ověření
 
+## Přímé úpravy cloudových dokumentů a jednodušší sdílení · 27. listopadu 2026
+
+Po úplném přijetí obsahu se vlastní cloudový dokument nebo dokument s právem zápisu rovnou otevře v editoru. Tlačítko Upravit a jeho obsluha odstraněny. Editor přebírá skutečně doručený název, obsah i verzi; před doručením editor nezpřístupní a další vykreslení ani sdílení rozepsané změny nepřepisují. Uložit změny na cloud zachovává serverové kontroly práv a verze. Sdílení a stažení zůstávají dostupné přímo v editoru. Samostatné stažení dál vytváří místní kopii bez přepsání rozepsaných změn.
+
+Z dialogu sdílení odstraněny popisek Oprávnění, výběr čtení/úprav i související stav. Sdílet nyní vždy odesílá právo úprav (`write`), Odebrat přístup dál odesílá odebrání (`none`). Nový soubor zůstává soukromý do potvrzení sdílení. README aktualizováno, prostředky `v=199`.
+
+Prošlo **46 souvisejících testů** (`node --test tests/cloud-ui.test.mjs tests/cloud.test.mjs tests/cancel-transfer.test.mjs tests/transfer-journey.test.mjs`). Kontroly pokrývají načtení až po celé odpovědi, zachování práv a verze, uložení bez místní kopie, zrušení přenosu, nové ovládání editoru, zachování rozepsaného obsahu a absenci výběru oprávnění. Syntaxe obou změněných skriptů ověřena.
+
+V odděleném prohlížeči při 774 × 743 px ověřeno, že před doručením obsahu editor chybí a po něm je název i text přímo upravitelný bez dalšího tlačítka. Název i text byly přepsány, následné sdílení neztratilo rozepsané změny a uložení vytvořilo správnou novou verzi. Dialog sdílení obsahuje jen uživatele, zrušení a potvrzení bez volby oprávnění; Matěj po prvním otevření rovnou upravil sdílený dokument a vlastník načetl jeho novou verzi. Zrušení ukládání ponechalo rozepsaný text editovatelný a další uložení uspělo. Při 320 × 568 px ověřena přímá editace v telefonu a dostupná tlačítka pro uložení, sdílení a stažení bez vodorovného přetékání. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Prázdný Cloud, automatický Matějův byt a viditelné sdílení · 27. listopadu 2026
 
 Rozšíření Cloud automaticky vyžaduje Matějův byt; nastavení ukazuje vazbu a nedovolí byt vypnout, dokud jej Cloud potřebuje. Při samostatném zapnutí Cloudu jsou dostupné oba uživatelské účty. Hlavní i záložní úložiště nyní začínají prázdná a první nový soubor má ID cloud-1. Předpřipravený sdílený dokument odstraněn; místní ukázkové dokumenty v Souborech zůstávají.
