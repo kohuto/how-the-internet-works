@@ -32,7 +32,7 @@
   };
   const presets={home:[35,270,465,440],city:[480,100,1720,1140],all:bounds(Object.keys(MAP_LAYOUT.bounds)),ads:bounds(['partners']),mail:bounds(['dc']),dc:bounds(['dc']),friend:bounds(['friend']),mobile:bounds(['home','city']),cafe:bounds(['cafe']),vpn:bounds(['vpn']),hacker:bounds(['hacker']),satellite:bounds(['cabin','satellite'])};
   const decor=`
-    <defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#213d37" flood-opacity=".09"/></filter>${Object.values(signalStyles).map(s=>`<radialGradient id="${s.medium}-coverage-gradient"><stop offset="0%" stop-color="${s.color}" stop-opacity=".24"/><stop offset="45%" stop-color="${s.color}" stop-opacity=".14"/><stop offset="75%" stop-color="${s.color}" stop-opacity=".05"/><stop offset="100%" stop-color="${s.color}" stop-opacity="0"/></radialGradient>`).join('')}</defs>
+    <defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#213d37" flood-opacity=".09"/></filter></defs>
     <rect x="-3000" y="-3000" width="7000" height="7000" fill="#f0f3eb"/>
     <g class="advertising-center" data-region="partners"><rect x="1370" y="-550" width="950" height="300" rx="18" fill="#eee8de" stroke="#c7b7a0" stroke-width="3"/><text x="1400" y="-530" class="place-label">17 / WEBY A REKLAMNÍ PARTNER</text><text x="1400" y="-510" class="center-subtitle">TŘI SAMOSTATNÉ SLUŽBY · SPOLEČNÝ REKLAMNÍ SERVER</text></g>
     <g class="satellite-scenery" data-region="satellite"><rect x="45" y="-550" width="1170" height="240" rx="40" fill="#e7eef3" stroke="#cadce7" stroke-dasharray="6 10"/><path d="M100-360Q660-580 1160-360" fill="none" stroke="#b8cfdf" stroke-dasharray="4 10"/><text x="600" y="-525" class="place-label">11 / SATELITNÍ PŘÍSTUP · LEO</text><text x="600" y="-500" class="center-subtitle">POLOHA A VZDÁLENOSTI JSOU SCHEMATICKÉ</text>
@@ -84,7 +84,7 @@
   class NetworkMap {
     constructor(svg,net,onSelect) {
       this.svg=svg;this.net=net;this.scene='home';this.box=[...presets.home];this.onSelect=onSelect;this.lastEvent=null;this.selected=null;this.selectedPacket=null;svg.dataset.scene='home';
-      this.packets=new Map();this.packetViews=new Map();this.frame=[];this.pointers=new Map();this.signalCoverage=false;
+      this.packets=new Map();this.packetViews=new Map();this.frame=[];this.pointers=new Map();this.signalCoverage=false;this.signalViews=new Map();
       svg.innerHTML=decor+'<g id="signal-coverage-layer" aria-hidden="true" pointer-events="none"></g><g id="links-layer"></g><g id="nodes-layer"></g><g id="packet-layer"></g>';
       svg.querySelectorAll('[data-region]').forEach(el=>{
         const offset=MAP_LAYOUT.offsets[el.dataset.region];
@@ -185,6 +185,31 @@
     setAnimationsPlaying(playing) {
       for(const view of this.packetViews.values())if(view.animation)playing?view.animation.play():view.animation.pause();
     }
+    setSignalWavesPlaying(playing) {
+      this.svg.dataset.signalsPaused=String(!playing);
+    }
+    renderSignals() {
+      // Keep each source's elements across map updates so the waves never restart on a packet step.
+      // These schematic radii only illustrate the signal; they do not affect connectivity.
+      const sources=this.signalCoverage?this.net.visibleNodes().filter(n=>signalStyles[n.type]&&n.on&&(n.id!=='cafe-attacker'||this.net.mitm.active)):[];
+      const active=new Set(sources.map(n=>n.id)),layer=this.svg.querySelector('#signal-coverage-layer');
+      for(const [id,view] of this.signalViews)if(!active.has(id)){view.remove();this.signalViews.delete(id);}
+      for(const n of sources) {
+        let view=this.signalViews.get(n.id);
+        if(!view) {
+          const s=signalStyles[n.type];
+          view=document.createElementNS('http://www.w3.org/2000/svg','g');
+          view.dataset.signalSource=n.id;view.dataset.signalKind=s.medium;
+          view.setAttribute('stroke',s.color);view.style.setProperty('--signal-radius',`${s.radius}px`);
+          for(const fraction of [.25,.75]) {
+            const wave=document.createElementNS('http://www.w3.org/2000/svg','circle');
+            wave.setAttribute('class','signal-wave');wave.setAttribute('r',s.radius*fraction);view.append(wave);
+          }
+          this.signalViews.set(n.id,view);layer.append(view);
+        }
+        view.setAttribute('transform',`translate(${n.x} ${n.y})`);
+      }
+    }
     setPlaybackRate(rate) {
       if(![1,2,4].includes(rate))return;
       this.playbackRate=rate;
@@ -213,10 +238,7 @@
       if(partners)partners.textContent=this.net.featureEnabled('ads')?'TŘI SAMOSTATNÉ SLUŽBY · SPOLEČNÝ REKLAMNÍ SERVER':'SAMOSTATNÉ WEBOVÉ SLUŽBY';
       const cafe=this.svg.querySelector('.cafe-house .region-subtitle');
       if(cafe)cafe.textContent=this.net.featureEnabled('mitm')?'HOST · VEŘEJNÁ WI-FI · NAPODOBENÝ HOTSPOT':'HOST · VEŘEJNÁ WI-FI';
-      // Schematic signal illustration only; neither radius nor opacity affects connectivity.
-      this.svg.querySelector('#signal-coverage-layer').innerHTML=this.signalCoverage?this.net.visibleNodes()
-        .filter(n=>signalStyles[n.type]&&n.on&&(n.id!=='cafe-attacker'||this.net.mitm.active))
-        .map(n=>{const s=signalStyles[n.type];return `<circle class="signal-coverage-area" data-signal-source="${esc(n.id)}" data-signal-kind="${s.medium}" cx="${n.x}" cy="${n.y}" r="${s.radius}" fill="url(#${s.medium}-coverage-gradient)"/>`;}).join(''):'';
+      this.renderSignals();
       const vpnLinks=new Set(Object.values(this.net.vpn?.clients||{}).filter(c=>c.enabled).flatMap(c=>c.path));
       this.svg.querySelector('#links-layer').innerHTML=this.net.visibleLinks().filter(l=>!wirelessMedia.has(l.medium)).map(l=> {
         const a=this.net.nodes[l.a],b=this.net.nodes[l.b],active=this.net.isActive(l);

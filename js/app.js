@@ -494,6 +494,7 @@
     $('#step').disabled=ui.packetOpen||sim.status!=='running'||sim.auth.working;$('#repeat').disabled=ui.packetOpen||!sim.lastAction;
     $('#playback-speed').value=String(playbackRate);$('#cancel-transfer').disabled=sim.status!=='running';
     $('#signal-coverage-control').hidden=!net.visibleNodes().some(n=>['ap','bts','satellite'].includes(n.type));
+    map.setSignalWavesPlaying((sim.status!=='running'||playing)&&!ui.packetOpen&&!$('#settings-dialog').open);
     map.render(current,ui.selection,ui.selection.kind==='packet'?ui.selection.id:null,animate,ANIMATION_DELAY,sim.packets,sim.frame);
   }
   function advance() {if(ui.packetOpen)return;map.finishAnimations();remaining=0;sim.advanceFrame();if(sim.status!=='running')stop();render(true);resumeBackground();}

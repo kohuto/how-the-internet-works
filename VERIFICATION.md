@@ -1,5 +1,15 @@
 # Záznam ověření
 
+## Jemné rozpínající se vlny bezdrátového signálu · 27. listopadu 2026
+
+Původní plošné radiální výplně Wi-Fi, BTS a satelitu nahrazeny dvěma tenkými čárkovanými kružnicemi bez výplně. Kružnice se plynule rozpínají od vysílače k dosavadnímu ilustračnímu dosahu, postupně blednou a mizí na jeho hranici. Cyklus trvá 4,8 sekundy, druhá vlna je posunuta o polovinu cyklu. Přepínač Dosah signálu zůstává zpočátku vypnutý. Zdrojové prvky se při vykreslování zachovávají, takže nové pakety, prohlížení zařízení a změna měřítka vlny nerestartují. Vypnutí zdroje odstraní jen jeho kružnice. Vrstva je pod spoji, zařízeními i pakety a nezachytává kliknutí; tloušťka čáry se nemění s přiblížením.
+
+Pauza přenosu, krokování, detail paketu a otevřené nastavení zastaví vlny na místě. Pokračování naváže na stejnou fázi; mimo přenos se vlny pohybují klidným tempem, nezávisle na rychlosti přehrávání paketů. Systémové omezení pohybu nahradí animace dvěma statickými kružnicemi. Vysílání dál závisí na zapnutí zařízení, nikoli jeho kabelové přípojky; napodobený hotspot vysílá jen při aktivním hotspotu. Síťový model, dosahy, dostupnost a trasy nezměněny. README aktualizováno; prostředky `v=200`.
+
+Prošlo **33 souvisejících testů** (`node --test tests/map-signals.test.mjs tests/map-input.test.mjs tests/map-layout.test.mjs tests/map-packets.test.mjs tests/mobile.test.mjs tests/satellite.test.mjs`). Nové kontroly používají skutečné síťové zdroje a ověřují zachování existujících prvků při aktualizacích a změně výřezu, odstranění pouze vypnutého zdroje, nové zapnutí, vypnutí celé vrstvy, závislost na rozšířeních a aktivním hotspotu, vysílání bez přípojky a nezměněný model. Syntaxe map.js i app.js ověřena.
+
+V odděleném prohlížeči při 1047 × 858 a 774 × 743 px ověřeny dva kruhy na zdroj, chybějící gradienty a výplně, rostoucí poloměr a blednutí až k hranici dosahu, rozestup 2,4 sekundy a správné pořadí vrstev. Vypnutí/zapnutí Wi-Fi bodu nezrušilo vlny jiného zdroje. Skutečný webový přenos ověřil přesné zastavení času animace při pauze, zachování fáze při krokování, pokračování a automatickou pauzu při otevření paketu. Po zrušení přenosu se animace znovu pohybují. Otevřené nastavení vlny zastaví a zavření je obnoví. Při omezeném pohybu jsou oba kruhy statické bez běžících animací. Při 320 × 568 px ověřen pohyb vln, zachování stejného prvku i animace při přiblížení a čára o tloušťce 1 px bez vodorovného přetékání. Konzole obou karet bez chyb a varování; uživatelská karta nezměněna.
+
 ## Přímé úpravy cloudových dokumentů a jednodušší sdílení · 27. listopadu 2026
 
 Po úplném přijetí obsahu se vlastní cloudový dokument nebo dokument s právem zápisu rovnou otevře v editoru. Tlačítko Upravit a jeho obsluha odstraněny. Editor přebírá skutečně doručený název, obsah i verzi; před doručením editor nezpřístupní a další vykreslení ani sdílení rozepsané změny nepřepisují. Uložit změny na cloud zachovává serverové kontroly práv a verze. Sdílení a stažení zůstávají dostupné přímo v editoru. Samostatné stažení dál vytváří místní kopii bez přepsání rozepsaných změn.
