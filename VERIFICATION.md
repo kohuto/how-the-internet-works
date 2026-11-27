@@ -1,5 +1,15 @@
 # Záznam ověření
 
+## Cloud vždy na hlavním serveru a nadpis paketu v záhlaví · 27. listopadu 2026
+
+Z Cloudu odstraněn výběr Hlavní úložiště / Záložní kopie a celá nabídka tří teček s odkazem na server a stahováním podle ID. Veškeré klientské operace nyní míří výslovně na hlavní server. Také zkratka Matějův cloud ze záložního serveru otevře běžného klienta hlavního úložiště. Odebrány související stav, obsluhy a styly. Automatické zálohování souborů a práv A → B zůstává stejné; obsah obou serverů lze nadále prohlížet v mapě. README aktualizováno.
+
+Nadpis Paket je ve společném zeleném záhlaví dialogu, stejně jako názvy zařízení a spojů. Z těla paketu odstraněn původní nadpis a jeho styly. Dialog má jediný platný nadpis `packet-title` pro `aria-labelledby`, včetně stavu již nedostupného paketu. Prostředky `v=196`.
+
+Prošlo **40 testů** cloudu, cloudového rozhraní, datových center a restartu zařízení a **10 testů** náhledu paketů. Kontroly pokrývají automatickou síťovou replikaci, výpadek a obnovení zálohování, práva, místní soubory a absenci odstraněných ovládacích prvků na všech čtyřech klientech. Syntaxe všech tří změněných skriptů ověřena.
+
+V odděleném prohlížeči při 774 × 743 px ověřen Cloud bez výběru úložiště i nabídky, uložení nového dokumentu a jeho přítomnost v hlavním i záložním serveru po automatické kopii. Zkratka ze záložního serveru při vypnutém hlavním serveru nezpřístupnila zálohu jako klientské úložiště. Telefon při 320 × 568 px načetl stejný účet bez odstraněných ovladačů a vodorovného přetékání. U skutečného HTTP paketu ověřeno zelené záhlaví s jediným nadpisem, zachovaná IP/porty/data a správný přechod zpět do záhlaví webového serveru. Nadpis i dialog se vejdou při 320 × 568 px. Konzole bez chyb a varování; uživatelská karta nezměněna.
+
 ## Soubory bez úchytu pro změnu velikosti textu · 27. listopadu 2026
 
 Textové pole dokumentu v aplikaci Soubory má `resize: none`, takže již nezobrazuje úchyt v pravém dolním rohu. Rozměry dál řídí rozložení editoru. Úprava je omezena na `#files-text`; prostředky `v=195`.

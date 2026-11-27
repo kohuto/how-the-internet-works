@@ -1,7 +1,7 @@
 import '../js/network.js';import '../js/settings.js';import '../js/cloud.js';import '../js/media.js';import '../js/web.js';import '../js/privacy.js';import '../js/auth.js';import '../js/vpn.js';import '../js/phishing.js';import '../js/mitm.js';import '../js/mail.js';import '../js/ads.js';import '../js/simulation.js';import '../js/map.js';import '../js/cloud-ui.js';import '../js/computer.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 const {Simulation,cloudApp,filesApp,computerView}=globalThis.InternetLab;
-const state=(device='laptop',extra={})=>({monitorDevice:device,phoneTab:'cloud',files:{[device]:{view:'files',editorKey:0,localId:null,name:'',content:''}},cloud:{[device]:{tab:'remote',view:'files',server:'cloud',remoteId:null,localId:null,cloudName:'',cloudContent:'',cloudFileId:'',permissions:{},...extra}}});
+const state=(device='laptop',extra={})=>({monitorDevice:device,phoneTab:'cloud',files:{[device]:{view:'files',editorKey:0,localId:null,name:'',content:''}},cloud:{[device]:{view:'files',remoteId:null,cloudName:'',cloudContent:'',permissions:{},...extra}}});
 function finish(s){for(let i=0;i<2000&&s.status==='running';i++)s.advanceFrame();assert.equal(s.status,'success');}
 
 test('The file browser and preview show only received data, not the omniscient server storage',()=>{
@@ -16,7 +16,7 @@ test('The file browser and preview show only received data, not the omniscient s
 });
 
 test('Document names, local drafts and received preview text are escaped',()=>{
-  const s=new Simulation(),unsafe='</textarea><script>alert(1)</script>',ui=state('laptop',{view:'editor',tab:'local',cloudName:'" onfocus="alert(1)',cloudContent:unsafe});
+  const s=new Simulation(),unsafe='</textarea><script>alert(1)</script>',ui=state('laptop',{view:'editor',cloudName:'" onfocus="alert(1)',cloudContent:unsafe});
   const editor=cloudApp(s.net,s,ui,'laptop');assert(editor.includes('&lt;script&gt;'));assert(!editor.includes('<script>'));assert(editor.includes('&quot; onfocus='));
   s.net.cloud.clients.laptop.preview={id:'cloud-1',server:'cloud',name:unsafe,content:unsafe};
   Object.assign(ui.cloud.laptop,{view:'preview',remoteId:'cloud-1'});
@@ -63,8 +63,13 @@ test('Local files work offline and cloud downloads appear only in Files',()=>{
   ui.cloud.laptop.downloadNotice=downloaded.id;const html=cloudApp(s.net,s,ui,'laptop');assert(html.includes('Soubor je uložený v aplikaci Soubory.'));assert(!html.includes('data-cloud-tab="local"'));
 });
 
-test('Backup and read-only files cannot offer cloud edits or uploads',()=>{
-  const s=new Simulation(),ui=state('laptop',{server:'cloud-backup'});const backup=cloudApp(s.net,s,ui,'laptop');assert(backup.includes('inert'));assert(!backup.includes('data-action="cloud-picker-open"'));assert(!backup.includes('data-action="cloud-new"'));
-  const f=s.net.cloud.files.get('cloud-1');assert(s.start('cloud',{device:'laptop',request:{op:'download',fileId:f.id},preview:true}));finish(s);Object.assign(ui.cloud.laptop,{server:'cloud',view:'preview',remoteId:f.id});
+test('Cloud has no storage selector or technical menu and read-only files still cannot be edited',()=>{
+  const s=new Simulation(),ui=state();
+  for(const device of ['laptop','friend','cabin','phone']){
+    const html=cloudApp(s.net,s,state(device),device);
+    for(const removed of ['data-cloud-center','drive-options','Prohlédnout server','Stáhnout podle ID','Záložní kopie'])assert(!html.includes(removed));
+    assert(html.includes('data-action="cloud-new"'));assert(html.includes('data-action="cloud-picker-open"'));
+  }
+  const f=s.net.cloud.files.get('cloud-1');assert(s.start('cloud',{device:'laptop',request:{op:'download',fileId:f.id},preview:true}));finish(s);Object.assign(ui.cloud.laptop,{view:'preview',remoteId:f.id});
   assert(!cloudApp(s.net,s,ui,'laptop').includes('data-action="cloud-edit"'));
 });
