@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Poloviční rychlost šíření signálu · 27. listopadu 2026
+
+Cyklus všech signálových vln prodloužen ze 4,8 na 9,6 sekundy. Oba záporné časové posuny se rovněž zdvojnásobily na −2,4 a −7,2 sekundy, takže zůstává zachovaná výchozí velikost kružnic i rozestup poloviny cyklu. README aktualizováno, prostředky `v=201`.
+
+V odděleném prohlížeči ověřeno u Wi-Fi, BTS i satelitu trvání 9,6 sekundy a odstup obou vln 4,8 sekundy. Skutečný vypočtený poloměr BTS se za sekundu zvětší o 83,333 jednotky při dosahu 800, tedy poloviční rychlostí oproti původnímu cyklu. Konzole bez chyb a varování; uživatelská karta nezměněna. Prošly oba existující testy `tests/map-signals.test.mjs`; pro úpravu časování nebyly přidány nové testy.
+
 ## Jemné rozpínající se vlny bezdrátového signálu · 27. listopadu 2026
 
 Původní plošné radiální výplně Wi-Fi, BTS a satelitu nahrazeny dvěma tenkými čárkovanými kružnicemi bez výplně. Kružnice se plynule rozpínají od vysílače k dosavadnímu ilustračnímu dosahu, postupně blednou a mizí na jeho hranici. Cyklus trvá 4,8 sekundy, druhá vlna je posunuta o polovinu cyklu. Přepínač Dosah signálu zůstává zpočátku vypnutý. Zdrojové prvky se při vykreslování zachovávají, takže nové pakety, prohlížení zařízení a změna měřítka vlny nerestartují. Vypnutí zdroje odstraní jen jeho kružnice. Vrstva je pod spoji, zařízeními i pakety a nezachytává kliknutí; tloušťka čáry se nemění s přiblížením.
