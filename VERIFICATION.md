@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Cloudové servery bez zkratky do Matějova notebooku · 27. listopadu 2026
+
+Z detailů hlavního i záložního cloudového serveru odstraněno tlačítko Matějův cloud včetně obalového řádku a nepoužívané obsluhy. Seznam souborů, vlastníci, práva, technické služby a napájení zůstávají. Prostředky `v=197`.
+
+Ověřena syntaxe skriptu a v odděleném prohlížeči při 774 × 743 px oba detaily se zapnutým Matějovým notebookem: zkratka ani prázdný řádek se nevykreslí, uložený soubor a ovládání napájení zůstávají dostupné. U skutečného cloudového paketu při 774 × 743 i 320 × 568 px znovu ověřen jediný nadpis Paket v zeleném záhlaví; uvnitř těla není duplicitní nadpis ani `.packet-heading`. Dialog nepřetéká vodorovně. Konzole bez chyb a varování; uživatelská karta nezměněna. Pro odebrání zkratky nebyly přidávány testy modelu.
+
 ## Cloud vždy na hlavním serveru a nadpis paketu v záhlaví · 27. listopadu 2026
 
 Z Cloudu odstraněn výběr Hlavní úložiště / Záložní kopie a celá nabídka tří teček s odkazem na server a stahováním podle ID. Veškeré klientské operace nyní míří výslovně na hlavní server. Také zkratka Matějův cloud ze záložního serveru otevře běžného klienta hlavního úložiště. Odebrány související stav, obsluhy a styly. Automatické zálohování souborů a práv A → B zůstává stejné; obsah obou serverů lze nadále prohlížet v mapě. README aktualizováno.
