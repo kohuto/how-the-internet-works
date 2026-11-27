@@ -91,7 +91,7 @@ test('Actual SMTP and IMAP markers retain mail labels and arrows with and withou
     assert(sim.start('mail-send',{device:'laptop',target:'friend',subject:'Popisek pošty',body:'Dlouhá zpráva s diakritikou 🐎. '.repeat(30)}));trace(sim,map,layer,inspect);
     assert([...sim.packets.values()].filter(p=>p.kind==='smtp-request').length>1);
     assert(sim.start('mail-check',{device:'friend'}));trace(sim,map,layer,inspect);
-    assert(sim.start('mail-seen',{device:'friend',messageId:'mail-1'}));trace(sim,map,layer,inspect);
+    const count=sim.packets.size;assert(sim.mail.open('friend','mail-1'));map.render();assert.equal(sim.packets.size,count);assert.equal(layer.children.length,0);
     assert.deepEqual([...seen].sort(),['imap-request','imap-response','smtp-request','smtp-response']);
     assert(sim.net.phishing.clients.friend.inbox.seen);
   }

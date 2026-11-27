@@ -16,12 +16,11 @@
       for(const c of Object.values(this.net.phishing.clients)){c.items??=[];c.sent??=[];c.checked??=false;c.notice??='';}
       this.entry=null;this.phase='idle';
     }
-    accepts(type){return ['mail-send','mail-check','mail-seen','phish-send'].includes(type);}
+    accepts(type){return ['mail-send','mail-check','phish-send'].includes(type);}
     validate(type,p){
       if(type==='phish-send')return p.device==='hacker'&&PHISH_CLIENTS.includes(p.target)&&(p.subject===undefined||typeof p.subject==='string'&&p.subject.trim().length>0&&p.subject.length<=100)&&(p.body===undefined||typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200);
       if(!MAIL_CLIENTS.includes(p.device))return false;
       if(type==='mail-send')return p.device!=='hacker'&&PHISH_CLIENTS.includes(p.target)&&(!fixedMailRecipient(p.device)||p.target===fixedMailRecipient(p.device))&&typeof p.subject==='string'&&p.subject.trim().length>0&&p.subject.length<=100&&typeof p.body==='string'&&p.body.trim().length>0&&p.body.length<=1200;
-      if(type==='mail-seen')return this.net.phishing.clients[p.device].items.some(m=>String(m.id)===String(p.messageId));
       return type==='mail-check';
     }
     start(type){
@@ -35,7 +34,7 @@
         this.entry=old||{message,origin:serverFor(p.device),destination:serverFor(p.target),state:'new',accepted:false,clientAccepted:false};
         this.phase='submission';
         if(c)Object.assign(c,{state:'sending',error:'',notice:'SMTP připravuje odeslání zprávy.'});
-      }else {this.phase='imap';Object.assign(c,{state:'loading',error:'',notice:type==='mail-check'?'IMAP načítá schránku.':'IMAP ukládá příznak přečtení.'});}
+      }else {this.phase='imap';Object.assign(c,{state:'loading',error:'',notice:'IMAP načítá schránku.'});}
       this.state.current={run:s.run,device:s.clientId(),phase:this.phase,messageId:p.messageId||null};
       s.next([{kind:'mail-prepare',node:s.clientId(),title:this.phase==='imap'?'IMAP · přístup ke schránce':'SMTP · odesílání zprávy',description:'Přenos spusť krokováním nebo přehráním.'}]);
     }
@@ -78,14 +77,7 @@
       }
       if(!response){
         if(text==='A1 UID FETCH 1:* (FLAGS BODY.PEEK[])')return {cmd:'FETCH',wire:text,say:'Pošli mi obsah doručené schránky.'};
-        const store=/^A1 UID STORE ([1-9][0-9]*) \+FLAGS \(\\Seen\)$/.exec(text),m=store&&this.state.boxes[session.from].find(m=>m.uid===Number(store[1]));
-        if(!m)return fail();
-        return {cmd:'STORE',messageId:m.id,wire:text,say:'Označ tuto zprávu jako přečtenou.'};
-      }
-      if(this.sim.action.type==='mail-seen'){
-        const store=/^\* [1-9][0-9]* FETCH \(UID ([1-9][0-9]*) FLAGS \(\\Seen\)\)\r\nA1 OK Příznak \\Seen uložen$/.exec(text),m=store&&this.net.phishing.clients[session.from].items.find(m=>m.uid===Number(store[1]));
-        if(!m)return fail();
-        return {cmd:'OK',messageId:m.id,wire:text,say:'Příznak přečtení je uložen na serveru.'};
+        return fail();
       }
       const items=[];let position=0;
       while(bytes[position]===42){
@@ -104,7 +96,7 @@
       if(!this.net.nodes[from].on)return s.failure(`${this.net.nodes[from].name} je vypnutý.`,null,from);
       this.log(from,session,'out',value);
       const sequence=response?'responseSeq':'requestSeq',firstSeq=session[sequence],events=[];
-      const purpose=session.protocol==='SMTP'?(response?'potvrzení přijetí':'e-mail'):this.sim.action.type==='mail-seen'?(response?'potvrzení přečtení':'označení přečtení'):(response?'zprávy ze schránky':'žádost o zprávy');
+      const purpose=session.protocol==='SMTP'?(response?'potvrzení přijetí':'e-mail'):(response?'zprávy ze schránky':'žádost o zprávy');
       const parts=[];
       for(let position=0;position<bytes.length;){
         let end=Math.min(position+CHUNK,bytes.length);
@@ -135,11 +127,6 @@
       this.send(session,{cmd:'CONTENT',wire:mailWire(m),say:'Odesílám e-mail s adresou odesílatele, příjemce a obsahem zprávy.',message:structuredClone(m)});
     }
     imapCommand(session){
-      const id=this.sim.clientId(),a=this.sim.action;
-      if(a.type==='mail-seen'){
-        const m=this.state.boxes[id].find(m=>String(m.id)===String(a.payload.messageId));
-        return this.send(session,{cmd:'STORE',wire:`A1 UID STORE ${m?.uid||0} +FLAGS (\\Seen)`,say:'Označ tuto zprávu jako přečtenou.',messageId:a.payload.messageId});
-      }
       this.send(session,{cmd:'FETCH',wire:'A1 UID FETCH 1:* (FLAGS BODY.PEEK[])',say:'Pošli mi obsah doručené schránky.'});
     }
     storeInbox(){
@@ -160,22 +147,18 @@
         const client=s.clientId(),box=this.state.boxes[client];
         if(session.to!==serverFor(client))throw new Error('IMAP účet nepatří tomuto serveru.');
         if(value.cmd==='FETCH'&&s.action.type==='mail-check')reply={cmd:'OK',wire:box.map((m,i)=>`* ${i+1} FETCH (UID ${m.uid} FLAGS (${m.seen?'\\Seen':''}) BODY[] {${encoder.encode(mailWire(m)).length}})`).join('\r\n')+'\r\nA1 OK Obsah zpráv odeslán',say:'Posílám zprávy uložené ve tvé schránce.',items:structuredClone(box)};
-        else if(value.cmd==='STORE'&&s.action.type==='mail-seen'){
-          const m=box.find(m=>String(m.id)===String(value.messageId));if(!m)throw new Error('IMAP: zpráva už ve schránce není.');m.seen=true;
-          reply={cmd:'OK',wire:`* ${box.indexOf(m)+1} FETCH (UID ${m.uid} FLAGS (\\Seen))\r\nA1 OK Příznak \\Seen uložen`,say:'Příznak přečtení je uložen na serveru.',messageId:m.id};
-        }else throw new Error('IMAP: neznámý příkaz.');
+        else throw new Error('IMAP: neznámý příkaz.');
       }
-      e.title=session.protocol==='SMTP'?'SMTP · e-mail uložen do schránky':s.action.type==='mail-seen'?'IMAP · zpráva označena jako přečtená':'IMAP · server odesílá zprávy';e.description=reply.say;this.send(session,reply,true);
+      e.title=session.protocol==='SMTP'?'SMTP · e-mail uložen do schránky':'IMAP · server odesílá zprávy';e.description=reply.say;this.send(session,reply,true);
     }
     clientReply(session,value){
       const s=this.sim,c=this.net.phishing.clients[s.clientId()];
       if(session.protocol==='SMTP'){
         this.entry.clientAccepted=true;return this.completeSend();
-      }else if(s.action.type==='mail-seen'){
-        for(const m of c.items)if(m.id===value.messageId)m.seen=true;if(c.inbox?.id===value.messageId)c.inbox.seen=true;
-        Object.assign(c,{state:'ready',notice:'IMAP uložilo příznak přečtení na serveru.'});s.finish('IMAP · příznak přečtení uložen','Příznak schránky není automatické potvrzení odesílateli.',s.clientId());
       }else{
-        const old=c.inbox?.id;c.items=value.items;c.inbox=c.items.at(-1)||null;c.opened=!!c.inbox&&c.inbox.id===old&&c.opened;
+        const old=c.inbox?.id,read=new Set(c.items.filter(m=>m.seen).map(m=>m.id));
+        // Reading is local UI state; refreshing the mailbox must not make an opened copy unread.
+        c.items=value.items.map(m=>({...m,seen:m.seen||read.has(m.id)}));c.inbox=c.items.at(-1)||null;c.opened=!!c.inbox&&c.inbox.id===old&&c.opened;
         Object.assign(c,{state:'ready',checked:true,error:'',notice:`IMAP načetlo zprávy do zařízení. Počet: ${c.items.length}.`});s.finish('IMAP · obsah schránky dorazil do zařízení','Serverová schránka a místní kopie zpráv jsou samostatné.',s.clientId());
       }
     }
@@ -184,7 +167,7 @@
       if(c){if(!c.sent.some(m=>m.id===this.entry.message.id))c.sent.push(structuredClone(this.entry.message));Object.assign(c,{state:'ready',error:'',notice:'Zpráva je v modelu doručená do serverové schránky příjemce.'});}
       this.state.current.phase='delivered';s.finish('SMTP · zpráva dorazila do schránky','Příjemce nemusí mít zapnuté zařízení. IMAP si obsah načte samostatným přenosem.',this.entry.destination);
     }
-    open(device,id){const c=this.net.phishing.clients[device],m=c.items.find(m=>String(m.id)===String(id));if(!m)return false;c.inbox=m;c.opened=true;return true;}
+    open(device,id){const c=this.net.phishing.clients[device],m=c?.items.find(m=>String(m.id)===String(id));if(!m)return false;m.seen=true;c.inbox=m;c.opened=true;return true;}
     handle(e){
       const s=this.sim;
       if(e.kind==='mail-part'){s.next([s.originate(e.packet)]);return;}

@@ -88,18 +88,24 @@ test('One IMAP request fetches the mailbox, with no local update after only part
  const c=s.net.phishing.clients.friend;assert.equal(c.items.length,1);assert.equal(c.inbox.body,draft().body);assert(!c.inbox.seen);assert(!s.net.mail.boxes.friend[0].seen);singleExchange(s,'friend','IMAP');assert.equal(outgoing(s,'friend','access')[0].wire,'A1 UID FETCH 1:* (FLAGS BODY.PEEK[])');
  assert(c.checked);assert.equal(s.net.phishing.clients.laptop.checked,false);assert.equal(c.sent.length,0);
 });
-test('Multiple messages retain immutable UID; opening uses IMAP STORE, no receipt to the sender',()=>{
- const s=new Simulation();send(s);send(s,'laptop','friend',{subject:'Druhá zpráva',body:'Další obsah'});check(s);const c=s.net.phishing.clients.friend;assert.deepEqual(c.items.map(m=>m.uid),[1,2]);assert.equal(c.inbox.id,'mail-2');assert(s.mail.open('friend','mail-1'));
- assert(s.start('mail-seen',{device:'friend',messageId:'mail-1'}));until(s,()=>s.net.mail.boxes.friend[0].seen);assert(!c.inbox.seen);assert(!c.items[1].seen);finish(s);assert(c.inbox.seen);assert.equal(s.status,'success');singleExchange(s,'friend','IMAP');
- assert(outgoing(s,'friend','access').some(r=>r.wire==='A1 UID STORE 1 +FLAGS (\\Seen)'));assert(![...s.packets.values()].some(p=>p.destination==='laptop'));check(s);assert.deepEqual(c.items.map(m=>m.seen),[true,false]);
+test('Opening a local message marks only that copy read without starting a transfer, and refresh preserves it',()=>{
+ const s=new Simulation();send(s);send(s,'laptop','friend',{subject:'Druhá zpráva',body:'Další obsah'});check(s);
+ const c=s.net.phishing.clients.friend;assert.deepEqual(c.items.map(m=>m.uid),[1,2]);assert.equal(c.inbox.id,'mail-2');
+ const before={run:s.run,current:s.current,action:s.action,lastAction:s.lastAction,status:s.status,packets:s.packets.size,dialogue:s.net.mail.dialogue.length,boxes:structuredClone(s.net.mail.boxes)};
+ assert(s.mail.open('friend','mail-1'));assert.equal(c.inbox.id,'mail-1');assert(c.opened);assert(c.inbox.seen);assert(!c.items[1].seen);
+ for(const key of ['run','current','action','lastAction','status'])assert.equal(s[key],before[key],key);
+ assert.equal(s.packets.size,before.packets);assert.equal(s.net.mail.dialogue.length,before.dialogue);assert.deepEqual(s.net.mail.boxes,before.boxes);
+ assert(!s.start('mail-seen',{device:'friend',messageId:'mail-1'}));assert.equal(s.run,before.run);
+ check(s);assert.equal(s.status,'success');singleExchange(s,'friend','IMAP');assert.deepEqual(c.items.map(m=>m.uid),[1,2]);assert.deepEqual(c.items.map(m=>m.seen),[true,false]);
+ assert(!outgoing(s,'friend','access').some(r=>r.wire.includes('STORE')));assert(![...s.packets.values()].some(p=>p.destination==='laptop'));
 });
-test('A lost read-flag confirmation preserves server state and retries as one request/reply',()=>{
+test('A fetched email opens offline without changing server flags or creating any packets',()=>{
  const s=new Simulation();send(s);check(s);const c=s.net.phishing.clients.friend,id=c.inbox.id;
- assert(s.start('mail-seen',{device:'friend',messageId:id}));until(s,()=>s.net.mail.boxes.friend[0].seen);
- assert(!c.inbox.seen);s.net.clearNat('friend-home');finish(s);assert.equal(s.status,'failed');
- assert(s.net.mail.boxes.friend[0].seen);assert(!c.inbox.seen);
- assert(s.repeat());finish(s);assert.equal(s.status,'success');assert(c.inbox.seen);singleExchange(s,'friend','IMAP');
- assert(![...s.packets.values()].some(p=>p.destination==='laptop'));
+ s.net.toggleNode('mail');s.net.setAccess('friend','offline');assert(!s.net.accessReady('friend'));
+ const packets=s.packets.size,dialogue=s.net.mail.dialogue.length,run=s.run,boxes=structuredClone(s.net.mail.boxes);
+ assert(!s.mail.open('friend','missing'));assert(!s.mail.open('missing',id));assert(!c.inbox.seen);
+ assert(s.mail.open('friend',id));assert(c.inbox.seen);assert(c.opened);assert.equal(s.run,run);assert.equal(s.packets.size,packets);assert.equal(s.net.mail.dialogue.length,dialogue);assert.deepEqual(s.net.mail.boxes,boxes);
+ assert(s.mail.open('friend',id));assert.equal(s.packets.size,packets);
 });
 test('An interrupted IMAP response preserves the previously fetched local snapshot',()=>{
  const s=new Simulation();send(s);check(s);send(s,'laptop','friend',{body:'Nový e-mail'});assert(s.start('mail-check',{device:'friend'}));until(s,()=>[...s.packets.values()].some(p=>p.kind==='imap-response'&&p.state==='delivered'));s.net.clearNat('friend-home');finish(s);assert.equal(s.status,'failed');assert.equal(s.net.phishing.clients.friend.items.length,1);assert.equal(s.net.mail.boxes.friend.length,2);

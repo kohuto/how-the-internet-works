@@ -1,5 +1,13 @@
 # Záznam ověření
 
+## Otevření e-mailu bez samostatné výměny paketů · 27. listopadu 2026
+
+Otevření načteného e-mailu nyní pouze zobrazí jeho místní kopii a ihned ji označí jako přečtenou. Nespouští nový pokus, nepřepíná scénu, nezmenšuje Gmail ani nevytváří pakety či záznamy SMTP/IMAP. Odstraněna podpora akce `mail-seen`, příkazu STORE, potvrzení, popisku Ukládání přečtení a titulku přenosu; výměna není dostupná v žádném režimu. Místní stav přečtení se zachová po novém načtení schránky a neovlivní ostatní zprávy. Serverová kopie se při otevření nemění; synchronizace příznaku přečtení se již nesimuluje. SMTP potvrzení přijetí a IMAP načtení celého obsahu zůstávají. README aktualizováno; prostředky `v=203`.
+
+Prošlo **77 souvisejících testů** (`node --test tests/mail.test.mjs tests/mail-ui.test.mjs tests/optional-tls.test.mjs tests/map-packets.test.mjs tests/phishing.test.mjs tests/phishing-ui.test.mjs tests/transfer-journey.test.mjs tests/cancel-transfer.test.mjs`). Stávající kontroly přepracovány pro místní otevření bez změny počtu paketů, protokolového rozhovoru, ID pokusu, poslední akce a události. Ověřeno okamžité označení pouze zvolené zprávy, zachování UID a příznaku při obnovení, otevření bez připojení a při vypnutém serveru, odmítnutí odstraněné akce i s platnou zprávou a zachované odesílání/načítání s TLS i bez TLS. Syntaxe všech čtyř změněných skriptů ověřena.
+
+V odděleném prohlížeči při 774 × 743 px skutečně odeslán e-mail v základní sestavě s rozšířením E-mail a potvrzena odpověď SMTP. Po načtení u Matěje otevření zprávy ponechalo stejné ID pokusu, pakety, protokolový rozhovor, stav i poslední událost. Obsah a Přečteno se zobrazily ihned, Gmail zůstal otevřený a ovládání přenosu i zmenšená karta zůstaly skryté. Příznak přečtení přežil další obnovení pošty. Po zapnutí všech rozšíření včetně TLS a hlaviček znovu odeslán a načten e-mail; při 320 × 568 px byl otevřen dosud nepřečtený místní e-mail s vypnutým Gmailem na serveru a odpojeným Matějovým notebookem. Znovu bez nového přenosu, bez vodorovného přetékání a bez chyb či varování v konzoli. Uživatelská karta nezměněna.
+
 ## Automatické zobrazení signálu bez přepínače · 27. listopadu 2026
 
 Z mapy odstraněn přepínač Dosah signálu, jeho obal, obsluha, podmínka zobrazení a nepoužívané styly. Signálové vlny se nyní automaticky vykreslují kolem všech dostupných zapnutých vysílačů, bez dodatečné volby. Výchozí sestava bez bezdrátových rozšíření kružnice nemá. Napájení, aktivní napodobený hotspot, zastavení při pauze a zpomalený cyklus 9,6 sekundy zachovány. README a stávající testy upraveny pro automatické zobrazení; prostředky `v=202`.

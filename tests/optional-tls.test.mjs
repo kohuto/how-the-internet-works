@@ -32,7 +32,7 @@ const packets=(s,kind)=>[...s.packets.values()].filter(p=>p.kind===kind);
 const bytes=p=>p.payload.record?.data||p.payload.bytes;
 function clearText(group){return new TextDecoder().decode(new Uint8Array(group.sort((a,b)=>a.seq-b.seq).flatMap(p=>Array.from(p.payload.bytes))));}
 
-test('SMTP, IMAP fetch and read flags use the chosen TLS mode and keep endpoint commit boundaries',()=>{
+test('SMTP and IMAP fetch use the chosen TLS mode, opening stays local, and endpoint commit boundaries',()=>{
   for(const tls of [false,true]){
     const s=create(['mail'],tls);
     assert(s.start('mail-send',draft));
@@ -55,10 +55,10 @@ test('SMTP, IMAP fetch and read flags use the chosen TLS mode and keep endpoint 
     assert(packets(s,'imap-request').every(p=>p.initialHeader.dport===(tls?993:143)));
     assert.equal(fetch.some(p=>packetView(s.net,p).includes('TAJNY-OBSAH')),!tls);
     if(!tls)assert(clearText(fetch).includes(draft.body.replace(/\n/g,'\r\n').replace(/^\./gm,'..')));
-    assert(s.start('mail-seen',{device:'friend',messageId:'mail-1'}));
-    until(s,()=>s.net.mail.boxes.friend[0].seen);assert(!s.net.phishing.clients.friend.inbox.seen);
-    finish(s);assert(s.net.phishing.clients.friend.inbox.seen);
-    assert.equal(packets(s,'imap-request').some(p=>packetView(s.net,p).includes('UID STORE')),!tls);
+    const before={run:s.run,packets:s.packets.size,dialogue:s.net.mail.dialogue.length};
+    assert(s.mail.open('friend','mail-1'));assert(s.net.phishing.clients.friend.inbox.seen);assert(!s.net.mail.boxes.friend[0].seen);
+    assert.equal(s.run,before.run);assert.equal(s.packets.size,before.packets);assert.equal(s.net.mail.dialogue.length,before.dialogue);
+    assert(!s.start('mail-seen',{device:'friend',messageId:'mail-1'}));
     const html=mailServerDetail(s.net,s,s.net.nodes.mail);
     assert.equal(html.includes('Na síti obsah chrání model TLS.'),tls);
     assert.equal(html.includes('TLS a přihlášení jsou připravené'),tls);
@@ -159,7 +159,7 @@ test('Plain SMTP retry is idempotent and interrupted IMAP preserves the old snap
   assert(s.start('mail-check',{device:'friend'}));until(s,()=>packets(s,'imap-response').some(p=>p.state==='delivered'));
   s.net.toggleLink('friend-uplink');finish(s,'failed');assert.equal(s.net.phishing.clients.friend.items.length,1);
   s.net.toggleLink('friend-uplink');assert(s.repeat());finish(s);assert.deepEqual(s.net.phishing.clients.friend.items.map(m=>m.uid),[1,2]);assert.equal(s.net.phishing.clients.friend.inbox.body,body);
-  run(s,'mail-seen',{device:'friend',messageId:'mail-1'});run(s,'mail-check',{device:'friend'});
+  assert(s.mail.open('friend','mail-1'));run(s,'mail-check',{device:'friend'});
   assert.deepEqual(s.net.phishing.clients.friend.items.map(m=>m.seen),[true,false]);
 });
 

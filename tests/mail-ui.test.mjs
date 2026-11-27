@@ -28,7 +28,7 @@ test('Search filters local messages and all displayed subjects, content and comp
   assert(s.start('mail-check',{device:'friend'}));finish(s);
   const ui=state('friend',{search:'tajné'}),html=mailApp(s.net,s,ui,'friend');assert(!html.includes('Běžný pozdrav'));assert(html.includes('Tajné &lt;script&gt;'));
   s.mail.open('friend',s.net.phishing.clients.friend.items.at(-1).id);
-  const letter=mailApp(s.net,s,ui,'friend');assert(letter.includes('&lt;img'));assert(!letter.includes('<img'));assert(!letter.includes('<script>'));
+  const letter=mailApp(s.net,s,ui,'friend');assert(letter.includes('&lt;img'));assert(!letter.includes('<img'));assert(!letter.includes('<script>'));assert(letter.includes('Přečteno'));assert(!letter.includes('Ukládání přečtení'));
   Object.assign(ui.mailComposer.friend,{composeOpen:true,subject:'" onfocus="alert(1)',body:'</textarea><script>alert(1)</script>'});
   const compose=mailApp(s.net,s,ui,'friend');assert(compose.includes('&quot; onfocus=&quot;'));assert(compose.includes('&lt;/textarea&gt;'));assert(!compose.includes('<script>'));
 });

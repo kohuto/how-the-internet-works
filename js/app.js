@@ -514,7 +514,7 @@
     const draft=ui.mailComposer[device];
     if(draft&&['mail-send','phish-send'].includes(type))Object.assign(draft,{sendingId:sim.action.payload.messageId,composeOpen:false,tab:'sent',sentId:null});
     if(ui.monitorOpen)ui.selection={kind:'node',id:device};
-    if(type!=='mail-seen'&&['home','hacker'].includes(ui.scene))setScene('all');beginTransfer('mail');
+    if(['home','hacker'].includes(ui.scene))setScene('all');beginTransfer('mail');
   }
   function startPhishing(type) {
     if(ui.packetOpen||sim.status==='running')return;stop();
@@ -643,7 +643,7 @@
     }
     if(b.dataset.gmailSent){ui.mailComposer[ui.monitorDevice].sentId=b.dataset.gmailSent;render();return;}
     if(b.dataset.mailTab){const d=ui.mailComposer[ui.monitorDevice];d.tab=b.dataset.mailTab;d.sentId=null;net.phishing.clients[ui.monitorDevice].opened=false;render();return;}
-    if(b.dataset.mailOpen){if(sim.status==='running')return;if(sim.mail.open(ui.monitorDevice,b.dataset.mailOpen)){if(!net.phishing.clients[ui.monitorDevice].inbox.seen)startMail('mail-seen',{messageId:net.phishing.clients[ui.monitorDevice].inbox.id});else render();}return;}
+    if(b.dataset.mailOpen){if(sim.status==='running')return;if(sim.mail.open(ui.monitorDevice,b.dataset.mailOpen))render();return;}
     if(b.dataset.action==='phish-compose'){if(ui.monitorDevice!=='hacker'||sim.status==='running')return;ui.mailComposer.hacker.composeOpen=true;openComputerApp('mail');return;}
     if(['phish-send','mail-check'].includes(b.dataset.action)){startMail(b.dataset.action);return;}
     if(['phish-results'].includes(b.dataset.action)){startPhishing(b.dataset.action);return;}

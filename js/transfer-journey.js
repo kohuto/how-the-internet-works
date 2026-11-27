@@ -45,7 +45,7 @@
     if(a.type==='web')return p.authOp?'Ověřuji přihlášení':p.privacyOp?'Načítám údaje ze serveru':p.method==='POST'?'Odesílám formulář':sim.webHost?.()==='knihovna.test'?'Načítám knihovnu':'Načítám webovou stránku';
     if(a.type==='cloud')return ({upload:'Nahrávám soubor',download:'Stahuji soubor',permissions:'Ukládám sdílení',list:'Načítám soubory z cloudu'})[p.request?.op]||'Pracuji s cloudem';
     if(a.type==='message')return ['read','connect-read'].includes(sim.phase)?'Posílám potvrzení přečtení':p.messageType==='image'?'Posílám obrázek':p.messageType==='video'?'Posílám video':'Posílám zprávu';
-    return ({print:'Posílám dokument do tiskárny',chatbot:'Čekám na odpověď chatbota','mail-send':'Posílám e-mail','phish-send':'Posílám e-mail','mail-check':'Načítám poštu','mail-seen':'Ukládám přečtení zprávy','phish-results':'Načítám záznamy serveru',replicate:'Kopíruji data mezi servery'})[a.type]||'Přenos v síti';
+    return ({print:'Posílám dokument do tiskárny',chatbot:'Čekám na odpověď chatbota','mail-send':'Posílám e-mail','phish-send':'Posílám e-mail','mail-check':'Načítám poštu','phish-results':'Načítám záznamy serveru',replicate:'Kopíruji data mezi servery'})[a.type]||'Přenos v síti';
   }
   Object.assign(globalThis.InternetLab,{TransferJourney,transferCaption});
 })();
