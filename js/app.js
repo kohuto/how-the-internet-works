@@ -493,7 +493,6 @@
     $('#play').disabled=ui.packetOpen||sim.status!=='running';$('#play').innerHTML=playing?'Ⅱ <span>Pauza</span>':'▶ <span>Pokračovat</span>';$('#play').setAttribute('aria-label',playing?'Pozastavit přenos':'Pokračovat v přenosu');
     $('#step').disabled=ui.packetOpen||sim.status!=='running'||sim.auth.working;$('#repeat').disabled=ui.packetOpen||!sim.lastAction;
     $('#playback-speed').value=String(playbackRate);$('#cancel-transfer').disabled=sim.status!=='running';
-    $('#signal-coverage-control').hidden=!net.visibleNodes().some(n=>['ap','bts','satellite'].includes(n.type));
     map.setSignalWavesPlaying((sim.status!=='running'||playing)&&!ui.packetOpen&&!$('#settings-dialog').open);
     map.render(current,ui.selection,ui.selection.kind==='packet'?ui.selection.id:null,animate,ANIMATION_DELAY,sim.packets,sim.frame);
   }
@@ -748,7 +747,6 @@
     root.addEventListener('click',handleClick);
   }
   $('#zoom-in').addEventListener('click',()=>map.zoom(.9));$('#zoom-out').addEventListener('click',()=>map.zoom(1/.9));
-  $('#signal-coverage').addEventListener('change',e=>{map.signalCoverage=e.target.checked;map.render();});
   const deviceHelp=$('#device-help'),helpTrigger=$('#device-help-trigger');
   deviceHelp.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch'&&matchMedia('(any-hover: hover)').matches)setDeviceHelpOpen(true);});
   deviceHelp.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')setDeviceHelpOpen(false);});

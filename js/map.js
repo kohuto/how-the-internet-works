@@ -84,7 +84,7 @@
   class NetworkMap {
     constructor(svg,net,onSelect) {
       this.svg=svg;this.net=net;this.scene='home';this.box=[...presets.home];this.onSelect=onSelect;this.lastEvent=null;this.selected=null;this.selectedPacket=null;svg.dataset.scene='home';
-      this.packets=new Map();this.packetViews=new Map();this.frame=[];this.pointers=new Map();this.signalCoverage=false;this.signalViews=new Map();
+      this.packets=new Map();this.packetViews=new Map();this.frame=[];this.pointers=new Map();this.signalViews=new Map();
       svg.innerHTML=decor+'<g id="signal-coverage-layer" aria-hidden="true" pointer-events="none"></g><g id="links-layer"></g><g id="nodes-layer"></g><g id="packet-layer"></g>';
       svg.querySelectorAll('[data-region]').forEach(el=>{
         const offset=MAP_LAYOUT.offsets[el.dataset.region];
@@ -191,7 +191,7 @@
     renderSignals() {
       // Keep each source's elements across map updates so the waves never restart on a packet step.
       // These schematic radii only illustrate the signal; they do not affect connectivity.
-      const sources=this.signalCoverage?this.net.visibleNodes().filter(n=>signalStyles[n.type]&&n.on&&(n.id!=='cafe-attacker'||this.net.mitm.active)):[];
+      const sources=this.net.visibleNodes().filter(n=>signalStyles[n.type]&&n.on&&(n.id!=='cafe-attacker'||this.net.mitm.active));
       const active=new Set(sources.map(n=>n.id)),layer=this.svg.querySelector('#signal-coverage-layer');
       for(const [id,view] of this.signalViews)if(!active.has(id)){view.remove();this.signalViews.delete(id);}
       for(const n of sources) {

@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Automatické zobrazení signálu bez přepínače · 27. listopadu 2026
+
+Z mapy odstraněn přepínač Dosah signálu, jeho obal, obsluha, podmínka zobrazení a nepoužívané styly. Signálové vlny se nyní automaticky vykreslují kolem všech dostupných zapnutých vysílačů, bez dodatečné volby. Výchozí sestava bez bezdrátových rozšíření kružnice nemá. Napájení, aktivní napodobený hotspot, zastavení při pauze a zpomalený cyklus 9,6 sekundy zachovány. README a stávající testy upraveny pro automatické zobrazení; prostředky `v=202`.
+
+Prošlo všech **20 souvisejících testů** (`node --test tests/map-signals.test.mjs tests/map-packets.test.mjs tests/map-input.test.mjs tests/map-layout.test.mjs`) i kontrola syntaxe map.js a app.js. V odděleném prohlížeči při 774 × 743 px ověřena výchozí mapa bez přepínače a po zapnutí Wi-Fi/mobilní sítě automaticky přítomných šest pohybujících se kružnic s cyklem 9,6 sekundy. Při 320 × 568 px ověřena absence přepínače, skrytí vln vypnutého přístupového bodu a jejich automatický návrat po zapnutí. Bez vodorovného přetékání a chyb či varování v konzoli; uživatelská karta nezměněna.
+
 ## Poloviční rychlost šíření signálu · 27. listopadu 2026
 
 Cyklus všech signálových vln prodloužen ze 4,8 na 9,6 sekundy. Oba záporné časové posuny se rovněž zdvojnásobily na −2,4 a −7,2 sekundy, takže zůstává zachovaná výchozí velikost kružnic i rozestup poloviny cyklu. README aktualizováno, prostředky `v=201`.
