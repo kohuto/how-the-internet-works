@@ -1,5 +1,11 @@
 # Záznam ověření
 
+## Soubory bez úchytu pro změnu velikosti textu · 27. listopadu 2026
+
+Textové pole dokumentu v aplikaci Soubory má `resize: none`, takže již nezobrazuje úchyt v pravém dolním rohu. Rozměry dál řídí rozložení editoru. Úprava je omezena na `#files-text`; prostředky `v=195`.
+
+V odděleném prohlížeči při 774 × 743 px vizuálně ověřen editor bez úchytu a výsledný styl `resize: none`. Text lze nadále upravit, uložit a znovu otevřít se změněným obsahem. Při 320 × 568 px se editor vejde bez vodorovného přetékání. Konzole bez chyb a varování; uživatelská karta nezměněna. Pro čistě vizuální změnu nebyly přidávány testy modelu.
+
 ## Samostatné Soubory a Cloud s nabídkou Přidat · 26. listopadu 2026
 
 Místní dokumenty mají vlastní aplikaci Soubory na notebooku, u Matěje, na chatě i v telefonu. Seznam a jednoduchý editor pracují pouze s místním úložištěm a fungují bez internetu. Cloud zobrazuje výhradně seznam doručený ze serveru. Vpravo nahoře má nabídku Přidat s volbami Textový dokument a Nahrát z počítače / telefonu. První vytvoří dokument přímo na serveru bez místní kopie; druhá otevře výběr existujícího modelového souboru z daného zařízení. Místní originál zůstává zachovaný. Výběr podporuje prázdný stav, zrušení, Escape, návrat fokusu a uzavřený cyklus klávesy Tab. Nabídka se vejde také do úzkého telefonu.

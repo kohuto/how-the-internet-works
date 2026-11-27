@@ -67,6 +67,7 @@
 .drive-download-notice>button:not(.drive-icon-button){background:none;border:0;padding:3px;color:#3d6f9e;text-decoration:underline;font-size:10px}
 .drive-download-notice .drive-icon-button{width:25px;height:25px;padding:4px}
 .drive-editor>#files-name:focus{outline:none}
+.drive-editor>#files-text{resize:none}
 @media(max-width:440px){.cloud-drive .drive-account{display:none}.drive-header{gap:7px}.drive-add>summary{padding:8px 10px}.cloud-drive .drive-toolbar h3{flex-basis:100%}.files-heading small{font-size:9px}.files-new{font-size:10px}.drive-picker-backdrop{padding:8px}.drive-picker>header{padding:12px}.drive-picker h3{font-size:14px}.drive-picker>footer{padding:10px}.drive-picker-files{padding:5px}}
 .phone-window .cloud-drive .drive-account{display:none}
 @media(max-width:440px){.cloud-drive .drive-add{position:static;margin-left:auto}.drive-add-menu{right:8px;top:calc(100% + 2px);width:min(225px,calc(100% - 16px))}}
